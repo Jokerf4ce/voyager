@@ -14,29 +14,42 @@ DATA.resources = {
 // Infrastructure: power, life support, meals, habitation.
 // Every colony and Habitat/Fusion building provides capacity; production buildings and ship crews use it.
 // You cannot build past the cap. If usage ends up over the cap (a colony is lost), all production is rationed.
-DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 6, minEfficiency: 0.25 };
+DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 5, minEfficiency: 0.25 };
 
+// Planet types. slots = how many different buildings fit on each layer (levels are unlimited).
 DATA.planetTypes = {
-  ash:    { name: 'Ash World',    mult: { metal: 1.5, rare: 1.2 }, palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
-  iron:   { name: 'Iron Desert',  mult: { metal: 2.0 },            palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
-  ice:    { name: 'Frozen Tomb',  mult: { infra: 1.5 },            palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
-  toxic:  { name: 'Toxic Mire',   mult: { rare: 2.0 },             palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
-  gas:    { name: 'Gas Giant',    mult: { polymers: 2.0 },         palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
-  hollow: { name: 'Hollow World', mult: { compute: 2.0 },          palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
+  ash:    { name: 'Ash World',     mult: { metal: 1.5, rare: 1.2 }, slots: { surface: 4, orbit: 3 }, palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
+  iron:   { name: 'Iron Desert',   mult: { metal: 2.0 },            slots: { surface: 4, orbit: 3 }, palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
+  ice:    { name: 'Frozen Tomb',   mult: { infra: 1.5 },            slots: { surface: 4, orbit: 3 }, palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
+  toxic:  { name: 'Toxic Mire',    mult: { rare: 2.0 },             slots: { surface: 3, orbit: 3 }, palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
+  molten: { name: 'Molten World',  mult: { rare: 1.5, metal: 1.2 }, slots: { surface: 3, orbit: 3 }, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
+  hollow: { name: 'Hollow World',  mult: { compute: 2.0 },          slots: { surface: 3, orbit: 3 }, palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
+  gas:    { name: 'Gas Giant',     mult: { polymers: 2.0 },         slots: { surface: 0, orbit: 5 }, palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
+  belt:   { name: 'Asteroid Belt', mult: { metal: 1.5, rare: 1.5 }, slots: { surface: 4, orbit: 1 }, palette: ['#141210', '#3a3430', '#6a5e52', '#9a8c7a'] },
 };
 
-// Buildings: cost grows by costGrowth^level. infra: capacity used (negative = provided) per level.
-// Light production chain: Mine → metal, Drill → rare minerals, Refinery turns metal + rare into polymers.
+DATA.layers = { surface: 'Surface', orbit: 'Orbit' };
+
+// Buildings. layers: where they can be built (a building allowed in both layers is built separately in each).
+// Cost grows by costGrowth^level. infra: capacity used per level (negative = provided).
+// Light production chain: Mine → Metal, Drill → Rare Minerals, Refinery turns Metal + Rare into Polymers.
 DATA.buildings = {
-  mine:     { name: 'Deep Mine',        desc: '+3 Metal',                         cost: { metal: 30 },                         costGrowth: 1.55, infra: 1 },
-  drill:    { name: 'Core Drill',       desc: '+1.5 Rare Minerals',               cost: { metal: 45 },                         costGrowth: 1.6,  infra: 1 },
-  refinery: { name: 'Polymer Refinery', desc: 'Turns 2 Metal + 0.5 Rare into 2 Polymers', cost: { metal: 50, rare: 10 },       costGrowth: 1.6,  infra: 1 },
-  cogitator:{ name: 'Cogitator Array',  desc: '+2 Compute',                       cost: { metal: 40, polymers: 15 },           costGrowth: 1.65, infra: 1 },
-  habitat:  { name: 'Habitat Ring',     desc: '+6 Infrastructure (meals, air, bunks)', cost: { metal: 35, polymers: 10 },     costGrowth: 1.5,  infra: -6 },
-  fusion:   { name: 'Fusion Core',      desc: '+5 Infrastructure, +10% colony output', cost: { metal: 60, rare: 20 },         costGrowth: 1.7,  infra: -5 },
-  shipyard: { name: 'Shipyard',         desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, polymers: 10 }, costGrowth: 1.8, infra: 1 },
-  bastion:  { name: 'Bastion',          desc: '+25 garrison, fires on attackers',  cost: { metal: 50, rare: 5 },             costGrowth: 1.6,  infra: 0 },
+  mine:     { name: 'Deep Mine',        layers: ['surface'], desc: '+3 Metal',                                cost: { metal: 30 },               costGrowth: 1.55, infra: 1 },
+  drill:    { name: 'Core Drill',       layers: ['surface'], desc: '+1.5 Rare Minerals',                      cost: { metal: 45 },               costGrowth: 1.6,  infra: 1 },
+  refinery: { name: 'Polymer Refinery', layers: ['surface'], desc: 'Turns 2 Metal + 0.5 Rare into 2 Polymers', cost: { metal: 50, rare: 10 },    costGrowth: 1.6,  infra: 1 },
+  dome:     { name: 'Hab Dome',         layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',   cost: { metal: 30, polymers: 10 }, costGrowth: 1.5,  infra: -5 },
+  bastion:  { name: 'Bastion',          layers: ['surface'], desc: '+25 garrison, fires on attackers',         cost: { metal: 50, rare: 5 },      costGrowth: 1.6,  infra: 0 },
+  fusion:   { name: 'Fusion Core',      layers: ['surface', 'orbit'], desc: '+5 Infrastructure, +10% planet output', cost: { metal: 60, rare: 20 }, costGrowth: 1.7, infra: -5 },
+  cogitator:{ name: 'Cogitator Array',  layers: ['surface', 'orbit'], desc: '+2 Compute',                      cost: { metal: 40, polymers: 15 }, costGrowth: 1.65, infra: 1 },
+  ring:     { name: 'Habitat Ring',     layers: ['orbit'],   desc: '+6 Infrastructure',                        cost: { metal: 35, polymers: 15 }, costGrowth: 1.5,  infra: -6 },
+  skimmer:  { name: 'Gas Skimmer',      layers: ['orbit'],   desc: '+1.5 Polymers, no inputs (Gas Giant ×2)',  cost: { metal: 55, rare: 10 },     costGrowth: 1.6,  infra: 1 },
+  shipyard: { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, polymers: 10 }, costGrowth: 1.8, infra: 1 },
+  platform: { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',   cost: { metal: 60, polymers: 10, rare: 10 }, costGrowth: 1.6, infra: 0 },
 };
+
+// Settling another planet in a system you already hold (no Ark needed). Grows with planets owned.
+DATA.settleCost = { metal: 60, polymers: 20 };
+DATA.settleGrowth = 1.2;
 
 // Ship types. infra = crew life support capacity used while the ship exists.
 DATA.ships = {
@@ -163,10 +176,11 @@ DATA.names = {
 
 DATA.config = {
   systemCount: 22,
+  planetsPerSystem: [2, 5],
   monsterSystems: 6,
   autoCycleMs: 3000,
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v1',
+  saveKey: 'voyager_save_v3',
 };

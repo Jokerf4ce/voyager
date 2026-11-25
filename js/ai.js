@@ -21,7 +21,7 @@ const AI = {
         if (targets.size) {
           const t = U.pick([...targets]);
           ai.ore -= 55;
-          Colonies.found(t, id, Math.random() < 0.5 ? { bastion: 1 } : {});
+          Colonies.found(t, Galaxy.bestPlanet(G.systems[t]), id, Math.random() < 0.5 ? { bastion: 1 } : {});
           if (Explore.isSeen(t)) Log.add(`${DATA.factions[id].name} spreads to ${G.systems[t].name}.`, 'bad');
         }
       }
@@ -69,7 +69,7 @@ const AI = {
   // Nearest enemy colony, preferring the player.
   pickTarget(id, from) {
     const d = U.distances(from);
-    const enemy = G.systems.filter((s) => s.colony && s.owner && s.owner !== id && s.owner !== 'monster' && d[s.id] != null);
+    const enemy = G.systems.filter((s) => s.owner && s.owner !== id && s.owner !== 'monster' && d[s.id] != null);
     if (!enemy.length) return null;
     enemy.sort((a, b) => (d[a.id] - (a.owner === 'player' ? 2 : 0)) - (d[b.id] - (b.owner === 'player' ? 2 : 0)));
     return enemy[0].id;

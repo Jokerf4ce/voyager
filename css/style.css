@@ -117,6 +117,17 @@ small, .small { font-size: 16px; }
 .shiprow { display: flex; gap: 10px; align-items: center; }
 .colony .sys-head { border-bottom: 1px dashed var(--edge); padding-bottom: 8px; }
 
+/* planets */
+.planet-row { display: flex; gap: 8px; align-items: flex-start; padding: 6px; border: 1px solid #2a2420; margin-bottom: 4px; background: #141210; }
+.planet-row.settled { border-color: var(--edge-hi); }
+.planet-panel.unsettled { opacity: .75; }
+.layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin-top: 10px; }
+.layer { background: var(--soot); border: 1px solid var(--edge); padding: 8px; }
+.layer h4 { margin-top: 0; display: flex; justify-content: space-between; }
+.bld.new { opacity: .85; border-style: dashed; }
+details summary { cursor: pointer; color: var(--ash); font-family: var(--font-head); font-size: 10px; text-transform: uppercase; padding: 6px 0; }
+details summary:hover { color: var(--bone); }
+
 /* gacha cards */
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
 .card { background: var(--soot); border: 2px solid; padding: 8px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; position: relative; animation: reveal .35s steps(4); }

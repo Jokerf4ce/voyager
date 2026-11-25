@@ -16,6 +16,29 @@ const Galaxy = {
     return o(a, b, c) !== o(a, b, d) && o(c, d, a) !== o(c, d, b);
   },
 
+  makePlanets() {
+    const [lo, hi] = DATA.config.planetsPerSystem;
+    const types = Object.keys(DATA.planetTypes);
+    const n = U.randInt(lo, hi);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const type = U.pick(types);
+      const base = DATA.planetTypes[type].slots;
+      // Planet size varies the slots a little.
+      const size = U.pick([-1, 0, 0, 1]);
+      out.push({
+        idx: i, type, colony: null,
+        slots: { surface: base.surface ? Math.max(2, base.surface + size) : 0, orbit: Math.max(1, base.orbit + (size > 0 ? 1 : 0)) },
+      });
+    }
+    return out;
+  },
+
+  // Best planet in a system for a first colony: most surface slots, never a gas giant if avoidable.
+  bestPlanet(s) {
+    return s.planets.slice().sort((a, b) => (b.slots.surface + b.slots.orbit) - (a.slots.surface + a.slots.orbit))[0].idx;
+  },
+
   generate() {
     const count = DATA.config.systemCount;
     const pts = [];
@@ -26,10 +49,9 @@ const Galaxy = {
       if (pts.every((q) => Math.hypot(p.x - q.x, (p.y - q.y) * 0.62) > 0.1)) pts.push(p);
     }
     const used = new Set();
-    const types = Object.keys(DATA.planetTypes);
     const systems = pts.map((p, i) => ({
       id: i, name: this.makeName(used), x: p.x, y: p.y,
-      type: U.pick(types), lanes: [], owner: null, colony: null,
+      planets: this.makePlanets(), lanes: [], owner: null, garrison: 0,
       explored: false, anomaly: null, star: U.pick(['#f0e0b0', '#f0a070', '#b0c8f0', '#f07050']),
     }));
 
@@ -69,11 +91,15 @@ const Galaxy = {
     const remnant = S.filter((s) => s !== home && s !== chorus)
       .reduce((b, s) => (Math.min(dP[s.id], dC[s.id]) > Math.min(dP[b.id], dC[b.id]) ? s : b));
 
-    Colonies.found(home.id, 'player', { mine: 1, drill: 1, cogitator: 1, habitat: 1, shipyard: 1, bastion: 1 });
+    // The home system always has a decent rocky world and at least three planets.
+    while (home.planets.length < 3) home.planets.push(...this.makePlanets().slice(0, 1).map((p) => Object.assign(p, { idx: home.planets.length })));
+    home.planets[0] = { idx: 0, type: U.pick(['ash', 'iron', 'ice']), colony: null, slots: { surface: 5, orbit: 4 } };
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
-    Colonies.found(chorus.id, 'chorus', { bastion: 1 });
-    Colonies.found(remnant.id, 'remnant', { bastion: 1 });
+    G.homePlanet = 0;
+    Colonies.found(home.id, 0, 'player', { mine: 1, drill: 1, dome: 1, bastion: 1 }, { shipyard: 1, ring: 1, cogitator: 1 });
+    Colonies.found(chorus.id, this.bestPlanet(chorus), 'chorus', { bastion: 1 });
+    Colonies.found(remnant.id, this.bestPlanet(remnant), 'remnant', { bastion: 1 });
     G.ai.chorus.homeId = chorus.id;
     G.ai.remnant.homeId = remnant.id;
 

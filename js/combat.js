@@ -24,7 +24,7 @@ const Combat = {
 
   sideAtk(fleets) { return fleets.reduce((a, f) => a + Fleets.stats(f).atk, 0); },
   sideSize(fleets) { return fleets.reduce((a, f) => a + Fleets.size(f), 0); },
-  bastionAtk(s) { return s.colony ? s.colony.buildings.bastion * 6 * (s.owner === 'player' ? State.mods().bastion : 1 + G.cycle / 80) : 0; },
+  bastionAtk(s) { return Colonies.defenseAtk(s); },
 
   lostText(lost) {
     const parts = Object.entries(lost).map(([t, n]) => `${n} ${DATA.ships[t].name}${n > 1 ? 's' : ''}`);
@@ -86,7 +86,7 @@ const Combat = {
 
   sieges() {
     for (const s of G.systems) {
-      if (!s.colony || !s.owner) continue;
+      if (!s.owner || s.owner === 'monster') continue;
       const present = Fleets.at(s.id).filter((f) => f.owner !== s.owner && Fleets.isCombat(f) && f.owner !== 'monster');
       if (!present.length || Fleets.at(s.id, s.owner).length) continue;
       const attacker = present[0].owner;
@@ -96,12 +96,12 @@ const Combat = {
       if (bAtk > 0) {
         const lost = this.applyDamage(present.filter((f) => f.owner === attacker), bAtk, this.hpMod(attacker));
         Fleets.cleanup();
-        if (attacker === 'player' && Object.keys(lost).length) Log.add(`The bastion of ${s.name} destroys ${this.lostText(lost)}.`, 'bad');
+        if (attacker === 'player' && Object.keys(lost).length) Log.add(`The defenses of ${s.name} destroy ${this.lostText(lost)}.`, 'bad');
       }
-      s.colony.garrison -= atk * 0.6;
-      if (s.colony.garrison > 0) {
-        if (s.owner === 'player') Log.add(`⚠ ${s.name} is under siege by ${DATA.factions[attacker].name}! Garrison: ${Math.round(s.colony.garrison)}.`, 'bad');
-        if (attacker === 'player') Log.add(`Sieging ${s.name}: garrison ${Math.round(s.colony.garrison)} left.`);
+      s.garrison -= atk * 0.6;
+      if (s.garrison > 0) {
+        if (s.owner === 'player') Log.add(`⚠ ${s.name} is under siege by ${DATA.factions[attacker].name}! Garrison: ${Math.round(s.garrison)}.`, 'bad');
+        if (attacker === 'player') Log.add(`Sieging ${s.name}: garrison ${Math.round(s.garrison)} left.`);
         continue;
       }
       const old = Colonies.capture(s.id, attacker);

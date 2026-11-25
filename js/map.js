@@ -52,6 +52,20 @@ const StarMap = {
     }
   },
 
+  // Star with its planets as coloured dots on little orbits.
+  drawSystem(ctx, s, p) {
+    ctx.fillStyle = s.star;
+    ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
+    ctx.fillRect(p.x - 2, p.y, 5, 1); ctx.fillRect(p.x, p.y - 2, 1, 5);
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x, p.y, 1, 1);
+    s.planets.forEach((pl, i) => {
+      const ang = (s.id * 1.7 + i * 2.4) % (Math.PI * 2), r = 4 + i * 1.6;
+      const x = Math.round(p.x + Math.cos(ang) * r), y = Math.round(p.y + Math.sin(ang) * r * 0.8);
+      ctx.fillStyle = pl.colony && s.owner ? DATA.factions[s.owner].color : DATA.planetTypes[pl.type].palette[3];
+      ctx.fillRect(x, y, pl.type === 'gas' ? 2 : 1, pl.type === 'gas' ? 2 : 1);
+    });
+  },
+
   draw(canvas) {
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
@@ -87,11 +101,11 @@ const StarMap = {
       if (!visible(s)) continue;
       const p = this.pos(s);
       if (s.explored) {
-        ctx.drawImage(Sprites.planetCanvas(s.type, 12, s.id), p.x - 6, p.y - 6);
+        this.drawSystem(ctx, s, p);
         if (s.owner) this.brackets(ctx, p, 8, DATA.factions[s.owner].color);
         ctx.fillStyle = s.owner ? DATA.factions[s.owner].color : '#8a8070';
         const label = s.name.toUpperCase(), half = ctx.measureText(label).width / 2 + 2;
-        ctx.fillText(label, Math.max(half, Math.min(this.W - half, p.x)), p.y + 16);
+        ctx.fillText(label, Math.max(half, Math.min(this.W - half, p.x)), p.y + 17);
       } else {
         ctx.fillStyle = '#3a3430'; ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
         ctx.fillStyle = '#5a5048'; ctx.fillText('?', p.x, p.y - 4);

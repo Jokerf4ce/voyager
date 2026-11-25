@@ -44,8 +44,8 @@ const Fleets = {
     return false;
   },
 
-  shipCost(type, sysId) {
-    const yard = G.systems[sysId].colony.buildings.shipyard;
+  shipCost(type, ref) {
+    const yard = Colonies.get(ref).p.colony.orbit.shipyard || 1;
     const disc = Math.max(0.6, 1 - 0.05 * (yard - 1));
     const out = {};
     for (const k in DATA.ships[type].cost) out[k] = Math.ceil(DATA.ships[type].cost[k] * disc);
@@ -53,17 +53,18 @@ const Fleets = {
   },
 
   // Why a ship can't be built right now, or null if it can.
-  blocker(type, sysId) {
+  blocker(type, ref) {
     if (!this.unlocked(type)) return 'Locked';
     if (Economy.infraFree() < DATA.ships[type].infra) return 'Not enough Infrastructure for the crew';
-    if (!Colonies.canAfford(this.shipCost(type, sysId))) return 'Not enough resources';
+    if (!Colonies.canAfford(this.shipCost(type, ref))) return 'Not enough resources';
     return null;
   },
 
-  build(type, sysId) {
-    const s = G.systems[sysId];
-    if (!s.colony || s.owner !== 'player' || s.colony.buildings.shipyard < 1 || this.blocker(type, sysId)) return false;
-    const cost = this.shipCost(type, sysId);
+  build(type, ref) {
+    const { s, p } = Colonies.get(ref);
+    if (!p || !p.colony || s.owner !== 'player' || !(p.colony.orbit.shipyard > 0) || this.blocker(type, ref)) return false;
+    const sysId = s.id;
+    const cost = this.shipCost(type, ref);
     Colonies.pay(cost);
     if (type === 'scout' || type === 'ark') {
       this.create('player', sysId, { [type]: 1 }, type === 'scout' ? 'Scout ' + G.nextFleetId : 'Ark ' + G.nextFleetId);
@@ -72,7 +73,7 @@ const Fleets = {
       if (!f) f = this.create('player', sysId, {}, 'Battlegroup ' + G.nextFleetId);
       f.ships[type] = (f.ships[type] || 0) + 1;
     }
-    Log.add(`A ${DATA.ships[type].name} is launched from ${s.name}.`);
+    Log.add(`A ${DATA.ships[type].name} is launched from ${Colonies.planetName(s, p)}.`);
     return true;
   },
 
@@ -103,18 +104,19 @@ const Fleets = {
     this.cleanup();
   },
 
-  colonize(fleetId) {
+  colonize(fleetId, pIdx) {
     const f = this.get(fleetId);
     if (!f || !this.has(f, 'ark')) return false;
     const s = G.systems[f.sys];
-    if (s.owner || s.colony) return false;
+    const p = s.planets[pIdx];
+    if (!p || p.colony || (s.owner && s.owner !== 'player')) return false;
     if (G.fleets.some((x) => x.sys === s.id && x.owner !== 'player' && this.size(x) > 0)) return false;
     f.ships.ark--;
     this.cleanup();
-    Colonies.found(s.id, 'player');
+    Colonies.found(s.id, pIdx, 'player');
     s.explored = true;
     Explore.reveal(s.id);
-    Log.add(`A colony is founded on ${s.name}. The colonists bury their dead first, then start building.`, 'good');
+    Log.add(`A colony is founded on ${Colonies.planetName(s, p)}. The colonists bury their dead first, then start building.`, 'good');
     return true;
   },
 

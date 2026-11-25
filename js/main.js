@@ -46,7 +46,7 @@ const Game = {
   newGame() {
     this.stopAuto();
     this.overShown = false;
-    UI.selSys = null; UI.selFleet = null; UI.lastPull = null; UI.yardSys = null;
+    UI.selSys = null; UI.selFleet = null; UI.lastPull = null; UI.yard = null;
     State.newGame();
     UI.selSys = G.homeId;
     UI.screen = 'map';
@@ -61,12 +61,14 @@ const Game = {
     halt: (a) => { const f = Fleets.get(+a); if (f) f.path = []; },
     split: (a) => { const [id, t] = a.split(':'); Fleets.split(+id, t); },
     merge: (a) => { Fleets.mergeAt(+a); },
-    colonize: (a) => { Fleets.colonize(+a); UI.selFleet = null; },
-    gocolony: () => { UI.screen = 'colonies'; },
-    goyard: (a) => { UI.yardSys = +a; UI.screen = 'shipyard'; },
-    yard: (a) => { UI.yardSys = +a; },
-    build: (a) => { const [id, k] = a.split(':'); Colonies.build(+id, k); },
-    buildship: (a) => { Fleets.build(a, UI.yardSys); },
+    colonize: (a) => { const [fid, pi] = a.split(':'); Fleets.colonize(+fid, +pi); UI.selFleet = null; },
+    settle: (a) => { const [sid, pi] = a.split(':'); Colonies.settle(+sid, +pi); },
+    gocolony: (a) => { UI.colSys = +a; UI.screen = 'colonies'; },
+    colsys: (a) => { UI.colSys = +a; },
+    goyard: (a) => { UI.yard = a; UI.screen = 'shipyard'; },
+    yard: (a) => { UI.yard = a; },
+    build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
+    buildship: (a) => { Fleets.build(a, UI.yard); },
     research: (a) => { Research.select(a); Research.tick(); },
     mapfleet: (a) => { const f = Fleets.get(+a); UI.selFleet = f.id; UI.selSys = f.sys; UI.screen = 'map'; },
     pull: (a) => { const r = Gacha.pull(+a); if (r) UI.lastPull = r; },

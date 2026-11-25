@@ -36,6 +36,19 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 - **Exploit.** Resources and production chains, research, and colony upgrades. This is where the incremental growth happens.
 - **Exterminate.** Fleets, ship designs from blueprints, and turn-resolved battles shown as a battle report with simple pixel-art visuals. Planets can be invaded, purged or razed.
 
+## 4a. Systems and planets
+
+**Decided:** each star system has several planets (2–5 in the POC), and each planet has two building layers, **surface** and **orbit**.
+
+**Proposed** (as built in the POC):
+- A system is owned as a whole. The first colony in a system needs a Colony Ark. Further planets in a system you hold can be settled for Metal and Polymers, with the cost rising as you grow.
+- Each layer has a number of **slots**. A slot holds one kind of building, and levels are unlimited.
+- Planet types set the slots and resource bonuses. Gas Giants have no surface (5 orbit slots). Asteroid Belts have big surfaces and a tiny orbit.
+- **Surface only:** Deep Mine, Core Drill, Polymer Refinery, Hab Dome, Bastion.
+- **Orbit only:** Orbital Shipyard, Habitat Ring, Gas Skimmer, Defense Platform.
+- **Both layers** (built separately in each): Fusion Core, Cogitator Array.
+- System defense adds up every planet's Bastions and Defense Platforms.
+
 ## 4b. Resources
 
 **Decided:** Metal, Rare Minerals, Polymers, Compute and Infrastructure, plus Void Shards for the gacha. Energy is folded into Infrastructure. Compute replaces Research. Infrastructure is a capacity cap. Light production chains.
@@ -44,9 +57,9 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 |---|---|---|---|
 | **Metal** | stockpile | Deep Mines (Iron Desert ×2, Ash World ×1.5) | almost everything; refinery input |
 | **Rare Minerals** | stockpile | Core Drills (Toxic Mire ×2) | advanced ships, Fusion Cores, Bastions; refinery input |
-| **Polymers** | stockpile, refined | Polymer Refinery: 2 Metal + 0.5 Rare → 2 Polymers (Gas Giant ×2) | Arks, Frigates and better, Habitat Rings, Cogitators, Shipyards |
+| **Polymers** | stockpile, refined | Polymer Refinery: 2 Metal + 0.5 Rare → 2 Polymers; Gas Skimmers in orbit (Gas Giant ×2) | Arks, Frigates and better, Habitat Rings, Cogitators, Shipyards |
 | **Compute** | stockpile | Cogitator Arrays (Hollow World ×2) | research |
-| **Infrastructure** | capacity | each colony (base 6), Habitat Rings, Fusion Cores (Frozen Tomb ×1.5) | used by production buildings (1 per level) and ship crews |
+| **Infrastructure** | capacity | each settled planet (base 5), Hab Domes, Habitat Rings, Fusion Cores (Frozen Tomb ×1.5) | used by production buildings (1 per level) and ship crews |
 | **Void Shards** | stockpile | exploration, battles, events, some techs and relics | Void Signals (gacha) |
 
 **Infrastructure rules** (proposed and in the POC):
