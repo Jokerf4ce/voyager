@@ -18,16 +18,18 @@ const Galaxy = {
 
   makePlanets() {
     const [lo, hi] = DATA.config.planetsPerSystem;
-    const types = Object.keys(DATA.planetTypes);
+    // Rare types (living worlds) show up a quarter as often.
+    const types = Object.keys(DATA.planetTypes).flatMap((t) => DATA.planetTypes[t].rare ? [t] : [t, t, t, t]);
     const n = U.randInt(lo, hi);
     const out = [];
     for (let i = 0; i < n; i++) {
       const type = U.pick(types);
+      const [hlo, hhi] = DATA.planetTypes[type].hab;
       const base = DATA.planetTypes[type].slots;
       // Planet size varies the slots a little.
       const size = U.pick([-1, 0, 0, 1]);
       out.push({
-        idx: i, type, colony: null,
+        idx: i, type, colony: null, hab: U.randInt(hlo, hhi),
         slots: { surface: base.surface ? Math.max(2, base.surface + size) : 0, orbit: Math.max(1, base.orbit + (size > 0 ? 1 : 0)) },
       });
     }
@@ -36,7 +38,8 @@ const Galaxy = {
 
   // Best planet in a system for a first colony: most surface slots, never a gas giant if avoidable.
   bestPlanet(s) {
-    return s.planets.slice().sort((a, b) => (b.slots.surface + b.slots.orbit) - (a.slots.surface + a.slots.orbit))[0].idx;
+    const score = (p) => p.slots.surface + p.slots.orbit + p.hab;
+    return s.planets.slice().sort((a, b) => score(b) - score(a))[0].idx;
   },
 
   generate() {
@@ -93,7 +96,7 @@ const Galaxy = {
 
     // The home system always has a decent rocky world and at least three planets.
     while (home.planets.length < 3) home.planets.push(...this.makePlanets().slice(0, 1).map((p) => Object.assign(p, { idx: home.planets.length })));
-    home.planets[0] = { idx: 0, type: U.pick(['ash', 'iron', 'ice']), colony: null, slots: { surface: 5, orbit: 4 } };
+    home.planets[0] = { idx: 0, type: U.pick(['ash', 'iron', 'ice']), colony: null, hab: 3, slots: { surface: 5, orbit: 4 } };
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
     G.homePlanet = 0;

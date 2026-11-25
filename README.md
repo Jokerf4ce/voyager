@@ -15,7 +15,7 @@ Open `index.html` in a browser. No server or build step is needed. Saves are kep
 ## Proof of concept (v0.1)
 
 - Procedural galaxy of 22 systems with hyperlanes and fog of war; each system has 2–5 planets
-- Every planet has a surface and an orbit layer with their own building slots
+- Every planet has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
 - Explore with scouts; exploration events with grim choices
 - Expand with Colony Arks into new systems, then settle more planets in systems you hold
 - Resources: Metal, Rare Minerals, Polymers (refined), Compute (research) and Infrastructure (capacity cap)

@@ -23,10 +23,16 @@ const Colonies = {
     return p;
   },
 
-  settleCost() {
+  // Habitability cost multiplier for a layer of a planet.
+  habMult(p, layer = 'surface') {
+    const m = DATA.habitability[p.hab].cost;
+    return layer === 'orbit' ? 1 + (m - 1) * DATA.habOrbitShare : m;
+  },
+
+  settleCost(p) {
     const n = this.playerPlanets().length;
     const out = {};
-    for (const k in DATA.settleCost) out[k] = Math.ceil(DATA.settleCost[k] * Math.pow(DATA.settleGrowth, Math.max(0, n - 1)));
+    for (const k in DATA.settleCost) out[k] = Math.ceil(DATA.settleCost[k] * Math.pow(DATA.settleGrowth, Math.max(0, n - 1)) * this.habMult(p, p.slots.surface ? 'surface' : 'orbit')); // no surface: an orbital station
     return out;
   },
 
@@ -34,7 +40,7 @@ const Colonies = {
   settle(sysId, pIdx) {
     const s = G.systems[sysId], p = s.planets[pIdx];
     if (s.owner !== 'player' || p.colony) return false;
-    const cost = this.settleCost();
+    const cost = this.settleCost(p);
     if (!this.canAfford(cost)) return false;
     this.pay(cost);
     this.found(sysId, pIdx, 'player');
@@ -57,7 +63,8 @@ const Colonies = {
     const def = DATA.buildings[key];
     const lvl = p.colony[layer][key] || 0;
     const out = {};
-    for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * Math.pow(def.costGrowth, lvl));
+    const hm = this.habMult(p, layer);
+    for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * Math.pow(def.costGrowth, lvl) * hm);
     return out;
   },
 

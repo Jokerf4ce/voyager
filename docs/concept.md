@@ -48,6 +48,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 - **Orbit only:** Orbital Shipyard, Habitat Ring, Gas Skimmer, Defense Platform.
 - **Both layers** (built separately in each): Fusion Core, Cogitator Array.
 - System defense adds up every planet's Bastions and Defense Platforms.
+- **Habitability 1–5** (decided): 1 is hellish (Venus, Jupiter), 5 is a garden like Earth. It changes building costs on the planet. Proposed numbers: surface costs ×2.0 / ×1.5 / ×1.2 / ×1.0 / ×0.8 for habitability 1 to 5. Orbital buildings feel half of that, and settling uses the surface rate (orbit rate for gas giants). Gas Giants and Molten Worlds are always 1. New types: Drowned World (3–4) and the rare Living World (4–5).
 
 ## 4b. Resources
 

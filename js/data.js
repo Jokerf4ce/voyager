@@ -16,16 +16,31 @@ DATA.resources = {
 // You cannot build past the cap. If usage ends up over the cap (a colony is lost), all production is rationed.
 DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 5, minEfficiency: 0.25 };
 
+// Habitability 1–5: 1 is hellish (Venus, Jupiter), 5 is a garden like old Earth.
+// cost multiplies the price of building on the surface and of settling the planet.
+// Orbit is shielded from the worst of it: orbital buildings get only orbitShare of the effect.
+DATA.habitability = {
+  1: { name: 'Hellish',   cost: 2.0,  color: '#c04030' },
+  2: { name: 'Hostile',   cost: 1.5,  color: '#c07030' },
+  3: { name: 'Harsh',     cost: 1.2,  color: '#c0a040' },
+  4: { name: 'Temperate', cost: 1.0,  color: '#90b050' },
+  5: { name: 'Garden',    cost: 0.8,  color: '#50c070' },
+};
+DATA.habOrbitShare = 0.5;
+
 // Planet types. slots = how many different buildings fit on each layer (levels are unlimited).
+// hab = [min, max] habitability rolled for planets of this type.
 DATA.planetTypes = {
-  ash:    { name: 'Ash World',     mult: { metal: 1.5, rare: 1.2 }, slots: { surface: 4, orbit: 3 }, palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
-  iron:   { name: 'Iron Desert',   mult: { metal: 2.0 },            slots: { surface: 4, orbit: 3 }, palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
-  ice:    { name: 'Frozen Tomb',   mult: { infra: 1.5 },            slots: { surface: 4, orbit: 3 }, palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
-  toxic:  { name: 'Toxic Mire',    mult: { rare: 2.0 },             slots: { surface: 3, orbit: 3 }, palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
-  molten: { name: 'Molten World',  mult: { rare: 1.5, metal: 1.2 }, slots: { surface: 3, orbit: 3 }, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
-  hollow: { name: 'Hollow World',  mult: { compute: 2.0 },          slots: { surface: 3, orbit: 3 }, palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
-  gas:    { name: 'Gas Giant',     mult: { polymers: 2.0 },         slots: { surface: 0, orbit: 5 }, palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
-  belt:   { name: 'Asteroid Belt', mult: { metal: 1.5, rare: 1.5 }, slots: { surface: 4, orbit: 1 }, palette: ['#141210', '#3a3430', '#6a5e52', '#9a8c7a'] },
+  ash:    { name: 'Ash World',     mult: { metal: 1.5, rare: 1.2 }, hab: [2, 3], slots: { surface: 4, orbit: 3 }, palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
+  iron:   { name: 'Iron Desert',   mult: { metal: 2.0 },            hab: [2, 3], slots: { surface: 4, orbit: 3 }, palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
+  ice:    { name: 'Frozen Tomb',   mult: { infra: 1.5 },            hab: [2, 3], slots: { surface: 4, orbit: 3 }, palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
+  toxic:  { name: 'Toxic Mire',    mult: { rare: 2.0 },             hab: [1, 2], slots: { surface: 3, orbit: 3 }, palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
+  molten: { name: 'Molten World',  mult: { rare: 1.5, metal: 1.2 }, hab: [1, 1], slots: { surface: 3, orbit: 3 }, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
+  hollow: { name: 'Hollow World',  mult: { compute: 2.0 },          hab: [2, 4], slots: { surface: 3, orbit: 3 }, palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
+  gas:    { name: 'Gas Giant',     mult: { polymers: 2.0 },         hab: [1, 1], slots: { surface: 0, orbit: 5 }, palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
+  ocean:  { name: 'Drowned World', mult: { infra: 1.2, compute: 1.2 }, hab: [3, 4], slots: { surface: 3, orbit: 3 }, palette: ['#0a1420', '#14304a', '#2a5a78', '#70a0b8'] },
+  verdant:{ name: 'Living World',  mult: { infra: 1.3 },            hab: [4, 5], slots: { surface: 5, orbit: 3 }, palette: ['#0e1a0e', '#24401e', '#4a6a2a', '#8a9a50'], rare: true },
+  belt:   { name: 'Asteroid Belt', mult: { metal: 1.5, rare: 1.5 }, hab: [1, 2], slots: { surface: 4, orbit: 1 }, palette: ['#141210', '#3a3430', '#6a5e52', '#9a8c7a'] },
 };
 
 DATA.layers = { surface: 'Surface', orbit: 'Orbit' };
@@ -182,5 +197,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v3',
+  saveKey: 'voyager_save_v4',
 };
