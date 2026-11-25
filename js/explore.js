@@ -23,7 +23,7 @@ const Explore = {
     const bonus = 2 + State.mods().exploreShards;
     G.res.shards += bonus;
     const hostile = G.fleets.some((x) => x.sys === s.id && x.owner !== 'player' && Fleets.size(x) > 0);
-    Log.add(`${f.name} charts ${s.name}: ${s.planets.length} planets (${s.planets.map((p) => DATA.planetTypes[p.type].name).join(', ')}). +${bonus} Shards.${hostile ? ' Hostile contacts detected!' : ''}`);
+    Log.add(`${f.name} charts ${s.name}: ${s.planets.length} planets (${s.planets.map((p) => Planets.label(p)).join(', ')}). +${bonus} Shards.${hostile ? ' Hostile contacts detected!' : ''}`);
     if (s.owner && s.owner !== 'player') Log.add(`${s.name} belongs to ${DATA.factions[s.owner].name}. ${DATA.factions[s.owner].desc}`, 'bad');
     if (s.anomaly) {
       G.pendingEvents.push({ ev: s.anomaly, sys: s.id, fleetId: f.id });

@@ -27,19 +27,42 @@ DATA.habitability = {
   5: { name: 'Natural Life Support', surface: 1,   orbit: 1,   color: '#50c070' },
 };
 
-// Planet types. slots = how many different buildings fit on each layer (levels are unlimited).
-// hab = [min, max] habitability rolled for planets of this type.
-DATA.planetTypes = {
-  ash:    { name: 'Ash World',     mult: { metal: 1.5, rare: 1.2 }, hab: [2, 3], slots: { surface: 4, orbit: 3 }, palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
-  iron:   { name: 'Iron Desert',   mult: { metal: 2.0 },            hab: [2, 3], slots: { surface: 4, orbit: 3 }, palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
-  ice:    { name: 'Frozen Tomb',   mult: { infra: 1.5 },            hab: [2, 3], slots: { surface: 4, orbit: 3 }, palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
-  toxic:  { name: 'Toxic Mire',    mult: { rare: 2.0 },             hab: [1, 2], slots: { surface: 3, orbit: 3 }, palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
-  molten: { name: 'Molten World',  mult: { rare: 1.5, metal: 1.2 }, hab: [1, 1], slots: { surface: 3, orbit: 3 }, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
-  hollow: { name: 'Hollow World',  mult: { compute: 2.0 },          hab: [2, 4], slots: { surface: 3, orbit: 3 }, palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
-  gas:    { name: 'Gas Giant',     mult: { polymers: 2.0 },         hab: [1, 1], slots: { surface: 0, orbit: 5 }, palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
-  ocean:  { name: 'Drowned World', mult: { infra: 1.2, compute: 1.2 }, hab: [3, 4], slots: { surface: 3, orbit: 3 }, palette: ['#0a1420', '#14304a', '#2a5a78', '#70a0b8'] },
-  verdant:{ name: 'Living World',  mult: { infra: 1.3 },            hab: [4, 5], slots: { surface: 5, orbit: 3 }, palette: ['#0e1a0e', '#24401e', '#4a6a2a', '#8a9a50'], rare: true },
-  belt:   { name: 'Asteroid Belt', mult: { metal: 1.5, rare: 1.5 }, hab: [1, 2], slots: { surface: 4, orbit: 1 }, palette: ['#141210', '#3a3430', '#6a5e52', '#9a8c7a'] },
+// Planets are classified by three factors: composition, size and temperature.
+//   size: giant (gas only), large, average, dwarf
+//   composition: gas, ice/water, silicate (earth-like)
+//   temperature: frozen, temperate (silicate and ice/water only), hot
+// slots = how many different buildings fit on each layer (levels are unlimited).
+// An Extremely Hazardous (habitability 1) planet has no buildable surface.
+DATA.planetSizes = {
+  giant:   { name: 'Giant',   slots: { surface: 0, orbit: 5 }, sprite: 32 },
+  large:   { name: 'Large',   slots: { surface: 5, orbit: 4 }, sprite: 30 },
+  average: { name: 'Average', slots: { surface: 4, orbit: 3 }, sprite: 24 },
+  dwarf:   { name: 'Dwarf',   slots: { surface: 2, orbit: 2 }, sprite: 16, habMod: -1 },
+};
+
+DATA.compositions = {
+  gas:      { name: 'Gas',       sizes: ['giant'],                     temps: ['frozen', 'hot'],              mult: { polymers: 2.0 } },
+  water:    { name: 'Ice/Water', sizes: ['large', 'average', 'dwarf'], temps: ['frozen', 'temperate', 'hot'], mult: { infra: 1.3 } },
+  silicate: { name: 'Silicate',  sizes: ['large', 'average', 'dwarf'], temps: ['frozen', 'temperate', 'hot'], mult: { metal: 1.5, rare: 1.2 } },
+};
+
+DATA.temperatures = {
+  frozen:    { name: 'Frozen',    mult: { compute: 1.5 } }, // free cooling for cogitators
+  temperate: { name: 'Temperate', mult: { infra: 1.2 } },
+  hot:       { name: 'Hot',       mult: { rare: 1.5 } },    // volcanism brings heavy elements up
+};
+
+// Planet classes: one per composition + temperature. hab = habitability roll [min, max] before size.
+// weight = how often it appears.
+DATA.planetClasses = {
+  gas_frozen:         { name: 'Cold Gas Giant', hab: [1, 1], weight: 3, palette: ['#141a28', '#28384e', '#4a6478', '#90b0c0'] },
+  gas_hot:            { name: 'Hot Gas Giant',  hab: [1, 1], weight: 2, palette: ['#2a1410', '#5a2a1a', '#a0502a', '#e0a060'] },
+  water_frozen:       { name: 'Ice World',      hab: [2, 3], weight: 5, palette: ['#1a2430', '#3a5060', '#6a8a98', '#c8dce4'] },
+  water_temperate:    { name: 'Ocean World',    hab: [3, 4], weight: 3, palette: ['#0a1420', '#14304a', '#2a5a78', '#70a0b8'] },
+  water_hot:          { name: 'Steam World',    hab: [1, 2], weight: 2, palette: ['#1a1a20', '#3a3a48', '#70707e', '#b0b0b8'] },
+  silicate_frozen:    { name: 'Frozen Rock',    hab: [2, 3], weight: 5, palette: ['#18181c', '#34343c', '#5e5e68', '#a0a0a8'] },
+  silicate_temperate: { name: 'Terran World',   hab: [4, 5], weight: 2, palette: ['#0e1a0e', '#24401e', '#4a6a2a', '#8a9a50'] },
+  silicate_hot:       { name: 'Scorched Rock',  hab: [1, 2], weight: 4, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
 };
 
 DATA.layers = { surface: 'Surface', orbit: 'Orbit' };
@@ -196,5 +219,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v4',
+  saveKey: 'voyager_save_v5',
 };

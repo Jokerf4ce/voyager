@@ -15,10 +15,12 @@ const Sprites = {
 
   canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; },
 
-  planet(type, size, seedKey) {
+  // p = planet object (comp/size/temp). Size in pixels comes from the planet's size class.
+  planet(p, seedKey) {
+    const type = Planets.classKey(p), size = DATA.planetSizes[p.size].sprite;
     const key = `p:${type}:${size}:${seedKey}`;
     if (this.cache[key]) return this.cache[key];
-    const pal = DATA.planetTypes[type].palette;
+    const pal = Planets.cls(p).palette;
     const rnd = this.seeded(key);
     const c = this.canvas(size, size), ctx = c.getContext('2d');
     const img = ctx.createImageData(size, size);
@@ -32,7 +34,7 @@ const Sprites = {
       const v = (i, j) => grid[Math.min(g - 1, j) * g + Math.min(g - 1, i)];
       return (v(x0, y0) * (1 - fx) + v(x0 + 1, y0) * fx) * (1 - fy) + (v(x0, y0 + 1) * (1 - fx) + v(x0 + 1, y0 + 1) * fx) * fy;
     };
-    const banded = type === 'gas';
+    const banded = p.comp === 'gas';
     for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
       const dx = (x + 0.5 - size / 2) / r, dy = (y + 0.5 - size / 2) / r;
       const d2 = dx * dx + dy * dy;
@@ -54,11 +56,6 @@ const Sprites = {
     ctx.putImageData(img, 0, 0);
     this.cache['cv:' + key] = c;
     return (this.cache[key] = c.toDataURL());
-  },
-
-  planetCanvas(type, size, seedKey) {
-    this.planet(type, size, seedKey);
-    return this.cache[`cv:p:${type}:${size}:${seedKey}`];
   },
 
   // Symmetric masked faces: leaders and relics.

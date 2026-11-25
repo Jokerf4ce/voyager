@@ -18,21 +18,9 @@ const Galaxy = {
 
   makePlanets() {
     const [lo, hi] = DATA.config.planetsPerSystem;
-    // Rare types (living worlds) show up a quarter as often.
-    const types = Object.keys(DATA.planetTypes).flatMap((t) => DATA.planetTypes[t].rare ? [t] : [t, t, t, t]);
     const n = U.randInt(lo, hi);
     const out = [];
-    for (let i = 0; i < n; i++) {
-      const type = U.pick(types);
-      const [hlo, hhi] = DATA.planetTypes[type].hab;
-      const base = DATA.planetTypes[type].slots;
-      // Planet size varies the slots a little.
-      const size = U.pick([-1, 0, 0, 1]);
-      out.push({
-        idx: i, type, colony: null, hab: U.randInt(hlo, hhi),
-        slots: { surface: base.surface ? Math.max(2, base.surface + size) : 0, orbit: Math.max(1, base.orbit + (size > 0 ? 1 : 0)) },
-      });
-    }
+    for (let i = 0; i < n; i++) out.push(Planets.random(i));
     return out;
   },
 
@@ -95,8 +83,9 @@ const Galaxy = {
       .reduce((b, s) => (Math.min(dP[s.id], dC[s.id]) > Math.min(dP[b.id], dC[b.id]) ? s : b));
 
     // The home system always has a decent rocky world and at least three planets.
-    while (home.planets.length < 3) home.planets.push(...this.makePlanets().slice(0, 1).map((p) => Object.assign(p, { idx: home.planets.length })));
-    home.planets[0] = { idx: 0, type: U.pick(['ash', 'iron', 'ice']), colony: null, hab: 3, slots: { surface: 5, orbit: 4 } };
+    while (home.planets.length < 3) home.planets.push(Planets.random(home.planets.length));
+    // The capital is a large Terran world with natural life support.
+    home.planets[0] = Planets.make(0, 'silicate', 'large', 'temperate', 5);
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
     G.homePlanet = 0;

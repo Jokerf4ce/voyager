@@ -61,8 +61,9 @@ const StarMap = {
     s.planets.forEach((pl, i) => {
       const ang = (s.id * 1.7 + i * 2.4) % (Math.PI * 2), r = 4 + i * 1.6;
       const x = Math.round(p.x + Math.cos(ang) * r), y = Math.round(p.y + Math.sin(ang) * r * 0.8);
-      ctx.fillStyle = pl.colony && s.owner ? DATA.factions[s.owner].color : DATA.planetTypes[pl.type].palette[3];
-      ctx.fillRect(x, y, pl.type === 'gas' ? 2 : 1, pl.type === 'gas' ? 2 : 1);
+      ctx.fillStyle = pl.colony && s.owner ? DATA.factions[s.owner].color : Planets.cls(pl).palette[3];
+      const d = pl.size === 'giant' || pl.size === 'large' ? 2 : 1;
+      ctx.fillRect(x, y, d, d);
     });
   },
 

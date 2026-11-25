@@ -43,7 +43,13 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 **Proposed** (as built in the POC):
 - A system is owned as a whole. The first colony in a system needs a Colony Ark. Further planets in a system you hold can be settled for Metal and Polymers, with the cost rising as you grow.
 - Each layer has a number of **slots**. A slot holds one kind of building, and levels are unlimited.
-- Planet types set the slots and resource bonuses. Gas Giants have no surface (5 orbit slots). Asteroid Belts have big surfaces and a tiny orbit.
+- **Planet classes** (decided): every planet is defined by three factors.
+  - **Size:** Giant (gas only), Large, Average, Dwarf. Size sets the slots: Giant 0 surface / 5 orbit, Large 5/4, Average 4/3, Dwarf 2/2. Dwarfs are one habitability step worse.
+  - **Composition:** Gas, Ice/Water, Silicate (earth-like). Gas ×2 Polymers, Ice/Water ×1.3 Infrastructure, Silicate ×1.5 Metal and ×1.2 Rare Minerals.
+  - **Temperature:** Frozen, Temperate (Silicate and Ice/Water only), Hot. Frozen ×1.5 Compute (free cooling), Temperate ×1.2 Infrastructure, Hot ×1.5 Rare Minerals.
+  - That gives eight classes: Cold/Hot Gas Giant (habitability 1), Ice World (2–3), Ocean World (3–4), Steam World (1–2), Frozen Rock (2–3), Terran World (4–5, rare), Scorched Rock (1–2).
+- **Extremely Hazardous planets (habitability 1) have no buildable surface** (decided). Only orbit can be built.
+- The capital is a Large Terran World with Natural Life Support (decided).
 - **Surface only:** Deep Mine, Core Drill, Polymer Refinery, Hab Dome, Bastion.
 - **Orbit only:** Orbital Shipyard, Habitat Ring, Gas Skimmer, Defense Platform.
 - **Both layers** (built separately in each): Fusion Core, Cogitator Array.
@@ -58,7 +64,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
   | 4 Habitable | ×2.5 | ×1 |
   | 5 Natural Life Support (Earth) | ×1 | ×1 |
 
-  Settling uses the surface rate (the orbit rate for gas giants). Gas Giants and Molten Worlds are always 1. Drowned Worlds (3–4) and the rare Living Worlds (4–5) are the habitable ones.
+  Settling uses the surface rate (the orbit rate for gas giants).
 
 ## 4b. Resources
 

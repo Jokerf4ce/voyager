@@ -114,7 +114,7 @@ const Colonies = {
 const Economy = {
   // --- Infrastructure (capacity) ---
   planetInfraCap(p) {
-    const t = DATA.planetTypes[p.type].mult;
+    const t = Planets.mult(p);
     let cap = DATA.infra.colonyBase;
     for (const layer of ['surface', 'orbit']) for (const [k, lvl] of Object.entries(p.colony[layer])) {
       const d = DATA.buildings[k];
@@ -150,7 +150,7 @@ const Economy = {
   planetYield(p, eff = 1) {
     const m = State.mods();
     const L = (k) => Colonies.level(p, k);
-    const t = DATA.planetTypes[p.type].mult;
+    const t = Planets.mult(p);
     const k = m.all * (1 + 0.1 * L('fusion')) * eff;
     return {
       metal: (2 + L('mine') * 3) * (t.metal || 1) * m.metal * k,

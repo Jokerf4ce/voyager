@@ -5,7 +5,7 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 4,
+      version: 5,
       cycle: 1,
       res: { metal: 120, rare: 20, polymers: 30, compute: 0, shards: 25 },
       systems: [],
@@ -59,7 +59,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 4) return false;
+      if (!data || data.version !== 5) return false;
       G = data;
       return true;
     } catch (e) { return false; }
@@ -72,7 +72,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 4) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 5) throw new Error('Not a Voyager save');
     G = data;
   },
 
