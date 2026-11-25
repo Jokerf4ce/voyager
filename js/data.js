@@ -16,15 +16,15 @@ DATA.resources = {
 // You cannot build past the cap. If usage ends up over the cap (a colony is lost), all production is rationed.
 DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 5, minEfficiency: 0.25 };
 
-// Habitability 1–5: 1 is hellish (Venus, Jupiter), 5 is a garden like old Earth.
+// Habitability 1–5: 1 Extremely Hazardous (Venus, Jupiter) … 5 Natural Life Support (old Earth).
 // cost multiplies the price of building on the surface and of settling the planet.
 // Orbit is shielded from the worst of it: orbital buildings get only orbitShare of the effect.
 DATA.habitability = {
-  1: { name: 'Hellish',   cost: 2.0,  color: '#c04030' },
-  2: { name: 'Hostile',   cost: 1.5,  color: '#c07030' },
-  3: { name: 'Harsh',     cost: 1.2,  color: '#c0a040' },
-  4: { name: 'Temperate', cost: 1.0,  color: '#90b050' },
-  5: { name: 'Garden',    cost: 0.8,  color: '#50c070' },
+  1: { name: 'Extremely Hazardous', cost: 2.0,  color: '#c04030' },
+  2: { name: 'Hazardous', cost: 1.5,  color: '#c07030' },
+  3: { name: 'Barren', cost: 1.2,  color: '#c0a040' },
+  4: { name: 'Habitable', cost: 1.0,  color: '#90b050' },
+  5: { name: 'Natural Life Support', cost: 0.8,  color: '#50c070' },
 };
 DATA.habOrbitShare = 0.5;
 
