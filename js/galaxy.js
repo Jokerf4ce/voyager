@@ -69,7 +69,7 @@ const Galaxy = {
     const remnant = S.filter((s) => s !== home && s !== chorus)
       .reduce((b, s) => (Math.min(dP[s.id], dC[s.id]) > Math.min(dP[b.id], dC[b.id]) ? s : b));
 
-    Colonies.found(home.id, 'player', { mine: 1, reactor: 1, archive: 1, shipyard: 1, bastion: 1 });
+    Colonies.found(home.id, 'player', { mine: 1, drill: 1, cogitator: 1, habitat: 1, shipyard: 1, bastion: 1 });
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
     Colonies.found(chorus.id, 'chorus', { bastion: 1 });

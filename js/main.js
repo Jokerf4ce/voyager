@@ -113,10 +113,7 @@ window.addEventListener('DOMContentLoaded', () => {
     UI.render();
     if (off) {
       UI.modal(`<h2>While You Were Gone</h2><p class="flavor">You were away for ${off.mins} minutes. The Covenant endured without you.</p>
-        <div class="kv"><span>Ore</span><b class="res-ore">+${U.fmt(off.gained.ore)}</b></div>
-        <div class="kv"><span>Energy</span><b class="res-energy">+${U.fmt(off.gained.energy)}</b></div>
-        <div class="kv"><span>Research</span><b class="res-research">+${U.fmt(off.gained.research)}</b></div>
-        <div class="kv"><span>Void Shards</span><b class="res-shards">+${off.gained.shards}</b></div>
+        ${Object.entries(off.gained).map(([k, v]) => `<div class="kv"><span>${DATA.resources[k].name}</span><b class="res-${k}">+${U.fmt(v)}</b></div>`).join('')}
         ${off.completed.length ? `<p class="small">Completed: ${off.completed.map(U.esc).join(', ')}</p>` : ''}
         <div class="btnrow">${UI.btn('Continue', 'close', '', false, 'gold')}</div>`);
     }

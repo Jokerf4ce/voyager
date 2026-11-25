@@ -36,6 +36,23 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 - **Exploit.** Resources and production chains, research, and colony upgrades. This is where the incremental growth happens.
 - **Exterminate.** Fleets, ship designs from blueprints, and turn-resolved battles shown as a battle report with simple pixel-art visuals. Planets can be invaded, purged or razed.
 
+## 4b. Resources
+
+**Decided:** Metal, Rare Minerals, Polymers, Compute and Infrastructure, plus Void Shards for the gacha. Energy is folded into Infrastructure. Compute replaces Research. Infrastructure is a capacity cap. Light production chains.
+
+| Resource | Type | Source | Used for |
+|---|---|---|---|
+| **Metal** | stockpile | Deep Mines (Iron Desert ×2, Ash World ×1.5) | almost everything; refinery input |
+| **Rare Minerals** | stockpile | Core Drills (Toxic Mire ×2) | advanced ships, Fusion Cores, Bastions; refinery input |
+| **Polymers** | stockpile, refined | Polymer Refinery: 2 Metal + 0.5 Rare → 2 Polymers (Gas Giant ×2) | Arks, Frigates and better, Habitat Rings, Cogitators, Shipyards |
+| **Compute** | stockpile | Cogitator Arrays (Hollow World ×2) | research |
+| **Infrastructure** | capacity | each colony (base 6), Habitat Rings, Fusion Cores (Frozen Tomb ×1.5) | used by production buildings (1 per level) and ship crews |
+| **Void Shards** | stockpile | exploration, battles, events, some techs and relics | Void Signals (gacha) |
+
+**Infrastructure rules** (proposed and in the POC):
+- You cannot build a building or ship whose crew or workers would push usage past capacity.
+- If usage ends up over capacity (for example a colony with Habitat Rings is lost), all production is rationed to capacity ÷ usage, down to a minimum of 25%.
+
 ## 5. Setting and tone
 
 **Open, with suggestions.** These are placeholders to react to.

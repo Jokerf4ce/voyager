@@ -39,7 +39,10 @@ small, .small { font-size: 16px; }
 .res b { font-size: 21px; font-weight: normal; }
 .res small { color: #8aa070; font-size: 15px; }
 .res small.neg { color: #d05050; }
-.res-ore { color: #d08a50; } .res-energy { color: #e0d070; } .res-research { color: #70c0c8; } .res-shards { color: #c080f0; }
+.res-metal { color: #b8b8c4; } .res-rare { color: #60d0a8; } .res-polymers { color: #d89a60; } .res-compute { color: #70c0c8; } .res-shards { color: #c080f0; } .res-infra { color: #d8c070; }
+.res.over { border-color: var(--blood); background: #2a1010; }
+.bar.infra i { background: repeating-linear-gradient(90deg, #b8a050 0 6px, #8a7838 6px 8px); }
+.bar.infra.over i { background: repeating-linear-gradient(90deg, #c04040 0 6px, #902828 6px 8px); }
 .spacer { flex: 1; }
 #cycle { font-size: 13px; color: var(--ash); }
 

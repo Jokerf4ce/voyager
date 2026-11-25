@@ -17,7 +17,8 @@ Open `index.html` in a browser. No server or build step is needed. Saves are kep
 - Procedural galaxy of 22 systems with hyperlanes and fog of war
 - Explore with scouts; exploration events with grim choices
 - Expand with Colony Arks; five building types per colony
-- Research, including endlessly repeatable "Doctrine" techs for the incremental layer
+- Resources: Metal, Rare Minerals, Polymers (refined), Compute (research) and Infrastructure (capacity cap)
+- Research paid in Compute, including endlessly repeatable "Doctrine" techs for the incremental layer
 - Ships, fleets, auto-resolved battles, sieges and capturing colonies
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
 - Void Signals gacha: shards earned in play, rarities, pity, rank-ups, cursed relics, ship blueprints

@@ -2,55 +2,68 @@
 
 const DATA = {};
 
+// Stockpiled resources. Infrastructure is not stockpiled: it is a capacity (see DATA.infra).
 DATA.resources = {
-  ore:      { name: 'Ore',      icon: '⛏', color: '#b0703c' },
-  energy:   { name: 'Energy',   icon: '⚡', color: '#d9c45a' },
-  research: { name: 'Research', icon: '☍', color: '#5aa3a8' },
-  shards:   { name: 'Void Shards', icon: '◆', color: '#a35ad9' },
+  metal:    { name: 'Metal',         icon: '▣', color: '#a8a8b0', desc: 'Mined everywhere. Hulls, walls, everything.' },
+  rare:     { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', desc: 'Scarce crystals and heavy elements for advanced tech.' },
+  polymers: { name: 'Polymers',      icon: '⬡', color: '#d08a50', desc: 'Refined from metal and rare minerals. Needed for advanced builds.' },
+  compute:  { name: 'Compute',       icon: '☍', color: '#70c0c8', desc: 'Raw thinking power. Spent on research.' },
+  shards:   { name: 'Void Shards',   icon: '◆', color: '#a35ad9', desc: 'Currency of the Void Signals.' },
 };
+
+// Infrastructure: power, life support, meals, habitation.
+// Every colony and Habitat/Fusion building provides capacity; production buildings and ship crews use it.
+// You cannot build past the cap. If usage ends up over the cap (a colony is lost), all production is rationed.
+DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 6, minEfficiency: 0.25 };
 
 DATA.planetTypes = {
-  ash:    { name: 'Ash World',    mult: { ore: 1.5 },     palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
-  iron:   { name: 'Iron Desert',  mult: { ore: 2.0 },     palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
-  ice:    { name: 'Frozen Tomb',  mult: { research: 1.5 },palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
-  toxic:  { name: 'Toxic Mire',   mult: { energy: 1.5 },  palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
-  gas:    { name: 'Gas Giant',    mult: { energy: 2.0 },  palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
-  hollow: { name: 'Hollow World', mult: { research: 2.0 },palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
+  ash:    { name: 'Ash World',    mult: { metal: 1.5, rare: 1.2 }, palette: ['#2a1e1a', '#4a3328', '#7a5240', '#a07050'] },
+  iron:   { name: 'Iron Desert',  mult: { metal: 2.0 },            palette: ['#2a1410', '#5a2a1a', '#8a4428', '#b86a3a'] },
+  ice:    { name: 'Frozen Tomb',  mult: { infra: 1.5 },            palette: ['#1a2430', '#3a5060', '#6a8a98', '#b8d0d8'] },
+  toxic:  { name: 'Toxic Mire',   mult: { rare: 2.0 },             palette: ['#141f10', '#2a4018', '#4a6a20', '#8aa040'] },
+  gas:    { name: 'Gas Giant',    mult: { polymers: 2.0 },         palette: ['#1f1428', '#3e2848', '#6a4a70', '#a080a0'] },
+  hollow: { name: 'Hollow World', mult: { compute: 2.0 },          palette: ['#101010', '#262222', '#4a3e3a', '#8a7a68'] },
 };
 
-// Buildings: cost grows by costGrowth^level.
+// Buildings: cost grows by costGrowth^level. infra: capacity used (negative = provided) per level.
+// Light production chain: Mine → metal, Drill → rare minerals, Refinery turns metal + rare into polymers.
 DATA.buildings = {
-  mine:     { name: 'Deep Mine',      desc: '+3 Ore per level',        cost: { ore: 30, energy: 10 }, costGrowth: 1.6 },
-  reactor:  { name: 'Reactor Shrine', desc: '+3 Energy per level',     cost: { ore: 35, energy: 0 },  costGrowth: 1.6 },
-  archive:  { name: 'Ossuary Archive',desc: '+2 Research per level',   cost: { ore: 40, energy: 20 }, costGrowth: 1.65 },
-  shipyard: { name: 'Shipyard',       desc: 'Builds ships. Higher levels discount ships 5%/lvl', cost: { ore: 60, energy: 30 }, costGrowth: 1.8 },
-  bastion:  { name: 'Bastion',        desc: '+25 garrison, fires on attackers', cost: { ore: 50, energy: 20 }, costGrowth: 1.6 },
+  mine:     { name: 'Deep Mine',        desc: '+3 Metal',                         cost: { metal: 30 },                         costGrowth: 1.55, infra: 1 },
+  drill:    { name: 'Core Drill',       desc: '+1.5 Rare Minerals',               cost: { metal: 45 },                         costGrowth: 1.6,  infra: 1 },
+  refinery: { name: 'Polymer Refinery', desc: 'Turns 2 Metal + 0.5 Rare into 2 Polymers', cost: { metal: 50, rare: 10 },       costGrowth: 1.6,  infra: 1 },
+  cogitator:{ name: 'Cogitator Array',  desc: '+2 Compute',                       cost: { metal: 40, polymers: 15 },           costGrowth: 1.65, infra: 1 },
+  habitat:  { name: 'Habitat Ring',     desc: '+6 Infrastructure (meals, air, bunks)', cost: { metal: 35, polymers: 10 },     costGrowth: 1.5,  infra: -6 },
+  fusion:   { name: 'Fusion Core',      desc: '+5 Infrastructure, +10% colony output', cost: { metal: 60, rare: 20 },         costGrowth: 1.7,  infra: -5 },
+  shipyard: { name: 'Shipyard',         desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, polymers: 10 }, costGrowth: 1.8, infra: 1 },
+  bastion:  { name: 'Bastion',          desc: '+25 garrison, fires on attackers',  cost: { metal: 50, rare: 5 },             costGrowth: 1.6,  infra: 0 },
 };
 
-// Ship types. upkeep is energy per Cycle.
+// Ship types. infra = crew life support capacity used while the ship exists.
 DATA.ships = {
-  scout:    { name: 'Scout',        atk: 0,  hp: 5,   cost: { ore: 15, energy: 5 },   upkeep: 0.2, role: 'Explores unknown systems' },
-  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { ore: 70, energy: 40 },  upkeep: 0.5, role: 'Founds a colony, consumed on use' },
-  corvette: { name: 'Corvette',     atk: 3,  hp: 10,  cost: { ore: 20, energy: 10 },  upkeep: 0.4, role: 'Cheap line ship' },
-  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { ore: 45, energy: 25 },  upkeep: 0.8, role: 'Solid warship', req: { tech: 'frigates' } },
-  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { ore: 60, energy: 45 },  upkeep: 1.2, role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
-  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { ore: 160, energy: 90 }, upkeep: 3,   role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
-  lurker:   { name: 'Lurker',       atk: 4,  hp: 16,  cost: {}, upkeep: 0, role: 'Something from the dark', monster: true },
+  scout:    { name: 'Scout',        atk: 0,  hp: 5,   cost: { metal: 15 },                                infra: 0.5, role: 'Explores unknown systems' },
+  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { metal: 60, polymers: 25 },                  infra: 2,   role: 'Founds a colony, consumed on use' },
+  corvette: { name: 'Corvette',     atk: 3,  hp: 10,  cost: { metal: 25 },                                infra: 1,   role: 'Cheap line ship' },
+  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { metal: 50, polymers: 15 },                  infra: 2,   role: 'Solid warship', req: { tech: 'frigates' } },
+  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { metal: 50, rare: 20, polymers: 15 },        infra: 2,   role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
+  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { metal: 160, rare: 50, polymers: 60 },       infra: 6,   role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
+  lurker:   { name: 'Lurker',       atk: 4,  hp: 16,  cost: {}, infra: 0, role: 'Something from the dark', monster: true },
 };
 
-// Research. repeat:true techs can be researched forever with growing cost (incremental layer).
+// Research, paid in Compute. repeat:true techs can be researched forever with growing cost (incremental layer).
 DATA.techs = {
-  deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { ore: 0.25 },      desc: '+25% Ore' },
-  reactorhymn:{ name: 'Reactor Litanies',     cost: 40,  mods: { energy: 0.25 },   desc: '+25% Energy' },
-  frigates:   { name: 'Frigate Hulls',        cost: 45,  mods: {},                 desc: 'Unlocks Frigates' },
-  voidlisten: { name: 'Void Listening',       cost: 60,  mods: { shardIncome: 1 }, desc: '+1 Void Shard per Cycle' },
-  ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { research: 0.3 },  desc: '+30% Research' },
-  plasmaweave:{ name: 'Plasma Weave',         cost: 80,  mods: { atk: 0.2 },       desc: '+20% ship attack' },
-  bonehulls:  { name: 'Bone-grown Hulls',     cost: 90,  mods: { hp: 0.25 },       desc: '+25% ship hull' },
-  bastionwalls:{name: 'Martyr Walls',         cost: 75,  mods: { bastion: 0.5 },   desc: '+50% garrison strength' },
-  forge:      { name: 'Forge Doctrine',       cost: 50,  mods: { ore: 0.1 },       desc: '+10% Ore per level', repeat: true, growth: 1.45 },
-  grid:       { name: 'Grid Doctrine',        cost: 50,  mods: { energy: 0.1 },    desc: '+10% Energy per level', repeat: true, growth: 1.45 },
-  cogitator:  { name: 'Cogitator Doctrine',   cost: 60,  mods: { research: 0.1 },  desc: '+10% Research per level', repeat: true, growth: 1.5 },
+  deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metal' },
+  frigates:   { name: 'Frigate Hulls',        cost: 40,  mods: {},                  desc: 'Unlocks Frigates' },
+  cracking:   { name: 'Catalytic Cracking',   cost: 45,  mods: { polymers: 0.3 },   desc: '+30% Polymers' },
+  rationing:  { name: 'Ration Protocols',     cost: 50,  mods: { infra: 0.2 },      desc: '+20% Infrastructure' },
+  voidlisten: { name: 'Void Listening',       cost: 60,  mods: { shardIncome: 1 },  desc: '+1 Void Shard per Cycle' },
+  prospect:   { name: 'Deep Prospecting',     cost: 65,  mods: { rare: 0.3 },       desc: '+30% Rare Minerals' },
+  ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { compute: 0.3 },    desc: '+30% Compute' },
+  bastionwalls:{name: 'Martyr Walls',         cost: 75,  mods: { bastion: 0.5 },    desc: '+50% garrison strength' },
+  plasmaweave:{ name: 'Plasma Weave',         cost: 80,  mods: { atk: 0.2 },        desc: '+20% ship attack' },
+  bonehulls:  { name: 'Bone-grown Hulls',     cost: 90,  mods: { hp: 0.25 },        desc: '+25% ship hull' },
+  forge:      { name: 'Forge Doctrine',       cost: 50,  mods: { metal: 0.1 },      desc: '+10% Metal per level', repeat: true, growth: 1.45 },
+  arcology:   { name: 'Arcology Doctrine',    cost: 60,  mods: { infra: 0.08 },     desc: '+8% Infrastructure per level', repeat: true, growth: 1.5 },
+  cogitator:  { name: 'Cogitator Doctrine',   cost: 60,  mods: { compute: 0.1 },    desc: '+10% Compute per level', repeat: true, growth: 1.5 },
 };
 
 // Factions. 'player' is you; others are AI. 'monster' are neutral horrors guarding systems.
@@ -73,21 +86,21 @@ DATA.pullCost = 10;
 
 DATA.gachaPool = [
   // Common
-  { id: 'l_vell',   kind: 'leader', rarity: 'common', name: 'Quartermaster Vell', mods: { ore: 0.1 },  desc: '+10% Ore. Counts every bolt twice.' },
-  { id: 'l_moro',   kind: 'leader', rarity: 'common', name: 'Tech-Adept Moro',    mods: { research: 0.1 }, desc: '+10% Research. Half of him is cogitator now.' },
-  { id: 'r_icon',   kind: 'relic',  rarity: 'common', name: 'Rusted Icon',        mods: { energy: 0.08 },  desc: '+8% Energy. The saint\'s face is worn away.' },
+  { id: 'l_vell',   kind: 'leader', rarity: 'common', name: 'Quartermaster Vell', mods: { metal: 0.1 },  desc: '+10% Metal. Counts every bolt twice.' },
+  { id: 'l_moro',   kind: 'leader', rarity: 'common', name: 'Tech-Adept Moro',    mods: { compute: 0.1 }, desc: '+10% Compute. Half of him is cogitator now.' },
+  { id: 'r_icon',   kind: 'relic',  rarity: 'common', name: 'Rusted Icon',        mods: { infra: 0.08 },  desc: '+8% Infrastructure. The saint\'s face is worn away.' },
   { id: 'r_compass',kind: 'relic',  rarity: 'common', name: 'Bone Compass',       mods: { exploreShards: 1 }, desc: '+1 Shard per system explored.' },
-  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { ore: 60, energy: 30 }, desc: '+60 Ore, +30 Energy, once.' },
-  { id: 'c_data',   kind: 'cache',  rarity: 'common', name: 'Corrupted Datacore', gives: { research: 40 }, desc: '+40 Research, once.' },
+  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { metal: 60, polymers: 20 }, desc: '+60 Metal, +20 Polymers, once.' },
+  { id: 'c_data',   kind: 'cache',  rarity: 'common', name: 'Corrupted Datacore', gives: { compute: 40 }, desc: '+40 Compute, once.' },
   // Rare
   { id: 'l_kesh',   kind: 'leader', rarity: 'rare', name: 'Admiral Kesh',        mods: { atk: 0.15 }, desc: '+15% ship attack. Never asks how many died.' },
   { id: 'l_sallow', kind: 'leader', rarity: 'rare', name: 'Governor Sallow',     mods: { all: 0.1 },  desc: '+10% all production. Rules by quota.' },
-  { id: 'r_weep',   kind: 'relic',  rarity: 'rare', name: 'Weeping Reliquary',   mods: { research: 0.25, energy: -0.05 }, cursed: true, desc: '+25% Research, −5% Energy. It weeps oil.' },
+  { id: 'r_weep',   kind: 'relic',  rarity: 'rare', name: 'Weeping Reliquary',   mods: { compute: 0.25, infra: -0.05 }, cursed: true, desc: '+25% Compute, −5% Infrastructure. It weeps oil.' },
   { id: 'bp_lancer',kind: 'blueprint', rarity: 'rare', name: 'Blueprint: Void Lancer', unlock: 'lancer', desc: 'Unlocks the Void Lancer.' },
   // Mythic
   { id: 'l_saint',  kind: 'leader', rarity: 'mythic', name: 'The Hollow Saint',  mods: { all: 0.25, hp: 0.2 }, desc: '+25% all production, +20% hull. No one has seen its face.' },
   { id: 'bp_dread', kind: 'blueprint', rarity: 'mythic', name: 'Blueprint: Dreadnought', unlock: 'dread', desc: 'Unlocks the Dreadnought.' },
-  { id: 'r_heart',  kind: 'relic', rarity: 'mythic', name: 'Heart of the Abyss', mods: { ore: 0.3, shardIncome: 2, aiAggro: 0.25 }, cursed: true, desc: '+30% Ore, +2 Shards/Cycle. The aliens can hear it beating.' },
+  { id: 'r_heart',  kind: 'relic', rarity: 'mythic', name: 'Heart of the Abyss', mods: { rare: 0.3, shardIncome: 2, aiAggro: 0.25 }, cursed: true, desc: '+30% Rare Minerals, +2 Shards/Cycle. The aliens can hear it beating.' },
 ];
 
 // Exploration events. effect(G, ctx) mutates the game and returns a log line.
@@ -97,9 +110,9 @@ DATA.events = {
     text: 'A dead warship drifts here. Its crew are fused into the walls, and some of them are still breathing.',
     choices: [
       { label: 'Strip it for salvage', effect: (G, c) => {
-        G.res.ore += 50;
-        if (Math.random() < 0.3) { Fleets.killOneShip(c.fleetId); return 'Salvage recovered (+50 Ore). Something followed the boarding party back. A ship is lost.'; }
-        return 'Salvage recovered (+50 Ore). The breathing stopped when the reactor was cut.';
+        G.res.metal += 50;
+        if (Math.random() < 0.3) { Fleets.killOneShip(c.fleetId); return 'Salvage recovered (+50 Metal). Something followed the boarding party back. A ship is lost.'; }
+        return 'Salvage recovered (+50 Metal). The breathing stopped when the reactor was cut.';
       } },
       { label: 'Leave it to the dark', effect: () => 'You leave the hulk behind. The breathing is in the comm logs now.' },
     ],
@@ -110,7 +123,7 @@ DATA.events = {
     choices: [
       { label: 'Listen', effect: (G) => {
         G.res.shards += 8;
-        if (Math.random() < 0.35) { G.res.research = Math.max(0, G.res.research - 30); return 'You listen (+8 Shards). Three archivists clawed out their eyes. −30 Research.'; }
+        if (Math.random() < 0.35) { G.res.compute = Math.max(0, G.res.compute - 30); return 'You listen (+8 Shards). Three archivists clawed out their eyes. −30 Compute.'; }
         return 'You listen (+8 Shards). It knows you now.';
       } },
       { label: 'Burn the receiver', effect: () => 'The receiver is burned. The voice keeps speaking on a frequency you no longer have.' },
@@ -120,7 +133,7 @@ DATA.events = {
     title: 'Ruins Older Than Stars',
     text: 'Cyclopean structures cover the planet. The geometry hurts to look at.',
     choices: [
-      { label: 'Excavate', effect: (G) => { G.res.research += 45; return 'Excavation complete (+45 Research). The dig team will not say what they saw.'; } },
+      { label: 'Excavate', effect: (G) => { G.res.compute += 30; G.res.rare += 20; return 'Excavation complete (+30 Compute, +20 Rare Minerals). The dig team will not say what they saw.'; } },
       { label: 'Seal it away', effect: (G) => { G.res.shards += 3; return 'The ruins are sealed under ferrocrete (+3 Shards). Sometimes the seal is warm.'; } },
     ],
   },
@@ -128,15 +141,15 @@ DATA.events = {
     title: 'Survivors',
     text: 'A crippled transport carries the last survivors of a fallen colony. They beg for rescue.',
     choices: [
-      { label: 'Take them in', effect: (G) => { G.res.energy = Math.max(0, G.res.energy - 25); G.res.shards += 4; return 'The survivors are taken aboard (−25 Energy, +4 Shards). Their prayers seem to reach something.'; } },
-      { label: 'Strip their vessel', effect: (G) => { G.res.ore += 70; return 'Their vessel is stripped (+70 Ore). The transport goes dark. Nobody speaks of it.'; } },
+      { label: 'Take them in', effect: (G) => { G.res.polymers = Math.max(0, G.res.polymers - 20); G.res.shards += 4; return 'The survivors are taken aboard (−20 Polymers for bunks and rations, +4 Shards). Their prayers seem to reach something.'; } },
+      { label: 'Strip their vessel', effect: (G) => { G.res.metal += 50; G.res.polymers += 15; return 'Their vessel is stripped (+50 Metal, +15 Polymers). The transport goes dark. Nobody speaks of it.'; } },
     ],
   },
   cache: {
     title: 'Hidden Cache',
     text: 'A sealed vault, marked with the sigil of an empire that no longer exists.',
     choices: [
-      { label: 'Crack it open', effect: (G) => { G.res.ore += 30; G.res.energy += 30; return 'The vault is cracked open (+30 Ore, +30 Energy).'; } },
+      { label: 'Crack it open', effect: (G) => { G.res.rare += 25; G.res.polymers += 20; return 'The vault is cracked open (+25 Rare Minerals, +20 Polymers).'; } },
     ],
   },
 };

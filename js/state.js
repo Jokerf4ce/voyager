@@ -5,9 +5,9 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 1,
+      version: 2,
       cycle: 1,
-      res: { ore: 120, energy: 60, research: 0, shards: 25 },
+      res: { metal: 120, rare: 20, polymers: 30, compute: 0, shards: 25 },
       systems: [],
       fleets: [],
       nextFleetId: 1,
@@ -37,7 +37,7 @@ const State = {
 
   // Sum of every bonus source: techs, leaders and relics.
   mods() {
-    const m = { ore: 1, energy: 1, research: 1, atk: 1, hp: 1, bastion: 1, all: 1, shardIncome: 0, exploreShards: 0, aiAggro: 0 };
+    const m = { metal: 1, rare: 1, polymers: 1, compute: 1, infra: 1, atk: 1, hp: 1, bastion: 1, all: 1, shardIncome: 0, exploreShards: 0, aiAggro: 0 };
     const add = (mods, scale) => { for (const k in mods) m[k] = (m[k] || 0) + mods[k] * scale; };
     for (const [id, lvl] of Object.entries(G.techs)) if (lvl > 0) add(DATA.techs[id].mods, lvl);
     for (const [id, c] of Object.entries(G.collection)) {
@@ -59,7 +59,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 1) return false;
+      if (!data || data.version !== 2) return false;
       G = data;
       return true;
     } catch (e) { return false; }
@@ -72,7 +72,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 1) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 2) throw new Error('Not a Voyager save');
     G = data;
   },
 
@@ -82,18 +82,19 @@ const State = {
     const secs = (Date.now() - (G.lastSeen || Date.now())) / 1000;
     const cycles = Math.min(DATA.config.offlineMaxCycles, Math.floor(secs / DATA.config.offlineSecondsPerCycle));
     if (cycles < 1 || G.over) return null;
-    const inc = Economy.income();
+    const inc = Economy.net();
     const eff = DATA.config.offlineEfficiency;
     const gained = {
-      ore: Math.max(0, inc.ore) * cycles * eff,
-      energy: Math.max(0, inc.energy - inc.upkeep) * cycles * eff,
-      research: inc.research * cycles * eff,
+      metal: Math.max(0, inc.metal) * cycles * eff,
+      rare: Math.max(0, inc.rare) * cycles * eff,
+      polymers: inc.polymers * cycles * eff,
+      compute: inc.compute * cycles * eff,
       shards: Math.floor((inc.shards * cycles + cycles / 10) * eff),
     };
     for (const k in gained) G.res[k] += gained[k];
     const completed = Research.tick();
     const mins = Math.floor(secs / 60);
-    Log.add(`While you were away (${mins} min), the Covenant endured: +${U.fmt(gained.ore)} Ore, +${U.fmt(gained.energy)} Energy, +${U.fmt(gained.research)} Research, +${gained.shards} Shards.`, 'good');
+    Log.add(`While you were away (${mins} min), the Covenant endured: ` + Object.entries(gained).map(([k, v]) => `+${U.fmt(v)} ${DATA.resources[k].name}`).join(', ') + '.', 'good');
     return { mins, cycles, gained, completed };
   },
 };

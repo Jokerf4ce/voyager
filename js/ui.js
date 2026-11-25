@@ -38,13 +38,14 @@ const UI = {
   },
 
   renderTop() {
-    const inc = Economy.income();
-    const r = (k, val, perCycle) => `<div class="res res-${k}" title="${DATA.resources[k].name}">
+    const net = Economy.net();
+    const r = (k, val, perCycle) => `<div class="res res-${k}" title="${DATA.resources[k].name}: ${DATA.resources[k].desc}">
       <span class="ico">${DATA.resources[k].icon}</span><b>${U.fmt(val)}</b>
       ${perCycle != null ? `<small class="${perCycle < 0 ? 'neg' : ''}">${perCycle >= 0 ? '+' : ''}${U.fmt1(perCycle)}</small>` : ''}</div>`;
-    this.$('top-res').innerHTML =
-      r('ore', G.res.ore, inc.ore) + r('energy', G.res.energy, inc.energy - inc.upkeep) +
-      r('research', G.res.research, inc.research) + r('shards', G.res.shards, inc.shards);
+    const inf = net.infra;
+    this.$('top-res').innerHTML = ['metal', 'rare', 'polymers', 'compute', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
+      `<div class="res res-infra ${inf.used > inf.cap ? 'over' : ''}" title="Infrastructure: power, life support, meals. Used / capacity. Over capacity means rationing.">
+        <span class="ico">${DATA.infra.icon}</span><b>${U.fmt(inf.used)}/${U.fmt(inf.cap)}</b>${inf.eff < 1 ? `<small class="neg">${Math.round(inf.eff * 100)}%</small>` : ''}</div>`;
     this.$('cycle').textContent = 'CYCLE ' + G.cycle;
     this.$('btn-auto').classList.toggle('on', !!Game.autoTimer);
     this.$('btn-auto').textContent = Game.autoTimer ? '❚❚ AUTO' : '▶ AUTO';
@@ -63,13 +64,19 @@ const UI = {
   btn(label, act, a = '', disabled = false, cls = '') {
     return `<button class="btn ${cls}" data-act="${act}" data-a="${a}" ${disabled ? 'disabled' : ''}>${label}</button>`;
   },
+  yieldText(s) {
+    const y = Economy.colonyYield(s, Economy.infra().eff);
+    const parts = ['metal', 'rare', 'polymers', 'compute'].filter((k) => y[k] > 0)
+      .map((k) => `<span class="res-${k}">${DATA.resources[k].icon}${U.fmt1(y[k])}</span>`);
+    return 'Yields ' + parts.join(' ') + (y.refMetal ? ` <small class="muted">(refinery eats ${U.fmt1(y.refMetal)}▣ ${U.fmt1(y.refRare)}◇)</small>` : '');
+  },
   shipsText(ships) {
     return Object.entries(ships).filter(([, n]) => n > 0).map(([t, n]) => `${n}× ${DATA.ships[t].name}`).join(', ') || '—';
   },
 
   // ---------- screens ----------
   screen_overview() {
-    const inc = Economy.income();
+    const net = Economy.net(), inc = Economy.income(), inf = net.infra;
     const cols = Colonies.playerColonies();
     const myFleets = G.fleets.filter((f) => f.owner === 'player');
     const power = myFleets.reduce((a, f) => a + Fleets.stats(f).atk, 0);
@@ -94,10 +101,17 @@ const UI = {
           <div><small>Worlds taken</small><b>${G.stats.coloniesTaken}</b></div>
         </div>`)}
       ${this.panel('Per Cycle', `
-        <div class="kv"><span>Ore</span><b class="res-ore">+${U.fmt1(inc.ore)}</b></div>
-        <div class="kv"><span>Energy (after ${U.fmt1(inc.upkeep)} upkeep)</span><b class="res-energy">${U.fmt1(inc.energy - inc.upkeep)}</b></div>
-        <div class="kv"><span>Research</span><b class="res-research">+${U.fmt1(inc.research)}</b></div>
-        <div class="kv"><span>Void Shards</span><b class="res-shards">+${U.fmt1(inc.shards)} <small>(+1 every 5 Cycles)</small></b></div>
+        <div class="kv"><span>Metal <small class="muted">(mined ${U.fmt1(inc.metal)}, refineries use ${U.fmt1(inc.refMetal)})</small></span><b class="res-metal">${U.fmt1(net.metal)}</b></div>
+        <div class="kv"><span>Rare Minerals <small class="muted">(drilled ${U.fmt1(inc.rare)}, refineries use ${U.fmt1(inc.refRare)})</small></span><b class="res-rare">${U.fmt1(net.rare)}</b></div>
+        <div class="kv"><span>Polymers</span><b class="res-polymers">+${U.fmt1(net.polymers)}</b></div>
+        <div class="kv"><span>Compute</span><b class="res-compute">+${U.fmt1(net.compute)}</b></div>
+        <div class="kv"><span>Void Shards</span><b class="res-shards">+${U.fmt1(net.shards)} <small>(+1 every 5 Cycles)</small></b></div>
+        <h4>Infrastructure</h4>
+        <div class="kv"><span>Capacity (colonies, Habitat Rings, Fusion Cores)</span><b class="res-infra">${U.fmt1(inf.cap)}</b></div>
+        <div class="kv"><span>Used by buildings</span><b>${U.fmt1(inf.buildings)}</b></div>
+        <div class="kv"><span>Used by ship crews</span><b>${U.fmt1(inf.ships)}</b></div>
+        <div class="bar infra ${inf.used > inf.cap ? 'over' : ''}"><i style="width:${Math.min(100, inf.used / Math.max(1, inf.cap) * 100)}%"></i></div>
+        ${inf.eff < 1 ? `<p class="bad small">Over capacity. Rationing has cut all production to ${Math.round(inf.eff * 100)}%.</p>` : `<p class="muted small">${U.fmt1(inf.cap - inf.used)} free. You cannot build past the cap.</p>`}
         <p class="muted small">While the game is closed, your empire keeps producing at ${DATA.config.offlineEfficiency * 100}% efficiency (1 Cycle per ${DATA.config.offlineSecondsPerCycle}s, max ${DATA.config.offlineMaxCycles}).</p>`)}
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
       ${this.panel('Battle Reports', reps)}
@@ -126,8 +140,7 @@ const UI = {
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.colony ? `<div class="muted small">Garrison ${Math.round(s.colony.garrison)}/${Colonies.maxGarrison(s)} · Bastion ${s.colony.buildings.bastion}</div>` : ''}</div></div>`;
     if (s.owner === 'player') {
-      const y = Economy.colonyYield(s);
-      body += `<div class="small">Yields ${DATA.resources.ore.icon}${U.fmt1(y.ore)} ${DATA.resources.energy.icon}${U.fmt1(y.energy)} ${DATA.resources.research.icon}${U.fmt1(y.research)}</div>
+      body += `<div class="small">${this.yieldText(s)}</div>
         <div class="btnrow">${this.btn('Manage colony', 'gocolony', s.id)}${s.colony.buildings.shipyard ? this.btn('Shipyard', 'goyard', s.id) : ''}</div>`;
     }
     body += this.fleetListHere(s);
@@ -174,15 +187,16 @@ const UI = {
   screen_colonies() {
     const cols = Colonies.playerColonies();
     return cols.map((s) => {
-      const y = Economy.colonyYield(s);
       const rows = Object.entries(DATA.buildings).map(([k, b]) => {
-        const cost = Colonies.buildCost(s, k);
-        return `<div class="bld"><div><b>${b.name}</b> <span class="lvl">Lv ${s.colony.buildings[k]}</span><br><small class="muted">${b.desc}</small></div>
-          <div class="right">${U.costText(cost)}<br>${this.btn(s.colony.buildings[k] ? 'Upgrade' : 'Build', 'build', s.id + ':' + k, !Colonies.canAfford(cost))}</div></div>`;
+        const cost = Colonies.buildCost(s, k), why = Colonies.blocker(s, k);
+        const inf = b.infra > 0 ? `<span class="res-infra">uses ${b.infra}${DATA.infra.icon}</span>` : b.infra < 0 ? `<span class="res-infra">gives ${-b.infra}${DATA.infra.icon}</span>` : '';
+        return `<div class="bld"><div><b>${b.name}</b> <span class="lvl">Lv ${s.colony.buildings[k]}</span><br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
+          <div class="right">${U.costText(cost)}<br>${why === 'Not enough Infrastructure' ? '<small class="bad">Infrastructure full</small><br>' : ''}${this.btn(s.colony.buildings[k] ? 'Upgrade' : 'Build', 'build', s.id + ':' + k, !!why)}</div></div>`;
       }).join('');
       return this.panel(U.esc(s.name), `<div class="sys-head"><img class="px" src="${Sprites.planet(s.type, 32, s.id)}" width="96" height="96">
         <div><div class="muted">${DATA.planetTypes[s.type].name}${s.id === G.homeId ? ' · Capital' : ''}</div>
-        <div>Yields ${DATA.resources.ore.icon}${U.fmt1(y.ore)} ${DATA.resources.energy.icon}${U.fmt1(y.energy)} ${DATA.resources.research.icon}${U.fmt1(y.research)}</div>
+        <div>${this.yieldText(s)}</div>
+        <div class="small res-infra">Infrastructure: provides ${U.fmt1(Economy.colonyInfraCap(s))}, buildings use ${U.fmt1(Economy.colonyInfraUsed(s))}</div>
         <div class="muted small">Garrison ${Math.round(s.colony.garrison)}/${Colonies.maxGarrison(s)}</div></div></div>${rows}`, 'colony');
     }).join('') || this.panel('No colonies', '<p>The Covenant has no worlds left.</p>');
   },
@@ -190,14 +204,14 @@ const UI = {
   screen_research() {
     const cur = G.researching;
     const curHtml = cur ? `<div class="kv"><span><b>${DATA.techs[cur].name}</b>${DATA.techs[cur].repeat ? ' ' + (Research.level(cur) + 1) : ''}</span><span>${U.fmt(G.researchProgress)} / ${U.fmt(Research.cost(cur))}</span></div>
-      <div class="bar"><i style="width:${Math.min(100, G.researchProgress / Research.cost(cur) * 100)}%"></i></div>` : '<p class="muted">Nothing selected. Research is piling up.</p>';
+      <div class="bar"><i style="width:${Math.min(100, G.researchProgress / Research.cost(cur) * 100)}%"></i></div>` : '<p class="muted">Nothing selected. Compute is piling up.</p>';
     const list = Object.entries(DATA.techs).map(([id, t]) => {
       const lvl = Research.level(id), avail = Research.available(id);
       return `<div class="tech ${cur === id ? 'cur' : ''} ${!avail ? 'done' : ''}">
         <div><b>${t.name}</b>${t.repeat ? ` <span class="lvl">Lv ${lvl}</span>` : lvl ? ' <span class="lvl">✓</span>' : ''}<br><small class="muted">${t.desc}</small></div>
-        <div class="right"><span class="res-research">☍${U.fmt(Research.cost(id))}</span><br>${avail ? this.btn(cur === id ? 'Researching' : 'Research', 'research', id, cur === id) : ''}</div></div>`;
+        <div class="right"><span class="res-compute">☍${U.fmt(Research.cost(id))}</span><br>${avail ? this.btn(cur === id ? 'Researching' : 'Research', 'research', id, cur === id) : ''}</div></div>`;
     }).join('');
-    return this.panel('Current Project', curHtml) + this.panel('Archives of the Covenant', `<p class="muted small">Doctrines can be researched forever. Each level costs more and grows your empire further.</p>${list}`);
+    return this.panel('Current Project', curHtml) + this.panel('Archives of the Covenant', `<p class="muted small">Research is paid in Compute. Doctrines can be researched forever, each level costing more and growing your empire further.</p>${list}`);
   },
 
   screen_shipyard() {
@@ -207,11 +221,11 @@ const UI = {
     const sel = `<div class="btnrow">${yards.map((s) => this.btn(U.esc(s.name), 'yard', s.id, false, s.id === this.yardSys ? 'on' : '')).join('')}</div>`;
     const list = Object.entries(DATA.ships).filter(([, d]) => !d.monster).map(([t, d]) => {
       const ok = Fleets.unlocked(t);
-      const cost = Fleets.shipCost(t, this.yardSys);
+      const cost = Fleets.shipCost(t, this.yardSys), why = Fleets.blocker(t, this.yardSys);
       const req = d.req ? (d.req.tech ? 'Requires ' + DATA.techs[d.req.tech].name : 'Requires ' + Gacha.item(d.req.blueprint).name + ' (Void Signals)') : '';
       return `<div class="bld ${ok ? '' : 'locked'}"><div class="shiprow"><img class="px" src="${Sprites.ship(t, '#d8c8a0')}" width="44" height="36">
-        <div><b>${d.name}</b><br><small class="muted">${d.role} · ATK ${d.atk} · HULL ${d.hp} · upkeep ${d.upkeep}⚡</small>${!ok ? `<br><small class="bad">${req}</small>` : ''}</div></div>
-        <div class="right">${U.costText(cost)}<br>${this.btn('Build', 'buildship', t, !ok || !Colonies.canAfford(cost))}</div></div>`;
+        <div><b>${d.name}</b><br><small class="muted">${d.role} · ATK ${d.atk} · HULL ${d.hp} · crew <span class="res-infra">${d.infra}${DATA.infra.icon}</span></small>${!ok ? `<br><small class="bad">${req}</small>` : ''}</div></div>
+        <div class="right">${U.costText(cost)}<br>${why === 'Not enough Infrastructure for the crew' ? '<small class="bad">Infrastructure full</small><br>' : ''}${this.btn('Build', 'buildship', t, !!why)}</div></div>`;
     }).join('');
     return this.panel('Shipyard', sel + list);
   },
@@ -254,8 +268,9 @@ const UI = {
     const unknown = DATA.gachaPool.filter((x) => !G.collection[x.id] && x.kind !== 'cache').length;
     const pct = (v) => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
     return this.panel('Empire Modifiers', `<div class="stats">
-        <div><small>Ore</small><b>${pct(m.ore)}</b></div><div><small>Energy</small><b>${pct(m.energy)}</b></div>
-        <div><small>Research</small><b>${pct(m.research)}</b></div><div><small>All production</small><b>${pct(m.all)}</b></div>
+        <div><small>Metal</small><b>${pct(m.metal)}</b></div><div><small>Rare Minerals</small><b>${pct(m.rare)}</b></div>
+        <div><small>Polymers</small><b>${pct(m.polymers)}</b></div><div><small>Compute</small><b>${pct(m.compute)}</b></div>
+        <div><small>Infrastructure</small><b>${pct(m.infra)}</b></div><div><small>All production</small><b>${pct(m.all)}</b></div>
         <div><small>Ship attack</small><b>${pct(m.atk)}</b></div><div><small>Ship hull</small><b>${pct(m.hp)}</b></div>
         <div><small>Garrisons</small><b>${pct(m.bastion)}</b></div><div><small>Shards/Cycle</small><b>+${m.shardIncome}</b></div></div>`) +
       this.panel(`Collection (${owned.length} found · ${unknown} unknown signals remain)`,

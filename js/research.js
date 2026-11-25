@@ -22,12 +22,12 @@ const Research = {
   tick() {
     const done = [];
     let guard = 0;
-    while (G.researching && G.res.research > 0 && guard++ < 50) {
+    while (G.researching && G.res.compute > 0 && guard++ < 50) {
       const id = G.researching;
       const need = this.cost(id) - G.researchProgress;
-      const put = Math.min(need, G.res.research);
+      const put = Math.min(need, G.res.compute);
       G.researchProgress += put;
-      G.res.research -= put;
+      G.res.compute -= put;
       if (G.researchProgress >= this.cost(id) - 1e-9) {
         G.techs[id] = this.level(id) + 1;
         G.researchProgress = 0;

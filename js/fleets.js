@@ -52,11 +52,18 @@ const Fleets = {
     return out;
   },
 
+  // Why a ship can't be built right now, or null if it can.
+  blocker(type, sysId) {
+    if (!this.unlocked(type)) return 'Locked';
+    if (Economy.infraFree() < DATA.ships[type].infra) return 'Not enough Infrastructure for the crew';
+    if (!Colonies.canAfford(this.shipCost(type, sysId))) return 'Not enough resources';
+    return null;
+  },
+
   build(type, sysId) {
     const s = G.systems[sysId];
-    if (!s.colony || s.owner !== 'player' || s.colony.buildings.shipyard < 1 || !this.unlocked(type)) return false;
+    if (!s.colony || s.owner !== 'player' || s.colony.buildings.shipyard < 1 || this.blocker(type, sysId)) return false;
     const cost = this.shipCost(type, sysId);
-    if (!Colonies.canAfford(cost)) return false;
     Colonies.pay(cost);
     if (type === 'scout' || type === 'ark') {
       this.create('player', sysId, { [type]: 1 }, type === 'scout' ? 'Scout ' + G.nextFleetId : 'Ark ' + G.nextFleetId);
