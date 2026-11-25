@@ -38,7 +38,22 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 
 ## 4a. Systems and planets
 
-**Decided:** each star system has several planets (2–5 in the POC), and each planet has two building layers, **surface** and **orbit**.
+**Star classes** (decided: based on the Morgan–Keenan stellar classification). The effects are proposed:
+
+| Class | Star | Planets | Planet temperatures lean | Infrastructure (starlight) | Habitability |
+|---|---|---|---|---|---|
+| O | Blue giant | 1–3 | strongly hot | ×1.6 | −1 (radiation) |
+| B | Blue-white | 2–4 | hot | ×1.4 | −1 |
+| A | White | 2–5 | hot | ×1.25 | — |
+| F | Yellow-white | 2–5 | hot/temperate | ×1.1 | — |
+| G | Yellow dwarf (like the Sun) | 2–5 | temperate | ×1.0 | — |
+| K | Orange dwarf | 2–5 | cool/temperate | ×0.9 | — |
+| M | Red dwarf (most common) | 1–4 | strongly frozen | ×0.75 | — |
+
+The home system is always a G star.
+
+
+**Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
 
 **Proposed** (as built in the POC):
 - A system is owned as a whole. The first colony in a system needs a Colony Ark. Further planets in a system you hold can be settled for Metal and Polymers, with the cost rising as you grow.

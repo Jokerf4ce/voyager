@@ -27,6 +27,21 @@ DATA.habitability = {
   5: { name: 'Natural Life Support', surface: 1,   orbit: 1,   color: '#50c070' },
 };
 
+// Stars use the Morgan–Keenan stellar classification (main sequence O B A F G K M).
+// weight: how common (real galaxies are ~75% M dwarfs; flattened here for play).
+// planets: [min, max] planets in the system. temps: bias on planet temperature rolls.
+// solar: Infrastructure multiplier for every planet in the system (power from starlight).
+// habMod: added to planet habitability (hard radiation around hot giants).
+DATA.starClasses = {
+  O: { name: 'O-type Blue Giant',        color: '#9bb0ff', size: 3, weight: 1, planets: [1, 3], temps: { hot: 3, temperate: 0.4, frozen: 0.5 }, solar: 1.6,  habMod: -1, desc: 'Searing, short-lived and drowned in radiation. Hot worlds; little can live here.' },
+  B: { name: 'B-type Blue-White Star',   color: '#aabfff', size: 3, weight: 2, planets: [2, 4], temps: { hot: 2.5, temperate: 0.6, frozen: 0.6 }, solar: 1.4,  habMod: -1, desc: 'Violent and luminous. Its planets are scoured by ultraviolet light.' },
+  A: { name: 'A-type White Star',        color: '#cad7ff', size: 2, weight: 3, planets: [2, 5], temps: { hot: 1.8, temperate: 1, frozen: 0.8 },   solar: 1.25, habMod: 0,  desc: 'Bright and fast-burning. Strong starlight for power.' },
+  F: { name: 'F-type Yellow-White Star', color: '#f8f7ff', size: 2, weight: 4, planets: [2, 5], temps: { hot: 1.3, temperate: 1.3, frozen: 0.9 }, solar: 1.1,  habMod: 0,  desc: 'A little hotter than the old Sun. Good odds for temperate worlds.' },
+  G: { name: 'G-type Yellow Dwarf',      color: '#fff4c8', size: 2, weight: 5, planets: [2, 5], temps: { hot: 1, temperate: 2, frozen: 1 },       solar: 1.0,  habMod: 0,  desc: 'Like the Sun the Covenant fled. The best chance of a living world.' },
+  K: { name: 'K-type Orange Dwarf',      color: '#ffd2a1', size: 1, weight: 6, planets: [2, 5], temps: { hot: 0.8, temperate: 1.3, frozen: 1.4 }, solar: 0.9,  habMod: 0,  desc: 'Calm and long-lived. Cooler worlds, steady light.' },
+  M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
+};
+
 // Planets are classified by three factors: composition, size and temperature.
 //   size: giant (gas only), large, average, dwarf
 //   composition: gas, ice/water, silicate (earth-like)
@@ -213,11 +228,10 @@ DATA.names = {
 
 DATA.config = {
   systemCount: 22,
-  planetsPerSystem: [2, 5],
   monsterSystems: 6,
   autoCycleMs: 3000,
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v5',
+  saveKey: 'voyager_save_v6',
 };

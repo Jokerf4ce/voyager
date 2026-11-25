@@ -118,6 +118,8 @@ small, .small { font-size: 16px; }
 .colony .sys-head { border-bottom: 1px dashed var(--edge); padding-bottom: 8px; }
 
 /* planets */
+.star-line { display: flex; align-items: center; gap: 8px; margin: 4px 0 2px; }
+.star-dot { width: 10px; height: 10px; display: inline-block; }
 .planet-frame { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .planet-row { display: flex; gap: 8px; align-items: flex-start; padding: 6px; border: 1px solid #2a2420; margin-bottom: 4px; background: #141210; }
 .planet-row.settled { border-color: var(--edge-hi); }

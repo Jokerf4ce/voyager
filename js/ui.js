@@ -158,7 +158,10 @@ const UI = {
     const owner = s.owner ? DATA.factions[s.owner] : null;
     const ark = Fleets.at(s.id, 'player').find((f) => Fleets.has(f, 'ark') && !f.path.length);
     const hostile = Fleets.at(s.id).some((x) => x.owner !== 'player');
+    const st = DATA.starClasses[s.star];
     let body = `<h3>${U.esc(s.name)}</h3>
+      <div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b></div>
+      <div class="small muted">${st.desc} Infrastructure ×${st.solar}${st.habMod ? ', habitability ' + st.habMod : ''}.</div>
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.owner ? `<div class="muted small">Garrison ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)}</div>` : ''}
       <h4>Planets</h4>`;
@@ -257,7 +260,8 @@ const UI = {
         <div class="small res-infra">Infrastructure: provides ${U.fmt1(Economy.planetInfraCap(p))}, buildings use ${U.fmt1(Economy.planetInfraUsed(p))}</div></div></div>
         <div class="layers">${layer('surface')}${layer('orbit')}</div></div>`;
     }).join('');
-    return tabs + `<p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
+    const st = DATA.starClasses[s.star];
+    return tabs + `<div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b> <span class="muted small">Infrastructure ×${st.solar}</span></div><p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
   },
 
   screen_research() {

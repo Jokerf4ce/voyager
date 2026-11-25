@@ -54,12 +54,15 @@ const StarMap = {
 
   // Star with its planets as coloured dots on little orbits.
   drawSystem(ctx, s, p) {
-    ctx.fillStyle = s.star;
-    ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
-    ctx.fillRect(p.x - 2, p.y, 5, 1); ctx.fillRect(p.x, p.y - 2, 1, 5);
+    const st = DATA.starClasses[s.star];
+    ctx.fillStyle = st.color;
+    // size 1: red/orange dwarfs, 2: sun-like, 3: blue giants with longer spikes
+    if (st.size >= 2) ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
+    const spike = st.size + 1;
+    ctx.fillRect(p.x - spike, p.y, spike * 2 + 1, 1); ctx.fillRect(p.x, p.y - spike, 1, spike * 2 + 1);
     ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x, p.y, 1, 1);
     s.planets.forEach((pl, i) => {
-      const ang = (s.id * 1.7 + i * 2.4) % (Math.PI * 2), r = 4 + i * 1.6;
+      const ang = (s.id * 1.7 + i * 2.4) % (Math.PI * 2), r = 4 + st.size + i * 1.6;
       const x = Math.round(p.x + Math.cos(ang) * r), y = Math.round(p.y + Math.sin(ang) * r * 0.8);
       ctx.fillStyle = pl.colony && s.owner ? DATA.factions[s.owner].color : Planets.cls(pl).palette[3];
       const d = pl.size === 'giant' || pl.size === 'large' ? 2 : 1;

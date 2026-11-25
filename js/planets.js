@@ -12,9 +12,11 @@ const Planets = {
   // Resource multipliers from composition and temperature, combined.
   mult(p) {
     const out = {};
-    for (const src of [DATA.compositions[p.comp].mult, DATA.temperatures[p.temp].mult]) {
+    const solar = { infra: DATA.starClasses[p.star || 'G'].solar };
+    for (const src of [DATA.compositions[p.comp].mult, DATA.temperatures[p.temp].mult, solar]) {
       for (const k in src) out[k] = Math.round((out[k] || 1) * src[k] * 100) / 100;
     }
+    for (const k in out) if (out[k] === 1) delete out[k];
     return out;
   },
 
@@ -24,16 +26,26 @@ const Planets = {
   },
 
   // Build a planet from its three factors. hab can be forced (e.g. the capital).
-  make(idx, comp, size, temp, hab) {
+  make(idx, comp, size, temp, hab, star = 'G') {
     const c = DATA.planetClasses[comp + '_' + temp];
-    if (hab == null) hab = Math.max(1, U.randInt(c.hab[0], c.hab[1]) + (DATA.planetSizes[size].habMod || 0));
-    return { idx, comp, size, temp, hab, colony: null, slots: this.slots(size, hab) };
+    if (hab == null) hab = Math.max(1, Math.min(5, U.randInt(c.hab[0], c.hab[1]) + (DATA.planetSizes[size].habMod || 0) + DATA.starClasses[star].habMod));
+    return { idx, comp, size, temp, hab, star, colony: null, slots: this.slots(size, hab) };
   },
 
-  random(idx) {
-    const keys = Object.keys(DATA.planetClasses).flatMap((k) => Array(DATA.planetClasses[k].weight).fill(k));
-    const [comp, temp] = U.pick(keys).split('_');
+  // Weighted pick from {key: weight}.
+  weighted(table) {
+    const total = Object.values(table).reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    for (const [k, w] of Object.entries(table)) { r -= w; if (r <= 0) return k; }
+    return Object.keys(table)[0];
+  },
+
+  random(idx, star = 'G') {
+    const bias = DATA.starClasses[star].temps;
+    const table = {};
+    for (const [k, c] of Object.entries(DATA.planetClasses)) table[k] = c.weight * (bias[k.split('_')[1]] || 1);
+    const [comp, temp] = this.weighted(table).split('_');
     const size = U.pick(DATA.compositions[comp].sizes);
-    return this.make(idx, comp, size, temp);
+    return this.make(idx, comp, size, temp, null, star);
   },
 };

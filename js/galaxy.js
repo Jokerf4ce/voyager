@@ -16,11 +16,11 @@ const Galaxy = {
     return o(a, b, c) !== o(a, b, d) && o(c, d, a) !== o(c, d, b);
   },
 
-  makePlanets() {
-    const [lo, hi] = DATA.config.planetsPerSystem;
+  makePlanets(star) {
+    const [lo, hi] = DATA.starClasses[star].planets;
     const n = U.randInt(lo, hi);
     const out = [];
-    for (let i = 0; i < n; i++) out.push(Planets.random(i));
+    for (let i = 0; i < n; i++) out.push(Planets.random(i, star));
     return out;
   },
 
@@ -40,11 +40,15 @@ const Galaxy = {
       if (pts.every((q) => Math.hypot(p.x - q.x, (p.y - q.y) * 0.62) > 0.1)) pts.push(p);
     }
     const used = new Set();
-    const systems = pts.map((p, i) => ({
-      id: i, name: this.makeName(used), x: p.x, y: p.y,
-      planets: this.makePlanets(), lanes: [], owner: null, garrison: 0,
-      explored: false, anomaly: null, star: U.pick(['#f0e0b0', '#f0a070', '#b0c8f0', '#f07050']),
-    }));
+    const starWeights = Object.fromEntries(Object.entries(DATA.starClasses).map(([k, c]) => [k, c.weight]));
+    const systems = pts.map((p, i) => {
+      const star = Planets.weighted(starWeights);
+      return {
+        id: i, name: this.makeName(used), x: p.x, y: p.y, star,
+        planets: this.makePlanets(star), lanes: [], owner: null, garrison: 0,
+        explored: false, anomaly: null,
+      };
+    });
 
     // Lanes: minimum spanning tree (always connected) plus some extra non-crossing links.
     const edges = [];
@@ -83,9 +87,11 @@ const Galaxy = {
       .reduce((b, s) => (Math.min(dP[s.id], dC[s.id]) > Math.min(dP[b.id], dC[b.id]) ? s : b));
 
     // The home system always has a decent rocky world and at least three planets.
-    while (home.planets.length < 3) home.planets.push(Planets.random(home.planets.length));
-    // The capital is a large Terran world with natural life support.
-    home.planets[0] = Planets.make(0, 'silicate', 'large', 'temperate', 5);
+    // The home star is a yellow dwarf like the lost Sun, with a large Terran capital.
+    home.star = 'G';
+    home.planets = this.makePlanets('G');
+    while (home.planets.length < 3) home.planets.push(Planets.random(home.planets.length, 'G'));
+    home.planets[0] = Planets.make(0, 'silicate', 'large', 'temperate', 5, 'G');
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
     G.homePlanet = 0;
