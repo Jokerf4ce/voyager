@@ -25,8 +25,7 @@ const Colonies = {
 
   // Habitability cost multiplier for a layer of a planet.
   habMult(p, layer = 'surface') {
-    const m = DATA.habitability[p.hab].cost;
-    return layer === 'orbit' ? 1 + (m - 1) * DATA.habOrbitShare : m;
+    return DATA.habitability[p.hab][layer];
   },
 
   settleCost(p) {

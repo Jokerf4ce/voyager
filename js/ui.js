@@ -83,9 +83,9 @@ const UI = {
   habText(p, compact) {
     const h = DATA.habitability[p.hab];
     const pips = '●'.repeat(p.hab) + '○'.repeat(5 - p.hab);
-    const pct = (m) => (m >= 1 ? '+' : '') + Math.round((m - 1) * 100) + '%';
-    return `<span class="hab" style="color:${h.color}" title="Habitability ${p.hab}/5. Surface building costs ${pct(Colonies.habMult(p, 'surface'))}, orbit ${pct(Colonies.habMult(p, 'orbit'))}.">${pips} ${h.name}</span>
-      ${compact ? '' : `<span class="muted">· build ${pct(Colonies.habMult(p, 'surface'))} surface, ${pct(Colonies.habMult(p, 'orbit'))} orbit</span>`}`;
+    const pct = (m) => '×' + m;
+    return `<span class="hab" style="color:${h.color}" title="Habitability ${p.hab}/5. Building costs ${pct(Colonies.habMult(p, 'surface'))} on the surface, ${pct(Colonies.habMult(p, 'orbit'))} in orbit.">${pips} ${h.name}</span>
+      ${compact ? '' : `<span class="muted">· costs ${pct(Colonies.habMult(p, 'surface'))} surface, ${pct(Colonies.habMult(p, 'orbit'))} orbit</span>`}`;
   },
   planetMods(p) {
     return Object.entries(DATA.planetTypes[p.type].mult).map(([k, v]) => k === 'infra' ? `${DATA.infra.icon}×${v}` : `${DATA.resources[k].icon}×${v}`).join(' ');

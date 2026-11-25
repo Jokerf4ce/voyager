@@ -17,16 +17,15 @@ DATA.resources = {
 DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 5, minEfficiency: 0.25 };
 
 // Habitability 1–5: 1 Extremely Hazardous (Venus, Jupiter) … 5 Natural Life Support (old Earth).
-// cost multiplies the price of building on the surface and of settling the planet.
-// Orbit is shielded from the worst of it: orbital buildings get only orbitShare of the effect.
+// surface / orbit multiply the cost of building on that layer. Settling uses the surface rate
+// (the orbit rate for planets without a surface).
 DATA.habitability = {
-  1: { name: 'Extremely Hazardous', cost: 2.0,  color: '#c04030' },
-  2: { name: 'Hazardous', cost: 1.5,  color: '#c07030' },
-  3: { name: 'Barren', cost: 1.2,  color: '#c0a040' },
-  4: { name: 'Habitable', cost: 1.0,  color: '#90b050' },
-  5: { name: 'Natural Life Support', cost: 0.8,  color: '#50c070' },
+  1: { name: 'Extremely Hazardous',  surface: 7.5, orbit: 2.5, color: '#c04030' },
+  2: { name: 'Hazardous',            surface: 5,   orbit: 2,   color: '#c07030' },
+  3: { name: 'Barren',               surface: 4,   orbit: 1,   color: '#c0a040' },
+  4: { name: 'Habitable',            surface: 2.5, orbit: 1,   color: '#90b050' },
+  5: { name: 'Natural Life Support', surface: 1,   orbit: 1,   color: '#50c070' },
 };
-DATA.habOrbitShare = 0.5;
 
 // Planet types. slots = how many different buildings fit on each layer (levels are unlimited).
 // hab = [min, max] habitability rolled for planets of this type.

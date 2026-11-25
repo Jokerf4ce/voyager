@@ -48,7 +48,17 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 - **Orbit only:** Orbital Shipyard, Habitat Ring, Gas Skimmer, Defense Platform.
 - **Both layers** (built separately in each): Fusion Core, Cogitator Array.
 - System defense adds up every planet's Bastions and Defense Platforms.
-- **Habitability 1–5** (decided): 1 Extremely Hazardous (Venus, Jupiter), 2 Hazardous, 3 Barren, 4 Habitable, 5 Natural Life Support (Earth). It changes building costs on the planet. Proposed numbers: surface costs ×2.0 / ×1.5 / ×1.2 / ×1.0 / ×0.8 for habitability 1 to 5. Orbital buildings feel half of that, and settling uses the surface rate (orbit rate for gas giants). Gas Giants and Molten Worlds are always 1. New types: Drowned World (3–4) and the rare Living World (4–5).
+- **Habitability 1–5** (decided). It multiplies building costs on each layer:
+
+  | Habitability | Surface | Orbit |
+  |---|---|---|
+  | 1 Extremely Hazardous (Venus, Jupiter) | ×7.5 | ×2.5 |
+  | 2 Hazardous | ×5 | ×2 |
+  | 3 Barren | ×4 | ×1 |
+  | 4 Habitable | ×2.5 | ×1 |
+  | 5 Natural Life Support (Earth) | ×1 | ×1 |
+
+  Settling uses the surface rate (the orbit rate for gas giants). Gas Giants and Molten Worlds are always 1. Drowned Worlds (3–4) and the rare Living Worlds (4–5) are the habitable ones.
 
 ## 4b. Resources
 
