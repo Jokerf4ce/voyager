@@ -1,14 +1,14 @@
 // Voyager — lines for the ship's computer voice (played by js/voice.js).
 //
-// Each line:
-//   text      what she says (spoken by the browser's British female voice)
+// Each line is an mp3 file named after the line id: assets/voice/<id>.mp3 (e.g. assets/voice/welcome_back.mp3).
+//   text      what she says; also shown on screen as a "SHIP AI" transmission
 //   triggers  game events that can play this line (see the list below)
-//   glitch    0..1 how broken-up it sounds: stutters, pitch slips, static (default 0.35)
+//   glitch    0..1 how broken-up it sounds: distortion, stutters, dropouts, static (default 0.35)
 //   chance    0..1 probability the line plays when triggered (default 1)
-//   src       optional recorded audio file (e.g. 'assets/voice/welcome_back.mp3'); when set, the file is
-//             played instead of the browser voice, and gets real distortion and stutter applied
+//   src       optional: a different file path instead of assets/voice/<id>.mp3
 //
-// When a trigger fires, one matching line is picked at random. To add a line, add an entry here.
+// When a trigger fires, one matching line is picked at random. To add a line: add an entry here and put
+// its mp3 in assets/voice/. Until the file exists, the line is shown on screen only.
 // To add a new trigger, call Voice.trigger('your_trigger') wherever it happens in the game.
 //
 // Triggers in use:

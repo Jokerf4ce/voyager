@@ -82,7 +82,7 @@ const Game = {
     musicskip: () => { Music.skip(); },
     musicmode: (a) => { Music.setMode(a); },
     voice: () => { Voice.toggle(); },
-    voicetest: () => { Voice.enabled = true; Voice.speaking = false; Voice.speechBroken = false; Voice.say('welcome_back'); },
+    voicetest: () => { Voice.enabled = true; Voice.speaking = false; Voice.say('welcome_back'); },
     subtitles: () => { Voice.subtitles = !Voice.subtitles; Voice.savePrefs(); },
     autospeed: (a) => { Game.autoMs = +a; if (Game.autoTimer) Game.startAuto(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },

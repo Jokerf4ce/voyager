@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.15.0 — 2026-11-26
+- The ship's computer voice now plays mp3 files instead of the browser's built-in speech, so it works the same in every browser.
+- Each line's file is `assets/voice/<line id>.mp3` (e.g. `welcome_back.mp3`). The game adds radio filtering, light distortion, stutters, dropouts and static live.
+- Lines without a file yet are shown as on-screen transmissions only; Settings lists which files are missing.
+- `assets/voice/README.md` lists the lines to record and how.
+
 ## 0.14.2 — 2026-11-26
 - Fix: in browsers that block speech (Brave, Firefox with fingerprinting resistance), the voice played only noises. The game now detects this, keeps the static short, and shows the line as an on-screen transmission instead.
 - Voice lines appear as glitching on-screen transmissions ("◆ SHIP AI") in every browser; Subtitles can be turned off in Settings.

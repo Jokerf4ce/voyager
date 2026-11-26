@@ -1,12 +1,9 @@
 // Voyager — the ship's computer voice: a lightly distorted, glitching British female voice.
 // Lines and triggers live in js/voicelines.js. Call Voice.trigger(name) from anywhere in the game.
 //
-// Two ways a line can sound:
-//  - Browser speech (default): the browser's built-in en-GB female voice. Browsers do not let a page
-//    process that audio, so the glitch is built around it: the text is cut into stuttering fragments with
-//    small pitch slips, and static, clicks and digital squelches are played underneath.
-//  - Recorded file (line.src): the file is played through Web Audio with real distortion (waveshaper,
-//    band-limited radio tone) and random stutters.
+// Each line is an mp3 file, by default assets/voice/<line id>.mp3. It is played through Web Audio with
+// radio filtering, soft distortion and random stutters/dropouts, over a bed of static and digital glitches,
+// and shown on screen as a "SHIP AI" transmission. If the file is missing, only the transmission is shown.
 
 const Voice = {
   enabled: true,
@@ -16,13 +13,11 @@ const Voice = {
   lastPlayed: {},           // trigger -> time (ms)
   lastActivity: Date.now(),
   hiddenAt: null,
-  voice: null,              // chosen SpeechSynthesisVoice
   subtitles: true,          // show lines as on-screen transmissions
-  speechBroken: false,      // set when the browser accepted speech but never spoke (e.g. Brave)
+  folder: 'assets/voice/',
+  buffers: {},              // line id -> decoded AudioBuffer
+  missing: new Set(),       // line ids whose file could not be loaded
   prefsKey: 'voyager_voice',
-
-  // Voice names to prefer, in order (Chrome, Edge/Windows, macOS/iOS, Android).
-  preferred: ['Google UK English Female', 'Microsoft Sonia', 'Microsoft Libby', 'Microsoft Hazel', 'Microsoft Maisie', 'Serena', 'Kate', 'Martha', 'Stephanie', 'Moira'],
 
   // ---- preferences ----
   loadPrefs() {
@@ -37,37 +32,8 @@ const Voice = {
     try { localStorage.setItem(this.prefsKey, JSON.stringify({ enabled: this.enabled, volume: this.volume, subtitles: this.subtitles })); } catch (e) { /* ignore */ }
   },
 
-  // Can this browser actually speak? Brave (and Firefox with fingerprinting resistance) hide the voices.
-  canSpeak() {
-    return 'speechSynthesis' in window && !this.speechBroken && speechSynthesis.getVoices().length > 0;
-  },
-
-  // ---- choosing a voice ----
-  pickVoice() {
-    if (!('speechSynthesis' in window)) return null;
-    const all = speechSynthesis.getVoices();
-    if (!all.length) return null;
-    for (const name of this.preferred) {
-      const v = all.find((x) => x.name.includes(name));
-      if (v) return (this.voice = v);
-    }
-    const gb = all.filter((x) => /en[-_]GB/i.test(x.lang));
-    return (this.voice = gb.find((x) => /female|woman|sonia|libby|hazel|serena|kate|martha/i.test(x.name)) || gb[0] || all.find((x) => /^en/i.test(x.lang)) || null);
-  },
-
-  voiceName() {
-    if (!('speechSynthesis' in window)) return 'this browser has no speech engine';
-    if (this.speechBroken) return 'this browser blocked speech';
-    const v = this.voice || this.pickVoice();
-    return v ? `${v.name} (${v.lang})` : 'this browser offers no voices (Brave hides them for privacy)';
-  },
-
   init() {
     this.loadPrefs();
-    if ('speechSynthesis' in window) {
-      this.pickVoice();
-      speechSynthesis.onvoiceschanged = () => this.pickVoice();
-    }
     // Activity tracking for the "return" trigger.
     const idleLimit = () => (VoiceTriggers.return.idleMinutes || 5) * 60000;
     const activity = () => {
@@ -114,10 +80,7 @@ const Voice = {
     this.speaking = true;
     this.duck(true);
     const done = () => { this.speaking = false; this.duck(false); };
-    const glitch = line.glitch ?? 0.35;
-    if (this.subtitles || (!line.src && !this.canSpeak())) this.subtitle(line.text, line.text.length * 0.075 + 2.2, glitch);
-    if (line.src) this.playFile(line, done);
-    else this.speak(line, done);
+    this.playFile(id, line, done);
     return true;
   },
 
@@ -126,52 +89,6 @@ const Voice = {
     if (typeof Music === 'undefined' || !Music.ctx || !Music.timer) return;
     const g = Music.out.gain, t = Music.ctx.currentTime, target = Music.gainFor(Music.volume) * (on ? 0.35 : 1);
     g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(target, t + (on ? 0.25 : 1.2));
-  },
-
-  // ---- browser speech with glitches ----
-  // Cut the text into fragments, sometimes repeating the start of a word: "Com— Commander".
-  fragments(text, glitch) {
-    const words = text.split(/\s+/);
-    const out = [];
-    let cur = [];
-    words.forEach((w, i) => {
-      const bare = w.replace(/[^A-Za-z']/g, '');
-      if (bare.length >= 5 && Math.random() < glitch) {
-        if (cur.length) out.push(cur.join(' '));
-        cur = [];
-        out.push(bare.slice(0, Math.max(2, Math.ceil(bare.length / 3)))); // the stutter
-      }
-      cur.push(w);
-    });
-    if (cur.length) out.push(cur.join(' '));
-    return out;
-  },
-
-  speak(line, done) {
-    // No usable voice: just open and close the comm channel; the line is shown on screen.
-    if (!this.canSpeak()) { this.glitchBed(0.6, (line.glitch ?? 0.35) * 0.5); setTimeout(done, 1200); return; }
-    speechSynthesis.cancel();
-    const glitch = line.glitch ?? 0.35;
-    const parts = this.fragments(line.text, glitch);
-    const voice = this.voice || this.pickVoice();
-    const est = line.text.length * 0.075 + parts.length * 0.25 + 0.6; // seconds, for the static bed
-    this.glitchBed(est, glitch);
-    let finished = false, started = false;
-    const finish = () => { if (!finished) { finished = true; done(); } };
-    // Some browsers accept the request but never speak. Notice that and stop trying.
-    setTimeout(() => { if (!started && !finished) { this.speechBroken = true; speechSynthesis.cancel(); finish(); } }, 2500);
-    parts.forEach((txt, i) => {
-      const u = new SpeechSynthesisUtterance(txt);
-      u.lang = 'en-GB';
-      try { if (voice) { u.voice = voice; u.lang = voice.lang; } } catch (e) { /* odd voice object: let the browser choose */ }
-      u.volume = this.volume;
-      u.rate = 0.94 + (Math.random() - 0.5) * 0.08 * glitch;
-      u.pitch = 1.05 + (Math.random() - 0.5) * 0.35 * glitch;
-      u.onstart = () => { started = true; };
-      if (i === parts.length - 1) { u.onend = finish; u.onerror = finish; }
-      speechSynthesis.speak(u);
-    });
-    setTimeout(finish, (est + 3) * 1000); // in case the browser never reports the end
   },
 
   // Static, clicks and digital squelches under the voice, so it sounds like a damaged ship's computer.
@@ -227,44 +144,55 @@ const Voice = {
     o.connect(g); g.connect(out); o.start(t); o.stop(t + len + 0.01);
   },
 
-  // ---- recorded lines: real distortion and stutter ----
-  async playFile(line, done) {
+  src(id, line) { return line.src || this.folder + id + '.mp3'; },
+
+  async load(id, line) {
+    if (this.buffers[id]) return this.buffers[id];
+    const res = await fetch(this.src(id, line));
+    if (!res.ok) throw new Error('missing');
+    return (this.buffers[id] = await this.ctx.decodeAudioData(await res.arrayBuffer()));
+  },
+
+  // ---- playing a line: real distortion and stutter ----
+  async playFile(id, line, done) {
     const ctx = this.audio();
-    if (!ctx) { done(); return; }
-    try {
-      const res = await fetch(line.src);
-      const buf = await ctx.decodeAudioData(await res.arrayBuffer());
-      const glitch = line.glitch ?? 0.35;
-      // radio tone: band-limit, then soft-clip
-      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 280;
-      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
-      const shaper = ctx.createWaveShaper();
-      const curve = new Float32Array(1024), k = 4 + glitch * 20;
-      for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x)); }
-      shaper.curve = curve;
-      const g = ctx.createGain(); g.gain.value = this.volume * 0.8;
-      hp.connect(lp); lp.connect(shaper); shaper.connect(g); g.connect(ctx.destination);
-      // play in slices; now and then repeat a slice (stutter) or drop it (dropout)
-      const t0 = ctx.currentTime + 0.05;
-      let t = t0, pos = 0;
-      const slice = 0.09;
-      while (pos < buf.duration) {
-        const len = Math.min(slice, buf.duration - pos);
-        const reps = Math.random() < glitch * 0.08 ? 2 + Math.floor(Math.random() * 2) : 1;
-        for (let r = 0; r < reps; r++) {
-          if (Math.random() < glitch * 0.03) { t += len; continue; } // dropout
-          const s = ctx.createBufferSource(); s.buffer = buf;
-          s.playbackRate.value = Math.random() < glitch * 0.05 ? 0.92 : 1;
-          s.connect(hp); s.start(t, pos, len); t += len / s.playbackRate.value;
-        }
-        pos += len;
-      }
-      this.glitchBed(t - t0, glitch * 0.6);
-      setTimeout(done, (t - t0 + 0.4) * 1000);
-    } catch (e) {
-      // file missing or unreadable: fall back to the browser voice
-      this.speak(line, done);
+    const glitch = line.glitch ?? 0.35;
+    let buf = null;
+    try { if (ctx) buf = await this.load(id, line); this.missing.delete(id); } catch (e) { this.missing.add(id); }
+    const seconds = buf ? buf.duration : line.text.length * 0.075 + 1;
+    if (this.subtitles || !buf) this.subtitle(line.text, seconds + 2, glitch);
+    if (!buf) {
+      // no file yet: just open and close the comm channel
+      if (ctx) this.glitchBed(0.6, glitch * 0.5);
+      setTimeout(done, 1200);
+      return;
     }
+    // radio tone: band-limit, then soft-clip
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 280;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
+    const shaper = ctx.createWaveShaper();
+    const curve = new Float32Array(1024), k = 4 + glitch * 20;
+    for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x)); }
+    shaper.curve = curve;
+    const g = ctx.createGain(); g.gain.value = this.volume * 0.8;
+    hp.connect(lp); lp.connect(shaper); shaper.connect(g); g.connect(ctx.destination);
+    // play in slices; now and then repeat a slice (stutter) or drop it (dropout)
+    const t0 = ctx.currentTime + 0.05;
+    let t = t0, pos = 0;
+    const slice = 0.09;
+    while (pos < buf.duration) {
+      const len = Math.min(slice, buf.duration - pos);
+      const reps = Math.random() < glitch * 0.08 ? 2 + Math.floor(Math.random() * 2) : 1;
+      for (let r = 0; r < reps; r++) {
+        if (Math.random() < glitch * 0.03) { t += len; continue; } // dropout
+        const src = ctx.createBufferSource(); src.buffer = buf;
+        src.playbackRate.value = Math.random() < glitch * 0.05 ? 0.92 : 1;
+        src.connect(hp); src.start(t, pos, len); t += len / src.playbackRate.value;
+      }
+      pos += len;
+    }
+    this.glitchBed(t - t0, glitch * 0.6);
+    setTimeout(done, (t - t0 + 0.4) * 1000);
   },
 
   // On-screen transmission: the line types out with glitching characters, then fades.
@@ -293,6 +221,6 @@ const Voice = {
     this.subHide = setTimeout(() => { box.className = ''; }, seconds * 1000);
   },
 
-  toggle() { this.enabled = !this.enabled; this.savePrefs(); if (!this.enabled && 'speechSynthesis' in window) speechSynthesis.cancel(); },
+  toggle() { this.enabled = !this.enabled; this.savePrefs(); },
   setVolume(v) { this.volume = Math.max(0, Math.min(1, v)); this.savePrefs(); },
 };
