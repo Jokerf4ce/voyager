@@ -5,6 +5,7 @@
 //   triggers  game events that can play this line (see the list below)
 //   glitch    0..1 how much the on-screen transmission text glitches (default 0.35); the audio plays as recorded
 //   chance    0..1 probability the line plays when triggered (default 1)
+//   style     optional on-screen look for this line: 'danger' = red transmission (default: the trigger's style)
 //   src       optional: a different file path instead of assets/voice/<id>.mp3
 //
 // When a trigger fires, one matching line is picked at random. To add a line: add an entry here and put
@@ -17,9 +18,11 @@
 //   test    the Test button in Settings (Assistant): plays any line at random
 //   random  ship announcements at a random moment every 5 to 30 minutes while you play
 //           (never the same line twice in a row if there is a choice; skipped while the tab is hidden)
+//   combat  the start of every battle (attacks and raid defenses); shown in danger red
 //
 // When several lines share a trigger, one of them is picked at random each time.
-// Trigger options below: cooldown (seconds), noRepeat (never the same line twice in a row).
+// Trigger options below: cooldown (seconds), noRepeat (never the same line twice in a row),
+// style (on-screen look of the transmission: 'danger' = red instead of the normal blue).
 //
 // Lines with an empty text play without an on-screen transmission.
 // The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
@@ -49,4 +52,5 @@ const VoiceTriggers = {
   return: { cooldown: 60, idleMinutes: 5 },
   test:   { cooldown: 0 },
   random: { cooldown: 0, minMinutes: 5, maxMinutes: 30, noRepeat: true },
+  combat: { cooldown: 0, style: 'danger' },
 };

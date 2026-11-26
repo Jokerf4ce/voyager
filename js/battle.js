@@ -22,6 +22,7 @@ const Battle = {
     G.battle = Object.assign({ phase: s.kind === 'defend' ? 'setup' : 'fight', units: [], order: [], turn: 0, round: 0, log: [], result: null, auto: false }, s);
     if (G.battle.phase === 'fight') this.begin();
     if (typeof Music !== 'undefined') Music.battle(0.8);
+    if (typeof Voice !== 'undefined') Voice.trigger('combat', true); // a warning from the Assistant, in red
   },
 
   // ---------- setting up ----------

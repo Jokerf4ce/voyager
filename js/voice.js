@@ -110,12 +110,18 @@ const Voice = {
     const [id] = lines[Math.floor(Math.random() * lines.length)];
     this.lastPlayed[name] = now;
     this.lastLine[name] = id;
-    return this.say(id);
+    // the look of the transmission: the line's own style, else the trigger's
+    // (the Test button borrows the style of the line's first trigger that has one)
+    const line = VoiceLines[id];
+    const styleOf = (t) => (VoiceTriggers[t] || {}).style;
+    const style = line.style || styleOf(name) || (name === 'test' ? (line.triggers || []).map(styleOf).find(Boolean) : '') || '';
+    return this.say(id, style);
   },
 
-  say(id) {
+  say(id, style = '') {
     const line = VoiceLines[id];
     if (!line || !this.enabled) return false;
+    this.style = style || line.style || '';
     const ctx = this.audio();
     if (ctx && ctx.state === 'suspended') ctx.resume();
     this.speaking = true;
@@ -202,7 +208,8 @@ const Voice = {
     if (!box) { box = document.createElement('div'); box.id = 'comms'; document.body.appendChild(box); }
     clearInterval(this.subTimer); clearTimeout(this.subHide);
     box.innerHTML = '<span class="comms-src">◆ AI Assistant</span><span class="comms-text"></span>';
-    box.className = 'show';
+    box.className = 'show' + (this.style ? ' ' + this.style : '');
+    box.querySelector('.comms-src').textContent = this.style === 'danger' ? '▲ AI Assistant · Alert' : '◆ AI Assistant';
     const el = box.querySelector('.comms-text');
     const junk = '█▓▒░#%&@$<>/\\|';
     let i = 0;

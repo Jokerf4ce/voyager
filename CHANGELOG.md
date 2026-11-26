@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.25.0 — 2026-11-26
+- New voice trigger **`combat`**: at the start of every battle (attacks and raid defenses) the Assistant says one of the combat lines at random ("Warning! Hostile forces inbound!", "Commander! Give them hell!" …).
+- Combat lines are shown as a **red alert transmission** ("▲ AI Assistant · Alert", pulsing red border) instead of the normal blue. Any trigger or line can use this look with `style: 'danger'` in `js/voicelines.js`.
+
 ## 0.24.0 — 2026-11-26
 **Old saves start a new game** (save format v12).
 - **No fixed ship stats.** Every stat (shield, hull, speed, evasion) and every weapon's damage is rolled from a normal distribution around the type's average (spread 15 %, 20 % for evasion), so every ship is different, Normal ones included. Rarity shifts the average up, and rarities overlap: a lucky Normal can beat an unlucky Strong.

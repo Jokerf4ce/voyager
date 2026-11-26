@@ -251,7 +251,7 @@ Recorded audio files can be added as tracks alongside the generated ones.
 
 **Open:** sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
 
-**Ship's computer voice** (decided: a lightly distorted, glitching British female computer voice, recorded as mp3 files). Lines and their triggers are data in `js/voicelines.js`. Each line's audio is `assets/voice/<line id>.mp3`. The robotic effect is baked into each file (text-to-speech.online "Sonia - GB", then echo and a −3 % pitch-shifted double track in Audacity). The engine (`js/voice.js`) plays the file as recorded, with no extra processing, and shows each line on screen as a glitching "SHIP AI" transmission. In Settings the section is called "Assistant". A line without a file yet is shown as text only.
+**Ship's computer voice** (decided: a lightly distorted, glitching British female computer voice, recorded as mp3 files). Lines and their triggers are data in `js/voicelines.js`. Each line's audio is `assets/voice/<line id>.mp3`. The robotic effect is baked into each file (text-to-speech.online "Sonia - GB", then echo and a −3 % pitch-shifted double track in Audacity). The engine (`js/voice.js`) plays the file as recorded, with no extra processing, and shows each line on screen as a glitching "SHIP AI" transmission. In Settings the section is called "Assistant". A line without a file yet is shown as text only. The `combat` trigger (start of every battle) shows its lines as a red alert transmission (`style: 'danger'`, decided v0.25).
 - **Triggers so far:**
   - `start`: the first click after loading.
   - `return`: back after more than 5 minutes away.
