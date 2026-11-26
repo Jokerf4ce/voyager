@@ -60,10 +60,10 @@ const Colonies = {
 
   buildCost(p, layer, key) {
     const def = DATA.buildings[key];
-    const lvl = p.colony[layer][key] || 0;
     const out = {};
     const hm = this.habMult(p, layer);
-    for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * Math.pow(def.costGrowth, lvl) * hm);
+    // Flat cost: the building's base price × the colony layer's habitability multiplier (no growth with level or count).
+    for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * hm);
     return out;
   },
 
@@ -90,6 +90,69 @@ const Colonies = {
     if (key === 'bastion' || key === 'platform') s.garrison = this.maxGarrison(s);
     Log.add(`${DATA.buildings[key].name} (${DATA.layers[layer]}) raised to level ${p.colony[layer][key]} on ${this.planetName(s, p)}.`);
     return true;
+  },
+
+  // ---- empire-wide building list ----
+  // Group a building type for the Buildings screen.
+  group(key) {
+    const d = DATA.buildings[key];
+    if (d.gathers) return 'Gathering';
+    if (d.refines) return 'Refining';
+    if (Object.values(d.cap || {}).some((v) => v < 0)) return 'Power, habitation & compute';
+    return 'Research, ships & defense';
+  },
+
+  // How much one more level would produce at this colony layer (relative; used to pick the best spot).
+  placementValue(p, layer, key) {
+    const d = DATA.buildings[key], m = Planets.mult(p), st = DATA.starClasses[p.star || 'G'];
+    if (d.gathers) {
+      const size = DATA.planetSizes[p.size].yield;
+      let v = 0;
+      for (const res of [d.gathers, d.also].filter(Boolean)) v += Economy.rating(p, res) * size * ((st.mult || {})[res] || 1);
+      return v;
+    }
+    const gives = Object.entries(d.cap || {}).find(([, v]) => v < 0);
+    if (gives) return (m[gives[0]] || 1) * (d.solar ? st.solar : 1);
+    return 1;
+  },
+
+  // Every colony layer where this building could get one more level, with cost and what stops it.
+  placements(key) {
+    const def = DATA.buildings[key], out = [];
+    for (const { s, p } of this.playerPlanets()) for (const layer of def.layers) {
+      if (!this.slots(p, layer)) continue;
+      const lvl = p.colony[layer][key] || 0;
+      if (!lvl && this.slotsUsed(p, layer) >= this.slots(p, layer)) continue; // no free slot
+      if (def.gathers && !(Economy.rating(p, def.gathers) > 0 || (def.also && Economy.rating(p, def.also) > 0))) continue;
+      const cost = this.buildCost(p, layer, key);
+      const value = this.placementValue(p, layer, key);
+      const price = Object.values(cost).reduce((a, b) => a + b, 0);
+      out.push({ s, p, layer, lvl, cost, value, score: value / Math.max(1, price), ref: this.ref(s, p), why: this.blocker(p, layer, key) });
+    }
+    return out.sort((a, b) => b.score - a.score || b.lvl - a.lvl);
+  },
+
+  // Auto: the best output per cost among the spots that can be built right now
+  // (ties prefer upgrading an existing building, which keeps free slots for other types).
+  best(key) {
+    const all = this.placements(key);
+    return all.find((x) => !x.why) || all[0] || null;
+  },
+
+  buildAuto(key) {
+    const b = this.best(key);
+    if (!b || b.why) return false;
+    return this.build(b.ref, b.layer, key);
+  },
+
+  // Where a building type stands: total levels and the colonies it is on.
+  holdings(key) {
+    const list = [];
+    for (const { s, p } of this.playerPlanets()) for (const layer of ['surface', 'orbit']) {
+      const lvl = p.colony[layer][key] || 0;
+      if (lvl) list.push({ s, p, layer, lvl, ref: this.ref(s, p) });
+    }
+    return { levels: list.reduce((a, x) => a + x.lvl, 0), list };
   },
 
   // Capture: every colony in the system changes hands, buildings are damaged, the garrison is reset.

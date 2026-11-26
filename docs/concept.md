@@ -95,6 +95,16 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
   Settling uses the surface rate (the orbit rate for gas giants).
 
+## 4a-2. Managing buildings
+
+**Decided:** buildings are managed in one empire-wide list, not colony by colony, because a big empire gets cumbersome otherwise.
+- **Colonies provide the slots:** each planet layer has its slots. A slot holds one building type, which is levelled up.
+- **Building screen:** each building type shows its total level and its colonies. You build either at a colony you pick, or with **Auto**, which picks the spot with the best output per cost.
+- **Overview:** lists the building types you own. Clicking one shows which colonies it is on.
+- **Costs** are flat: base cost × the colony layer's habitability multiplier.
+
+**Open (balance):** with flat costs, upgrading is cheap, so the economy grows very fast and only the capacity caps (Power, Infrastructure, Compute) hold it back. Possible brakes: a level cap per slot, upkeep per level, or costs rising with level again.
+
 ## 4b. Resources
 
 **Decided:** three gathered resources, two refined goods and three capacities, plus Research and Void Shards.

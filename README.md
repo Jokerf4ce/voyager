@@ -18,6 +18,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 
 - Procedural galaxy of 22 systems with hyperlanes and fog of war; the 10 nearest are charted at the start, including one Red Hypergiant
 - Each system has a star class (O B A F G K M), or rarely a white dwarf, pulsar or black hole, and 1–5 planets
+- Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
 - Explore with scouts; exploration events with grim choices
 - Expand with Colony Arks into new systems, then settle more planets in systems you hold

@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.18.0 — 2026-11-26
+- New **Buildings** screen: every building type in one empire-wide list, grouped (Gathering, Refining, Power/habitation/compute, Research/ships/defense), with total levels and the number of colonies.
+- **Auto** builds or upgrades where it produces the most for its cost (best planet rating for gatherers, starlight for solar, planet bonuses for capacities; ties prefer upgrading an existing building). The button shows where it will build and the cost.
+- **Choose colony** lists every colony with that building and every spot it can go, with cost, output and a ★ on the Auto pick.
+- Overview has a Buildings panel: click a building to see which colonies it is on.
+- Building costs are now flat: base cost × the colony's habitability multiplier, no increase per level.
+- Mobile: the top bar fits phone screens (buttons on one row, resources in a scrollable row); panels no longer overflow narrow screens.
+
 ## 0.17.0 — 2026-11-26
 - Star pictures: every star class has a pixel-art portrait in the same style as the planets (glowing disc with convection cells and a darker edge, sized by class; tiny white dwarf; pulsar with beams; black hole with its accretion disc; the hypergiant fills the frame).
 - Shown in the system panel, on the Colonies screen and in exploration events.
