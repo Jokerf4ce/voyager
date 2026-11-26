@@ -4,4 +4,4 @@
 - Plain HTML/JS/CSS, no build step; `index.html` loads the scripts in order. All game content lives in `js/data.js`.
 - When the save format changes, bump `version` in `js/state.js` and `saveKey` in `js/data.js` so old saves start a new game instead of breaking.
 - Design decisions are recorded in `docs/concept.md` (marked Decided / Proposed / Open).
-- The game is published with GitHub Pages from `main` (https://jokerf4ce.github.io/voyager/); every push deploys. Keep all paths relative.
+- The game is published with GitHub Pages from `main` (https://voyager.weidmann.cloud/); every push deploys. Keep all paths relative.

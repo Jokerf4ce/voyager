@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.15.4 — 2026-11-26
+- The game is now served at https://voyager.weidmann.cloud/ (GitHub Pages custom domain); README and notes updated.
+
 ## 0.15.3 — 2026-11-26
 - Fix: the voice could stay silent, for example when the game was opened straight from disk, where browsers block loading the file for the effects chain. Lines now fall back to plain playback (no live effects) when the effects path can't load them, and a failed file is retried after 30 seconds instead of never.
 - The voice shares the music's audio channel when music is playing.
