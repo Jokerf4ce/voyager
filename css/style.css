@@ -30,14 +30,16 @@ small, .small { font-size: 16px; }
 .flavor { color: #b8a888; font-style: italic; }
 
 /* top bar */
-#top { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: var(--coal);
-  border-bottom: 2px solid var(--edge); box-shadow: 0 2px 0 #000; flex-wrap: wrap; }
-.logo { font-size: 20px; color: var(--bone); text-shadow: 2px 2px 0 var(--blood); letter-spacing: 4px; }
-#top-res { display: flex; gap: 8px; flex-wrap: wrap; }
-.res { display: flex; align-items: baseline; gap: 4px; padding: 2px 8px; background: var(--soot); border: 1px solid var(--edge); }
+#top { display: flex; align-items: center; gap: 10px; padding: 6px 12px; background: var(--coal);
+  border-bottom: 2px solid var(--edge); box-shadow: 0 2px 0 #000; flex-wrap: nowrap; }
+.logo { font-size: 18px; color: var(--bone); text-shadow: 2px 2px 0 var(--blood); letter-spacing: 3px; }
+#top-res { display: flex; gap: 6px; flex-wrap: wrap; flex: 1 1 0; min-width: 0; }
+#top .spacer { display: none; }
+#top > .btn, #cycle, .logo, #btn-menu { flex-shrink: 0; }
+.res { display: flex; align-items: baseline; gap: 3px; padding: 2px 5px; background: var(--soot); border: 1px solid var(--edge); }
 .res .ico { font-size: 16px; }
-.res b { font-size: 21px; font-weight: normal; }
-.res small { color: #8aa070; font-size: 15px; }
+.res b { font-size: 19px; font-weight: normal; }
+.res small { color: #8aa070; font-size: 14px; }
 .res small.neg { color: #d05050; }
 .res-metal { color: #b8b8c4; } .res-rare { color: #60d0a8; } .res-organics { color: #9ac050; } .res-electronics { color: #d89a60; } .res-chemicals { color: #d8c860; }
 .res-research { color: #80c8e0; } .res-shards { color: #c080f0; }
@@ -154,6 +156,11 @@ details summary:hover { color: var(--bone); }
 .card.cursed { background: repeating-linear-gradient(45deg, #1a0c0c 0 4px, #0c0b0a 4px 8px); }
 .tag { font-size: 8px; background: #2a221c; padding: 2px 4px; border: 1px solid var(--edge-hi); }
 @keyframes reveal { from { transform: scale(.6); } to { transform: scale(1); } }
+
+/* music */
+.btn.icon { font-family: var(--font-body); font-size: 18px; padding: 1px 10px; text-transform: none; }
+.btn.icon.off { opacity: .45; text-decoration: line-through; }
+.slider { accent-color: var(--rust); width: 140px; vertical-align: middle; }
 
 /* version tag, bottom right */
 #version { position: fixed; right: 8px; bottom: 6px; z-index: 5; font-family: var(--font-head); font-size: 10px; letter-spacing: 1px; color: #8a8070; background: rgba(12, 11, 10, .85); border: 1px solid var(--edge); padding: 2px 6px; pointer-events: none; }

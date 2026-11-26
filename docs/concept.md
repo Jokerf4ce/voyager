@@ -190,6 +190,14 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - A pixel font for headings, and a readable font for body text.
 - Emojis or simple placeholders until the art exists.
 
+## 9b. Audio
+
+**Decided:** add music; inspired by Halo's choral scores ("One Final Effort").
+
+**In the POC:** original generative music synthesised with the Web Audio API in `js/music.js`, so there are no audio files. A choir chants in D minor over a drone, in plainchant phrases generated as random walks, so it never repeats exactly. Slow strings and war drums come in during "rise" sections, and swell whenever a battle happens. Players can mute it with the ♪ button and set the volume in Settings.
+
+**Open:** sound effects (buttons, battles, gacha pulls), or real recorded music later.
+
 ## 10. Technical
 
 **Decided:** HTML, JavaScript and CSS, with image files for graphics.

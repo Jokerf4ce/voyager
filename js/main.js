@@ -7,7 +7,9 @@ const Game = {
   endCycle() {
     if (G.over || UI.modalOpen) return;
     Fleets.moveAll();
+    const reportsBefore = G.reports.length && G.reports[0];
     Combat.resolveAll();
+    if (G.reports[0] && G.reports[0] !== reportsBefore) Music.battle(G.reports[0].lost ? 1 : 0.7);
     Economy.tick();
     Research.tick();
     AI.tick();
@@ -75,6 +77,7 @@ const Game = {
     mapfleet: (a) => { const f = Fleets.get(+a); UI.selFleet = f.id; UI.selSys = f.sys; UI.screen = 'map'; },
     pull: (a) => { const r = Gacha.pull(+a); if (r) UI.lastPull = r; },
     eventchoice: (a) => { Explore.resolveEvent(+a); UI.closeModal(); },
+    music: () => { Music.toggle(); },
     autospeed: (a) => { Game.autoMs = +a; if (Game.autoTimer) Game.startAuto(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },
     export: () => { UI.$('savebox').value = State.exportSave(); },
@@ -101,6 +104,12 @@ document.addEventListener('click', (ev) => {
   if (G) { State.save(); UI.render(); }
 });
 
+// Sliders and other inputs use data-input instead of data-act.
+document.addEventListener('input', (ev) => {
+  const el = ev.target.closest('[data-input]');
+  if (el && el.dataset.input === 'volume') Music.setVolume(el.value / 100);
+});
+
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
@@ -112,6 +121,13 @@ window.addEventListener('DOMContentLoaded', () => {
   UI.$('version').title = `Voyager v${VERSION.number} · ${VERSION.date}`;
   UI.$('btn-end').onclick = () => Game.endCycle();
   UI.$('btn-auto').onclick = () => Game.toggleAuto();
+  // Music: browsers only allow sound after the first click or key press.
+  Music.loadPrefs();
+  UI.$('btn-music').onclick = (ev) => { ev.stopPropagation(); if (!Music.timer && Music.enabled) Music.start(); else Music.toggle(); UI.renderTop(); if (UI.screen === 'settings') UI.render(); };
+  // Only refresh the top bar here: a full re-render would replace the element being clicked and swallow the click.
+  const firstGesture = () => { Music.start(); UI.renderTop(); };
+  document.addEventListener('pointerdown', firstGesture, { once: true });
+  document.addEventListener('keydown', firstGesture, { once: true });
   UI.$('btn-menu').onclick = () => document.body.classList.toggle('nav-collapsed');
   if (State.load()) {
     const off = State.applyOffline();

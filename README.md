@@ -25,6 +25,7 @@ Open `index.html` in a browser. No server or build step is needed. Saves are kep
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
 - Void Signals gacha: shards earned in play, rarities, pity, rank-ups, cursed relics, ship blueprints
 - Auto-cycle, offline progress, save export/import
+- Generative choir-and-drums soundtrack synthesised in the browser (mute with ♪, volume in Settings)
 - Placeholder pixel art generated in code (planets, portraits, ships), to be replaced with real sprites
 
 ## Versions
@@ -50,6 +51,7 @@ js/combat.js      battles and sieges
 js/ai.js          alien empire AI
 js/gacha.js       Void Signals
 js/sprites.js     procedural placeholder pixel art
+js/music.js       generative soundtrack (Web Audio)
 js/map.js         star map canvas (galaxy)
 js/sysmap.js      solar system map canvas (one system)
 js/ui.js          screens and modals

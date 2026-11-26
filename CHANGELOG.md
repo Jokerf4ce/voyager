@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.12.0 — 2026-11-26
+- Music: an original generative soundtrack synthesised live in the browser. A monk choir chants over a low drone, with slow strings and war drums that swell during battles. Inspired by the mood of Halo's choral scores; no audio files.
+- Music on/off button (♪) in the top bar, and a volume slider in Settings; both are remembered.
+- Fix: the first click after loading no longer gets lost.
+- Top bar fits on one row at 1400 px and wider.
+
 ## 0.11.1 — 2026-11-26
 - Polymers renamed to Electronics (⌁). The Polymer Refinery is now the Electronics Foundry, and Catalytic Cracking is now Microfabrication.
 - Old saves start a new game.
