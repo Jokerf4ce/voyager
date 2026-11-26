@@ -402,9 +402,14 @@ const UI = {
         return `<div class="track ${now ? 'now' : ''}"><div><b>${now ? '♪ ' : ''}${U.esc(t.name)}</b><br><small class="muted">${U.esc(t.mood || '')}</small></div>
           ${this.btn(now ? 'Playing' : '▶ Play', 'musicplay', t.id, now, now ? 'on' : '')}</div>`;
       }).join('')}</div>
-      <div class="kv"><span>Computer voice</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
+      <div class="kv"><span>Assistant</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
-      <p class="muted small">Voice lines are mp3 files in <code>${Voice.folder}</code>. She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away.${Voice.missing.size ? ` Not found yet (shown as text only): ${[...Voice.missing].map((id) => U.esc(id) + '.mp3').join(', ')}.` : ''}</p>
+      <p class="muted small">The Assistant's lines are mp3 files in <code>${Voice.folder}</code>. She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away. Test plays <code>slipspace.mp3</code>.</p>
+      <div class="voice-files small">${Object.keys(VoiceLines).map((id) => {
+        const st = Voice.status[id];
+        const label = st === 'ready' ? '<span class="good">✓ playing with effects</span>' : st === 'basic' ? '<span class="res-power">✓ playing without live effects (opened from disk or restricted browser)</span>' : st === 'missing' ? '<span class="bad">✗ could not be played (missing or blocked)</span>' : '<span class="muted">not played yet</span>';
+        return `<div><code>${U.esc(id)}.mp3</code> ${label}</div>`;
+      }).join('')}</div>
       <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>

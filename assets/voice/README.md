@@ -6,6 +6,7 @@ The ship's computer voice plays mp3 files from this folder. Each file is named a
 | File | Line | Triggers |
 |---|---|---|
 | `welcome_back.mp3` | "Welcome back, Commander." | game start; returning after 5+ minutes away |
+| `slipspace.mp3` | (slipspace line) | the Test button in Settings → Assistant |
 
 ## How the voice is made
 
@@ -34,5 +35,6 @@ static, a bit differently every time. If a line sounds too broken up, lower its 
 
 Until the file exists, the line still shows on screen as a "SHIP AI" transmission.
 
-Voice files only play when the game is served over the web (GitHub Pages). When `index.html` is opened
-straight from disk, the browser blocks loading them.
+Played over the web (GitHub Pages), lines get the game's live effects. Opened straight from disk, the browser blocks
+the effects chain, so lines play plainly (your Audacity effects are still there). Settings → Assistant shows which way
+each file plays.

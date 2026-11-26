@@ -163,6 +163,7 @@ details summary:hover { color: var(--bone); }
 .slider { accent-color: var(--rust); width: 140px; vertical-align: middle; }
 .tracks { margin: 6px 0 12px; }
 .track { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid #2a2420; background: #141210; margin-bottom: 4px; }
+.voice-files { margin: -4px 0 10px; } .voice-files .good { color: #9ac070; }
 .track.now { border-color: var(--edge-hi); box-shadow: inset 3px 0 0 var(--rust); }
 
 /* ship AI transmissions */

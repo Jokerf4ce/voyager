@@ -16,7 +16,9 @@ const Voice = {
   subtitles: true,          // show lines as on-screen transmissions
   folder: 'assets/voice/',
   buffers: {},              // line id -> decoded AudioBuffer
-  missing: new Set(),       // line ids whose file could not be loaded
+  status: {},               // line id -> 'ready' (with effects) | 'basic' (plain playback) | 'missing'
+  failedAt: {},             // line id -> time of the last failed load (retried after 30 s)
+  get missing() { return new Set(Object.keys(this.status).filter((id) => this.status[id] === 'missing')); },
   prefsKey: 'voyager_voice',
 
   // ---- preferences ----
@@ -51,8 +53,13 @@ const Voice = {
     });
   },
 
+  // Share the music's audio context when it exists: one context is more reliable than two.
   audio() {
-    if (this.ctx) return this.ctx;
+    if (typeof Music !== 'undefined' && Music.ctx && Music.timer && typeof Music.ctx.resume === 'function' && !(window.OfflineAudioContext && Music.ctx instanceof OfflineAudioContext)) {
+      if (this.ctx !== Music.ctx) { this.ctx = Music.ctx; this.buffers = {}; }
+      return this.ctx;
+    }
+    if (this.ctx && !(window.OfflineAudioContext && this.ctx instanceof OfflineAudioContext)) return this.ctx;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
     try { this.ctx = new AC(); } catch (e) { return null; }
@@ -60,11 +67,11 @@ const Voice = {
   },
 
   // ---- triggers ----
-  trigger(name) {
-    if (!this.enabled || this.speaking) return false;
+  trigger(name, force = false) {
+    if (!this.enabled || (this.speaking && !force)) return false;
     const cfg = VoiceTriggers[name] || {};
     const now = Date.now();
-    if (cfg.cooldown && this.lastPlayed[name] && now - this.lastPlayed[name] < cfg.cooldown * 1000) return false;
+    if (!force && cfg.cooldown && this.lastPlayed[name] && now - this.lastPlayed[name] < cfg.cooldown * 1000) return false;
     const lines = Object.entries(VoiceLines).filter(([, l]) => (l.triggers || []).includes(name) && Math.random() < (l.chance ?? 1));
     if (!lines.length) return false;
     const [id] = lines[Math.floor(Math.random() * lines.length)];
@@ -79,7 +86,10 @@ const Voice = {
     if (ctx && ctx.state === 'suspended') ctx.resume();
     this.speaking = true;
     this.duck(true);
-    const done = () => { this.speaking = false; this.duck(false); };
+    const done = () => {
+      this.speaking = false; this.duck(false);
+      if (typeof UI !== 'undefined' && UI.screen === 'settings') UI.render(); // refresh the file status list
+    };
     this.playFile(id, line, done);
     return true;
   },
@@ -146,12 +156,42 @@ const Voice = {
 
   src(id, line) { return line.src || this.folder + id + '.mp3'; },
 
+  // Load and decode a line for the effects chain. Fails on missing files, and when the page is opened
+  // straight from disk (file://), where browsers block fetch().
   async load(id, line) {
     if (this.buffers[id]) return this.buffers[id];
-    if (this.missing.has(id)) throw new Error('missing'); // looked once this session already
+    if (this.failedAt[id] && Date.now() - this.failedAt[id] < 30000) throw new Error('failed recently');
     const res = await fetch(this.src(id, line));
     if (!res.ok) throw new Error('missing');
     return (this.buffers[id] = await this.ctx.decodeAudioData(await res.arrayBuffer()));
+  },
+
+  // Plain playback with an <audio> element: no live effects, but works almost everywhere (also from disk).
+  playBasic(id, line, glitch, done) {
+    let a;
+    try { a = new Audio(this.src(id, line)); } catch (e) { a = null; }
+    if (!a) { this.noFile(id, line, glitch, done); return; }
+    a.volume = Math.min(1, this.volume);
+    let ended = false;
+    const end = () => { if (!ended) { ended = true; done(); } };
+    a.onended = end;
+    a.onerror = () => { if (!ended) { ended = true; this.noFile(id, line, glitch, done); } };
+    a.play().then(() => {
+      this.status[id] = 'basic';
+      if (this.subtitles && line.text) this.subtitle(line.text, (a.duration || 2) + 2, glitch);
+      if (this.ctx) this.glitchBed(a.duration || 2, glitch * 0.4);
+      setTimeout(end, ((a.duration || 3) + 1) * 1000);
+    }).catch(() => { if (!ended) { ended = true; this.noFile(id, line, glitch, done); } });
+  },
+
+  // No playable file: show the transmission and open/close the comm channel.
+  noFile(id, line, glitch, done) {
+    this.status[id] = 'missing';
+    this.failedAt[id] = Date.now();
+    if (line.text) this.subtitle(line.text, line.text.length * 0.075 + 3, glitch);
+    if (this.ctx) this.glitchBed(0.6, glitch * 0.5);
+    setTimeout(done, 1200);
+    if (typeof UI !== 'undefined' && UI.screen === 'settings') UI.render();
   },
 
   // ---- playing a line: real distortion and stutter ----
@@ -159,15 +199,12 @@ const Voice = {
     const ctx = this.audio();
     const glitch = line.glitch ?? 0.35;
     let buf = null;
-    try { if (ctx) buf = await this.load(id, line); } catch (e) { this.missing.add(id); }
-    const seconds = buf ? buf.duration : line.text.length * 0.075 + 1;
-    if (this.subtitles || !buf) this.subtitle(line.text, seconds + 2, glitch);
-    if (!buf) {
-      // no file yet: just open and close the comm channel
-      if (ctx) this.glitchBed(0.6, glitch * 0.5);
-      setTimeout(done, 1200);
-      return;
-    }
+    try { if (ctx) buf = await this.load(id, line); } catch (e) { /* fall back to plain playback */ }
+    if (!buf) { this.playBasic(id, line, glitch, done); return; }
+    this.status[id] = 'ready';
+    delete this.failedAt[id];
+    if (ctx.state === 'suspended') ctx.resume();
+    if (this.subtitles && line.text) this.subtitle(line.text, buf.duration + 2, glitch);
     // radio tone: band-limit, then soft-clip
     const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 280;
     const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;

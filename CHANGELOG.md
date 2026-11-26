@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.15.3 — 2026-11-26
+- Fix: the voice could stay silent, for example when the game was opened straight from disk, where browsers block loading the file for the effects chain. Lines now fall back to plain playback (no live effects) when the effects path can't load them, and a failed file is retried after 30 seconds instead of never.
+- The voice shares the music's audio channel when music is playing.
+- Settings: "Computer voice" is now "Assistant"; Test plays `slipspace.mp3`; each voice file shows whether it plays with effects, plainly, or not at all.
+
 ## 0.15.2 — 2026-11-26
 - First recorded voice line: `welcome_back.mp3` ("Welcome back, Commander.").
 - `assets/voice/README.md` documents how the voice is made: text-to-speech.online with "Sonia - GB", then Audacity echo (0.3 s, decay 0.4) and a duplicated track pitched −3 %.

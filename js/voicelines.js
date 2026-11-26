@@ -14,13 +14,18 @@
 // Triggers in use:
 //   start   the first click or key press after the game loads
 //   return  coming back after more than 5 minutes away (tab hidden or no activity)
+//   test    the Test button in Settings (Assistant)
+//
+// Lines with an empty text play without an on-screen transmission.
 
 const VoiceLines = {
   welcome_back: { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
+  slipspace:    { text: '', triggers: ['test'], glitch: 0.35 }, // played by the Test button in Settings
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
 const VoiceTriggers = {
   start:  { cooldown: 0 },
   return: { cooldown: 60, idleMinutes: 5 },
+  test:   { cooldown: 0 },
 };
