@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.15.2 — 2026-11-26
+- First recorded voice line: `welcome_back.mp3` ("Welcome back, Commander.").
+- `assets/voice/README.md` documents how the voice is made: text-to-speech.online with "Sonia - GB", then Audacity echo (0.3 s, decay 0.4) and a duplicated track pitched −3 %.
+
 ## 0.15.1 — 2026-11-26
 - Voice: a missing voice file is only looked for once per session (less console noise). Reload after adding a file.
 
