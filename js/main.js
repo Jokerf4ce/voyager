@@ -94,8 +94,7 @@ const Game = {
     bshow: (a) => { UI.bOpen = a; UI.screen = 'buildings'; },
     bauto: (a) => { Colonies.buildAuto(a); },
     bplace: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
-    mapmode: (a) => { UI.mapMode = a; UI.selPlanet = null; },
-    selplanet: (a) => { UI.mapMode = 'system'; UI.selPlanet = +a; },
+    selplanet: (a) => { UI.selPlanet = UI.selPlanet === +a ? null : +a; },
     mapfleet: (a) => { const f = Fleets.get(+a); UI.selFleet = f.id; UI.selSys = f.sys; UI.screen = 'map'; },
     pull: (a) => { const r = Gacha.pull(+a); if (r) UI.lastPull = r; },
     eventchoice: (a) => { Explore.resolveEvent(+a); UI.closeModal(); },
@@ -143,7 +142,7 @@ document.addEventListener('input', (ev) => {
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
-  if (ev.code === 'Escape') { if (UI.mapMode === 'system') UI.mapMode = 'galaxy'; else UI.selFleet = null; UI.render(); }
+  if (ev.code === 'Escape') { if (UI.selFleet) UI.selFleet = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
 });
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -159,7 +158,14 @@ window.addEventListener('DOMContentLoaded', () => {
   const firstGesture = () => { Music.start(); Voice.trigger('start'); UI.renderTop(); };
   document.addEventListener('pointerdown', firstGesture, { once: true });
   document.addEventListener('keydown', firstGesture, { once: true });
-  UI.$('btn-menu').onclick = () => document.body.classList.toggle('nav-collapsed');
+  // Side menu: ☰ toggles it; it collapses on its own 10 s after the cursor leaves it.
+  const nav = UI.$('nav');
+  let navTimer = null;
+  const armNav = () => { clearTimeout(navTimer); navTimer = setTimeout(() => document.body.classList.add('nav-collapsed'), 10000); };
+  nav.addEventListener('mouseenter', () => clearTimeout(navTimer));
+  nav.addEventListener('mouseleave', armNav);
+  UI.$('btn-menu').onclick = () => { document.body.classList.toggle('nav-collapsed'); if (!nav.matches(':hover')) armNav(); };
+  armNav();
   if (location.hash === '#admin') State.slot = 'admin';
   if (State.load()) {
     const off = State.applyOffline();

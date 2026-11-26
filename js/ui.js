@@ -4,7 +4,7 @@ const UI = {
   screen: 'map',
   selSys: null,
   selPlanet: null,
-  mapMode: 'galaxy', // 'galaxy' or 'system'
+  hover: null,       // star-map hover card: { id, x, y }
   selFleet: null,
   yard: null,
   bOpen: null,        // building type expanded on the Buildings screen
@@ -46,14 +46,18 @@ const UI = {
       this.colSys = null;
     }
     this.lastScreen = this.screen;
+    document.body.classList.toggle('map-screen', this.screen === 'map'); // the map screen hides the Chronicle
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
-      if (this.mapMode === 'system') {
-        SystemMap.draw(cv);
-        cv.onclick = (ev) => { const p = SystemMap.hit(cv, ev); this.selPlanet = p ? p.idx : null; this.render(); };
-      } else {
-        StarMap.draw(cv);
-        cv.onclick = (ev) => this.mapClick(cv, ev);
+      StarMap.draw(cv);
+      cv.onclick = (ev) => this.mapClick(cv, ev);
+      cv.onpointermove = (ev) => { if (ev.pointerType === 'mouse') this.mapHover(cv, ev); }; // no hover card on touch
+      cv.onmouseleave = () => { this.hover = null; this.$('maphover').classList.remove('show'); };
+      if (this.hover) this.showHover(); // keep the hover card through re-renders (e.g. Auto)
+      const sc = this.$('syscanvas');
+      if (sc) {
+        SystemMap.draw(sc);
+        sc.onclick = (ev) => { const p = SystemMap.hit(sc, ev); this.selPlanet = p ? p.idx : null; this.render(); };
       }
     }
     this.renderTicker();
@@ -185,25 +189,68 @@ const UI = {
     </div>`;
   },
 
+  // Scroll down to the selected system's solar system map.
   openSystem() {
-    this.mapMode = 'system';
     this.selPlanet = null;
     this.render();
+    const el = this.$('sysrow');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
 
+  // Star map across the full width (hover a star for a summary), the selected system's solar system below.
   screen_map() {
     const s = this.selSys != null ? G.systems[this.selSys] : null;
-    if (this.mapMode === 'system' && !(s && s.explored)) this.mapMode = 'galaxy';
-    const sysMode = this.mapMode === 'system';
-    const tabs = `<div class="btnrow maptabs">${this.btn('✦ Star Map', 'mapmode', 'galaxy', false, sysMode ? '' : 'on')}${this.btn('◉ Solar System' + (s && s.explored ? ': ' + U.esc(s.name) : ''), 'mapmode', 'system', !(s && s.explored), sysMode ? 'on' : '')}</div>`;
-    const hint = sysMode
-      ? 'Click a planet to inspect it. Hot worlds orbit close to the star, frozen ones far out.'
-      : this.selFleet ? `<b>${U.esc((Fleets.get(this.selFleet) || {}).name || '')}</b> selected. Click a system to send it there.` : 'Click a system to inspect it, double-click to open its solar system. Select one of your fleets to give it orders.';
-    return `<div class="mapwrap">
-      <div class="mapbox">${tabs}<canvas id="mapcanvas" width="${StarMap.W}" height="${StarMap.H}"></canvas>
+    const hint = this.selFleet
+      ? `<b>${U.esc((Fleets.get(this.selFleet) || {}).name || '')}</b> selected. Click a system to send it there.`
+      : 'Hover a system for a summary, click it to select it. Its solar system, planets and fleets appear below.';
+    let below = '';
+    if (s) {
+      const sysMap = s.explored
+        ? `<div class="sysmapbox"><h3 class="sysmap-title">◉ ${U.esc(s.name)}</h3><canvas id="syscanvas" width="${SystemMap.W}" height="${SystemMap.H}"></canvas>
+            <div class="maphint">Click a planet to inspect it. Hot worlds orbit close to the star, frozen ones far out.</div></div>`
+        : `<div class="sysmapbox"><h3 class="sysmap-title">? ${U.esc(s.name)}</h3><p class="flavor">Uncharted. Send a scout to see its star and planets.</p></div>`;
+      below = `<div class="sysrow" id="sysrow">${sysMap}<aside class="side">${this.systemPanel()}</aside></div>`;
+    }
+    return `<div class="mapscreen">
+      <div class="mapbox"><canvas id="mapcanvas" width="${StarMap.W}" height="${StarMap.H}"></canvas>
+        <div id="maphover" class="maphover"></div>
         <div class="maphint">${hint}</div></div>
-      <aside class="side">${this.systemPanel()}</aside>
+      ${below}
     </div>`;
+  },
+
+  // Hover card over the star map.
+  mapHover(cv, ev) {
+    const s = StarMap.hit(cv, ev);
+    const box = cv.parentElement.getBoundingClientRect();
+    this.hover = s ? { id: s.id, x: ev.clientX - box.left, y: ev.clientY - box.top } : null;
+    cv.style.cursor = s ? 'pointer' : 'crosshair';
+    this.showHover();
+  },
+  showHover() {
+    const el = this.$('maphover');
+    if (!el) return;
+    if (!this.hover) { el.classList.remove('show'); return; }
+    const s = G.systems[this.hover.id];
+    if (el.dataset.sys !== String(s.id) || !el.classList.contains('show')) { el.innerHTML = this.hoverCard(s); el.dataset.sys = s.id; }
+    el.classList.add('show');
+    const W = el.parentElement.clientWidth, H = el.parentElement.clientHeight;
+    const w = el.offsetWidth, h = el.offsetHeight;
+    let x = this.hover.x + 18, y = this.hover.y + 18;
+    if (x + w > W) x = this.hover.x - w - 18;
+    if (y + h > H) y = Math.max(0, H - h);
+    el.style.left = Math.max(0, x) + 'px';
+    el.style.top = y + 'px';
+  },
+  hoverCard(s) {
+    const fleets = Fleets.at(s.id);
+    const fleetLine = fleets.length ? `<div class="small">${fleets.map((f) => `<span style="color:${DATA.factions[f.owner].color}">${U.esc(f.name)} (${Fleets.size(f)})</span>`).join(' · ')}</div>` : '';
+    if (!s.explored) return `<h4>? ${U.esc(s.name)}</h4><p class="muted small">Uncharted. Send a scout.</p>${fleetLine}`;
+    const st = DATA.starClasses[s.star], owner = s.owner ? DATA.factions[s.owner] : null;
+    return `<div class="sys-head">${this.starImg(s, 36)}<div><h4>${U.esc(s.name)}</h4><small style="color:${st.color}">${st.name}</small></div></div>
+      <div class="small" style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}${s.owner ? ` <span class="muted">· garrison ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)}</span>` : ''}</div>
+      ${s.planets.map((p) => `<div class="hp-row">${this.planetImg(s, p, 20)}<span>${U.esc(Colonies.planetName(s, p))}</span>${p.colony ? '<span class="lvl">⌂</span>' : ''}<span class="hab-pips" style="color:${DATA.habitability[p.hab].color}">${'●'.repeat(p.hab)}${'○'.repeat(5 - p.hab)}</span></div>`).join('')}
+      ${fleetLine}${s.anomaly ? '<div class="small res-shards">Strange signals here.</div>' : ''}`;
   },
 
   systemPanel() {
@@ -227,7 +274,7 @@ const UI = {
         if (ark && (!s.owner || s.owner === 'player') && p.slots.surface + p.slots.orbit > 0) act = this.btn('Settle with Ark', 'colonize', ark.id + ':' + p.idx, false, 'gold small');
         else if (s.owner === 'player') { const sc = Colonies.settleCost(p); act = this.btn(`Settle ${U.costText(sc)}`, 'settle', s.id + ':' + p.idx, !Colonies.canAfford(sc), 'small'); }
       }
-      return `<div class="planet-row ${p.colony ? 'settled' : ''} ${this.mapMode === 'system' && this.selPlanet === p.idx ? 'sel' : ''}" data-act="selplanet" data-a="${p.idx}">${this.planetImg(s, p, 40)}
+      return `<div class="planet-row ${p.colony ? 'settled' : ''} ${this.selPlanet === p.idx ? 'sel' : ''}" data-act="selplanet" data-a="${p.idx}">${this.planetImg(s, p, 40)}
         <div><b>${U.esc(Colonies.planetName(s, p))}</b> <span class="muted small">${Planets.label(p)}</span>
         <div class="small">${this.habText(p, true)}</div>
         <div class="small muted">${this.planetMods(p)} · surface ${p.slots.surface} · orbit ${p.slots.orbit}</div>

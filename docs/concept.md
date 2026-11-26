@@ -68,6 +68,8 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes and fleets. The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and fleets at the jump point. The Solar System map draws sizes to scale, using real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of a big star fits on screen. Two exceptions keep things visible: small worlds are drawn at least 8 px across, and pulsars and black holes are enlarged. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
 
+**Map screen layout** (decided, v0.21): the Star Map fills the screen width; hovering a system shows a summary card (star, owner, planets with habitability, fleets). The selected system's Solar System map and its full panel (planets, settle, fleets) sit below the star map, in place of the Chronicle, which is hidden on this screen.
+
 
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
 

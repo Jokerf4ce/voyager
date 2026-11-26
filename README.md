@@ -11,7 +11,8 @@ See [docs/concept.md](docs/concept.md) for the design.
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
-- **Star Map:** click a system to inspect it, double-click to open its **Solar System** map. Select one of your fleets, then click a system to send it there.
+- **Star Map:** fills the screen width. Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and fleets appear below (double-click scrolls there). Select one of your fleets, then click a system to send it there.
+- The side menu collapses on its own 10 seconds after the cursor leaves it; ☰ opens it again.
 - **Admin test game:** Settings → *Open admin test game*, or add `#admin` to the address. A separate save with extra colonies, random buildings and full stores, for testing. The real save is not touched.
 - While the game is closed, the empire keeps producing at 50% efficiency (1 Cycle per 60 s, max 120 Cycles).
 

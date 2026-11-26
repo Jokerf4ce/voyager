@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.21.0 — 2026-11-26
+- **Star Map screen reworked**: the star map fills the full width. Hovering a system shows a summary card (star, owner and garrison, planets with habitability and colony marks, fleets, strange signals). Clicking selects it; its **Solar System** map and the full system panel (planets, settling, fleets) now sit below the star map instead of the Chronicle, which is hidden on this screen. Double-click scrolls down to it. Esc clears the fleet, planet or system selection. The old Star Map / Solar System tabs are gone.
+- The hover card is mouse-only; on touch screens a tap simply selects the system.
+- **Side menu** collapses on its own 10 seconds after the cursor leaves it (☰ opens it again).
+
 ## 0.20.0 — 2026-11-26
 - **Building icons**: a 12×12 pixel icon for each of the 15 buildings (in `js/sprites.js`, `Sprites.building`), shown on the Buildings screen, in each colony's build lists, in the Overview building summary and as chips on the Colonies screen.
 - **Buildings screen condensed**: one line per building (icon, name, total level, a one-line description, Auto button with its cost). Hover Auto to see where it will build; click a row for the colony list and "Build at".
