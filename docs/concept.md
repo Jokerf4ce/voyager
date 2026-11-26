@@ -105,8 +105,8 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 | Resource | Type | Source | Used for |
 |---|---|---|---|
-| **Metals** | gathered | Deep Mines on rocky worlds | almost everything; Polymer input |
-| **Rare Minerals** | gathered | Core Drills, Atmosphere Skimmers; hot worlds, dwarfs, stellar remnants | advanced buildings and ships; Polymer and Chemical input |
+| **Metals** | gathered | Deep Mines on rocky worlds | almost everything; Electronics input |
+| **Rare Minerals** | gathered | Core Drills, Atmosphere Skimmers; hot worlds, dwarfs, stellar remnants | advanced buildings and ships; Electronics and Chemical input |
 | **Organics** | gathered | Bio-Harvesters on living and icy worlds; Atmosphere Skimmers on gas giants | Chemical input; feeding survivors |
 | **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, Arks, warships, settling |
 | **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, Arks, warships, settling |
