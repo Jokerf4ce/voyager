@@ -291,6 +291,8 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
 .r-legendary { box-shadow: 0 0 0 2px #000, 0 0 14px #d0a020aa, 3px 3px 0 #000; }
 .r-omega { box-shadow: 0 0 0 2px #000, 0 0 18px #e04040; animation: omega 1.2s steps(3) infinite; }
 @keyframes omega { 50% { box-shadow: 0 0 0 2px #000, 0 0 26px #ff6060, 0 0 4px #fff inset; } }
+/* in battle the pulsing glow would compete with the active-ship outline: a steady glow instead */
+.board .scard.r-omega { animation: none; }
 
 /* shipyard */
 .buildtiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 10px; margin: 8px 0; }

@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.46.1 — 2026-11-27
+- Battle: Omega ships no longer pulse on the board (a steady red glow instead), so the active ship stands out. They still pulse in the hangar and shipyard.
+
 ## 0.46.0 — 2026-11-27
 - **Battle: Planetary Defenses can move** (and be pushed aside) like any ship, by drag and drop or with ◀ ▶.
 - **Battle: no holes in a row.** Ships can only move within their row, so the lanes stay packed. Wrecks keep their place, and rows that had gaps are closed up.
