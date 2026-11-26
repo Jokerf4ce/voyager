@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.23.1 — 2026-11-26
+- New `docs/combat.md`: the combat mechanics in full (sizes, types, rarities, weapons, turn order, hit and damage formulas, defenses, rewards, enemies, maintenance).
+
 ## 0.23.0 — 2026-11-26
 New fleet and combat system. **Old saves start a new game** (save format v11).
 - **Ship cards.** Ships come in three sizes that beat each other like rock-paper-scissors (Small > Large > Medium > Small), with three types each: Scout, Fighter, Heavy Fighter · Corvette, Frigate, Gunboat · Destroyer, Battleship, Carrier. Stats: shield, hull, speed (turn order), maneuverability (evasion), 1–3 weapon slots, maintenance.

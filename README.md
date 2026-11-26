@@ -41,6 +41,8 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 
 The build version is shown in the bottom-right corner of the game. It is set in `js/version.js`, and every change is listed in [CHANGELOG.md](CHANGELOG.md).
 
+Combat rules and numbers: [docs/combat.md](docs/combat.md).
+
 ## Code layout
 
 ```
