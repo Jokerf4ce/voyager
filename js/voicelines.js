@@ -26,18 +26,21 @@
 
 const VoiceLines = {
   welcome_back:   { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
-  slipspace:      { text: 'Slipspace rupture detected!', triggers: ['test', 'random'], glitch: 0.35 }, // played by the Test button in Settings
   gagarin:        { text: 'Attention! Colonel Gagarin, please report to Medbay!', triggers: ['random'], glitch: 0.35 },
   shepard:        { text: 'Attention! Rear admiral Shepard, your keycard was found in engineering!', triggers: ['random'], glitch: 0.35 },
   still_here:     { text: 'Hey, are you still here?', triggers: ['random', 'return'], glitch: 0.35 },
-  hydrated:       { text: 'Commander, Make sure you stay hydrated', triggers: ['random'], glitch: 0.35 },
+  hydrated:       { text: 'Commander, Make sure you stay hydrated!', triggers: ['random'], glitch: 0.35 },
   second_monitor: { text: 'Commander, what is that on your second monitor?', triggers: ['random'], glitch: 0.35 },
   posture:        { text: 'Commander, make sure to keep a healthy posture!', triggers: ['random'], glitch: 0.35 },
   ripley:         { text: 'Attention! Warrant Officer Ripley, the cat is loose in the cargo bay again.', triggers: ['random'], glitch: 0.35 },
   cryopod:        { text: 'Cryo pod seven reports an occupant who is... awake. Please stand by.', triggers: ['random'], glitch: 0.45 },
-  coffee:         { text: 'Reminder: the coffee in the officers\' mess is not a fuel substitute.', triggers: ['random'], glitch: 0.35 },
+  coffee:         { text: 'Reminder: the coffee in the officers lounge is not a fuel substitute.', triggers: ['random'], glitch: 0.35 },
   airlock:        { text: 'Airlock three cycling. Whoever is in there, please knock twice.', triggers: ['random'], glitch: 0.4 },
   blink:          { text: 'Commander, remember to blink. Your crew finds it unsettling.', triggers: ['random'], glitch: 0.35 },
+  slipspace:      { text: 'Warning! Slipspace rupture detected!', triggers: ['combat'], glitch: 0.35 },
+  forces:         { text: 'Warning! Hostile forces inbound!', triggers: ['combat'], glitch: 0.35 },
+  signatures:     { text: 'Warning! Unknown signatures detected!', triggers: ['combat'], glitch: 0.35 },
+  hell:           { text: 'Commander! Give them hell!', triggers: ['combat'], glitch: 0.35 },
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
