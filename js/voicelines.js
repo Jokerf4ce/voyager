@@ -33,6 +33,11 @@ const VoiceLines = {
   hydrated:       { text: 'Commander, Make sure you stay hydrated', triggers: ['random'], glitch: 0.35 },
   second_monitor: { text: 'Commander, what is that on your second monitor?', triggers: ['random'], glitch: 0.35 },
   posture:        { text: 'Commander, make sure to keep a healthy posture!', triggers: ['random'], glitch: 0.35 },
+  ripley:         { text: 'Attention! Warrant Officer Ripley, the cat is loose in the cargo bay again.', triggers: ['random'], glitch: 0.35 },
+  cryopod:        { text: 'Cryo pod seven reports an occupant who is... awake. Please stand by.', triggers: ['random'], glitch: 0.45 },
+  coffee:         { text: 'Reminder: the coffee in the officers\' mess is not a fuel substitute.', triggers: ['random'], glitch: 0.35 },
+  airlock:        { text: 'Airlock three cycling. Whoever is in there, please knock twice.', triggers: ['random'], glitch: 0.4 },
+  blink:          { text: 'Commander, remember to blink. Your crew finds it unsettling.', triggers: ['random'], glitch: 0.35 },
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
