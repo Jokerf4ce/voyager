@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.14.1 — 2026-11-26
+- Playable online through GitHub Pages: https://jokerf4ce.github.io/voyager/ (deploys on every push to `main`).
+- Added `.nojekyll` so GitHub serves the files as they are.
+
 ## 0.14.0 — 2026-11-26
 - Ship's computer voice: a British female voice says "Welcome back, Commander." when you start playing and when you return after more than 5 minutes away.
 - Glitch effect: stuttered word fragments, small pitch slips, static, clicks and digital squelches, with the music ducked while she speaks.

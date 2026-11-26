@@ -6,7 +6,9 @@ See [docs/concept.md](docs/concept.md) for the design.
 
 ## Play
 
-Open `index.html` in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
+**Play online:** https://jokerf4ce.github.io/voyager/ (GitHub Pages, updated automatically on every push to `main`).
+
+Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
 - **Star Map:** click a system to inspect it, double-click to open its **Solar System** map. Select one of your fleets, then click a system to send it there.
