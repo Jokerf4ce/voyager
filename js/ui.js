@@ -199,7 +199,7 @@ const UI = {
         <p class="muted small">While the game is closed, your empire keeps producing at ${DATA.config.offlineEfficiency * 100}% efficiency (1 Cycle per ${DATA.config.offlineSecondsPerCycle}s, max ${DATA.config.offlineMaxCycles}).</p>`)}
       ${this.panel('Buildings', this.buildingSummary())}
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
-      ${this.panel('Threats & Missions', (threats || '<p class="muted small">No raids detected.</p>') + (away || '<p class="muted small">All fleets are home.</p>'))}
+      ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${DATA.raids.graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), DATA.raids.graceColonies)}/${DATA.raids.graceColonies}).</p>`)) + (away || '<p class="muted small">All fleets are home.</p>'))}
       ${this.panel('Battle Reports', this.reportList(5))}
     </div>`;
   },

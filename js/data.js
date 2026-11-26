@@ -217,6 +217,10 @@ DATA.weaponModels = {
 DATA.survey = { name: 'Survey probe', cost: { metal: 20, electronics: 5 }, desc: 'Charts an uncharted system next to known space.' };
 DATA.colonize = { name: 'Colony expedition', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony on the best planet of a charted, unclaimed, unguarded system.' };
 DATA.forge = { cost: { shards: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
+// Raids on the Covenant (js/ai.js). No raids until the player has founded graceColonies colonies besides the
+// capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
+// per empire, and waits cooldown Cycles after launching one.
+DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
 DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
@@ -377,7 +381,7 @@ DATA.tutorial = [
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
     text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, or <b>Medium</b> and <b>Large</b> once researched. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
   { screen: 'fleets', target: '#main .panel', title: 'Fleets',
-    text: 'Ships fight in fleets of up to five. From here (or from the Star Map) you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.' },
+    text: 'Ships fight in fleets of up to five. From here (or from the Star Map) you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>The xenos ignore you at first. Raids only begin once you have founded <b>{grace}</b> colonies besides your capital.' },
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
     text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire or swap it into another lane. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',

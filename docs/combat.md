@@ -369,7 +369,8 @@ Monsters have almost no shields, so physical weapons are the answer.
 - **Rarity:** odds improve with the Cycle; better rarities become up to 6× as likely by Cycle 175.
 
 **Raids:**
-- **When:** from Cycle 20, each faction has a 5 % × aggression chance per Cycle to launch a raid. A faction has at most one raid on its way at a time.
+- **Grace period:** no raids at all until you have founded **3 colonies besides your capital**. The Overview shows your progress; when it ends, the Chronicle and the Assistant warn you.
+- **When:** after that, each faction has a 2.5 % × aggression chance per Cycle to launch a raid. A faction has at most one raid on its way at a time, and waits 12 Cycles after launching one. In tests that comes to about one raid every 50 Cycles (before v0.40: about one every 20). Tuned in `DATA.raids`.
 - **Size:** 2 ships, plus 1 for every 30 Cycles after Cycle 20, up to 5.
 - **Warning:** the raid targets your system nearest to that faction and arrives in at least 2 Cycles. It shows on the Star Map (red !) and on the Overview.
 

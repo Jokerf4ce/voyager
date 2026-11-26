@@ -26,6 +26,18 @@ const AI = {
   },
   setGuard(s, id, n) { s.guard = { owner: id, name: DATA.factions[id].short + ' Garrison', ships: this.team(id, n) }; },
 
+  // Colonies the player founded besides the capital (the grace period lasts until DATA.raids.graceColonies).
+  foundedColonies() { return Colonies.playerPlanets().filter(({ p }) => !p.colony.capital).length; },
+  // Raids are possible once the grace period is over. The first time, the player is warned.
+  raidsOpen() {
+    if (G.raidsOpen) return true;
+    if (this.foundedColonies() < DATA.raids.graceColonies) return false;
+    G.raidsOpen = true;
+    Log.add('⚠ The Covenant has grown loud enough to be heard. The xenos have noticed you: from now on, expect raids on your colonies.', 'bad');
+    if (typeof Voice !== 'undefined' && VoiceLines.signatures) Voice.say('signatures', (VoiceTriggers.combat || {}).style);
+    return true;
+  },
+
   tick() {
     const aggro = State.mods().aiAggro;
     for (const id of this.ids) {
@@ -71,13 +83,16 @@ const AI = {
         home.guard.ships[home.guard.ships.indexOf(weakest)] = this.makeShip(id, size);
       }
 
-      // Raids on the Covenant.
-      if (G.cycle >= 20 && !G.threats.some((t) => t.owner === id) && Math.random() < 0.05 * (ai.aggro + aggro)) {
-        const n = Math.min(DATA.fleetMax, 2 + Math.floor((G.cycle - 20) / 30));
+      // Raids on the Covenant (after the grace period; see DATA.raids).
+      const R = DATA.raids;
+      if (this.raidsOpen() && !G.threats.some((t) => t.owner === id) && G.cycle - (ai.lastRaid || -999) >= R.cooldown
+          && Math.random() < R.chance * (ai.aggro + aggro)) {
+        const n = Math.min(DATA.fleetMax, 2 + Math.floor(Math.max(0, G.cycle - 20) / 30));
         const cost = n * 16;
         const target = this.pickTarget(id);
         if (target && ai.ore >= cost) {
           ai.ore -= cost;
+          ai.lastRaid = G.cycle;
           const eta = Math.max(2, target.d);
           G.threats.push({ id: 't' + (G.nextThreatId++), owner: id, name: `${DATA.factions[id].short} Raid`, target: target.s.id, eta, total: eta, ships: this.team(id, n) });
           Log.add(`⚠ Long-range augurs detect a ${DATA.factions[id].short} raid of ${n} ships moving toward ${target.s.name}. Arrival in ${eta} Cycles.`, 'bad');

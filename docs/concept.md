@@ -177,7 +177,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - Maintenance is paid each Cycle in Metals, plus half as much in Chemicals.
 - Research unlocks Medium hulls (*Medium Hulls*) and Large hulls (*Capital Hulls*).
 - Weapons come from scrapping ships (which also refunds 30 % of a hull's cost), from wrecks after a victory (30 % chance per destroyed alien ship) and from the Weapon Forge (15 Shards, rarity rolled like a ship's).
-- Alien raids appear as threats with a countdown. When one arrives you choose a fleet to defend; the system's Bastions and Defense Platforms fight as one **Planetary Defenses** card (the capital always has one). If the defense loses, the system falls.
+- Alien raids (decided v0.40: only after a grace period of 3 colonies founded besides the capital, and rarer, see `docs/combat.md`) appear as threats with a countdown. When one arrives you choose a fleet to defend; the system's Bastions and Defense Platforms fight as one **Planetary Defenses** card (the capital always has one). If the defense loses, the system falls.
 - Monster lairs and alien worlds are guarded by ship cards. The Chorus leans on energy weapons, the Iron Remnant on physical ones. Alien ships get better rarities and bigger hulls as the Cycles pass.
 
 **Open:** abilities per ship type (for example Carriers launching fighters, Scouts spotting), boarding or capturing ships, fleet formations.

@@ -49,7 +49,7 @@ const Tutorial = {
   clear() { document.querySelectorAll('.tut-focus').forEach((el) => el.classList.remove('tut-focus')); },
 
   text(st) {
-    return st.text.replace('{survey}', U.costText(DATA.survey.cost)).replace('{colonize}', U.costText(DATA.colonize.cost));
+    return st.text.replace('{survey}', U.costText(DATA.survey.cost)).replace('{colonize}', U.costText(DATA.colonize.cost)).replace('{grace}', DATA.raids.graceColonies);
   },
 
   // Called after every UI.render (the screens are rebuilt, so the outline has to be put back).

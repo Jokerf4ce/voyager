@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.40.0 — 2026-11-26
+- **Grace period before raids.** The xenos leave you alone until you have founded 3 colonies besides your capital. The Overview's *Threats & Missions* panel shows your progress (for example 1/3). When the grace period ends, the Chronicle and the Assistant warn you.
+- **Raids are rarer.** Half the chance per Cycle (2.5 % × aggression) and a 12-Cycle wait for each empire after it launches a raid. In tests that is about one raid every 50 Cycles instead of every 20. Tuned in `DATA.raids`.
+- Tutorial updated: the Fleets step explains the grace period.
+
 ## 0.39.0 — 2026-11-26
 - **End Cycle is locked during combat.** The button is greyed out while a battle waits for your choice or is being fought (Space / Enter takes you to the battle).
 - **No Continue button after a battle.**
