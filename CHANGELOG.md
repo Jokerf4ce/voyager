@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.22.0 — 2026-11-26
+- Three new dark, unsettling music tracks (Settings → Playlist):
+  - **The Hollow Choir**: B Locrian. A drone grinding against a ghost a semitone above, a choir in semitone clusters, wind through empty decks, a wail sliding down, distant metal.
+  - **Signal from Below**: F Phrygian. Geiger crackle and radio sweeps, a music-box motif played slightly out of tune with notes that go missing, strings a tritone apart, a heartbeat that skips.
+  - **Groaning Hull**: C# Phrygian dominant. Bending metal groans, struck-metal stress hits, brass in grinding minor seconds, a thin whistle that never settles, and a collapse section with rising wind.
+- New music instruments: `noise` (wind/static sweeps), `glide` (sliding moans), `metal` (struck metal), `crackle` (static ticks).
+
 ## 0.21.1 — 2026-11-26
 - The star map is wider and less tall (480×210 instead of 400×250, same area), so the full-width map and its hint fit on a 1920×1080 screen without scrolling. On very short windows it is capped to the window height. New galaxies space their systems for the new shape; existing saves keep their layout, slightly squeezed vertically.
 

@@ -217,6 +217,9 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 | Cathedral of Ash | monk choir over a drone; strings and war drums rise and fall | D minor, 54 bpm |
 | Cold Drift | exploring: slow pads, distant bells, a faint choir | E Dorian, 46 bpm |
 | Iron Tide | war: drum ostinato, low brass, pulsing strings, choir | C harmonic minor, 72 bpm |
+| The Hollow Choir | dread: grinding drone, semitone choir, wind, distant metal | B Locrian, 40 bpm |
+| Signal from Below | crackling dead channel, out-of-tune music-box motif, skipping heartbeat | F Phrygian, 58 bpm |
+| Groaning Hull | hull under strain: metal groans and hits, brass in minor seconds, a thin whistle | C# Phrygian dominant, 50 bpm |
 
 Recorded audio files can be added as tracks alongside the generated ones.
 

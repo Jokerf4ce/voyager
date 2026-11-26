@@ -2,7 +2,8 @@
 //
 // Generative track: { id, name, mood, root (MIDI), scale, bpm, bars, bar(M, t, i) }
 //   bar() is called once per bar with the engine M, the start time t and the bar number i within the track,
-//   and schedules notes with M's instruments: M.voice, M.strings, M.drone, M.drum, M.bell, M.brass.
+//   and schedules notes with M's instruments: M.voice, M.strings, M.drone, M.drum, M.bell, M.brass,
+//   and for the dark tracks M.noise (wind/static), M.glide (sliding moans), M.metal (struck metal), M.crackle (static ticks).
 //   Use M.degree(d, octave) / M.triad(d, octave) for notes in the track's scale; M.intensity is 0..1 (battles).
 // Recorded track: { id, name, mood, src: 'assets/music/file.mp3' } plays an audio file instead.
 
@@ -165,6 +166,169 @@ const MusicTracks = [
         for (const m of [a + 12, b + 12, c + 12]) M.voice(t, m, M.barLen * 1.02, 0.09, 'ah');
         if (inPhrase === 0) M.voice(t, M.degree(chord + 7, 2), M.barLen * 2, 0.16, 'ah', 2);
       }
+    },
+  },
+  // ---------------------------------------------------------------------------
+  {
+    id: 'hollow',
+    name: 'The Hollow Choir',
+    mood: 'Dread: a drone that grinds against itself, a choir in semitones, wind through empty decks.',
+    root: 35,                          // B1
+    scale: [0, 1, 3, 5, 6, 8, 10],     // B Locrian: no stable fifth anywhere
+    bpm: 40,
+    bars: 40,
+    form: ['void', 'choir', 'choir', 'void', 'wail'],
+    chords: [0, 4, 1, 3],              // scale degrees the choir clusters on
+
+    bar(M, t, i) {
+      const phrase = Math.floor(i / 4), inPhrase = i % 4;
+      const section = this.form[phrase % this.form.length];
+      const hot = M.intensity;
+
+      // The drone has a perfect fifth, the scale a diminished one: they grind. A ghost a semitone up beats against it.
+      if (inPhrase === 0) {
+        M.drone(t, this.root, M.barLen * 4, 0.17);
+        M.drone(t + M.beat, this.root + 1, M.barLen * 4 - M.beat, 0.045);
+      }
+
+      // wind through the decks, rising or falling
+      if (i % 2 === 0) {
+        const up = Math.random() < 0.5;
+        M.noise(t + Math.random() * M.beat, M.barLen * 2, section === 'void' ? 0.06 : 0.04, up ? 180 : 700, up ? 700 : 180, 5);
+      }
+
+      // choir: two voices a semitone apart, barely there
+      if (section === 'choir' || section === 'wail') {
+        const d = this.chords[inPhrase];
+        const a = M.degree(d, 2);
+        M.voice(t, a, M.barLen * 1.1, 0.055, 'oo', 2);
+        M.voice(t + M.beat * 0.5, a + 1, M.barLen * 1.05 - M.beat * 0.5, 0.04, 'oo', 2);
+        if (inPhrase === 2) M.voice(t, M.degree(d + 4, 1), M.barLen * 2, 0.05, 'oh', 2);
+      }
+
+      // a lone wail sliding down a semitone, high and far away
+      if (section === 'wail' && inPhrase % 2 === 0) {
+        const top = M.degree(4 + Math.floor(Math.random() * 3), 4);
+        M.glide(t + Math.random() * M.beat, top, top - 1.2, M.barLen * 1.8, 0.035, 'sine');
+      }
+
+      // something heavy, somewhere in the ship
+      if (Math.random() < (section === 'void' ? 0.3 : 0.15)) M.metal(t + M.beat * Math.floor(Math.random() * 4), this.root + 24 + Math.floor(Math.random() * 6), 0.06);
+
+      // in battle: a slow heartbeat
+      if (hot > 0.2) {
+        M.drum(t, 0.4 * hot, 0.6);
+        M.drum(t + M.beat * 0.4, 0.25 * hot, 0.55);
+      }
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  {
+    id: 'signal',
+    name: 'Signal from Below',
+    mood: 'A dead channel crackling, a music-box motif slightly out of tune, a heartbeat that skips.',
+    root: 29,                          // F1
+    scale: [0, 1, 3, 5, 7, 8, 10],     // F Phrygian: the flat second hangs over everything
+    bpm: 58,
+    bars: 48,
+    form: ['static', 'motif', 'motif', 'static', 'motif', 'swell'],
+    motif: [7, 8, 7, 4],               // scale degrees, a minor-second turn falling to the fifth
+
+    bar(M, t, i) {
+      const phrase = Math.floor(i / 4), inPhrase = i % 4;
+      const section = this.form[phrase % this.form.length];
+      const hot = M.intensity;
+
+      if (inPhrase === 0) M.drone(t, this.root, M.barLen * 4, 0.16);
+
+      // Geiger crackle: a few ticks, sometimes a burst
+      const ticks = (section === 'static' ? 6 : 3) + Math.floor(Math.random() * 4) + (Math.random() < 0.15 ? 10 : 0);
+      for (let k = 0; k < ticks; k++) M.crackle(t + Math.random() * M.barLen, 0.025 + Math.random() * 0.05, 1800 + Math.random() * 3500);
+
+      // a radio dial sweeping through nothing
+      if (Math.random() < (section === 'static' ? 0.7 : 0.35)) {
+        const up = Math.random() < 0.5;
+        M.noise(t + Math.random() * M.beat, M.barLen * (0.8 + Math.random()), 0.035, up ? 400 : 2600, up ? 2600 : 400, 18);
+      }
+
+      // the motif, played a third of a semitone sharp; now and then a note goes missing or drops a tritone
+      if ((section === 'motif' || section === 'swell') && i % 2 === 0) {
+        this.motif.forEach((d, k) => {
+          const r = Math.random();
+          if (k > 0 && r < 0.12) return;
+          const m = M.degree(d, 3) + 0.33 - (k === 3 && r > 0.85 ? 6 : 0);
+          M.bell(t + k * M.beat * 0.75, m, 0.07);
+        });
+      }
+
+      // strings a tritone apart, swelling every two bars
+      if (i % 2 === 0 && section !== 'static') {
+        M.strings(t, this.root + 12, M.barLen * 2, 0.04);
+        M.strings(t + M.beat, this.root + 18, M.barLen * 2 - M.beat, 0.03);
+      }
+      if (section === 'swell') M.voice(t, M.degree(1, 2), M.barLen * 1.05, 0.05 + inPhrase * 0.02, 'ah', 2);
+
+      // a heartbeat that does not keep time
+      const beatVel = 0.22 + 0.4 * hot;
+      for (const b of [0, 2]) {
+        if (b === 2 && Math.random() < 0.25) continue; // skipped beat
+        const at = t + M.beat * b + (Math.random() - 0.5) * 0.12;
+        M.drum(at, beatVel, 0.55);
+        M.drum(at + 0.24, beatVel * 0.6, 0.5);
+      }
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  {
+    id: 'hull',
+    name: 'Groaning Hull',
+    mood: 'The ship under strain: metal groans, brass in grinding seconds, a thin whistle that will not stop.',
+    root: 37,                          // C#2
+    scale: [0, 1, 4, 5, 7, 8, 10],     // C# Phrygian dominant: old, ritual, wrong
+    bpm: 50,
+    bars: 48,
+    form: ['creak', 'creak', 'dread', 'dread', 'creak', 'collapse'],
+
+    bar(M, t, i) {
+      const phrase = Math.floor(i / 4), inPhrase = i % 4;
+      const section = this.form[phrase % this.form.length];
+      const hot = M.intensity;
+
+      if (inPhrase === 0) M.drone(t, this.root, M.barLen * 4, section === 'collapse' ? 0.22 : 0.17);
+
+      // the hull groans: low saws bending down
+      if (i % 2 === 0 || section === 'collapse') {
+        const from = this.root + 12 + Math.floor(Math.random() * 5);
+        M.glide(t + Math.random() * M.beat, from, from - 2 - Math.random() * 3, M.barLen * 1.6, section === 'creak' ? 0.05 : 0.035, 'sawtooth');
+      }
+
+      // metal stress: hits at odd moments
+      const hits = section === 'creak' ? 1 + Math.floor(Math.random() * 2) : Math.random() < 0.4 ? 1 : 0;
+      for (let k = 0; k < hits; k++) M.metal(t + Math.random() * M.barLen, this.root + 19 + Math.floor(Math.random() * 10), 0.05 + Math.random() * 0.03);
+
+      // brass grinding in minor seconds
+      if (section === 'dread' || section === 'collapse') {
+        const base = section === 'collapse' ? this.root + 12 - inPhrase : M.degree([0, 1, 0, 4][inPhrase], 1);
+        M.brass(t, base, M.barLen * 0.98, 0.045);
+        M.brass(t + M.beat * 0.5, base + 1, M.barLen * 0.98 - M.beat * 0.5, 0.035);
+        if (inPhrase === 2) M.voice(t, base + 13, M.barLen * 2, 0.07, 'ah', 3);
+      }
+
+      // the whistle: a thin sine wavering a fraction of a semitone, always slightly sharp
+      if (inPhrase === 0 && section !== 'collapse') {
+        const m = M.degree(4, 4);
+        M.glide(t, m + 0.15, m + 0.55, M.barLen * 4, 0.02, 'sine');
+      }
+
+      // the collapse: wind rising under everything
+      if (section === 'collapse' && inPhrase === 0) M.noise(t, M.barLen * 4, 0.08, 150, 1500, 3);
+
+      // a distant war drum, slow and uneven
+      const dv = (section === 'dread' ? 0.35 : section === 'collapse' ? 0.5 : 0.18) + hot * 0.4;
+      if (i % 2 === 0 || section !== 'creak') M.drum(t, 0.5 * dv, 0.7);
+      if (section !== 'creak' && Math.random() < 0.6) M.drum(t + M.beat * (2 + (Math.random() < 0.5 ? 0.33 : 0)), 0.35 * dv, 0.75);
     },
   },
 ];

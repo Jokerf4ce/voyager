@@ -212,6 +212,80 @@ const Music = {
     this.send(env, 0.6, 0.5);
   },
 
+  // A shared buffer of white noise (2 s), made once per audio context.
+  noiseBuffer() {
+    if (this.noiseBuf && this.noiseBuf.ctx === this.ctx) return this.noiseBuf.buf;
+    const len = this.ctx.sampleRate * 2, buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    this.noiseBuf = { ctx: this.ctx, buf };
+    return buf;
+  },
+
+  // Wind, breath or radio static: band-passed noise swelling in and out while its band sweeps from → to (Hz).
+  noise(t, dur, vel, from = 300, to = 900, q = 6) {
+    const ctx = this.ctx;
+    const n = ctx.createBufferSource(); n.buffer = this.noiseBuffer(); n.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = q;
+    bp.frequency.setValueAtTime(from, t);
+    bp.frequency.exponentialRampToValueAtTime(to, t + dur);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vel, t + dur * 0.5);
+    env.gain.linearRampToValueAtTime(0, t + dur);
+    n.connect(bp); bp.connect(env);
+    n.start(t, Math.random() * 1.5); n.stop(t + dur + 0.05);
+    this.send(env, 0.4, 0.9);
+  },
+
+  // A moaning tone sliding from one pitch to another (hull groans, distant sirens). Fractional MIDI is fine.
+  glide(t, from, to, dur, vel, type = 'triangle') {
+    const ctx = this.ctx;
+    const o = ctx.createOscillator(); o.type = type;
+    o.frequency.setValueAtTime(this.midiHz(from), t);
+    o.frequency.exponentialRampToValueAtTime(this.midiHz(to), t + dur);
+    const lfo = ctx.createOscillator(), lg = ctx.createGain();
+    lfo.frequency.value = 0.3 + Math.random() * 3; lg.gain.value = this.midiHz(from) * 0.012;
+    lfo.connect(lg); lg.connect(o.frequency);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vel, t + dur * 0.35);
+    env.gain.linearRampToValueAtTime(0, t + dur);
+    o.connect(lp); lp.connect(env);
+    o.start(t); o.stop(t + dur + 0.05); lfo.start(t); lfo.stop(t + dur + 0.05);
+    this.send(env, 0.35, 1);
+  },
+
+  // A struck metal plate: inharmonic FM with a long ring, far off in the reverb.
+  metal(t, midi, vel) {
+    const ctx = this.ctx, f0 = this.midiHz(midi);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vel, t + 0.004);
+    env.gain.exponentialRampToValueAtTime(0.0005, t + 5);
+    for (const [ratio, idx, g] of [[1.414, 2.8, 1], [2.76, 1.6, 0.5]]) {
+      const car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), cg = ctx.createGain();
+      car.frequency.value = f0 * (g === 1 ? 1 : 1.19); mod.frequency.value = f0 * ratio;
+      mg.gain.setValueAtTime(f0 * idx, t); mg.gain.exponentialRampToValueAtTime(f0 * 0.1, t + 3);
+      mod.connect(mg); mg.connect(car.frequency); cg.gain.value = g;
+      car.connect(cg); cg.connect(env);
+      car.start(t); mod.start(t); car.stop(t + 5.1); mod.stop(t + 5.1);
+    }
+    this.send(env, 0.15, 1);
+  },
+
+  // A short tick of static (Geiger counter, a dying radio).
+  crackle(t, vel, freq = 3000) {
+    const ctx = this.ctx;
+    const n = ctx.createBufferSource(); n.buffer = this.noiseBuffer();
+    const hp = ctx.createBiquadFilter(); hp.type = 'bandpass'; hp.frequency.value = freq; hp.Q.value = 1.5;
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(vel, t); env.gain.exponentialRampToValueAtTime(0.0005, t + 0.03);
+    n.connect(hp); hp.connect(env);
+    n.start(t, Math.random() * 1.5); n.stop(t + 0.05);
+    this.send(env, 0.7, 0.3);
+  },
+
   // ---- playlist ----
   find(id) { return this.tracks.find((t) => t.id === id) || this.tracks[0]; },
 

@@ -30,7 +30,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
 - Void Signals gacha: shards earned in play, rarities, pity, rank-ups, cursed relics, ship blueprints
 - Auto-cycle, offline progress, save export/import
-- Generative soundtrack synthesised in the browser: three tracks in a playlist (mute with ♪, tracks and volume in Settings)
+- Generative soundtrack synthesised in the browser: six tracks in a playlist (mute with ♪, tracks and volume in Settings)
 - The Assistant, the ship's computer voice ("Welcome back, Commander."): mp3 lines in `assets/voice/`, listed with their triggers in `js/voicelines.js`
 - Placeholder pixel art generated in code (planets, portraits, ships), to be replaced with real sprites
 
