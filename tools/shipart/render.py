@@ -2,15 +2,19 @@
 """
 Voyager — ship sprite generator.
 
-Every ship is a tiny low-poly model (boxes, wedges and plates). It is drawn in a 3/4 view with flat shading
-and a depth buffer at 4x resolution, then reduced to pixel art: each pixel takes the colour of the face that
-covers most of it, faces get 1 px panel lines where they meet, the silhouette gets a dark outline and a rim
-light, and engines get a dithered glow.
+Every ship is a tiny low-poly model (boxes, wedges and plates). It is drawn in a 3/4 view (nose toward the
+viewer, lower left) with flat shading and a depth buffer at 4x resolution, then reduced to pixel art: each
+pixel takes the colour of the face that covers most of it, faces get 1 px panel lines where they meet, the
+silhouette gets a dark outline and a rim light, and engines get a dithered glow.
 
-Output: assets/ships/<type>_<palette>_<view>.png
-  palette: player | chorus | remnant | monster
-  view:    front (nose toward the viewer, lower left: cards, enemies in battle)
-           rear  (nose away, upper right: your ships in battle, facing the enemy line)
+The sprites are colourless templates: every pixel is a grey level that stands for one material and shade
+(hull, metal, accent, glass, glow, void, halo, outline). The game recolours them on the fly with any palette
+(DATA.shipPalettes in js/data.js), so one image per ship type serves every faction.
+
+Output:
+  assets/ships/<type>.png   the grey templates (to look at)
+  js/shipsprites.js         the same templates as data URIs plus the grey -> (material, shade) table,
+                            so the game can read the pixels even when opened straight from disk
 
 Run from the repository root:  python3 tools/shipart/render.py   (needs numpy and Pillow)
 All ships share one scale (PXU pixels per model unit), so a Battleship really is bigger than a Fighter.
@@ -22,41 +26,34 @@ from PIL import Image
 SS = 4            # supersampling factor
 PXU = 50          # final pixels per model unit
 PITCH = -38       # camera looks down at the ship
-VIEWS = {'front': -145, 'rear': 35}
+VIEW = -145      # yaw: nose toward the viewer, lower left
 LIGHT = np.array([-0.45, 0.8, -0.4]); LIGHT /= np.linalg.norm(LIGHT)   # upper left, toward the viewer
-OUTLINE = (10, 8, 7)
 
-PALETTES = {
-    'player': {  # the Covenant: bone hull, soot metal, rust trim, cyan glass, ember engines
-        'hull':   ['#1c1814', '#3a332b', '#5a5145', '#7e7464', '#a89c86', '#d2c6aa', '#ece2c8'],
-        'metal':  ['#121010', '#26221e', '#3c3630', '#56504a', '#787068', '#9a9088'],
-        'accent': ['#3a140c', '#6a2414', '#9a3a1e', '#c0592e', '#e0804a'],
-        'glass':  ['#081014', '#10232c', '#1c3a46', '#2e5a68', '#5aa0b0', '#a8e0e8'],
-        'glow':   ['#ffb050', '#ffd890'], 'halo': ('#ff7a30', '#c03018'),
-    },
-    'chorus': {  # the hive: sickly pale-green chitin, toxic green trim, amber eyes, green drive glow
-        'hull':   ['#121610', '#262e22', '#3e4a36', '#5c6c50', '#82947a', '#a8b89c', '#cad8bc'],
-        'metal':  ['#0c0f0a', '#1a2016', '#2a3424', '#3e4a36', '#56644c', '#728262'],
-        'accent': ['#1a2c0e', '#2c4a16', '#467820', '#6ca832', '#a0d860'],
-        'glass':  ['#141008', '#2a2410', '#4a4018', '#7a6a20', '#c0a830', '#f0e070'],
-        'glow':   ['#a0ff60', '#e0ffb0'], 'halo': ('#90e050', '#3a7a20'),
-    },
-    'remnant': {  # the war machines: iron grey, black metal, blood-orange trim, red optics
-        'hull':   ['#121214', '#24242a', '#3a3a42', '#56565e', '#7a7a80', '#a0a0a4', '#c4c4c4'],
-        'metal':  ['#0a0a0c', '#18181c', '#28282e', '#3a3a42', '#525258', '#6c6c72'],
-        'accent': ['#401008', '#701c0c', '#a83018', '#d05030', '#f08050'],
-        'glass':  ['#180606', '#300a0a', '#581010', '#901818', '#d03020', '#ff7050'],
-        'glow':   ['#ff6030', '#ffb090'], 'halo': ('#ff5020', '#a01808'),
-    },
-    'monster': {  # things from the dark: flesh, bone, sinew, yellow eyes
-        'hull':   ['#140808', '#2c0e10', '#4a1418', '#6e2024', '#943038', '#b84850', '#d87070'],
-        'metal':  ['#1a1612', '#3a332a', '#5e5444', '#8a7c64', '#b4a688', '#d8ccae'],
-        'accent': ['#1a0c1a', '#341834', '#542a50', '#7a4070', '#a86098'],
-        'glass':  ['#201a04', '#4a3a08', '#806010', '#c0a020', '#f0e040', '#ffffa0'],
-        'glow':   ['#f0e040', '#ffffa0'], 'halo': ('#d0c030', '#6a5010'),
-    },
+# Shades per material (dark -> light). The template gives each (material, shade) its own grey level,
+# close to how bright it looks in the Covenant palette, so the template still reads as a ship.
+RAMP_SIZES = {'hull': 7, 'metal': 6, 'accent': 5, 'glass': 6, 'glow': 2, 'void': 1, 'halo': 2, 'outline': 1}
+LOOK = {  # brightness reference for the grey levels (the Covenant colours)
+    'hull':   ['#1c1814', '#3a332b', '#5a5145', '#7e7464', '#a89c86', '#d2c6aa', '#ece2c8'],
+    'metal':  ['#121010', '#26221e', '#3c3630', '#56504a', '#787068', '#9a9088'],
+    'accent': ['#3a140c', '#6a2414', '#9a3a1e', '#c0592e', '#e0804a'],
+    'glass':  ['#081014', '#10232c', '#1c3a46', '#2e5a68', '#5aa0b0', '#a8e0e8'],
+    'glow':   ['#ffb050', '#ffd890'], 'void': ['#050404'], 'halo': ['#ff7a30', '#c03018'], 'outline': ['#0a0807'],
 }
-for p in PALETTES.values(): p['void'] = ['#050404', '#050404']
+
+def build_template():
+    used, table, pal = set(), {}, {}
+    for mat, n in RAMP_SIZES.items():
+        pal[mat] = []
+        for i in range(n):
+            r, g, b = (int(LOOK[mat][i][k:k + 2], 16) for k in (1, 3, 5))
+            v0 = int(round(0.3 * r + 0.59 * g + 0.11 * b))
+            v = next(c for d in range(256) for c in (v0 + d, v0 - d) if 1 <= c <= 254 and c not in used)  # nearest free grey
+            used.add(v); table[v] = [mat, i]
+            pal[mat].append('#%02x%02x%02x' % (v, v, v))
+    pal['halo'] = tuple(pal['halo'])
+    return pal, table
+
+TEMPLATE, GREY_TABLE = build_template()
 
 def rgb(h): return tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
 
@@ -314,7 +311,6 @@ def defense(m):
 MODELS = {'scout': scout, 'fighter': fighter, 'heavy': heavy, 'corvette': corvette, 'frigate': frigate,
           'gunboat': gunboat, 'destroyer': destroyer, 'battleship': battleship, 'carrier': carrier,
           'lurker': lurker, 'maw': maw, 'leviathan': leviathan, 'defense': defense}
-MONSTERS = {'lurker', 'maw', 'leviathan'}
 
 # ---------------------------------------------------------------- rendering
 def render(model_fn, pal, yaw_deg):
@@ -352,7 +348,7 @@ def render(model_fn, pal, yaw_deg):
     for k, (q, n, mt) in enumerate(faces):
         ramp = pal[mt]
         lam = max(0.0, float(np.dot(n, LIGHT)))
-        idx = (1 if lam > 0.2 else 0) if mt in ('glow', 'void') else min(len(ramp) - 1, int(round((0.18 + 0.82 * lam) * (len(ramp) - 1))))
+        idx = min(len(ramp) - 1, 1 if lam > 0.2 else 0) if mt in ('glow', 'void') else min(len(ramp) - 1, int(round((0.18 + 0.82 * lam) * (len(ramp) - 1))))
         colours.append((mt, idx))
         S = [np.array([ox + p[0] * pxu, oy - p[1] * pxu, p[2]]) for p in q]
         for tri in ((S[0], S[1], S[2]), (S[0], S[2], S[3])):
@@ -413,7 +409,7 @@ def render(model_fn, pal, yaw_deg):
                 if info and info[0] in ('hull', 'accent') and info[1] >= 2 and (not nb(y - 1, x) or not nb(y, x - 1)):
                     r = pal[info[0]]; o[y, x] = rgb(r[min(len(r) - 1, info[1] + 2)]) + (255,)
             elif nb(y + 1, x) or nb(y - 1, x) or nb(y, x + 1) or nb(y, x - 1):
-                o[y, x] = OUTLINE + (255,)
+                o[y, x] = rgb(pal['outline'][0]) + (255,)
 
     # engine glow: a dithered halo around each exhaust, behind the hull
     inner, outer = rgb(pal['halo'][0]), rgb(pal['halo'][1])
@@ -433,20 +429,26 @@ def render(model_fn, pal, yaw_deg):
     return img.crop(img.getbbox())
 
 def main():
+    import base64, io, json
     root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
     outdir = os.path.join(root, 'assets', 'ships')
     os.makedirs(outdir, exist_ok=True)
-    only = set(sys.argv[1:])
-    sizes = {}
+    images = {}
     for name, fn in MODELS.items():
-        if only and name not in only: continue
-        pals = ['monster'] if name in MONSTERS else ['player', 'chorus', 'remnant']
-        for pal in pals:
-            for view, yaw in VIEWS.items():
-                img = render(fn, PALETTES[pal], yaw)
-                img.save(os.path.join(outdir, f'{name}_{pal}_{view}.png'), optimize=True)
-                sizes[f'{name}_{pal}_{view}'] = img.size
-        print(f'{name:11s}', '  '.join(f'{k.split("_", 1)[1]} {v[0]}x{v[1]}' for k, v in sizes.items() if k.startswith(name + '_')))
+        img = render(fn, TEMPLATE, VIEW)
+        img.save(os.path.join(outdir, f'{name}.png'), optimize=True)
+        buf = io.BytesIO(); img.save(buf, 'PNG', optimize=True)
+        images[name] = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+        print(f'{name:11s} {img.size[0]}x{img.size[1]}')
+    js = ('// Voyager — ship sprite templates. GENERATED by tools/shipart/render.py: do not edit by hand.\n'
+          '// Each sprite is grey: a pixel\'s grey level names a material and a shade, listed in `greys`.\n'
+          '// js/sprites.js paints them with a palette from DATA.shipPalettes.\n'
+          'const ShipSprites = {\n'
+          f'  ramps: {json.dumps(RAMP_SIZES)},\n'
+          f'  greys: {json.dumps({str(k): v for k, v in sorted(GREY_TABLE.items())})},\n'
+          '  images: {\n' + ''.join(f'    {k}: {json.dumps(v)},\n' for k, v in images.items()) + '  },\n};\n')
+    with open(os.path.join(root, 'js', 'shipsprites.js'), 'w') as f: f.write(js)
+    print('wrote js/shipsprites.js', len(js) // 1024, 'KB')
 
 if __name__ == '__main__':
     main()

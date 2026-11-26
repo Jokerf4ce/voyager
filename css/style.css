@@ -216,6 +216,12 @@ details summary:hover { color: var(--bone); }
 @keyframes comms-flicker { 0%, 100% { opacity: 1; } 47% { opacity: .82; } 48% { opacity: 1; } 83% { opacity: .9; } }
 @media (prefers-reduced-motion: reduce) { #comms.show { animation: none; } }
 
+/* fleet colour pickers */
+.colors { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.colorpick { display: flex; align-items: center; gap: 4px; font-size: 16px; color: var(--ash); cursor: pointer; }
+.colorpick input { width: 34px; height: 24px; border: 1px solid var(--edge-hi); background: none; padding: 0; cursor: pointer; }
+.color-preview { display: flex; gap: 14px; align-items: flex-end; margin: 8px 0 12px; }
+
 /* version tag, bottom right */
 #version { position: fixed; right: 8px; bottom: 6px; z-index: 5; font-family: var(--font-head); font-size: 10px; letter-spacing: 1px; color: #8a8070; background: rgba(12, 11, 10, .85); border: 1px solid var(--edge); padding: 2px 6px; pointer-events: none; }
 

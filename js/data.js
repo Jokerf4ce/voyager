@@ -219,6 +219,18 @@ DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
 DATA.scrapRefund = 0.3;      // part of the build cost returned when a ship is scrapped
 
+// Ship colours. Ship sprites are grey templates (js/shipsprites.js) painted with these on the fly.
+// Each entry is one base colour per material; the shades are derived from it (js/sprites.js). An entry can also be
+// a full list of shades, dark to light (hull 7, metal 6, accent 5, glass 6, glow 2, halo 2, void 1, outline 1).
+//   hull: main plating · metal: guns, engines, keel · accent: trim and stripes · glass: canopies and windows
+//   glow: engine exhausts · halo: the glow around them
+DATA.shipPalettes = {
+  player:  { hull: '#d2c6aa', metal: '#5e5850', accent: '#c0592e', glass: '#5aa0b0', glow: '#ffb050', halo: '#ff7a30' },
+  chorus:  { hull: '#a8b89c', metal: '#3e4a36', accent: '#6ca832', glass: '#c0a830', glow: '#a0ff60', halo: '#90e050' },
+  remnant: { hull: '#a0a0a4', metal: '#3a3a42', accent: '#d05030', glass: '#d03020', glow: '#ff6030', halo: '#ff5020' },
+  monster: { hull: '#b84850', metal: '#b4a688', accent: '#7a4070', glass: '#f0e040', glow: '#f0e040', halo: '#d0c030' },
+};
+
 // Grim names for new ships.
 DATA.shipNames = ['Penitent', 'Ashborn', 'Last Rite', 'Mercy\'s End', 'Grave Hymn', 'Hollow Vow', 'Cinder Saint', 'Bitter Psalm', 'Iron Requiem', 'Pale Lantern',
   'Ossuary', 'Widowmaker', 'Remembrance', 'Silent Choir', 'Black Candle', 'Martyr', 'Dirge', 'Shroudwalker', 'Vigil', 'Absolution', 'Emberfall', 'Thornvow',

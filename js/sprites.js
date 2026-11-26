@@ -1,4 +1,4 @@
-// Voyager — pixel art: procedural planets, stars and building icons; rendered ship sprites (assets/ships).
+// Voyager — pixel art: procedural planets, stars and building icons; ship sprites recoloured from grey templates.
 // Real hand-drawn sprites can replace these later: anything here returns an image URL.
 
 const Sprites = {
@@ -146,14 +146,93 @@ const Sprites = {
     return (this.cache[key] = cv.toDataURL());
   },
 
-  // Ship sprites are rendered images (tools/shipart/render.py → assets/ships/<type>_<palette>_<view>.png).
-  // view 'front': nose toward the viewer (cards, enemies in battle); 'rear': nose away (your ships in battle).
-  shipPalette(type, owner) {
-    if (DATA.shipTypes[type] && DATA.shipTypes[type].monster) return 'monster';
-    return ['chorus', 'remnant'].includes(owner) ? owner : 'player';
+  // ---------- ship sprites: grey templates (js/shipsprites.js) recoloured on the fly ----------
+  shipTpl: {},          // type -> ImageData of the template, once decoded
+  shipCache: {},        // 'type|palette' -> data URL of the coloured sprite
+  shipKey: {},          // template grey level -> [material, shade]
+  shipKeyPoint: { hull: 5, metal: 3, accent: 3, glass: 4, glow: 0, halo: 0, void: 0, outline: 0 }, // where the base colour sits in each ramp
+  shipDefaults: { void: '#050404', outline: '#0a0807' },
+
+  loadShipTemplates() {
+    if (typeof ShipSprites === 'undefined') return;
+    for (const [g, v] of Object.entries(ShipSprites.greys)) this.shipKey[+g] = v;
+    for (const [type, uri] of Object.entries(ShipSprites.images)) {
+      const img = new Image();
+      img.onload = () => {
+        const c = this.canvas(img.width, img.height), ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        this.shipTpl[type] = ctx.getImageData(0, 0, img.width, img.height);
+        // once every template is in, redraw whatever shows grey placeholders
+        if (Object.keys(this.shipTpl).length === Object.keys(ShipSprites.images).length && typeof G !== 'undefined' && G && typeof UI !== 'undefined') UI.render();
+      };
+      img.src = uri;
+    }
   },
-  shipImg(type, owner = 'player', view = 'front') {
-    return `assets/ships/${type}_${this.shipPalette(type, owner)}_${view}.png`;
+
+  hexRgb(h) { return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); },
+  // Shades for one material from a base colour: darker toward black below it, lighter toward white above.
+  ramp(mat, base, n) {
+    if (Array.isArray(base)) return base.map((h) => this.hexRgb(h));
+    const c = this.hexRgb(base), k = Math.min(n - 1, this.shipKeyPoint[mat] || 0), out = [];
+    for (let i = 0; i < n; i++) {
+      let t, to;
+      if (mat === 'halo') { t = i * 0.45; to = [40, 8, 4]; }                 // inner glow, then a darker outer ring
+      else if (i < k) { t = (k - i) / k * 0.88; to = [0, 0, 0]; }
+      else if (i > k) { t = (i - k) / Math.max(1, n - 1 - k) * 0.45; to = [255, 255, 255]; }
+      else { t = 0; to = c; }
+      out.push(c.map((v, j) => Math.round(v + (to[j] - v) * t)));
+    }
+    return out;
+  },
+  shipRamps(pal) {
+    const out = {};
+    for (const [mat, n] of Object.entries(ShipSprites.ramps)) out[mat] = this.ramp(mat, pal[mat] || this.shipDefaults[mat] || '#808080', n);
+    return out;
+  },
+  shipPaletteKey(type, owner) {
+    if (DATA.shipTypes[type] && DATA.shipTypes[type].monster) return 'monster';
+    return DATA.shipPalettes[owner] ? owner : 'player';
+  },
+  // The sprite of a ship type for an owner (faction) or an explicit palette object.
+  shipImg(type, owner = 'player') {
+    const palKey = typeof owner === 'object' ? JSON.stringify(owner) : this.shipPaletteKey(type, owner);
+    const key = type + '|' + palKey;
+    if (this.shipCache[key]) return this.shipCache[key];
+    const tpl = this.shipTpl[type];
+    if (!tpl) return (typeof ShipSprites !== 'undefined' && ShipSprites.images[type]) || ''; // grey until decoded
+    const ramps = this.shipRamps(typeof owner === 'object' ? owner : DATA.shipPalettes[palKey]);
+    const c = this.canvas(tpl.width, tpl.height), ctx = c.getContext('2d');
+    const img = ctx.createImageData(tpl.width, tpl.height), src = tpl.data, dst = img.data;
+    for (let i = 0; i < src.length; i += 4) {
+      if (!src[i + 3]) continue;
+      const m = this.shipKey[src[i]];
+      const col = m ? ramps[m[0]][m[1]] : [src[i], src[i + 1], src[i + 2]];
+      dst[i] = col[0]; dst[i + 1] = col[1]; dst[i + 2] = col[2]; dst[i + 3] = src[i + 3];
+    }
+    ctx.putImageData(img, 0, 0);
+    return (this.shipCache[key] = c.toDataURL());
+  },
+  // Your own fleet colours (Settings), kept in this browser.
+  colorsKey: 'voyager_shipcolors',
+  playerDefaults: null,
+  loadPlayerColors() {
+    this.playerDefaults = Object.assign({}, DATA.shipPalettes.player);
+    try { const c = JSON.parse(localStorage.getItem(this.colorsKey) || 'null'); if (c) this.setShipPalette('player', c); } catch (e) { /* ignore */ }
+  },
+  setPlayerColor(mat, hex) {
+    this.setShipPalette('player', { [mat]: hex });
+    try { localStorage.setItem(this.colorsKey, JSON.stringify(DATA.shipPalettes.player)); } catch (e) { /* ignore */ }
+  },
+  resetPlayerColors() {
+    DATA.shipPalettes.player = Object.assign({}, this.playerDefaults);
+    this.setShipPalette('player', {});
+    try { localStorage.removeItem(this.colorsKey); } catch (e) { /* ignore */ }
+  },
+
+  // Change a faction's colours at runtime (e.g. from Settings); every sprite of it is repainted.
+  setShipPalette(key, pal) {
+    DATA.shipPalettes[key] = Object.assign({}, DATA.shipPalettes[key], pal);
+    for (const k of Object.keys(this.shipCache)) if (k.endsWith('|' + key)) delete this.shipCache[k];
   },
 
   // 12×12 building icons. k outline, = light metal, # dark metal, o ember, y light, w glint, b glass, g bio, p rare, r blood.
@@ -190,3 +269,6 @@ const Sprites = {
   },
 
 };
+
+Sprites.loadShipTemplates();
+Sprites.loadPlayerColors();

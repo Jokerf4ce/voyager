@@ -21,7 +21,7 @@ Object.assign(UI, {
     return `<div class="sbar ${cls}" title="${cls === 'sh' ? 'Shield' : 'Hull'} ${Math.round(now)}/${Math.round(max)}"><i style="width:${pct}%"></i><span>${Math.round(now)}</span></div>`;
   },
 
-  // A ship card. d: a ship or a battle unit. opts: { act, a, cls, owner, view ('front' | 'rear'), extra, small }
+  // A ship card. d: a ship or a battle unit. opts: { act, a, cls, owner, extra, small }
   shipCard(d, opts = {}) {
     const t = DATA.shipTypes[d.type], rar = DATA.shipRarities[d.rarity] || DATA.shipRarities.normal;
     const owner = opts.owner || d.owner || 'player';
@@ -30,7 +30,7 @@ Object.assign(UI, {
     const act = opts.act ? `data-act="${opts.act}" data-a="${opts.a}"` : '';
     return `<div class="scard r-${d.rarity} ${opts.cls || ''} ${opts.small ? 'small' : ''}" style="--rc:${rar.color}" ${act}>
       <div class="sc-top"><span class="sc-size" title="${DATA.sizes[d.size].name}: beats ${DATA.sizes[DATA.sizes[d.size].beats].name}">${d.size}</span><span class="sc-rar">${rar.name}</span></div>
-      <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner, opts.view || 'front')}" alt="${U.esc(t.name)}"></div>
+      <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner)}" alt="${U.esc(t.name)}"></div>
       <b class="sc-name" title="${U.esc(d.name)}">${U.esc(d.name)}</b><small class="sc-type">${t.name}</small>
       ${this.bar('sh', shield, shieldMax)}${this.bar('hu', hull, hullMax)}
       <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Maintenance per Cycle">⚙${d.upkeep}</span>` : ''}${d.quality != null && !opts.small && !t.structure ? `<span class="q ${d.quality >= 110 ? 'hi' : d.quality <= 90 ? 'lo' : ''}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${d.quality}</span>` : ''}</div>
@@ -212,7 +212,7 @@ Object.assign(UI, {
       const cls = [u.dead ? 'dead' : '', i === curIdx ? 'acting' : '', hit && hit.to === i ? 'hit' : '', isT ? 'target' : ''].join(' ');
       const extra = isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
       const owner = u.side === 'player' ? 'player' : (b.kind === 'attack' ? (s.guard && s.guard.owner) || s.owner : b.threat.owner);
-      return this.shipCard(u, { owner, view: u.side === 'player' ? 'rear' : 'front', cls, extra });
+      return this.shipCard(u, { owner, cls, extra });
     };
     // each side is a row of lanes; lane i faces lane i on the other side
     const side = (name) => {

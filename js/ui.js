@@ -435,6 +435,11 @@ const UI = {
       }).join('')}</div>
       <div class="kv"><span>Assistant</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
+      <h4>Fleet colours</h4>
+      <div class="colors">${[['hull', 'Hull'], ['metal', 'Metal'], ['accent', 'Trim'], ['glass', 'Glass'], ['glow', 'Engines'], ['halo', 'Engine glow']].map(([m, l]) =>
+        `<label class="colorpick"><input type="color" value="${DATA.shipPalettes.player[m]}" data-input="shipcolor" data-mat="${m}"><span>${l}</span></label>`).join('')}
+        ${this.btn('Reset', 'resetcolors', '', false, 'small')}</div>
+      <div id="color-preview" class="color-preview">${this.colorPreview()}</div>
       <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>
@@ -444,6 +449,10 @@ const UI = {
         : this.btn('Open admin test game', 'slot', 'admin')}</span></div>
       <p class="muted small">The test game has its own save (extra colonies with random buildings, plenty of resources). Your real game is not touched. You can also open it with <code>#admin</code> at the end of the address.</p>
       <p class="muted small">Voyager v${VERSION.number} (${VERSION.date}) · saves stay in this browser (localStorage).</p>`);
+  },
+
+  colorPreview() {
+    return ['fighter', 'frigate', 'battleship'].map((t) => `<img class="px" src="${Sprites.shipImg(t, 'player')}" alt="">`).join('');
   },
 
   // ---------- modal ----------

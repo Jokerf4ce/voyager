@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.28.0 — 2026-11-26
+- **Colourless ship sprites, coloured in the game.** Each ship type is now one grey template (13 images instead of 66). Every grey level stands for a material and a shade, and the game paints the sprites on the fly from `DATA.shipPalettes` in `js/data.js`: one base colour each for hull, metal, trim, glass, engines and engine glow, with the shades worked out automatically. Changing a faction's look is now a one-line edit.
+- **Fleet colours** in Settings: pick your own hull, metal, trim, glass and engine colours with a live preview; every card repaints at once. Saved in this browser; Reset restores the Covenant's bone and rust.
+- Only the front view is used now; the rear view is gone (your ships in battle use the same view as the cards).
+- The templates are embedded in `js/shipsprites.js` (generated), so recolouring also works when the game is opened straight from disk.
+
 ## 0.27.0 — 2026-11-26
 - **New ship graphics.** Every ship is now a detailed sprite in a 3/4 view (about 50 to 120 px), rendered from a small 3D model: Scout, Fighter, Heavy Fighter, Corvette, Frigate, Gunboat, Destroyer, Battleship, Carrier, the Planetary Defenses station, and the Lurker, Maw and Leviathan. All share one scale, so bigger hulls look bigger.
 - **Faction colours**: the Covenant in bone and rust, the Chorus in pale green chitin with toxic green trim, the Iron Remnant in iron grey with blood orange; monsters in flesh, bone and sinew.

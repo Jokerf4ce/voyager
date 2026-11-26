@@ -87,6 +87,7 @@ const Game = {
     recall: (a) => { Missions.recall(+a); },
     survey: (a) => { Missions.survey(+a); },
     colonize: (a) => { Missions.colonize(+a); },
+    resetcolors: () => { Sprites.resetPlayerColors(); },
     gofleets: (a) => { UI.screen = 'fleets'; if (a) UI.selShip = null; },
     // battles
     gobattle: () => { UI.screen = 'battle'; },
@@ -157,6 +158,11 @@ document.addEventListener('input', (ev) => {
   const el = ev.target.closest('[data-input]');
   if (el && el.dataset.input === 'volume') Music.setVolume(el.value / 100);
   if (el && el.dataset.input === 'voicevol') Voice.setVolume(el.value / 100);
+  if (el && el.dataset.input === 'shipcolor') {
+    Sprites.setPlayerColor(el.dataset.mat, el.value);
+    const prev = document.getElementById('color-preview');
+    if (prev) prev.innerHTML = UI.colorPreview();
+  }
 });
 
 document.addEventListener('keydown', (ev) => {
