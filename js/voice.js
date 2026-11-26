@@ -148,6 +148,7 @@ const Voice = {
 
   async load(id, line) {
     if (this.buffers[id]) return this.buffers[id];
+    if (this.missing.has(id)) throw new Error('missing'); // looked once this session already
     const res = await fetch(this.src(id, line));
     if (!res.ok) throw new Error('missing');
     return (this.buffers[id] = await this.ctx.decodeAudioData(await res.arrayBuffer()));
@@ -158,7 +159,7 @@ const Voice = {
     const ctx = this.audio();
     const glitch = line.glitch ?? 0.35;
     let buf = null;
-    try { if (ctx) buf = await this.load(id, line); this.missing.delete(id); } catch (e) { this.missing.add(id); }
+    try { if (ctx) buf = await this.load(id, line); } catch (e) { this.missing.add(id); }
     const seconds = buf ? buf.duration : line.text.length * 0.075 + 1;
     if (this.subtitles || !buf) this.subtitle(line.text, seconds + 2, glitch);
     if (!buf) {

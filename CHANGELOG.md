@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.15.1 — 2026-11-26
+- Voice: a missing voice file is only looked for once per session (less console noise). Reload after adding a file.
+
 ## 0.15.0 — 2026-11-26
 - The ship's computer voice now plays mp3 files instead of the browser's built-in speech, so it works the same in every browser.
 - Each line's file is `assets/voice/<line id>.mp3` (e.g. `welcome_back.mp3`). The game adds radio filtering, light distortion, stutters, dropouts and static live.
