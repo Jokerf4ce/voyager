@@ -200,7 +200,7 @@ const Voice = {
     let box = document.getElementById('comms');
     if (!box) { box = document.createElement('div'); box.id = 'comms'; document.body.appendChild(box); }
     clearInterval(this.subTimer); clearTimeout(this.subHide);
-    box.innerHTML = '<span class="comms-src">◆ SHIP AI</span><span class="comms-text"></span>';
+    box.innerHTML = '<span class="comms-src">◆ AI Assistant</span><span class="comms-text"></span>';
     box.className = 'show';
     const el = box.querySelector('.comms-text');
     const junk = '█▓▒░#%&@$<>/\\|';

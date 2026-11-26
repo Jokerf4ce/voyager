@@ -1,7 +1,7 @@
 // Voyager — lines for the ship's computer voice (played by js/voice.js).
 //
 // Each line is an mp3 file named after the line id: assets/voice/<id>.mp3 (e.g. assets/voice/welcome_back.mp3).
-//   text      what she says; also shown on screen as a "SHIP AI" transmission
+//   text      what she says; also shown on screen as a "AI Assistant" transmission
 //   triggers  game events that can play this line (see the list below)
 //   glitch    0..1 how much the on-screen transmission text glitches (default 0.35); the audio plays as recorded
 //   chance    0..1 probability the line plays when triggered (default 1)
