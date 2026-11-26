@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.34.1 — 2026-11-26
+- **Phones: Star Map / Solar System tabs are back.** On screens up to 820 px wide, two tabs at the top of the map screen switch between the star map and the selected system's solar system; the system panel (missions, planets) stays below both. Double-tapping a charted system opens its Solar System tab. The tab is greyed out for uncharted systems. Desktop is unchanged.
+- On phones the star map is shorter (about 60 % of the screen), so the page can still be scrolled past it, and the hint text talks about taps instead of hovering.
+
 ## 0.34.0 — 2026-11-26
 - **The galaxy has no edge.** It is generated in chunks as you explore: every system you chart or own grows the map around it, so you can expand in any direction. All systems stay connected by hyperlanes.
 - **The Star Map is a camera.** Drag to pan, scroll or pinch to zoom, and use the buttons for zoom, home (⌂) and the selected system (◎). A **minimap** in the corner shows everything charted and your view; click it to jump there. The map remembers where you were looking.

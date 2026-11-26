@@ -72,7 +72,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Star Map camera** (decided, v0.34): the Star Map is a pan/zoom view of the world (drag, wheel, pinch; buttons for zoom, home and the selected system; a minimap). The pixel art is drawn into a low-resolution buffer and scaled up (3 screen px per art pixel, 2 on phones), keeping the chunky look; names and markers are drawn on top at full resolution for readability, without overlapping.
 
-**Map screen layout** (decided, v0.21): the Star Map fills the screen width; hovering a system shows a summary card (star, owner, planets with habitability, fleets). The selected system's Solar System map and its full panel (planets, settle, fleets) sit below the star map, in place of the Chronicle, which is hidden on this screen.
+**Map screen layout** (decided, v0.21): the Star Map fills the screen width; hovering a system shows a summary card (star, owner, planets with habitability, fleets). The selected system's Solar System map and its full panel (planets, settle, fleets) sit below the star map, in place of the Chronicle, which is hidden on this screen. On phones (≤ 820 px, decided v0.34.1) the two maps don't fit together, so tabs switch between them; the system panel stays below both.
 
 
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.

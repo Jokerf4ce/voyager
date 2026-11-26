@@ -48,8 +48,7 @@ const UI = {
     if (this.screen === 'battle') this.drawBattleArrow();
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
-      StarMap.draw(cv);
-      StarMap.attach(cv); // drag to pan, wheel/pinch to zoom, click to select, hover card on mouse
+      if (cv.offsetParent) { StarMap.draw(cv); StarMap.attach(cv); } // hidden behind the Solar System tab on phones // drag to pan, wheel/pinch to zoom, click to select, hover card on mouse
       if (this.hover) this.showHover(); // keep the hover card through re-renders (e.g. Auto)
       const sc = this.$('syscanvas');
       if (sc) {
@@ -190,15 +189,25 @@ const UI = {
   // Scroll down to the selected system's solar system map.
   openSystem() {
     this.selPlanet = null;
+    if (this.narrow()) { const s = G.systems[this.selSys]; if (s && s.explored) this.mapMode = 'system'; }
     this.render();
     const el = this.$('sysrow');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
 
+  // Phone-width layout (matches the 820 px breakpoint in style.css).
+  narrow() { return window.matchMedia('(max-width: 820px)').matches; },
+
   // Star map across the full width (hover a star for a summary), the selected system's solar system below.
+  // On phones the two maps don't fit together, so tabs switch between them (the system panel stays below both).
   screen_map() {
     const s = this.selSys != null ? G.systems[this.selSys] : null;
-    const hint = 'Drag to pan, scroll or pinch to zoom. Hover a system for a summary, click to select it; missions and its solar system appear below. The galaxy grows as you explore.';
+    if (this.mapMode === 'system' && !(s && s.explored)) this.mapMode = 'galaxy';
+    const sysMode = this.mapMode === 'system';
+    const tabs = `<div class="btnrow maptabs">${this.btn('✦ Star Map', 'mapmode', 'galaxy', false, sysMode ? '' : 'on')}${this.btn('◉ Solar System' + (s && s.explored ? ': ' + U.esc(s.name) : ''), 'mapmode', 'system', !(s && s.explored), sysMode ? 'on' : '')}</div>`;
+    const hint = this.narrow()
+      ? 'Drag to pan, pinch to zoom, tap a system to select it. Double-tap opens its solar system.'
+      : 'Drag to pan, scroll or pinch to zoom. Hover a system for a summary, click to select it; missions and its solar system appear below. The galaxy grows as you explore.';
     let below = '';
     if (s) {
       const sysMap = s.explored
@@ -207,7 +216,7 @@ const UI = {
         : `<div class="sysmapbox"><h3 class="sysmap-title">? ${U.esc(s.name)}</h3><p class="flavor">Uncharted. Send a survey probe to see its star and planets.</p></div>`;
       below = `<div class="sysrow" id="sysrow">${sysMap}<aside class="side">${this.systemPanel()}</aside></div>`;
     }
-    return `<div class="mapscreen">
+    return `<div class="mapscreen mode-${sysMode ? 'system' : 'galaxy'}">${tabs}
       <div class="mapbox"><canvas id="mapcanvas"></canvas>
         <div class="mapctl">
           <button class="btn" data-act="mapzoom" data-a="1.4" title="Zoom in">+</button>
