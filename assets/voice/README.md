@@ -5,7 +5,8 @@ The ship's computer voice plays mp3 files from this folder. Each file is named a
 
 | File | Line | Triggers |
 |---|---|---|
-| `welcome_back.mp3` | "Welcome back, Commander." | game start; returning after 5+ minutes away |
+| `wake_up.mp3` | "Wake up, Commander, all systems operational." | a new game starts (first time, new galaxy, Begin anew) |
+| `welcome_back.mp3` | "Welcome back, Commander." | loading a saved game; returning after 5+ minutes away |
 | `still_here.mp3` | "Hey, are you still here?" | returning after 5+ minutes away; random announcement |
 | `gagarin.mp3` | "Attention! Colonel Gagarin, please report to Medbay!" | random announcement |
 | `shepard.mp3` | "Attention! Rear admiral Shepard, your keycard was found in engineering!" | random announcement |

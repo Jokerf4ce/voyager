@@ -45,6 +45,8 @@ const Game = {
     State.save();
     UI.render();
     if (State.slot !== 'tester') Tutorial.start(); // every new real game opens with the tour
+    // the Assistant wakes you; before the first click the browser blocks sound, so the first click plays it
+    if (this.gestured) Voice.trigger('first', true); else this.fresh = true;
   },
 
   // Switch between the real game and tester mode (separate save slots).
@@ -84,6 +86,7 @@ const Game = {
     gobattle: () => { UI.screen = 'battle'; },
     bfire: (a) => { Battle.act(+a); },
     bswapnav: (a) => { UI.swapNav(+a); },
+    brestore: () => { Battle.restoreTurn(); },
     bswapconfirm: () => { if (UI.swapPick && UI.swapPick.lane != null) Battle.swapTurn(UI.swapPick.lane); UI.swapPick = null; },
     battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
     bresolve: () => { Battle.resolve(); },
@@ -242,7 +245,8 @@ window.addEventListener('DOMContentLoaded', () => {
   UI.$('btn-music').onclick = (ev) => { ev.stopPropagation(); if (!Music.timer && Music.enabled) Music.start(); else Music.toggle(); UI.renderTop(); if (UI.screen === 'settings') UI.render(); };
   // Only refresh the top bar here: a full re-render would replace the element being clicked and swallow the click.
   Voice.init();
-  const firstGesture = () => { Music.start(); Voice.trigger('start'); UI.renderTop(); };
+  // The first click or key: music starts and the Assistant greets you (a new game gets its own greeting).
+  const firstGesture = () => { Game.gestured = true; Music.start(); Voice.trigger(Game.fresh ? 'first' : 'start'); Game.fresh = false; UI.renderTop(); };
   document.addEventListener('pointerdown', firstGesture, { once: true });
   document.addEventListener('keydown', firstGesture, { once: true });
   // Side menu: ☰ toggles it; it collapses on its own 10 s after the cursor leaves it.

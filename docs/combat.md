@@ -213,14 +213,14 @@ So formation matters: put the ships that can best take on each enemy across from
 1. Each **round**, every surviving ship acts once, **fastest first**. Ties are broken at random.
 2. At the start of a ship's turn, each of its weapons recharges one step.
 3. If no weapon is ready, the ship skips its turn ("recharges its weapons").
-4. Otherwise it either **fires one ready weapon** at its target (see 4.2), or **swaps formation** instead:
-   - **Swapping:** the ship trades lanes with **any** ship on its side, or moves into any empty lane. This uses its turn, so it doesn't fire.
-   - Wrecks count as empty space.
-   - Planetary Defenses never move, and nobody can swap with them.
-   - The new lanes hold for the rest of the battle, and targets follow them (4.2).
+4. Otherwise it does one of three things:
+   - **Fire** one ready weapon at its target (see 4.2).
+   - **Move** (v0.42; before that, ships traded places): the ship goes to **any** lane on its side, like reordering a list. Every ship or wreck between its old and new lane slides one lane towards the gap it left; ships beyond are untouched. Planetary Defenses never move, and no move may pass over them. The new lanes hold for the rest of the battle, and targets follow them (4.2).
+   - **Restore** (v0.42): the ship holds position and regains **25 % of its max shields and 10 % of its max hull** (never above the max). `DATA.restore`.
+   - Moving and restoring use the turn, so the ship doesn't fire.
 5. When it fires:
-   - **Your ships:** you pick the weapon (or a swap). The target is marked ◎ on the board, and each weapon button shows the expected shield and hull damage, the hit chance and ★/▽ for size.
-   - **Enemy ships, and yours on Auto:** the computer picks the weapon or a swap (see 4.7).
+   - **Your ships:** you pick the weapon (or move, or Restore). The target is marked ◎ on the board, and each weapon button shows the expected shield and hull damage, the hit chance and ★/▽ for size.
+   - **Enemy ships, and yours on Auto:** the computer picks the weapon, a move or Restore (see 4.7).
 
 The battle ends when one side has no ships left. If 25 rounds pass without that:
 - An **attack** ends in a **stalemate**: your ships withdraw.
@@ -266,23 +266,27 @@ The base is then applied to the target's shield first, then its hull:
 | Button | What it does |
 |---|---|
 | A weapon | fire it at the ship's target (your turn only) |
-| Drag the acting ship onto another lane | swap places with that ship (or move into that empty lane) instead of firing |
+| Drag the acting ship onto another lane | move it there instead of firing; the ships in between slide over |
+| **⟲ Restore** | instead of firing, regain 25 % of max shields and 10 % of max hull (shows the amounts) |
 | ◀ ▶ on the acting ship's card, then **Confirm** | the same, by picking the lane with the arrows (works on touch screens too) |
 | **Auto** | the computer plays your side too, one step at a time; press again to take back control |
 | **Resolve instantly** | plays the rest of the battle at once on Auto |
 | **Retreat** | ends the battle now; in an attack your ships withdraw, in a defense the system falls |
 
 **On screen:**
-- Each side shows its live **fleet power** (living ships, current shields and hull), with a bar comparing the two.
+- Each side shows its live **fleet power** (living ships, current shields and hull); a bar across the top of the board compares the two.
+- A missed shot shows **MISS** over the target card, and a Restore shows **+ RESTORED**.
 - An **arrow** floats from the acting ship to its target.
 - The **turn order** for the round is pinned to the bottom of the screen.
 
 ### 4.7 How the computer plays
 
-**Swapping.** First the computer checks whether a swap is clearly worth it:
-- For every lane on its side, it compares the best expected shot of this ship and the ship it would trade places with, before and after.
-- It swaps if the two would do at least 40 % more together, and the gain still beats 60 % of the shot it gives up by moving.
-- A ship that swapped in this round or the last one doesn't swap again, so lines don't shuffle back and forth.
+**Moving.** First the computer checks whether a move is clearly worth it:
+- For every lane on its side, it compares the best expected shots of this ship and every ship the move would push aside, before and after.
+- It moves if they would do at least 40 % more together, and the gain still beats 60 % of the shot it gives up by moving.
+- A ship that moved in this round or the last one doesn't move again, so lines don't shuffle back and forth.
+
+**Restoring.** Then, a ship below half its hull restores if what it would regain (shield × 0.6 + hull, × 0.6) beats its best expected shot. In tests the computer restores about once per battle.
 
 **Picking a weapon.** Otherwise it fires. The target is fixed by the lanes (4.2). For every ready weapon, the computer scores:
 

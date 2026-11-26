@@ -221,6 +221,7 @@ DATA.forge = { cost: { shards: 15 }, desc: 'Forge a random weapon of the chosen 
 // capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
 // per empire, and waits cooldown Cycles after launching one.
 DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
+DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of max shields / hull regained
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
 DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
@@ -383,7 +384,7 @@ DATA.tutorial = [
   { screen: 'fleets', target: '#main .panel', title: 'Fleets',
     text: 'Ships fight in fleets of up to five. From here (or from the Star Map) you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>The xenos ignore you at first. Raids only begin once you have founded <b>{grace}</b> colonies besides your capital.' },
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
-    text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire or swap it into another lane. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
+    text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire, <b>move</b> it to another lane (the ships in between slide over) or <b>Restore</b> some of its shields and hull. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
     text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your mines. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
 ];

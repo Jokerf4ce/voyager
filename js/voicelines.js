@@ -28,6 +28,7 @@
 // The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
 
 const VoiceLines = {
+  wake_up:        { text: 'Wake up, Commander, all systems operational.', triggers: ['first'], glitch: 0.35 },
   welcome_back:   { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
   gagarin:        { text: 'Attention! Colonel Gagarin, please report to Medbay!', triggers: ['random'], glitch: 0.35 },
   shepard:        { text: 'Attention! Rear admiral Shepard, your keycard was found in engineering!', triggers: ['random'], glitch: 0.35 },
@@ -48,6 +49,7 @@ const VoiceLines = {
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
 const VoiceTriggers = {
+  first:  { cooldown: 0 },          // a brand-new game (instead of 'start')
   start:  { cooldown: 0 },
   return: { cooldown: 60, idleMinutes: 5 },
   test:   { cooldown: 0 },

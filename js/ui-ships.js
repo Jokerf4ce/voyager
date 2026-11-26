@@ -214,8 +214,10 @@ Object.assign(UI, {
     const enemyOwner = b.kind === 'attack' ? (s.guard && s.guard.owner) || s.owner : b.threat.owner;
     const unitCard = (u, i) => {
       const isT = u === tgt, acting = i === curIdx;
-      const cls = [u.dead ? 'dead' : '', acting ? 'acting' : '', hit && hit.to === i ? 'hit' : '', isT ? 'target' : '', u.side === 'player' && pick === u.lane ? 'swap-dest' : ''].join(' ');
-      let extra = isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
+      const struck = hit && hit.to === i;
+      const cls = [u.dead ? 'dead' : '', acting ? 'acting' : '', struck && !hit.miss && !hit.restore ? 'hit' : '', struck && hit.miss ? 'missed' : '', isT ? 'target' : '', u.side === 'player' && pick === u.lane ? 'swap-dest' : ''].join(' ');
+      let extra = struck && hit.miss ? '<div class="floater miss">MISS</div>' : struck && hit.restore ? '<div class="floater restore">+ RESTORED</div>' : '';
+      extra += isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
       // the acting ship gets little arrows to pick a lane to swap to
       if (acting && myTurn && !DATA.shipTypes[u.type].structure) {
         extra += `<div class="swapnav"><button class="btn small" data-act="bswapnav" data-a="-1" title="Pick a lane to the left">◀</button><span>swap</span><button class="btn small" data-act="bswapnav" data-a="1" title="Pick a lane to the right">▶</button></div>`;
@@ -246,12 +248,14 @@ Object.assign(UI, {
         const d = Battle.preview(cur, x, tgt), sm = Battle.sizeMult(cur, tgt);
         return `<small>≈${Math.round(d.shield)} sh + ${Math.round(d.hull)} hu · ${Math.round(Battle.hitChance(x, tgt, cur) * 100)}% hit${sm > 1 ? ' ★' : sm < 1 ? ' ▽' : ''}${cur.size === 'L' && tgt.size === 'S' ? ' (small target)' : ''}</small>`;
       };
-      const mate = pick != null ? Battle.inLane('player', pick) : null;
-      controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b> targets <b>${U.esc(tgt.name)}</b>${cur.lane !== tgt.lane ? ' <span class="bad">(across lanes: half the hit chance)</span>' : ''}. Fire a weapon, or swap places.</div>
-        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}</div>
+      const pushedN = pick != null ? Battle.pushed(cur, pick).filter(([x]) => !x.dead).length : 0;
+      const rg = Battle.restoreGain(cur);
+      controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b> targets <b>${U.esc(tgt.name)}</b>${cur.lane !== tgt.lane ? ' <span class="bad">(across lanes: half the hit chance)</span>' : ''}. Fire a weapon, restore, or move.</div>
+        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}
+          <button class="btn wbtn restore" data-act="brestore" ${Battle.canRestore(cur) ? '' : 'disabled'} title="Hold position: regain ${Math.round(DATA.restore.shield * 100)} % of max shields and ${Math.round(DATA.restore.hull * 100)} % of max hull. Uses this turn."><span class="wchip">⟲ Restore</span><small>${rg.shield || rg.hull ? `+${rg.shield} sh + ${rg.hull} hu` : 'undamaged'}</small></button></div>
         <div class="btnrow swaprow">${pick != null
-          ? `${this.btn(`⇄ Confirm: ${mate && !mate.dead ? `swap with ${U.esc(mate.name)}` : `move to lane ${pick + 1}`}`, 'bswapconfirm', '', false, 'gold')}${this.btn('Cancel', 'bswapnav', 0, false, 'small')}`
-          : '<small class="muted">To swap places instead of firing: drag this ship onto another of yours, or use ◀ ▶ on its card and confirm. Uses this turn.</small>'}</div>`;
+          ? `${this.btn(`⇄ Confirm: move to lane ${pick + 1}${pushedN ? ` (pushes ${pushedN} aside)` : ''}`, 'bswapconfirm', '', false, 'gold')}${this.btn('Cancel', 'bswapnav', 0, false, 'small')}`
+          : '<small class="muted">Or move instead of firing: drag this ship to another lane, or use ◀ ▶ on its card and confirm. Ships in between slide over. Uses this turn.</small>'}</div>`;
     } else if (cur) {
       controls = `<div class="bprompt muted">${cur.side === 'enemy' ? 'Enemy turn' : 'Auto'}: ${U.esc(cur.name)} → ${tgt ? U.esc(tgt.name) : '…'}</div>`;
     }
@@ -263,10 +267,11 @@ Object.assign(UI, {
     const myName = f ? f.name : 'Planetary Defenses';
     const powerBar = `<div class="pbar" title="Fleet power: yours ${pP}, theirs ${pE}"><i style="width:${share}%"></i></div>`;
     return `<div class="battlescreen fitscreen"><div class="board" id="board">
+      ${powerBar}
       <div class="bhead2"><h3>⚔ ${U.esc(s.name)}</h3><span class="muted small">${b.kind === 'attack' ? 'Attack' : 'Defense'} · Round ${b.round}${G.battleQueue.length ? ` · ${G.battleQueue.length} more battle${G.battleQueue.length > 1 ? 's' : ''} waiting` : ''}</span>${tools}</div>
       <div class="bpower enemy" style="--fc:${this.factionColor(enemyOwner)}"><b>${U.esc(enemyName)}</b><span>fleet power <b>${pE}</b></span></div>
       <div class="bside enemy" style="--lanes:${lanes}">${side('enemy')}</div>
-      ${powerBar}
+      <div class="bgap"></div>
       <div class="bside player" style="--lanes:${lanes}">${side('player')}</div>
       <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b><span>fleet power <b>${pP}</b></span></div>
       <svg class="barrow" id="barrow"></svg>
@@ -276,7 +281,7 @@ Object.assign(UI, {
     <aside class="side bside-col">
       <h4>Battle log</h4>
       <div class="blog">${b.log.slice(-30).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
-      <details data-key="battle-rules"><summary class="small">Rules of engagement</summary><p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance, and Large ships hit Small ones at ×${DATA.largeVsSmallHit}. Instead of firing, a ship can swap places with any of yours.</p></details>
+      <details data-key="battle-rules"><summary class="small">Rules of engagement</summary><p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance, and Large ships hit Small ones at ×${DATA.largeVsSmallHit}. Instead of firing, a ship can <b>move</b> to any lane on its side (the ships in between slide over), or <b>Restore</b>: regain ${Math.round(DATA.restore.shield * 100)} % of its max shields and ${Math.round(DATA.restore.hull * 100)} % of its max hull.</p></details>
     </aside></div>`;
   },
 

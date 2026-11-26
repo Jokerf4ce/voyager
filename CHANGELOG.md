@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.42.0 — 2026-11-26
+- **First-time greeting.** A new game (first visit, new galaxy, Begin anew) is greeted with "Wake up, Commander, all systems operational." (`wake_up`, new trigger `first`) instead of "Welcome back". Until `assets/voice/wake_up.mp3` exists, only the transmission text shows.
+- **Battle: the fleet-power bar is at the top of the board.**
+- **Battle: moving pushes ships aside.** A ship moved to another lane is inserted there and the ships in between slide one lane towards the gap it left, like reordering a list. Before, it traded places with the ship in that lane. Planetary Defenses can't be pushed. The confirm button says how many ships make room.
+- **Battle: misses show.** A missed shot flashes **MISS** over the target, which sidesteps.
+- **Battle: new action Restore (⟲).** Instead of firing, a ship regains 25 % of its max shields and 10 % of its max hull (`DATA.restore`); the button shows how much. Enemies and Auto use it when a badly hurt ship has no good shot (about once per battle).
+- Tutorial updated: the battle step explains moving and Restore.
+
 ## 0.41.0 — 2026-11-26
 - **The tutorial opens with every new game:** a fresh browser, *Abandon and start a new galaxy* in Settings, or *Begin anew* after a loss. Tester mode never starts it.
 - **The battle screen fits the 95 % screen height.**
