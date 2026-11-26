@@ -172,11 +172,11 @@ DATA.shipTypes = {
 
 // Rarity of a ship (and of a forged weapon). mult scales stats and weapon damage.
 DATA.shipRarities = {
-  normal:    { name: 'Normal',    rate: 0.769, mult: 1.0,  color: '#9a9080' },
-  strong:    { name: 'Strong',    rate: 0.20,  mult: 1.2,  color: '#4a9ad0' },
+  normal:    { name: 'Normal',    rate: 0.769, mult: 1.0,  color: '#a3a3a3' },
+  strong:    { name: 'Strong',    rate: 0.20,  mult: 1.2,  color: '#4059ac' },
   epic:      { name: 'Epic',      rate: 0.02,  mult: 1.45, color: '#a060d0', extraSlot: true },
-  legendary: { name: 'Legendary', rate: 0.01,  mult: 1.75, color: '#d0a020', extraSlot: true },
-  omega:     { name: 'Omega',     rate: 0.001, mult: 2.2,  color: '#e04040', extraSlot: true },
+  legendary: { name: 'Legendary', rate: 0.01,  mult: 1.75, color: '#db8432', extraSlot: true },
+  omega:     { name: 'Omega',     rate: 0.001, mult: 2.2,  color: '#440b11', extraSlot: true },
 };
 
 // Weapons: physical hits hull hard and bounces off shields; energy strips shields but barely scratches hull.
