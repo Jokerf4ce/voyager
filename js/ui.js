@@ -162,7 +162,7 @@ const UI = {
           <div><small>Fleets</small><b>${G.fleets.length}</b></div>
           <div><small>Ships</small><b>${Ships.all().length}</b></div>
           <div><small>Fleet power</small><b>${U.fmt(power)}</b></div>
-          <div><small>Colony Arks</small><b>${G.arks}</b></div>
+          <div><small>Expeditions</small><b>${G.surveys.length + G.expeditions.length}</b></div>
           <div><small>Systems charted</small><b>${G.stats.explored}</b></div>
           <div><small>Battles won</small><b>${G.stats.battlesWon}</b></div>
           <div><small>Worlds taken</small><b>${G.stats.coloniesTaken}</b></div>
@@ -204,7 +204,7 @@ const UI = {
       const sysMap = s.explored
         ? `<div class="sysmapbox"><h3 class="sysmap-title">◉ ${U.esc(s.name)}</h3><canvas id="syscanvas" width="${SystemMap.W}" height="${SystemMap.H}"></canvas>
             <div class="maphint">Click a planet to inspect it. Hot worlds orbit close to the star, frozen ones far out.</div></div>`
-        : `<div class="sysmapbox"><h3 class="sysmap-title">? ${U.esc(s.name)}</h3><p class="flavor">Uncharted. Send a scout to see its star and planets.</p></div>`;
+        : `<div class="sysmapbox"><h3 class="sysmap-title">? ${U.esc(s.name)}</h3><p class="flavor">Uncharted. Send a survey probe to see its star and planets.</p></div>`;
       below = `<div class="sysrow" id="sysrow">${sysMap}<aside class="side">${this.systemPanel()}</aside></div>`;
     }
     return `<div class="mapscreen">
@@ -243,7 +243,7 @@ const UI = {
     const fleetLine = (g && s.explored ? `<div class="small" style="color:${this.factionColor(g.owner)}">${U.esc(g.name)}: ${g.ships.length} ship${g.ships.length > 1 ? 's' : ''} · power ${Ships.groupPower(g.ships)}</div>` : '')
       + th.map((t) => `<div class="small bad">⚠ ${U.esc(t.name)} arrives in ${t.eta}</div>`).join('')
       + mine.map((f) => `<div class="small res-power">➤ ${U.esc(f.name)} · ${U.esc(Missions.label(f.mission))}</div>`).join('');
-    if (!s.explored) return `<h4>? ${U.esc(s.name)}</h4><p class="muted small">Uncharted. Send a scout.</p>${fleetLine}`;
+    if (!s.explored) return `<h4>? ${U.esc(s.name)}</h4><p class="muted small">Uncharted. Send a survey probe.</p>${fleetLine}`;
     const st = DATA.starClasses[s.star], owner = s.owner ? DATA.factions[s.owner] : null;
     return `<div class="sys-head">${this.starImg(s, 36)}<div><h4>${U.esc(s.name)}</h4><small style="color:${st.color}">${st.name}</small></div></div>
       <div class="small" style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
@@ -255,7 +255,7 @@ const UI = {
     const s = this.selSys != null ? G.systems[this.selSys] : null;
     if (!s) return this.panel('No system selected', '<p class="muted">Select a star on the map.</p>');
     if (!s.explored) {
-      return this.panel('Uncharted', `<p class="flavor">The augurs see only static. Send a fleet with a Scout.</p>` + this.missionPanel(s));
+      return this.panel('Uncharted', `<p class="flavor">The augurs see only static. Send a survey probe.</p>` + this.missionPanel(s));
     }
     const owner = s.owner ? DATA.factions[s.owner] : null;
     const hostile = !!Missions.guard(s);

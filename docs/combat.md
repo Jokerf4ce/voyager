@@ -1,12 +1,12 @@
 # Voyager — Combat Mechanics
 
-How ships, fleets and battles work, as built in v0.23. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
+How ships, fleets and battles work, as built in v0.24. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
 
 ---
 
 ## 1. Ships
 
-Every ship is a **card**. It has a size, a type, a rarity, stats and 1–3 weapons.
+Every ship is a **card**. It has a size, a type, a rarity, stats and 1–3 weapons. There are no fixed stats: each ship rolls its own (see 1.4), so no two ships are alike, not even two Normal ones.
 
 ### 1.1 Sizes: rock, paper, scissors
 
@@ -22,7 +22,7 @@ When one ship attacks another:
 - If the target's size beats the attacker's, the attacker does **×0.7** damage (▽ in the UI).
 - Otherwise (same size) damage is ×1.
 
-### 1.2 Types (base stats at Normal rarity)
+### 1.2 Types (average stats of a Normal ship)
 
 | Type | Size | Shield | Hull | Speed | Evasion | Slots | Maintenance |
 |---|---|---|---|---|---|---|---|
@@ -42,13 +42,15 @@ When one ship attacks another:
 - **Slots** is how many weapons the ship carries.
 - **Maintenance** is paid every Cycle (see 6.3).
 
-Types have no special abilities yet. The only extra rule is that **a fleet needs a Scout to explore**.
+These are the **averages** (means) that a Normal ship's rolls are centred on; a single ship usually lands within ±15 % of them (see 1.4). Weapon slots are fixed per type.
+
+Types have no special abilities yet.
 
 ### 1.3 Rarity
 
 Every build rolls a rarity:
 
-| Rarity | Chance | Stat multiplier | Extra weapon slot |
+| Rarity | Chance | Shifts the average by | Extra weapon slot |
 |---|---|---|---|
 | Normal | 76.9 % | ×1.0 | — |
 | Strong | 20 % | ×1.2 | — |
@@ -60,17 +62,36 @@ The extra slot can't take a ship past 3 slots.
 
 ### 1.4 How a ship's stats are rolled
 
-`m` is the rarity multiplier. "±10 %" means the value is multiplied by a random factor between 0.9 and 1.1.
+Every stat is drawn from a **normal distribution** (a bell curve):
 
-| Stat | Formula |
-|---|---|
-| Shield, Hull | base × m, ±10 % |
-| Speed | base × (1 + (m − 1) × 0.5), ±10 %, at least 1 |
-| Evasion | base × (1 + (m − 1) × 0.5), at most 60 % |
-| Maintenance | base × (1 + (m − 1) × 0.8) |
-| Weapons | one per slot, rolled at the ship's rarity (see 2.2) |
+- **The mean** is the type's average (1.2) shifted up by rarity (`m` = the rarity multiplier).
+- **The standard deviation** (the spread) is a share of that mean.
+- **The cap:** rolls are limited to ±3 standard deviations.
 
-Better ships therefore cost more to maintain: an Omega costs about twice the upkeep of a Normal of the same type.
+| Stat | Mean | Spread (standard deviation) | Limits |
+|---|---|---|---|
+| Shield | average × m | 15 % of the mean | at least 0 |
+| Hull | average × m | 15 % of the mean | at least 1 |
+| Speed | average × (1 + (m − 1) × 0.5) | 15 % of the mean | at least 1 |
+| Evasion | average × (1 + (m − 1) × 0.5) | 20 % of the mean | 0 – 60 % |
+
+What a 15 % spread means in practice:
+- About two ships in three land within ±15 % of the mean.
+- About 19 in 20 land within ±30 %.
+- None land beyond ±45 %.
+
+**Example:** Normal Frigates average 35 shield and 40 hull. Out of 2,000 test rolls, shields ran from 19 to 51 and hulls from 22 to 58. 1,743 of them had a stat line no other one shared.
+
+Rarities overlap. A lucky Normal can out-roll an unlucky Strong, but on average each rarity is clearly better than the one below.
+
+**Quality (Q):**
+- Each card shows **Q**, the ship's rolls compared with the average of its type and rarity.
+- It is the mean of (rolled stat ÷ expected mean) over shield, hull, speed and evasion.
+- 100 is average, above 110 is shown green, below 90 red.
+
+**Maintenance** follows quality: `average maintenance × (1 + (m − 1) × 0.8) × Q / 100`. A well-rolled ship costs a little more to keep flying, and an Omega costs about twice a Normal of the same type.
+
+**Weapons:** one per slot, rolled at the ship's rarity (see 2.2).
 
 ---
 
@@ -110,7 +131,8 @@ Only monsters and Planetary Defenses carry these:
 How a weapon's damage is set when it is rolled:
 
 ```
-damage = size base damage (5 / 10 / 18) × damage factor × rarity multiplier × (0.9 – 1.1), rounded, at least 1
+mean damage = size base damage (5 / 10 / 18) × damage factor × rarity multiplier
+damage      = a normal-distribution roll around that mean, spread 15 %, rounded, at least 1
 ```
 
 - **The model** is picked by roll weight, so heavy weapons are rarer.
@@ -128,23 +150,24 @@ damage = size base damage (5 / 10 / 18) × damage factor × rarity multiplier ×
 
 ---
 
-## 3. Fleets
+## 3. Fleets, exploring and settling
 
 - **Size:** a fleet holds up to **5 ships**, which is one side of a battle. Ships in no fleet wait in the **hangar**.
-- **New ships:** a new build joins the first fleet at home that has room and no Scout; otherwise it goes to the hangar.
-- **Missions instead of movement:** fleets have no position on the map. They go on missions from a system on the Star Map.
+- **New ships:** a new build joins the first fleet at home that has room; otherwise it goes to the hangar.
+- **No map positions:** fleets don't move on the map. They are sent to **attack** a charted monster lair or alien system from that system on the Star Map.
 
-| Mission | Target | Needs |
+Exploring and settling need no ships; they cost a **flat fee**:
+
+| Action | Target | Fee |
 |---|---|---|
-| **Explore** | an uncharted system next to known space | a Scout in the fleet |
-| **Attack** | a charted monster lair or alien system | any ships |
-| **Settle** | a charted, unclaimed, unguarded system | a Colony Ark |
+| **Survey probe** (explore) | an uncharted system next to known space | 20 Metals, 5 Electronics |
+| **Colony expedition** (settle) | a charted, unclaimed, unguarded system | 60 Metals, 25 Electronics, 15 Chemicals |
 
-Settling uses an Ark, not a fleet. An Ark costs 60 Metals, 25 Electronics and 15 Chemicals and is used up on arrival.
+If the target of a colony expedition has been taken or guarded by the time it arrives, the colonists turn back and half the fee is refunded.
 
 **Travel time:**
-- A trip takes one Cycle per hyperlane hop from your nearest system (at least 1), through known space only.
-- After the mission the fleet takes the same number of Cycles to come home.
+- Everything takes one Cycle per hyperlane hop from your nearest system (at least 1), through known space only.
+- An attacking fleet takes the same number of Cycles to come home after its battle.
 - You can **recall** a fleet that is still on its way out.
 - A fleet on a mission can't be changed.
 

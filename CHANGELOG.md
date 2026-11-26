@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.24.0 — 2026-11-26
+**Old saves start a new game** (save format v12).
+- **No fixed ship stats.** Every stat (shield, hull, speed, evasion) and every weapon's damage is rolled from a normal distribution around the type's average (spread 15 %, 20 % for evasion), so every ship is different, Normal ones included. Rarity shifts the average up, and rarities overlap: a lucky Normal can beat an unlucky Strong.
+- Each card shows **Q**, how well the ship rolled compared with an average ship of its type and rarity (100 = average). Maintenance scales with it.
+- **Colony Ark removed.** A **colony expedition** settles a charted, unclaimed system for a flat fee (60 Metals, 25 Electronics, 15 Chemicals); half is refunded if the target was taken before it arrives.
+- **Scouts no longer explore.** A **survey probe** charts a system for a flat fee (20 Metals, 5 Electronics). Scouts remain as a fast Small combat ship.
+- You start with one fleet: Home Guard (a Scout, two Fighters and a Heavy Fighter).
+- New ships get a name no other ship of yours carries.
+- `docs/combat.md` updated.
+
 ## 0.23.1 — 2026-11-26
 - New `docs/combat.md`: the combat mechanics in full (sizes, types, rarities, weapons, turn order, hit and damage formulas, defenses, rewards, enemies, maintenance).
 

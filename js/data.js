@@ -135,7 +135,7 @@ DATA.buildings = {
   platform:  { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',     cost: { metal: 60, electronics: 10, chemicals: 10 }, cap: { power: 2, compute: 1 } },
 };
 
-// Settling another planet in a system you already hold (no Ark needed). Grows with planets owned.
+// Settling another planet in a system you already hold (no expedition needed). Grows with planets owned.
 DATA.settleCost = { metal: 60, electronics: 20, chemicals: 10 };
 DATA.settleGrowth = 1.2;
 
@@ -150,10 +150,12 @@ DATA.sizes = {
 DATA.sizeAdvantage = 1.5;    // damage multiplier against the size you beat
 DATA.sizeDisadvantage = 0.7; // ... and against the size that beats you
 
-// Base stats at Normal rarity. shield and hull are life points (shield first); speed sets turn order;
-// maneuver is the chance to evade (%); slots = weapon slots (1–3); upkeep = Metals per Cycle (plus half that in Chemicals).
+// There are no fixed stats: every ship rolls each stat from a normal distribution. The numbers below are the
+// averages (means) of a Normal-rarity ship; DATA.statSpread sets how far a roll usually lands from it.
+// shield and hull are life points (shield first); speed sets turn order; maneuver is the chance to evade (%);
+// slots = weapon slots (1–3, fixed per type); upkeep = average Metals per Cycle (plus half that in Chemicals).
 DATA.shipTypes = {
-  scout:      { name: 'Scout',         size: 'S', shield: 8,  hull: 10,  speed: 9, maneuver: 30, slots: 1, upkeep: 0.2, scout: true, desc: 'Fast and fragile. A fleet needs one to explore.' },
+  scout:      { name: 'Scout',         size: 'S', shield: 8,  hull: 10,  speed: 9, maneuver: 30, slots: 1, upkeep: 0.2, desc: 'Fast and fragile: acts first, dodges often.' },
   fighter:    { name: 'Fighter',       size: 'S', shield: 10, hull: 14,  speed: 8, maneuver: 25, slots: 1, upkeep: 0.3, desc: 'Cheap, quick, hard to hit.' },
   heavy:      { name: 'Heavy Fighter', size: 'S', shield: 14, hull: 20,  speed: 6, maneuver: 18, slots: 2, upkeep: 0.5, desc: 'A fighter with a second gun and more armour.' },
   corvette:   { name: 'Corvette',      size: 'M', shield: 25, hull: 30,  speed: 6, maneuver: 12, slots: 2, upkeep: 0.8, desc: 'Fast for a line ship.' },
@@ -170,7 +172,11 @@ DATA.shipTypes = {
   defense:    { name: 'Planetary Defenses', size: 'M', shield: 20, hull: 30, speed: 3, maneuver: 0, slots: 2, upkeep: 0, structure: true, desc: 'Bastions and Defense Platforms of the system.' },
 };
 
-// Rarity of a ship (and of a forged weapon). mult scales stats and weapon damage.
+// Spread of the normal distribution: standard deviation as a share of the mean (15 % = about two in three ships
+// land within ±15 % of the average, almost all within ±45 %).
+DATA.statSpread = { shield: 0.15, hull: 0.15, speed: 0.15, maneuver: 0.2, dmg: 0.15 };
+
+// Rarity of a ship (and of a forged weapon). mult shifts the mean of every stat roll and of weapon damage.
 DATA.shipRarities = {
   normal:    { name: 'Normal',    rate: 0.769, mult: 1.0,  color: '#a3a3a3' },
   strong:    { name: 'Strong',    rate: 0.20,  mult: 1.2,  color: '#4059ac' },
@@ -201,7 +207,9 @@ DATA.weaponModels = {
   lance:      { name: 'Orbital Lance',    kind: 'energy',   dmg: 1.4, cd: 0, acc: 95, weight: 0 },
 };
 
-DATA.ark = { name: 'Colony Ark', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony in a charted, unclaimed system. Consumed on arrival.' };
+// Exploring and settling cost a flat fee instead of a ship. Both take one Cycle per hyperlane hop to arrive.
+DATA.survey = { name: 'Survey probe', cost: { metal: 20, electronics: 5 }, desc: 'Charts an uncharted system next to known space.' };
+DATA.colonize = { name: 'Colony expedition', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony on the best planet of a charted, unclaimed, unguarded system.' };
 DATA.forge = { cost: { shards: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
@@ -251,7 +259,7 @@ DATA.events = {
     choices: [
       { label: 'Strip it for salvage', effect: (G, c) => {
         G.res.metal += 50;
-        if (Math.random() < 0.3 && Ships.loseRandom(c.fleetId)) return 'Salvage recovered (+50 Metals). Something followed the boarding party back. A ship is lost.';
+        if (Math.random() < 0.3) { G.res.metal -= 20; return 'Salvage recovered (+30 Metals net). Something followed the salvage crew back; the cargo bay had to be vented.'; }
         return 'Salvage recovered (+50 Metals). The breathing stopped when the reactor was cut.';
       } },
       { label: 'Leave it to the dark', effect: () => 'You leave the hulk behind. The breathing is in the comm logs now.' },
@@ -310,5 +318,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v11',
+  saveKey: 'voyager_save_v12',
 };

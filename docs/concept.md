@@ -31,7 +31,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 
 **Proposed.**
 
-- **Explore.** Scout ships reveal systems, anomalies, derelicts and alien ruins. Text events have choices, some of them risky or horrifying.
+- **Explore.** Survey probes reveal systems, anomalies, derelicts and alien ruins. Text events have choices, some of them risky or horrifying.
 - **Expand.** Colonise planets and build outposts. Each colony has a menu screen with buildings, population and unrest.
 - **Exploit.** Resources and production chains, research, and colony upgrades. This is where the incremental growth happens.
 - **Exterminate.** Fleets of ship cards and turn-based card battles (see 4c). Planets can be invaded, purged or razed.
@@ -74,7 +74,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
 
 **Proposed** (as built in the POC):
-- A system is owned as a whole. The first colony in a system needs a Colony Ark. Further planets in a system you hold can be settled for Metal and Electronics, with the cost rising as you grow.
+- A system is owned as a whole. The first colony in a system needs a colony expedition (a flat fee since v0.24; a Colony Ark ship before). Further planets in a system you hold can be settled for Metal and Electronics, with the cost rising as you grow.
 - Each layer has a number of **slots**. A slot holds one kind of building, and levels are unlimited.
 - **Planet classes** (decided): every planet is defined by three factors.
   - **Size:** Giant (gas only), Large, Average, Dwarf. Size sets the slots: Giant 0 surface / 5 orbit, Large 5/4, Average 4/3, Dwarf 2/2. Dwarfs are one habitability step worse.
@@ -122,8 +122,8 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 | **Metals** | gathered | Deep Mines on rocky worlds | almost everything; Electronics input |
 | **Rare Minerals** | gathered | Core Drills, Atmosphere Skimmers; hot worlds, dwarfs, stellar remnants | advanced buildings and ships; Electronics and Chemical input |
 | **Organics** | gathered | Bio-Harvesters on living and icy worlds; Atmosphere Skimmers on gas giants | Chemical input; feeding survivors |
-| **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, Arks, warships, settling |
-| **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, Arks, warships, settling |
+| **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, warships, surveys, settling |
+| **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, warships, settling |
 | **Research** | points | Research Labs (+2 each), capital +1 | technology |
 | **Void Shards** | points | exploration, battles, events, techs, relics, pulsars and black holes | Void Signals (gacha) |
 | **Power** ϟ | capacity | colony base 2 × starlight, Fusion Reactors (+6), Solar Arrays in orbit (+4 × starlight); hot worlds ×1.3 | almost every building |
@@ -155,13 +155,15 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **Decided (v0.23).** The full rules and numbers are in `docs/combat.md`.
 - **Fleets are global**, like the colonies: one Fleets screen lists every fleet, the hangar (ships in no fleet) and the armory (spare weapons). A fleet holds up to **five ships**, the size of one side in battle.
-- **No map positions.** Fleets are sent on **missions** from a system on the Star Map: **Explore** (needs a Scout in the fleet), **Attack** (monster lairs and alien systems), and the **Colony Ark** settles a charted, unclaimed system. A mission takes as many Cycles as hyperlane hops from the nearest Covenant system; the fleet then returns. Fleets out on a mission can't be changed.
+- **No map positions.** Fleets are sent to **attack** (monster lairs and alien systems) from a system on the Star Map. A mission takes as many Cycles as hyperlane hops from the nearest Covenant system; the fleet then returns. Fleets out on a mission can't be changed.
+- **Exploring and settling cost a flat fee** (changed in v0.24; before, they needed a Scout in the fleet and a Colony Ark): a **survey probe** charts a system, a **colony expedition** settles one. Both travel like a fleet.
 - **Ship sizes** beat each other like rock-paper-scissors: **Small beats Large, Large beats Medium, Medium beats Small** (×1.5 damage; ×0.7 the other way).
   - Small: Scout, Fighter, Heavy Fighter. Medium: Corvette, Frigate, Gunboat. Large: Destroyer, Battleship, Carrier.
-  - The types differ only in base stats so far; type-specific abilities are open.
+  - The types differ only in their average stats so far; type-specific abilities are open.
 - **Ship stats:** shield (first life points), hull (second life points), speed (turn order), maneuverability (evasion chance), weapon slots (1–3) and maintenance (upkeep per Cycle).
 - **Weapons** are rolled with the ship and can be swapped. **Physical** weapons do ×1.5 to hull and ×0.5 to shields; **energy** weapons the reverse. Heavier models hit harder but need turns to recharge (cooldown) and are less accurate.
-- **Building is a gacha:** you choose and pay for a size; the type, rarity, stats and weapons are rolled. Rarity sets the stats: **Normal 76.9 % (×1), Strong 20 % (×1.2), Epic 2 % (×1.45, +1 slot), Legendary 1 % (×1.75, +1 slot), Omega 0.1 % (×2.2, +1 slot).**
+- **Building is a gacha:** you choose and pay for a size; the type, rarity, stats and weapons are rolled.
+- **No fixed stats** (v0.24): every stat (and weapon damage) is drawn from a **normal distribution** around the type's average, so every ship differs, Normal ones included. Rarity shifts the average up: **Normal 76.9 % (×1), Strong 20 % (×1.2), Epic 2 % (×1.45, +1 slot), Legendary 1 % (×1.75, +1 slot), Omega 0.1 % (×2.2, +1 slot).**
 - **Battles** are turn-based, like a card game or a Pokémon battle: both sides' cards face each other; every round each ship acts once, fastest first, firing one ready weapon at one target. You pick weapon and target for your ships, or switch on **Auto**; **Resolve instantly** and **Retreat** are always available. A battle ends when one side is destroyed (or after 25 rounds).
 - **Losses are permanent.** Damage to hull carries over and is repaired at home (20 % of max hull per Cycle, only while maintenance is paid). Shields recharge after every battle.
 - **The Void Signals gacha is removed** (no leaders, relics or blueprints). Void Shards now buy random weapons at the **Weapon Forge**.

@@ -35,7 +35,7 @@ Object.assign(UI, {
       <div class="sc-img"><img class="px" src="${Sprites.ship(d.type, color, !!opts.flip)}" width="${sz.w * scale}" height="${sz.h * scale}" alt=""></div>
       <b class="sc-name" title="${U.esc(d.name)}">${U.esc(d.name)}</b><small class="sc-type">${t.name}</small>
       ${this.bar('sh', shield, shieldMax)}${this.bar('hu', hull, hullMax)}
-      <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Maintenance per Cycle">⚙${d.upkeep}</span>` : ''}</div>
+      <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Maintenance per Cycle">⚙${d.upkeep}</span>` : ''}${d.quality != null && !opts.small && !t.structure ? `<span class="q ${d.quality >= 110 ? 'hi' : d.quality <= 90 ? 'lo' : ''}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${d.quality}</span>` : ''}</div>
       ${opts.small ? '' : `<div class="sc-weps">${d.weapons.map((w) => this.weaponChip(w)).join('')}</div>`}
       ${opts.extra || ''}
     </div>`;
@@ -74,13 +74,9 @@ Object.assign(UI, {
         <div class="btnrow">${this.btn('Show in Fleets', 'gofleets')}</div></div></div>` : '';
     const lw = this.lastWeapon && G.armory.find((w) => w.id === this.lastWeapon);
     return this.panel('Shipyard', `<p class="flavor">Every hull is laid down blind. The forge-priests swear the machine-spirit chooses what it becomes.</p>
-        <p class="small muted">Choose a size and pay; the type, rarity, stats and weapons are rolled. Rates: ${this.rarityRates()}. Your best shipyard (Lv ${best}) cuts costs by ${Math.round(Math.min(40, 5 * (best - 1)))}%.</p>
+        <p class="small muted">Choose a size and pay; the type, rarity, stats and weapons are rolled. Every stat is drawn from a normal distribution around the type's average, so no two ships are alike; Q on a card shows how well it rolled (100 = average). Rarity shifts the average up. Rates: ${this.rarityRates()}. Your best shipyard (Lv ${best}) cuts costs by ${Math.round(Math.min(40, 5 * (best - 1)))}%.</p>
         <div class="buildtiles">${['S', 'M', 'L'].map(tile).join('')}</div>${reveal}`) +
       `<div class="grid2">` +
-      this.panel('Colony Ark', `<p class="small">${DATA.ark.desc} Send it from a system on the Star Map.</p>
-        <div class="kv"><span>Arks ready</span><b>${G.arks}</b></div>
-        ${G.arkMissions.length ? `<div class="small muted">${G.arkMissions.map((m) => `On its way to ${U.esc(G.systems[m.target].name)} · ${m.eta}`).join('<br>')}</div>` : ''}
-        <div class="btnrow">${this.btn(`Build an Ark <small>${U.costText(Ships.arkCost())}</small>`, 'buildark', '', !Colonies.canAfford(Ships.arkCost()))}</div>`) +
       this.panel('Weapon Forge', `<p class="small">${DATA.forge.desc} Fit forged weapons to ships on the Fleets screen.</p>
         <div class="btnrow">${['S', 'M', 'L'].map((z) => this.btn(`${DATA.sizes[z].name} weapon <small class="res-shards">◆${DATA.forge.cost.shards}</small>`, 'forge', z, !Ships.unlocked(z) || G.res.shards < DATA.forge.cost.shards)).join('')}</div>
         ${lw ? `<div class="forged">New: ${this.weaponChip(lw)} <small class="muted">(${DATA.sizes[lw.size].name})</small></div>` : ''}`) +
@@ -103,7 +99,7 @@ Object.assign(UI, {
       }
       const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : '<span class="muted">at home · ready</span>';
       return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button>
-          <span class="small">${status}</span><span class="small muted">power ${Ships.groupPower(ships)} · ${ships.length}/${DATA.fleetMax}${Ships.hasScout(f) ? ' · can explore' : ''}</span></div>
+          <span class="small">${status}</span><span class="small muted">power ${Ships.groupPower(ships)} · ${ships.length}/${DATA.fleetMax}</span></div>
         <div class="cardrow">${slots.join('')}</div></div>`;
     }).join('');
     const hangar = Ships.hangar();
@@ -143,6 +139,7 @@ Object.assign(UI, {
       <div class="kv"><span>Shield / Hull</span><b>${sh.shield} / ${Math.round(sh.hullNow)}${sh.hullNow < sh.hull ? ` of ${sh.hull}` : ''}</b></div>
       <div class="kv"><span>Speed · Evasion</span><b>${sh.speed} · ${sh.maneuver}%</b></div>
       <div class="kv"><span>Maintenance</span><b>${sh.upkeep} / Cycle</b></div>
+      <div class="kv"><span>Roll quality</span><b>${sh.quality}% <small class="muted">of an average ${DATA.shipRarities[sh.rarity].name} ${t.name}</small></b></div>
       <div class="kv"><span>Fleet</span><b>${f ? U.esc(f.name) : 'Hangar'}</b></div>
       <h4>Weapons (${slots} slot${slots > 1 ? 's' : ''})</h4>${weps}
       ${moves}`);
@@ -158,10 +155,11 @@ Object.assign(UI, {
         <div class="cardrow wrap">${g.ships.map((sh) => this.shipCard(sh, { small: true, flip: true, color: this.factionColor(g.owner) })).join('')}</div>`;
     }
     const opts = [];
+    const eta = Missions.distance(s.id);
+    const etaText = eta ? ` · ${eta} Cycle${eta > 1 ? 's' : ''}` : '';
     if (!s.explored && Explore.isSeen(s.id)) {
-      const can = idle.filter((f) => !Missions.blocker(f.id, 'explore', s.id));
-      opts.push(`<h4>Explore</h4>` + (can.length ? `<div class="btnrow">${can.map((f) => this.btn(`Send ${U.esc(f.name)} <small>${Missions.distance(s.id)} Cycle${Missions.distance(s.id) > 1 ? 's' : ''}</small>`, 'mission', `${f.id}|explore|${s.id}`)).join('')}</div>`
-        : '<p class="small muted">No fleet with a Scout is free.</p>'));
+      const why = Missions.surveyBlocker(s.id);
+      opts.push(`<h4>Explore</h4><div class="btnrow">${this.btn(`Launch a survey probe <small>${U.costText(DATA.survey.cost)}${etaText}</small>`, 'survey', s.id, !!why, 'gold')}</div>${why && why !== 'Not enough resources' ? `<small class="muted">${why}</small>` : ''}`);
     }
     if (s.explored && Missions.hostile(s)) {
       const enemyPower = g ? Ships.groupPower(g.ships) : 0;
@@ -172,14 +170,15 @@ Object.assign(UI, {
     }
     if (s.explored && !s.owner && !g) {
       const why = Missions.colonizeBlocker(s.id);
-      opts.push(`<h4>Settle</h4><div class="btnrow">${this.btn(`Send a Colony Ark <small>${G.arks} ready${why ? '' : ' · ' + Missions.distance(s.id) + ' Cycles'}</small>`, 'sendark', s.id, !!why, 'gold')}</div>${why ? `<small class="muted">${why}</small>` : ''}`);
+      opts.push(`<h4>Settle</h4><div class="btnrow">${this.btn(`Send a colony expedition <small>${U.costText(DATA.colonize.cost)}${etaText}</small>`, 'colonize', s.id, !!why, 'gold')}</div>${why && why !== 'Not enough resources' ? `<small class="muted">${why}</small>` : ''}`);
     }
     const coming = G.fleets.filter((f) => f.mission && f.mission.target === s.id);
-    const arks = G.arkMissions.filter((m) => m.target === s.id);
+    const exps = G.expeditions.filter((m) => m.target === s.id), probes = G.surveys.filter((m) => m.target === s.id);
     const threats = G.threats.filter((t) => t.target === s.id);
     const notes = [
       ...coming.map((f) => `<div class="small res-power">➤ ${U.esc(f.name)}: ${U.esc(Missions.label(f.mission))}</div>`),
-      ...arks.map((m) => `<div class="small good">➤ Colony Ark arrives in ${m.eta}</div>`),
+      ...probes.map((m) => `<div class="small res-research">➤ Survey probe arrives in ${m.eta}</div>`),
+      ...exps.map((m) => `<div class="small good">➤ Colony expedition arrives in ${m.eta}</div>`),
       ...threats.map((t) => `<div class="small bad">⚠ ${U.esc(t.name)} (${t.ships.length} ships, power ${Ships.groupPower(t.ships)}) arrives in ${t.eta}</div>`),
     ];
     return out + opts.join('') + notes.join('');

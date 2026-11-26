@@ -137,7 +137,8 @@ const StarMap = {
       if (g) g.ships.forEach((x, i) => pip(p.x + 9 + Math.floor(i / 3) * 4, p.y - 7 + (i % 3) * 4, DATA.factions[g.owner].color));
       let row = 0;
       for (const f of G.fleets) if (f.mission && f.mission.target === s.id && f.mission.phase !== 'back') pip(p.x - 12, p.y - 7 + 4 * row++, '#e0c060');
-      for (const m of G.arkMissions) if (m.target === s.id) pip(p.x - 12, p.y - 7 + 4 * row++, '#9ac070');
+      for (const m of G.expeditions) if (m.target === s.id) pip(p.x - 12, p.y - 7 + 4 * row++, '#9ac070');
+      for (const m of G.surveys) if (m.target === s.id) pip(p.x - 12, p.y - 7 + 4 * row++, '#80c0e0');
       for (const t of G.threats) if (t.target === s.id) { ctx.fillStyle = '#e04040'; ctx.fillText('!', p.x - 10, p.y + 9); this.brackets(ctx, p, 13, '#e04040'); }
     }
   },

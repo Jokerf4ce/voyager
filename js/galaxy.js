@@ -113,13 +113,10 @@ const Galaxy = {
     G.ai.chorus.homeId = chorus.id;
     G.ai.remnant.homeId = remnant.id;
 
-    // Starting fleets: two scouts and a small guard of fighters, all Normal cards.
+    // Starting fleet: a Scout, two Fighters and a Heavy Fighter, all Normal cards.
     const give = (type, fleet) => { const sh = Ships.make(type, { rarity: 'normal' }); G.ships[sh.id] = sh; fleet.ships.push(sh.id); };
-    give('scout', Ships.newFleet('Pathfinder'));
-    give('scout', Ships.newFleet('Wayseeker'));
     const guard = Ships.newFleet('Home Guard');
-    give('fighter', guard); give('fighter', guard); give('heavy', guard);
-    G.arks = 1;
+    give('scout', guard); give('fighter', guard); give('fighter', guard); give('heavy', guard);
     AI.setGuard(chorus, 'chorus', 4);
     AI.setGuard(remnant, 'remnant', 4);
 

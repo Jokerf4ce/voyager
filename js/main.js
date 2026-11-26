@@ -84,7 +84,8 @@ const Game = {
     renamefleet: (a) => { const f = Ships.fleet(+a); if (!f) return; const n = window.prompt('Fleet name', f.name); if (n) Ships.rename(f.id, n.trim()); },
     mission: (a) => { const [fid, kind, sid] = a.split('|'); Missions.launch(+fid, kind, +sid); },
     recall: (a) => { Missions.recall(+a); },
-    sendark: (a) => { Missions.colonize(+a); },
+    survey: (a) => { Missions.survey(+a); },
+    colonize: (a) => { Missions.colonize(+a); },
     gofleets: (a) => { UI.screen = 'fleets'; if (a) UI.selShip = null; },
     // battles
     gobattle: () => { UI.screen = 'battle'; },
@@ -108,7 +109,6 @@ const Game = {
     goyard: () => { UI.screen = 'shipyard'; },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastWeapon = null; } },
-    buildark: () => { Ships.buildArk(); },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
     research: (a) => { Research.select(a); Research.tick(); },
     bopen: (a) => { UI.bOpen = UI.bOpen === a ? null : a; },

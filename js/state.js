@@ -5,15 +5,15 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 11,
+      version: 12,
       cycle: 1,
       res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, shards: 25 },
       systems: [],
       ships: {},          // every Covenant ship card, by id (js/ships.js)
       fleets: [],         // [{ id, name, ships: [shipId], mission }]
       armory: [],         // spare weapons
-      arks: 0,            // Colony Arks ready to launch
-      arkMissions: [],
+      surveys: [],        // survey probes on their way: [{ target, eta, total }]
+      expeditions: [],    // colony expeditions on their way: [{ target, eta, total }]
       threats: [],        // alien raids on their way
       battle: null,       // the battle being fought (js/battle.js)
       battleQueue: [],
@@ -36,8 +36,8 @@ const State = {
     G.systems = Galaxy.generate();
     Galaxy.placeStarts();
     Log.add('The Covenant fleet arrives at the edge of the Shroud. The homeworld is ash behind it, and the void ahead is full of things that hunger.', 'story');
-    Log.add('Send your scouts into the dark. Find worlds. Survive.', 'story');
-    Log.add('Open the Star Map, pick a "?" system and send the Pathfinder to chart it.', 'story');
+    Log.add('Send your probes into the dark. Find worlds. Survive.', 'story');
+    Log.add('Open the Star Map, pick a "?" system and send a survey probe to chart it.', 'story');
   },
 
   // Sum of every bonus source (research).
@@ -64,7 +64,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 11) return false;
+      if (!data || data.version !== 12) return false;
       G = data;
       return true;
     } catch (e) { return false; }
@@ -77,7 +77,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 11) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 12) throw new Error('Not a Voyager save');
     G = data;
   },
 

@@ -45,7 +45,6 @@ const Admin = {
     add('battleship', 'omega', wolves); add('gunboat', 'normal', wolves); add('scout', 'strong', wolves);
     for (const [t, r] of [['carrier', 'strong'], ['frigate', 'normal'], ['fighter', 'epic'], ['scout', 'normal'], ['heavy', 'normal'], ['gunboat', 'strong']]) add(t, r, null);
     for (const z of ['S', 'M', 'L', 'S', 'M']) G.armory.push(Ships.makeWeapon(z, Ships.rollRarity(2)));
-    G.arks = 3;
     // an alien raid already on its way, to try a defense battle
     const target = AI.pickTarget('chorus');
     if (target) G.threats.push({ id: 't' + (G.nextThreatId++), owner: 'chorus', name: 'Chorus Raid', target: target.s.id, eta: 2, total: 2, ships: AI.team('chorus', 3) });

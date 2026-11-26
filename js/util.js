@@ -4,6 +4,14 @@ const U = {
   rand: (a, b) => a + Math.random() * (b - a),
   randInt: (a, b) => Math.floor(a + Math.random() * (b - a + 1)),
   pick: (arr) => arr[Math.floor(Math.random() * arr.length)],
+  // A normally distributed random number (Box–Muller), clamped to ±3 standard deviations.
+  gauss(mean = 0, sd = 1) {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    const z = Math.max(-3, Math.min(3, Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v)));
+    return mean + z * sd;
+  },
   shuffle: (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; },
   fmt: (n) => {
     n = Math.floor(n);

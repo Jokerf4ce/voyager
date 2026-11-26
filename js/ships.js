@@ -19,7 +19,8 @@ const Ships = {
     return 'normal';
   },
 
-  vary() { return U.rand(0.9, 1.1); },
+  // One stat roll: a normal distribution around the mean, its spread a share of the mean (DATA.statSpread).
+  roll(mean, key) { return mean > 0 ? U.gauss(mean, mean * DATA.statSpread[key]) : 0; },
 
   // A weapon for a ship of the given size. kindBias: 'physical' | 'energy' | null.
   makeWeapon(size, rarity = 'normal', kindBias = null, modelKey = null) {
@@ -33,9 +34,19 @@ const Ships = {
     const m = DATA.weaponModels[modelKey], rar = DATA.shipRarities[rarity];
     return {
       id: 'w' + (G.nextWeaponId++), model: modelKey, name: m.name, kind: m.kind, size, rarity,
-      dmg: Math.max(1, Math.round(DATA.sizes[size].weaponDmg * m.dmg * rar.mult * this.vary())),
+      dmg: Math.max(1, Math.round(this.roll(DATA.sizes[size].weaponDmg * m.dmg * rar.mult, 'dmg'))),
       cd: m.cd, acc: m.acc,
     };
+  },
+
+  // A grim name no Covenant ship carries right now (numbered once all are taken).
+  freshName() {
+    const used = new Set(Object.values(G.ships || {}).map((s) => s.name));
+    const free = DATA.shipNames.filter((n) => !used.has(n));
+    if (free.length) return U.pick(free);
+    let n = 2, base = U.pick(DATA.shipNames);
+    while (used.has(`${base} ${n}`)) n++;
+    return `${base} ${n}`;
   },
 
   // A new ship card. opts: { rarity, owner, kindBias, bias }
@@ -43,14 +54,27 @@ const Ships = {
     const t = DATA.shipTypes[type], rarity = opts.rarity || this.rollRarity(opts.bias || 0);
     const rar = DATA.shipRarities[rarity], mult = rar.mult;
     const slots = Math.min(3, t.slots + (rar.extraSlot ? 1 : 0));
+    // Every stat is rolled from a normal distribution around the type's average, shifted up by rarity.
+    const mean = {
+      shield: t.shield * mult, hull: t.hull * mult,
+      speed: t.speed * (1 + (mult - 1) * 0.5), maneuver: t.maneuver * (1 + (mult - 1) * 0.5),
+    };
+    const r = {
+      shield: Math.max(0, Math.round(this.roll(mean.shield, 'shield'))),
+      hull: Math.max(1, Math.round(this.roll(mean.hull, 'hull'))),
+      speed: Math.max(1, Math.round(this.roll(mean.speed, 'speed'))),
+      maneuver: Math.max(0, Math.min(60, Math.round(this.roll(mean.maneuver, 'maneuver')))),
+    };
+    // quality: how this ship compares with the average of its type and rarity (100 = average)
+    const parts = Object.keys(mean).filter((k) => mean[k] > 0).map((k) => r[k] / mean[k]);
+    const quality = parts.reduce((a, b) => a + b, 0) / parts.length;
     const ship = {
       id: 's' + (G.nextShipId++), type, size: t.size, rarity, owner: opts.owner || 'player',
-      name: opts.name || (t.monster || t.structure ? t.name : U.pick(DATA.shipNames)),
-      shield: Math.round(t.shield * mult * this.vary()),
-      hull: Math.max(1, Math.round(t.hull * mult * this.vary())),
-      speed: Math.max(1, Math.round(t.speed * (1 + (mult - 1) * 0.5) * this.vary())),
-      maneuver: Math.min(60, Math.round(t.maneuver * (1 + (mult - 1) * 0.5))),
-      upkeep: Math.round(t.upkeep * (1 + (mult - 1) * 0.8) * 100) / 100,
+      name: opts.name || (t.monster || t.structure ? t.name : this.freshName()),
+      shield: r.shield, hull: r.hull, speed: r.speed, maneuver: r.maneuver,
+      quality: Math.round(quality * 100),
+      // better rolls cost more to keep flying
+      upkeep: Math.round(t.upkeep * (1 + (mult - 1) * 0.8) * quality * 100) / 100,
       weapons: [],
       built: G.cycle,
     };
@@ -85,7 +109,6 @@ const Ships = {
   fleet(id) { return G.fleets.find((f) => f.id === id); },
   fleetShips(f) { return f.ships.map((id) => G.ships[id]).filter(Boolean); },
   idleFleets() { return G.fleets.filter((f) => !f.mission && f.ships.length); },
-  hasScout(f) { return this.fleetShips(f).some((s) => DATA.shipTypes[s.type].scout); },
   // A rough strength number for one ship / a group (shown on cards and fleets; also used by the AI).
   power(s) {
     const dmg = s.weapons.reduce((a, w) => a + w.dmg / (1 + w.cd * 0.6), 0);
@@ -116,20 +139,11 @@ const Ships = {
     const ship = this.make(U.pick(types));
     G.ships[ship.id] = ship;
     // straight into a fleet at home that has room, otherwise the hangar
-    const f = G.fleets.find((x) => !x.mission && x.ships.length < DATA.fleetMax && !x.ships.some((id) => DATA.shipTypes[G.ships[id].type].scout) && x.ships.length);
+    const f = G.fleets.find((x) => !x.mission && x.ships.length < DATA.fleetMax && x.ships.length);
     if (f) f.ships.push(ship.id);
     const rar = DATA.shipRarities[ship.rarity];
     Log.add(`${rar.name} ${DATA.shipTypes[ship.type].name} "${ship.name}" leaves the slipway${f ? ` and joins ${f.name}` : ''}.`, ship.rarity === 'normal' ? '' : ship.rarity === 'strong' ? 'good' : 'mythic');
     return ship;
-  },
-
-  arkCost() { return Object.assign({}, DATA.ark.cost); },
-  buildArk() {
-    if (!Colonies.yards().length || !Colonies.canAfford(this.arkCost())) return false;
-    Colonies.pay(this.arkCost());
-    G.arks++;
-    Log.add('A Colony Ark is consecrated. Ten thousand sleepers wait in its holds.');
-    return true;
   },
 
   forge(size) {
@@ -149,7 +163,7 @@ const Ships = {
   },
   fleetName() {
     const used = new Set(G.fleets.map((f) => f.name));
-    const names = ['Home Guard', 'Pathfinder', 'Wayseeker', 'Ash Lance', 'Grey Vigil', 'Bone Choir', 'Penance', 'Ember Host', 'Cold Hand', 'Last Light', 'Tithe', 'Requiem'];
+    const names = ['Home Guard', 'Ash Lance', 'Pathfinder', 'Grey Vigil', 'Bone Choir', 'Penance', 'Ember Host', 'Cold Hand', 'Last Light', 'Tithe', 'Requiem'];
     return names.find((n) => !used.has(n)) || 'Battlegroup ' + G.nextFleetId;
   },
   // Move a ship into a fleet (or the hangar with fleetId null). Fleets on a mission can't change.

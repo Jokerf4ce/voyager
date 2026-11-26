@@ -15,7 +15,7 @@ const AI = {
     return 'S';
   },
   makeShip(id, size = this.pickSize()) {
-    const types = Object.keys(DATA.shipTypes).filter((k) => DATA.shipTypes[k].size === size && !DATA.shipTypes[k].monster && !DATA.shipTypes[k].structure && !DATA.shipTypes[k].scout);
+    const types = Object.keys(DATA.shipTypes).filter((k) => DATA.shipTypes[k].size === size && !DATA.shipTypes[k].monster && !DATA.shipTypes[k].structure && k !== 'scout');
     const type = U.pick(types);
     return Ships.make(type, { owner: id, kindBias: this.weapons[id], bias: this.bias(), name: `${DATA.factions[id].short} ${DATA.shipTypes[type].name}` });
   },

@@ -247,8 +247,10 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
 .sbar.sh i { background: repeating-linear-gradient(90deg, #4a9ad0 0 4px, #3a7ab0 4px 5px); }
 .sbar.hu i { background: repeating-linear-gradient(90deg, #c07038 0 4px, #a05828 4px 5px); }
 .sbar span { position: absolute; right: 2px; top: -4px; font-size: 13px; color: #fff; text-shadow: 1px 1px 0 #000; }
-.sc-stats { display: flex; gap: 8px; font-size: 14px; color: var(--ash); }
+.sc-stats { display: flex; flex-wrap: wrap; gap: 0 6px; font-size: 13px; color: var(--ash); }
 .sc-weps { display: flex; flex-direction: column; gap: 2px; }
+.sc-stats .q { margin-left: auto; color: var(--bone); }
+.sc-stats .q.hi { color: #9ac070; } .sc-stats .q.lo { color: #c07060; }
 .wchip { --wc: #aaa; --rc: #9a9080; display: inline-flex; align-items: center; gap: 3px; font-size: 14px; line-height: 1.1; padding: 1px 4px; background: #0e0c0b; border: 1px solid #2a2420; border-left: 3px solid var(--rc); white-space: nowrap; }
 .wchip i { font-style: normal; color: var(--wc); }
 .wchip em { font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }

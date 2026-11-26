@@ -11,9 +11,9 @@ See [docs/concept.md](docs/concept.md) for the design.
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
-- **Star Map:** fills the screen width. Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and missions appear below (double-click scrolls there). From there, send fleets to **explore** or **attack**, or send a **Colony Ark** to settle.
+- **Star Map:** fills the screen width. Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and missions appear below (double-click scrolls there). From there, launch a **survey probe** to explore or a **colony expedition** to settle (both cost a flat fee), or send a fleet to **attack**.
 - **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
-- **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons.
+- **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
 - **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
 - The side menu collapses on its own 10 seconds after the cursor leaves it; ☰ opens it again.
 - **Admin test game:** Settings → *Open admin test game*, or add `#admin` to the address. A separate save with extra colonies, random buildings and full stores, for testing. The real save is not touched.
@@ -26,7 +26,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
 - Explore with scouts; exploration events with grim choices
-- Expand with Colony Arks into new systems, then settle more planets in systems you hold
+- Expand with colony expeditions into new systems, then settle more planets in systems you hold
 - Resources: Metals, Rare Minerals and Organics (gathered); Electronics and Chemicals (refined); Power, Compute and Infrastructure (capacities); Research
 - Research made by Research Labs, including endlessly repeatable "Doctrine" techs for the incremental layer
 - Ship cards in 3 sizes (rock-paper-scissors) and 9 types, rolled at 5 rarities; global fleets of up to 5; missions instead of map movement
@@ -57,7 +57,7 @@ js/galaxy.js      galaxy generation and starting positions
 js/economy.js     colonies, buildings, per-Cycle production
 js/research.js    research
 js/ships.js       ship cards: build gacha, weapons, fleets, hangar, armory, forge
-js/missions.js    missions (explore, attack, Colony Ark) and incoming raids
+js/missions.js    fleet attacks, survey probes, colony expeditions and incoming raids
 js/explore.js     exploration, fog of war, events
 js/battle.js      turn-based card battles
 js/ai.js          alien empire AI: garrisons, expansion, raids
