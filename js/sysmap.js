@@ -149,7 +149,7 @@ const SystemMap = {
     const s = G.systems[UI.selSys];
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(StarMap.background(), 0, 0);
+    ctx.drawImage(StarMap.background(this.W, this.H), 0, 0);
     const lay = this.layout(s);
     s.planets.forEach((p, i) => this.orbit(ctx, s, lay[i]));
     this.drawStar(ctx, s);

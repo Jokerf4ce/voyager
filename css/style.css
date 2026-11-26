@@ -112,6 +112,7 @@ small, .small { font-size: 16px; }
 /* map */
 .map-screen #ticker { display: none; }
 .mapbox { position: relative; }
+#mapcanvas { max-height: calc(100vh - 150px); object-fit: contain; }
 #mapcanvas, #syscanvas { display: block; width: 100%; height: auto; border: 2px solid var(--edge); box-shadow: 4px 4px 0 #000; cursor: crosshair; background: #070606; }
 .maphover { position: absolute; z-index: 4; display: none; pointer-events: none; min-width: 200px; max-width: 320px; background: rgba(20, 18, 16, .96); border: 2px solid var(--edge-hi); box-shadow: 4px 4px 0 #000; padding: 8px 10px; }
 .maphover.show { display: block; }

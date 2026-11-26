@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.21.1 — 2026-11-26
+- The star map is wider and less tall (480×210 instead of 400×250, same area), so the full-width map and its hint fit on a 1920×1080 screen without scrolling. On very short windows it is capped to the window height. New galaxies space their systems for the new shape; existing saves keep their layout, slightly squeezed vertically.
+
 ## 0.21.0 — 2026-11-26
 - **Star Map screen reworked**: the star map fills the full width. Hovering a system shows a summary card (star, owner and garrison, planets with habitability and colony marks, fleets, strange signals). Clicking selects it; its **Solar System** map and the full system panel (planets, settling, fleets) now sit below the star map instead of the Chronicle, which is hidden on this screen. Double-click scrolls down to it. Esc clears the fleet, planet or system selection. The old Star Map / Solar System tabs are gone.
 - The hover card is mouse-only; on touch screens a tap simply selects the system.

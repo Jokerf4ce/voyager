@@ -1,31 +1,33 @@
 // Voyager — the star system map, drawn on a small canvas and scaled up with crisp pixels.
 
 const StarMap = {
-  W: 400, H: 250,
-  bg: null,
+  W: 480, H: 210, // wide, so the full-width map still fits a 1080p screen
+  bg: {},
 
   pos(s) { return { x: Math.round(s.x * this.W), y: Math.round(s.y * this.H) }; },
 
-  background() {
-    if (this.bg) return this.bg;
-    const c = Sprites.canvas(this.W, this.H), ctx = c.getContext('2d');
+  // Starfield background, cached per size (the solar system map uses its own size).
+  background(W = this.W, H = this.H) {
+    const key = W + 'x' + H;
+    if (this.bg[key]) return this.bg[key];
+    const c = Sprites.canvas(W, H), ctx = c.getContext('2d');
     const rnd = Sprites.seeded('voyager-bg');
-    ctx.fillStyle = '#070606'; ctx.fillRect(0, 0, this.W, this.H);
+    ctx.fillStyle = '#070606'; ctx.fillRect(0, 0, W, H);
     // dithered nebula blotches
     const blobs = [[0.7, 0.3, 90, '#1a0d14'], [0.25, 0.75, 110, '#0d1214'], [0.55, 0.8, 70, '#14100a']];
     for (const [bx, by, br, col] of blobs) {
       ctx.fillStyle = col;
-      for (let y = 0; y < this.H; y++) for (let x = 0; x < this.W; x++) {
-        const d = Math.hypot(x - bx * this.W, y - by * this.H) / br;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const d = Math.hypot(x - bx * W, y - by * H) / br;
         if (d < 1 && Sprites.bayer[y % 4][x % 4] / 16 > d * 1.1) ctx.fillRect(x, y, 1, 1);
       }
     }
     for (let i = 0; i < 260; i++) {
       const v = rnd();
       ctx.fillStyle = v > 0.97 ? '#e8e0d0' : v > 0.85 ? '#807870' : '#3a3632';
-      ctx.fillRect(Math.floor(rnd() * this.W), Math.floor(rnd() * this.H), 1, 1);
+      ctx.fillRect(Math.floor(rnd() * W), Math.floor(rnd() * H), 1, 1);
     }
-    return (this.bg = c);
+    return (this.bg[key] = c);
   },
 
   line(ctx, a, b, color, dotted) {

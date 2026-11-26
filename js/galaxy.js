@@ -41,11 +41,12 @@ const Galaxy = {
   generate() {
     const count = DATA.config.systemCount;
     const pts = [];
+    const asp = StarMap.H / StarMap.W; // keep systems evenly spaced on the wide map
     let tries = 0;
     while (pts.length < count && tries < 5000) {
       tries++;
       const p = { x: U.rand(0.05, 0.95), y: U.rand(0.08, 0.92) };
-      if (pts.every((q) => Math.hypot(p.x - q.x, (p.y - q.y) * 0.62) > 0.1)) pts.push(p);
+      if (pts.every((q) => Math.hypot(p.x - q.x, (p.y - q.y) * asp) > 0.1)) pts.push(p);
     }
     const used = new Set();
     const starWeights = Object.fromEntries(Object.entries(DATA.starClasses).map(([k, c]) => [k, c.weight]));
@@ -60,7 +61,7 @@ const Galaxy = {
 
     // Lanes: minimum spanning tree (always connected) plus some extra non-crossing links.
     const edges = [];
-    const dist = (a, b) => Math.hypot(a.x - b.x, (a.y - b.y) * 0.62);
+    const dist = (a, b) => Math.hypot(a.x - b.x, (a.y - b.y) * StarMap.H / StarMap.W);
     const inTree = new Set([0]);
     while (inTree.size < systems.length) {
       let best = null;
