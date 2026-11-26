@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.20.0 — 2026-11-26
+- **Building icons**: a 12×12 pixel icon for each of the 15 buildings (in `js/sprites.js`, `Sprites.building`), shown on the Buildings screen, in each colony's build lists, in the Overview building summary and as chips on the Colonies screen.
+- **Buildings screen condensed**: one line per building (icon, name, total level, a one-line description, Auto button with its cost). Hover Auto to see where it will build; click a row for the colony list and "Build at".
+- **Colonies screen** now lists every colony in every system on one page, home system first. Each colony is a compact row (planet, habitability, output, slots and its buildings as icons with levels); click it to open its build panel. Unsettled planets of a held system sit under a fold. Jump buttons at the top scroll to a system, and "Open" on the Buildings screen opens that exact colony.
+
 ## 0.19.0 — 2026-11-26
 - A new game now starts with only the home system charted and only the capital settled; neighbouring systems show as "?". The Red Hypergiant is still placed close to home (among the 10 nearest systems), waiting to be found.
 - **Admin test game**: a separate save slot for testing, opened from Settings or with `#admin` at the end of the address. It generates the capital plus 3 extra colonies (two at home, one in a neighbouring system) with random buildings at levels 1–4, the 10 nearest systems charted, capacity buildings raised so nothing is rationed, and 1,500 of every resource (500 Shards). The top bar shows "ADMIN TEST". Your real save is never touched; "Back to the real game" returns to it, and "Regenerate the test game" rolls a new one.

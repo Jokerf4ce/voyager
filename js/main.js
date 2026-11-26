@@ -76,8 +76,15 @@ const Game = {
     merge: (a) => { Fleets.mergeAt(+a); },
     colonize: (a) => { const [fid, pi] = a.split(':'); Fleets.colonize(+fid, +pi); UI.selFleet = null; },
     settle: (a) => { const [sid, pi] = a.split(':'); Colonies.settle(+sid, +pi); },
-    gocolony: (a) => { UI.colSys = +a; UI.screen = 'colonies'; },
+    // a = "sysId" (open that system's colonies) or "sysId:planetIdx" (open one colony).
+    gocolony: (a) => {
+      const [sid, pi] = String(a).split(':').map(Number);
+      const s = G.systems[sid];
+      for (const p of s.planets) if (p.colony && (pi == null || isNaN(pi) || p.idx === pi)) UI.colOpen[Colonies.ref(s, p)] = true;
+      UI.colSys = sid; UI.screen = 'colonies';
+    },
     colsys: (a) => { UI.colSys = +a; },
+    colopen: (a) => { UI.colOpen[a] = !UI.colOpen[a]; },
     goyard: (a) => { UI.yard = a; UI.screen = 'shipyard'; },
     yard: (a) => { UI.yard = a; },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },

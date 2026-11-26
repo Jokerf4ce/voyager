@@ -8,7 +8,8 @@ const UI = {
   selFleet: null,
   yard: null,
   bOpen: null,        // building type expanded on the Buildings screen
-  colSys: null,
+  colSys: null,       // system to scroll to on the Colonies screen
+  colOpen: {},        // colonies expanded on the Colonies screen, by ref
   lastPull: null,
   modalOpen: false,
 
@@ -39,6 +40,11 @@ const UI = {
     this.$('main').innerHTML = fn ? fn.call(this) : '';
     for (const d of this.$('main').querySelectorAll('details[data-key]')) if (open.has(d.dataset.key)) d.open = true;
     if (this.screen === this.lastScreen) this.$('main').scrollTop = scroll;
+    if (this.screen === 'colonies' && this.colSys != null) {
+      const el = document.getElementById('csys-' + this.colSys);
+      if (el) el.scrollIntoView({ block: 'start' });
+      this.colSys = null;
+    }
     this.lastScreen = this.screen;
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
@@ -119,6 +125,9 @@ const UI = {
     const pct = (m) => '×' + m;
     return `<span class="hab" style="color:${h.color}" title="Habitability ${p.hab}/5. Building costs ${pct(Colonies.habMult(p, 'surface'))} on the surface, ${pct(Colonies.habMult(p, 'orbit'))} in orbit.">${pips} ${h.name}</span>
       ${compact ? '' : `<span class="muted">· costs ${p.slots.surface ? pct(Colonies.habMult(p, 'surface')) + ' surface' : 'no surface'}, ${pct(Colonies.habMult(p, 'orbit'))} orbit</span>`}`;
+  },
+  bIcon(key, size = 24) {
+    return `<img class="px bicon" src="${Sprites.building(key)}" width="${size}" height="${size}" alt="">`;
   },
   starImg(s, size = 64) {
     return `<span class="planet-frame star-frame" style="width:${size}px;height:${size}px"><img class="px" src="${Sprites.star(s.star, s.id)}" width="${size}" height="${size}" alt="${U.esc(DATA.starClasses[s.star].name)}"></span>`;
@@ -274,19 +283,45 @@ const UI = {
   },
 
   screen_colonies() {
-    const systems = Colonies.playerSystems();
+    const systems = Colonies.playerSystems().slice().sort((a, b) => (b.id === G.homeId) - (a.id === G.homeId)); // home first
     if (!systems.length) return this.panel('No colonies', '<p>The Covenant has no worlds left.</p>');
-    if (!systems.some((s) => s.id === this.colSys)) this.colSys = systems[0].id;
-    const s = G.systems[this.colSys];
-    const tabs = `<div class="btnrow">${systems.map((x) => this.btn(`${U.esc(x.name)} <small>${x.planets.filter((p) => p.colony).length}/${x.planets.length}</small>`, 'colsys', x.id, false, x.id === s.id ? 'on' : '')).join('')}</div>`;
-    const planets = s.planets.map((p) => {
-      if (!p.colony) {
-        return `<div class="panel planet-panel unsettled"><div class="sys-head">${this.planetImg(s, p, 64)}
-          <div><h3>${U.esc(Colonies.planetName(s, p))}</h3><div class="muted">${Planets.label(p)} · ${this.planetMods(p)} · surface ${p.slots.surface} · orbit ${p.slots.orbit}</div>
-          <div class="small">${this.habText(p)}</div>
-          <div class="btnrow">${this.btn(`Settle ${U.costText(Colonies.settleCost(p))}`, 'settle', s.id + ':' + p.idx, !Colonies.canAfford(Colonies.settleCost(p)) || Fleets.at(s.id).some((f) => f.owner !== 'player'))}</div></div></div></div>`;
-      }
-      const layer = (L) => {
+    const total = systems.reduce((n, x) => n + x.planets.filter((p) => p.colony).length, 0);
+    const jump = systems.length > 1 ? `<div class="btnrow">${systems.map((x) => this.btn(`${U.esc(x.name)} <small>${x.planets.filter((p) => p.colony).length}/${x.planets.length}</small>`, 'colsys', x.id, false, 'small')).join('')}</div>` : '';
+    return `<p class="muted small">${total} ${total === 1 ? 'colony' : 'colonies'} in ${systems.length} ${systems.length === 1 ? 'system' : 'systems'}. Click a colony to manage its buildings.</p>` + jump +
+      systems.map((x) => this.colonySystem(x)).join('');
+  },
+
+  // One system on the Colonies screen: a header line, then a compact row per planet (click to expand).
+  colonySystem(s) {
+    const colRow = (p) => {
+      const ref = Colonies.ref(s, p), open = !!this.colOpen[ref];
+      const capital = s.id === G.homeId && p.idx === (G.homePlanet || 0);
+      const chips = ['surface', 'orbit'].flatMap((L) => Object.entries(p.colony[L]).filter(([, v]) => v > 0)
+        .map(([k, v]) => `<span class="bchip" title="${U.esc(DATA.buildings[k].name)} Lv ${v} (${DATA.layers[L].toLowerCase()})">${this.bIcon(k, 20)}<b>${v}</b></span>`)).join('');
+      const slots = ['surface', 'orbit'].map((L) => Colonies.slots(p, L) ? `${L === 'surface' ? '▤' : '◌'}${Colonies.slotsUsed(p, L)}/${Colonies.slots(p, L)}` : '').filter(Boolean).join(' ');
+      return `<div class="crow ${open ? 'open' : ''}"><div class="chead" data-act="colopen" data-a="${ref}">
+          ${this.planetImg(s, p, 32)}
+          <div class="grow"><b>${U.esc(Colonies.planetName(s, p))}</b>${capital ? ' <span class="lvl">Capital</span>' : ''} <small class="muted">${Planets.label(p)} · ${slots} slots</small>
+            <div class="small">${this.habText(p, true)} · ${this.yieldText(p)}</div>
+            <div class="chips">${chips || '<small class="muted">no buildings</small>'}</div></div>
+          <span class="muted">${open ? '▾' : '▸'}</span></div>
+        ${open ? this.colonyDetail(s, p) : ''}</div>`;
+    };
+    const free = s.planets.filter((p) => !p.colony);
+    const freeRow = (p) => `<div class="crow unsettled"><div class="chead">${this.planetImg(s, p, 32)}
+        <div class="grow"><b>${U.esc(Colonies.planetName(s, p))}</b> <small class="muted">${Planets.label(p)} · surface ${p.slots.surface} · orbit ${p.slots.orbit}</small>
+          <div class="small">${this.habText(p, true)} · ${this.planetMods(p)}</div></div>
+        ${this.btn(`Settle ${U.costText(Colonies.settleCost(p))}`, 'settle', s.id + ':' + p.idx, !Colonies.canAfford(Colonies.settleCost(p)) || Fleets.at(s.id).some((f) => f.owner !== 'player'), 'small')}</div></div>`;
+    const st = DATA.starClasses[s.star];
+    return `<div class="panel csys" id="csys-${s.id}"><div class="star-line">${this.starImg(s, 32)}<h3>${U.esc(s.name)}</h3>
+        <span class="small" style="color:${st.color}">${st.name}</span> <span class="muted small">· starlight ×${st.solar} Power · garrison ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)}</span></div>
+      ${s.planets.filter((p) => p.colony).map(colRow).join('')}
+      ${free.length ? `<details data-key="free-${s.id}"><summary class="small">Unsettled planets here (${free.length})</summary>${free.map(freeRow).join('')}</details>` : ''}</div>`;
+  },
+
+  // The full build panel of one colony (both layers).
+  colonyDetail(s, p) {
+    const layer = (L) => {
         const used = Colonies.slotsUsed(p, L), max = Colonies.slots(p, L);
         if (!max) return `<div class="layer"><h4>${DATA.layers[L]} <span class="muted">no ${L}</span></h4><p class="muted small">${p.comp === 'gas' ? 'Nothing stands on a gas giant. Build in orbit.' : 'Extremely hazardous. Nothing can be built on the surface. Build in orbit.'}</p></div>`;
         const keys = Object.keys(DATA.buildings).filter((k) => DATA.buildings[k].layers.includes(L));
@@ -295,32 +330,27 @@ const UI = {
           const b = DATA.buildings[k], lvl = p.colony[L][k] || 0;
           const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k);
           const inf = this.capText(b.cap);
-          return `<div class="bld ${lvl ? '' : 'new'}"><div><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
+          return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
             <div class="right">${U.costText(cost)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}</div></div>`;
         };
         return `<div class="layer"><h4>${DATA.layers[L]} <span class="${used >= max ? 'bad' : 'muted'}">${used}/${max} slots</span></h4>
           ${built.map(row).join('')}
           ${used < max ? `<details data-key="${s.id}:${p.idx}:${L}" ${built.length ? '' : 'open'}><summary>Construct new (${avail.length})</summary>${avail.map(row).join('')}</details>` : ''}</div>`;
       };
-      return `<div class="panel planet-panel"><div class="sys-head">${this.planetImg(s, p, 64)}
-        <div><h3>${U.esc(Colonies.planetName(s, p))}${s.id === G.homeId && p.idx === (G.homePlanet || 0) ? ' <span class="lvl">Capital</span>' : ''}</h3>
-        <div class="muted">${Planets.label(p)} · ${this.planetMods(p)}</div>
+      return `<div class="cdetail"><div class="sys-head">
+        <div><div class="muted">${Planets.label(p)} · ${this.planetMods(p)}</div>
         <div class="small muted">${Planets.factors(p)}</div>
         <div class="small">${this.habText(p)}</div>
-        <div>${this.yieldText(p)}</div>
         <div class="small">${Object.entries(Economy.planetCaps(p)).map(([k, v]) => `<span class="res-${k}">${DATA.capacities[k].icon} ${U.fmt1(v.use)}/${U.fmt1(v.give)}</span>`).join(' · ')} <span class="muted">(used/provided here)</span></div></div></div>
         <div class="layers">${layer('surface')}${layer('orbit')}</div></div>`;
-    }).join('');
-    const st = DATA.starClasses[s.star];
-    return tabs + `<div class="star-line">${this.starImg(s, 40)}<b style="color:${st.color}">${st.name}</b> <span class="muted small">Starlight ×${st.solar} Power</span></div><p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
   },
 
   // Overview: every building type you own, with its total level; click to see where they are.
   buildingSummary() {
     const rows = Object.keys(DATA.buildings).map((k) => ({ k, h: Colonies.holdings(k) })).filter((x) => x.h.levels);
     if (!rows.length) return '<p class="muted">No buildings yet.</p>';
-    return `<div class="bsum">${rows.map(({ k, h }) => `<button class="bsum-item" data-act="bshow" data-a="${k}">
-      <b>${U.esc(DATA.buildings[k].name)}</b><span>Lv ${h.levels} · ${h.list.length} ${h.list.length === 1 ? 'colony' : 'colonies'}</span></button>`).join('')}</div>
+    return `<div class="bsum">${rows.map(({ k, h }) => `<button class="bsum-item" data-act="bshow" data-a="${k}">${this.bIcon(k, 24)}
+      <span class="bsum-txt"><b>${U.esc(DATA.buildings[k].name)}</b><span>Lv ${h.levels} · ${h.list.length} ${h.list.length === 1 ? 'colony' : 'colonies'}</span></span></button>`).join('')}</div>
       <p class="muted small">Click a building to see which colonies it is on.</p>`;
   },
 
@@ -333,14 +363,14 @@ const UI = {
       const d = DATA.buildings[k], h = Colonies.holdings(k), open = this.bOpen === k;
       const best = Colonies.best(k);
       const autoBtn = best
-        ? this.btn(`Auto <small>${best.lvl ? 'upgrade' : 'build'} at ${U.esc(Colonies.planetName(best.s, best.p))} ${best.layer === 'orbit' ? '(orbit)' : ''} · ${U.costText(best.cost)}</small>`, 'bauto', k, !!best.why, 'gold')
-        : this.btn('Auto <small>no colony has room</small>', 'bauto', k, true);
+        ? `<button class="btn gold small bauto" data-act="bauto" data-a="${k}" ${best.why ? 'disabled' : ''} title="${best.lvl ? 'Upgrade' : 'Build'} at ${U.esc(Colonies.planetName(best.s, best.p))}${best.layer === 'orbit' ? ' (orbit)' : ''}${best.why ? ': ' + U.esc(best.why) : ''}">Auto <small>${U.costText(best.cost)}</small></button>`
+        : `<button class="btn small bauto" disabled title="No colony has room">Auto <small>no room</small></button>`;
       let detail = '';
       if (open) {
         const spots = Colonies.placements(k);
         detail = `<div class="bdetail">
           <h4>On ${h.list.length} ${h.list.length === 1 ? 'colony' : 'colonies'}</h4>
-          ${h.list.length ? h.list.map((x) => `<div class="kv"><span>${where(x)}</span><span><b class="lvl">Lv ${x.lvl}</b> ${this.btn('Open', 'gocolony', x.s.id, false, 'small')}</span></div>`).join('') : '<p class="muted small">None yet.</p>'}
+          ${h.list.length ? h.list.map((x) => `<div class="kv"><span>${where(x)}</span><span><b class="lvl">Lv ${x.lvl}</b> ${this.btn('Open', 'gocolony', x.ref, false, 'small')}</span></div>`).join('') : '<p class="muted small">None yet.</p>'}
           <h4>Build at</h4>
           ${spots.length ? spots.map((x, i) => `<div class="kv spot ${x === best ? 'best' : ''}"><span>${where(x)} ${x.lvl ? `<span class="muted">Lv ${x.lvl} → ${x.lvl + 1}</span>` : '<span class="muted">new slot</span>'}
               ${d.gathers || Object.values(d.cap || {}).some((v) => v < 0) ? `<span class="muted">· output ×${U.fmt1(x.value)}</span>` : ''} ${x === best ? '<span class="res-power">★ Auto pick</span>' : ''}</span>
@@ -349,16 +379,17 @@ const UI = {
         </div>`;
       }
       return `<div class="brow ${open ? 'open' : ''}">
-        <div class="bhead" data-act="bopen" data-a="${k}">
-          <div><b>${U.esc(d.name)}</b> ${h.levels ? `<span class="lvl">Lv ${h.levels} on ${h.list.length}</span>` : '<span class="muted small">none yet</span>'}
-            <br><small class="muted">${U.esc(d.desc)} · ${d.layers.map((l) => DATA.layers[l]).join(' or ')}</small> <small>${this.capText(d.cap)}</small></div>
+        <div class="bhead" data-act="bopen" data-a="${k}" title="${U.esc(d.desc)}">
+          ${this.bIcon(k, 24)}
+          <div class="grow"><b>${U.esc(d.name)}</b> ${h.levels ? `<span class="lvl">Lv ${h.levels}</span><small class="muted"> on ${h.list.length}</small>` : '<small class="muted">none</small>'}
+            <div class="bsub"><small class="muted">${U.esc(d.desc)} · ${d.layers.map((l) => DATA.layers[l]).join('/')}</small> <small>${this.capText(d.cap)}</small></div></div>
+          ${autoBtn}
           <span class="muted">${open ? '▾' : '▸'}</span>
         </div>
-        <div class="btnrow">${autoBtn}${this.btn(open ? 'Hide colonies' : 'Choose colony', 'bopen', k, false, 'small')}</div>
         ${detail}
       </div>`;
     };
-    return `<p class="muted small">Every building in your empire. <b>Auto</b> builds where it produces the most for its cost; open a building to see where it stands, or to pick the colony yourself. Costs depend on the colony's habitability.</p>` +
+    return `<p class="muted small">Every building in your empire. <b>Auto</b> builds where it produces the most for its cost (hover it to see where). Click a row to see where it stands or to pick the colony yourself. Costs depend on the colony's habitability.</p>` +
       groups.map((g) => this.panel(g, keys.filter((k) => Colonies.group(k) === g).map(row).join(''))).join('');
   },
 

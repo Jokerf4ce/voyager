@@ -1,4 +1,4 @@
-// Voyager — procedural placeholder pixel art (planets, portraits, ships).
+// Voyager — procedural placeholder pixel art (planets, portraits, ships, building icons).
 // Real hand-drawn sprites can replace these later: anything here returns an image URL.
 
 const Sprites = {
@@ -203,6 +203,39 @@ const Sprites = {
       ctx.fillStyle = ch === '#' ? color : ch === '+' ? '#f0e0a0' : '#e07030';
       ctx.fillRect(ox + x, oy + y, 1, 1);
     }));
+  },
+
+  // 12×12 building icons. k outline, = light metal, # dark metal, o ember, y light, w glint, b glass, g bio, p rare, r blood.
+  buildingArt: {
+    mine: ['.....kk.....', '....k==k....', '....k==k....', '...k====k...', '...k#==#k...', '..k##==##k..', '..k#.==.#k..', '.k#..==..#k.', '.k#..oo..#k.', 'kkkkkookkkkk', '#=#=#oo=#=#=', '############'],
+    drill: ['...kkkkkk...', '...k====k...', '...k====k...', '....k==k....', '....k==k....', '.....kk.....', '.....==.....', '.kk..==..kk.', 'kpk..==..kpk', 'kppk.oo.kppk', 'kpppkookpppk', '############'],
+    harvester: ['....kkkk....', '..kkbbbbkk..', '.kb..gg..bk.', '.kb.g..g.bk.', 'kb...gg...bk', 'kb.gggggg.bk', 'kb..g.g.g.bk', 'kbgggggggbbk', 'kkkkkkkkkkkk', 'k=#=#=#=#=#k', 'k##########k', '............'],
+    skimmer: ['.k........k.', '.k=kkkkkk=k.', '..k======k..', '...k#==#k...', '....k##k....', '.....==.....', '.....==.....', '....o==o....', '.....oo.....', 'bbbbbbbbbbbb', 'gbbbbggbbbbg', 'bbggbbbbggbb'],
+    refinery: ['.kk.........', '.k=k........', '.k=k....kk..', '.k=k...k=k..', 'kk=kkkkk==k.', 'k=====k===k.', 'k=y=y=k=y=k.', 'k=====k===k.', 'k#y#y#k#y#k.', 'k#########k.', 'kkkkkkkkkkk.', '............'],
+    chemplant: ['...kkk......', '..k===k.kkk.', '..k=g=k.k=k.', '..kgggk.k=k.', '..kgggk.k=k.', '..kgggk.kgk.', '..k===k.kgk.', '..kk=kkkkkk.', '...k=====k..', '...k#####k..', '.kkkkkkkkkk.', '............'],
+    fusion: ['....kkkk....', '..kk====kk..', '.k==yyyy==k.', '.k=yywwyy=k.', 'k=yywwwwyy=k', 'k=yywwwwyy=k', '.k=yywwyy=k.', '.k==yyyy==k.', '..kk====kk..', '...k#kk#k...', '..kk#kk#kk..', '.kkkkkkkkkk.'],
+    solar: ['............', 'kkkkk..kkkkk', 'kbwbk..kbwbk', 'kbbbkkkkbbbk', 'kbbbk==kbbbk', 'kbbbkkkkbbbk', 'kbbbk..kbbbk', 'kkkkk..kkkkk', '.....kk.....', '....kook....', '.....kk.....', '............'],
+    dome: ['............', '....kkkk....', '..kkbwbbkk..', '.kbwbbbbbbk.', '.kbbbbbbbbk.', 'kbbbyb#ybbbk', 'kbby##y#ybbk', 'kkkkkkkkkkkk', 'k=#=#=#=#=#k', 'kkkkkkkkkkkk', '............', '............'],
+    ring: ['...kkkkkk...', '..k=y==y=k..', '.k=kkkkkk=k.', 'k=k......k=k', 'ky=..kk..=yk', 'k=..k==k..=k', 'k=..k==k..=k', 'ky=..kk..=yk', 'k=k......k=k', '.k=kkkkkk=k.', '..k=y==y=k..', '...kkkkkk...'],
+    cogitator: ['kkkkkkkkkkkk', 'k==========k', 'k=g=b======k', 'kkkkkkkkkkkk', 'k==========k', 'k=b=g=g====k', 'kkkkkkkkkkkk', 'k==========k', 'k=g=b======k', 'kkkkkkkkkkkk', '.k#......#k.', '............'],
+    lab: ['....kkkk....', '.....kk.....', '.....k=k....', '.....k=k....', '....k==pk...', '...kpppppk..', '..kpppwpppk.', '..kppppwppk.', '.kpppppppppk', '.kpppppppppk', '..kkkkkkkkk.', '............'],
+    shipyard: ['k..........k', 'k=kkkkkkkk=k', 'k=........=k', 'k=..kkk...=k', 'k=.k=o=kk.=k', 'k=k=====wk=k', 'k=.k===kk.=k', 'k=..kkk...=k', 'k=........=k', 'k=kkkkkkkk=k', 'k..........k', '............'],
+    bastion: ['.k.k.k.k.k..', '.kkkkkkkkk..', '.k=======k..', '.k=kk=kk=k..', '.k=======k..', '.k==rrr==k..', '.k=r###r=k..', '.k=r###r=k..', 'kk=======kk.', 'k#########k.', 'kkkkkkkkkkk.', '............'],
+    platform: ['............', '........kk..', '.......kwk..', '......k=k...', '...kkk=k....', '..k===kk....', '.k=rr===k...', '.k=rr====kkk', '..k========k', '...kkkkkkkk.', '....k....k..', '............'],
+  },
+  buildingPal: { k: '#14100c', '=': '#9a8c78', '#': '#4e443a', o: '#e07030', y: '#f0d060', w: '#f4ecd8', b: '#4f8fb8', g: '#6f9a3c', p: '#9a6cc8', r: '#b03030' },
+
+  building(key) {
+    const k = 'b:' + key;
+    if (this.cache[k]) return this.cache[k];
+    const art = this.buildingArt[key];
+    const c = this.canvas(12, 12), ctx = c.getContext('2d');
+    if (art) art.forEach((row, y) => [...row].forEach((ch, x) => {
+      if (ch === '.') return;
+      ctx.fillStyle = this.buildingPal[ch] || '#ff00ff';
+      ctx.fillRect(x, y, 1, 1);
+    }));
+    return (this.cache[k] = c.toDataURL());
   },
 
   ship(type, color) {

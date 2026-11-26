@@ -129,16 +129,35 @@ small, .small { font-size: 16px; }
 .colony .sys-head { border-bottom: 1px dashed var(--edge); padding-bottom: 8px; }
 
 /* empire-wide building list */
-.brow { border: 1px solid #2a2420; background: #141210; padding: 8px; margin-bottom: 6px; }
+.brow { border: 1px solid #2a2420; background: #141210; padding: 4px 6px; margin-bottom: 3px; }
 .brow.open { border-color: var(--edge-hi); box-shadow: inset 3px 0 0 var(--rust); }
-.bhead { display: flex; justify-content: space-between; gap: 10px; cursor: pointer; }
+.bhead { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.grow { flex: 1 1 auto; min-width: 0; }
+.bsub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
+.bauto { flex-shrink: 0; white-space: nowrap; }
+.bicon { flex-shrink: 0; display: inline-block; vertical-align: middle; background: #3a3229; border: 1px solid #4a4036; }
+.bsum-item { display: flex; align-items: center; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.bchip { display: inline-flex; align-items: center; gap: 2px; background: var(--soot); border: 1px solid #2a2420; padding: 1px 4px 1px 1px; }
+.bchip .bicon { border: 0; }
+.bhead .bicon { width: 30px; height: 30px; }
+.bchip b { color: var(--gold); font-size: 15px; }
+.crow { border: 1px solid #2a2420; background: #141210; padding: 4px 6px; margin-bottom: 3px; }
+.crow.open { border-color: var(--edge-hi); box-shadow: inset 3px 0 0 var(--rust); }
+.crow.unsettled { opacity: .75; border-style: dashed; }
+.chead { display: flex; align-items: center; gap: 8px; }
+.chead[data-act] { cursor: pointer; }
+.chead[data-act]:hover b { color: #fff; }
+.cdetail { margin-top: 6px; border-top: 1px dashed var(--edge); padding-top: 6px; }
+.csys .star-line { flex-wrap: wrap; }
+.csys .star-line h3 { margin: 0; }
 .bhead:hover b { color: #fff; }
 .bdetail { margin-top: 8px; border-top: 1px dashed var(--edge); padding-top: 4px; }
 .bdetail .kv { align-items: center; flex-wrap: wrap; }
 .bdetail .spot.best { background: rgba(208, 160, 32, .06); }
 .bsum { display: flex; flex-wrap: wrap; gap: 6px; }
 .bsum-item { background: var(--soot); border: 1px solid var(--edge); color: var(--bone); padding: 5px 8px; cursor: pointer; text-align: left; font-family: var(--font-body); font-size: 17px; }
-.bsum-item span { display: block; color: var(--ash); font-size: 15px; }
+.bsum-txt > span { display: block; color: var(--ash); font-size: 15px; }
 .bsum-item:hover { border-color: var(--edge-hi); background: #1e1a16; }
 
 /* planets */
@@ -220,6 +239,7 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
   #main { padding: 8px; }
   #ticker { height: 84px; font-size: 16px; }
   .bld, .tech { flex-wrap: wrap; } .bld .right, .tech .right { text-align: left; }
+  .bhead .grow > b { font-size: 16px; }
 }
 @media (max-width: 480px) {
   .logo { display: none; }
