@@ -5,7 +5,7 @@
 const Music = {
   ctx: null,
   enabled: true,
-  volume: 0.6,
+  volume: 0.3,
   mode: 'order',         // 'order' | 'shuffle' | 'repeat'
   trackId: null,         // the track playing (or last played)
   track: null,
