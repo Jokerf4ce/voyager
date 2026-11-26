@@ -13,13 +13,13 @@ const UI = {
 
   screens: [
     ['overview', '☩', 'Overview'],
+    ['battle', '⚔', 'Battle'],
     ['map', '✦', 'Star Map'],
     ['buildings', '▦', 'Buildings'],
     ['colonies', '⌂', 'Colonies'],
     ['research', '☍', 'Research'],
     ['shipyard', '⚒', 'Shipyard'],
     ['fleets', '➤', 'Fleets'],
-    ['battle', '⚔', 'Battle'],
     ['log', '☰', 'Chronicle'],
     ['settings', '⚙', 'Settings'],
   ],
