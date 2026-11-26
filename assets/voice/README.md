@@ -7,12 +7,15 @@ The ship's computer voice plays mp3 files from this folder. Each file is named a
 |---|---|---|
 | `welcome_back.mp3` | "Welcome back, Commander." | game start; returning after 5+ minutes away |
 | `still_here.mp3` | "Hey, are you still here?" | returning after 5+ minutes away; random announcement |
-| `slipspace.mp3` | "Slipspace rupture detected!" | random announcement |
 | `gagarin.mp3` | "Attention! Colonel Gagarin, please report to Medbay!" | random announcement |
 | `shepard.mp3` | "Attention! Rear admiral Shepard, your keycard was found in engineering!" | random announcement |
 | `hydrated.mp3` | "Commander, Make sure you stay hydrated" | random announcement |
+| `slipspace.mp3` | "Warning! Slipspace rupture detected!" | battle start (combat, red alert) |
+| `forces.mp3` | "Warning! Hostile forces inbound!" | battle start (combat, red alert) |
+| `signatures.mp3` | "Warning! Unknown signatures detected!" | battle start (combat, red alert) |
+| `hell.mp3` | "Commander! Give them hell!" | battle start (combat, red alert) |
 
-When several lines share a trigger, one is picked at random. The Test button in Settings → Assistant plays any line.
+When several lines share a trigger, one is picked at random. The Test button in Settings → Assistant plays any line. Lines with the `combat` trigger play at the start of every battle and show as a red alert transmission. The other lines added since (`second_monitor`, `posture`, `airlock`, `blink`, `coffee`, `cryopod`, `ripley`, …) are listed with their triggers in `js/voicelines.js`.
 
 ## How the voice is made
 
