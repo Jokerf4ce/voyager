@@ -32,14 +32,15 @@ DATA.habitability = {
 // planets: [min, max] planets in the system. temps: bias on planet temperature rolls.
 // solar: Infrastructure multiplier for every planet in the system (power from starlight).
 // habMod: added to planet habitability (hard radiation around hot giants).
+// radius: in solar radii (typical main-sequence values), used to draw the solar system map to scale.
 DATA.starClasses = {
-  O: { name: 'O-type Blue Giant',        color: '#9bb0ff', size: 3, weight: 1, planets: [1, 3], temps: { hot: 3, temperate: 0.4, frozen: 0.5 }, solar: 1.6,  habMod: -1, desc: 'Searing, short-lived and drowned in radiation. Hot worlds; little can live here.' },
-  B: { name: 'B-type Blue-White Star',   color: '#aabfff', size: 3, weight: 2, planets: [2, 4], temps: { hot: 2.5, temperate: 0.6, frozen: 0.6 }, solar: 1.4,  habMod: -1, desc: 'Violent and luminous. Its planets are scoured by ultraviolet light.' },
-  A: { name: 'A-type White Star',        color: '#cad7ff', size: 2, weight: 3, planets: [2, 5], temps: { hot: 1.8, temperate: 1, frozen: 0.8 },   solar: 1.25, habMod: 0,  desc: 'Bright and fast-burning. Strong starlight for power.' },
-  F: { name: 'F-type Yellow-White Star', color: '#f8f7ff', size: 2, weight: 4, planets: [2, 5], temps: { hot: 1.3, temperate: 1.3, frozen: 0.9 }, solar: 1.1,  habMod: 0,  desc: 'A little hotter than the old Sun. Good odds for temperate worlds.' },
-  G: { name: 'G-type Yellow Dwarf',      color: '#fff4c8', size: 2, weight: 5, planets: [2, 5], temps: { hot: 1, temperate: 2, frozen: 1 },       solar: 1.0,  habMod: 0,  desc: 'Like the Sun the Covenant fled. The best chance of a living world.' },
-  K: { name: 'K-type Orange Dwarf',      color: '#ffd2a1', size: 1, weight: 6, planets: [2, 5], temps: { hot: 0.8, temperate: 1.3, frozen: 1.4 }, solar: 0.9,  habMod: 0,  desc: 'Calm and long-lived. Cooler worlds, steady light.' },
-  M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
+  O: { name: 'O-type Blue Giant',        color: '#9bb0ff', size: 3, radius: 10, weight: 1, planets: [1, 3], temps: { hot: 3, temperate: 0.4, frozen: 0.5 }, solar: 1.6,  habMod: -1, desc: 'Searing, short-lived and drowned in radiation. Hot worlds; little can live here.' },
+  B: { name: 'B-type Blue-White Star',   color: '#aabfff', size: 3, radius: 5, weight: 2, planets: [2, 4], temps: { hot: 2.5, temperate: 0.6, frozen: 0.6 }, solar: 1.4,  habMod: -1, desc: 'Violent and luminous. Its planets are scoured by ultraviolet light.' },
+  A: { name: 'A-type White Star',        color: '#cad7ff', size: 2, radius: 1.8, weight: 3, planets: [2, 5], temps: { hot: 1.8, temperate: 1, frozen: 0.8 },   solar: 1.25, habMod: 0,  desc: 'Bright and fast-burning. Strong starlight for power.' },
+  F: { name: 'F-type Yellow-White Star', color: '#f8f7ff', size: 2, radius: 1.3, weight: 4, planets: [2, 5], temps: { hot: 1.3, temperate: 1.3, frozen: 0.9 }, solar: 1.1,  habMod: 0,  desc: 'A little hotter than the old Sun. Good odds for temperate worlds.' },
+  G: { name: 'G-type Yellow Dwarf',      color: '#fff4c8', size: 2, radius: 1.0, weight: 5, planets: [2, 5], temps: { hot: 1, temperate: 2, frozen: 1 },       solar: 1.0,  habMod: 0,  desc: 'Like the Sun the Covenant fled. The best chance of a living world.' },
+  K: { name: 'K-type Orange Dwarf',      color: '#ffd2a1', size: 1, radius: 0.75, weight: 6, planets: [2, 5], temps: { hot: 0.8, temperate: 1.3, frozen: 1.4 }, solar: 0.9,  habMod: 0,  desc: 'Calm and long-lived. Cooler worlds, steady light.' },
+  M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, radius: 0.35, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
 };
 
 // Planets are classified by three factors: composition, size and temperature.
@@ -48,12 +49,15 @@ DATA.starClasses = {
 //   temperature: frozen, temperate (silicate and ice/water only), hot
 // slots = how many different buildings fit on each layer (levels are unlimited).
 // An Extremely Hazardous (habitability 1) planet has no buildable surface.
+// radius: range in Earth radii, used to draw the solar system map to scale
+// (giants: Neptune-sized to bloated hot Jupiters; large: super-Earths; dwarf: Mars-sized and smaller).
 DATA.planetSizes = {
-  giant:   { name: 'Giant',   slots: { surface: 0, orbit: 5 }, sprite: 32 },
-  large:   { name: 'Large',   slots: { surface: 5, orbit: 4 }, sprite: 30 },
-  average: { name: 'Average', slots: { surface: 4, orbit: 3 }, sprite: 24 },
-  dwarf:   { name: 'Dwarf',   slots: { surface: 2, orbit: 2 }, sprite: 16, habMod: -1 },
+  giant:   { name: 'Giant',   slots: { surface: 0, orbit: 5 }, sprite: 32, radius: [3.9, 12] },
+  large:   { name: 'Large',   slots: { surface: 5, orbit: 4 }, sprite: 30, radius: [1.4, 2.2] },
+  average: { name: 'Average', slots: { surface: 4, orbit: 3 }, sprite: 24, radius: [0.8, 1.25] },
+  dwarf:   { name: 'Dwarf',   slots: { surface: 2, orbit: 2 }, sprite: 16, radius: [0.3, 0.6], habMod: -1 },
 };
+DATA.solarRadiusInEarths = 109;
 
 DATA.compositions = {
   gas:      { name: 'Gas',       sizes: ['giant'],                     temps: ['frozen', 'hot'],              mult: { polymers: 2.0 } },

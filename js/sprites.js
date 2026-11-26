@@ -15,9 +15,9 @@ const Sprites = {
 
   canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; },
 
-  // p = planet object (comp/size/temp). Size in pixels comes from the planet's size class.
-  planet(p, seedKey) {
-    const type = Planets.classKey(p), size = DATA.planetSizes[p.size].sprite;
+  // p = planet object (comp/size/temp). Size in pixels comes from the planet's size class unless px is given.
+  planet(p, seedKey, px) {
+    const type = Planets.classKey(p), size = px || DATA.planetSizes[p.size].sprite;
     const key = `p:${type}:${size}:${seedKey}`;
     if (this.cache[key]) return this.cache[key];
     const pal = Planets.cls(p).palette;
@@ -58,9 +58,10 @@ const Sprites = {
     return (this.cache[key] = c.toDataURL());
   },
 
-  planetCanvas(p, seedKey) {
-    this.planet(p, seedKey);
-    return this.cache[`cv:p:${Planets.classKey(p)}:${DATA.planetSizes[p.size].sprite}:${seedKey}`];
+  planetCanvas(p, seedKey, px) {
+    const size = px || DATA.planetSizes[p.size].sprite;
+    this.planet(p, seedKey, size);
+    return this.cache[`cv:p:${Planets.classKey(p)}:${size}:${seedKey}`];
   },
 
   // Symmetric masked faces: leaders and relics.

@@ -52,7 +52,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 
 The home system is always a G star.
 
-**Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes and fleets. The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and fleets at the jump point. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
+**Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes and fleets. The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and fleets at the jump point. The Solar System map draws sizes to scale: real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of the star fits on screen. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
 
 
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
