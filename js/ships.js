@@ -76,6 +76,7 @@ const Ships = {
       // better rolls cost more to keep flying
       upkeep: Math.round(t.upkeep * (1 + (mult - 1) * 0.8) * quality * 100) / 100,
       weapons: [],
+      variant: U.randInt(0, Sprites.shipVariants(type) - 1),   // which of the type's designs it looks like
       built: G.cycle,
     };
     ship.hullNow = ship.hull;

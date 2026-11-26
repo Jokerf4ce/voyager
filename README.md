@@ -34,7 +34,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge for Shards
 - Auto-cycle, offline progress, save export/import
 - Generative soundtrack synthesised in the browser: six tracks in a playlist (mute with ♪, tracks and volume in Settings)
-- Ship sprites in a 3/4 view, rendered from small 3D models (`tools/shipart/render.py`): one grey template per type, painted on the fly in each faction's colours (`DATA.shipPalettes`); pick your own fleet colours in Settings
+- Ship sprites in a 3/4 view, rendered from small 3D models (`tools/shipart/render.py`): three designs per ship type as grey templates, painted on the fly in each faction's colours (`DATA.shipPalettes`); pick your own fleet colours in Settings
 - The Assistant, the ship's computer voice ("Welcome back, Commander."): mp3 lines in `assets/voice/`, listed with their triggers in `js/voicelines.js`
 - Placeholder pixel art generated in code (planets, portraits, ships), to be replaced with real sprites
 

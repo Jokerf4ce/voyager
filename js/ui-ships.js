@@ -30,7 +30,7 @@ Object.assign(UI, {
     const act = (opts.act ? `data-act="${opts.act}" data-a="${opts.a}"` : '') + (opts.attrs ? ' ' + opts.attrs : '');
     return `<div class="scard r-${d.rarity} ${opts.cls || ''} ${opts.small ? 'small' : ''}" style="--rc:${rar.color}" ${act}>
       <div class="sc-top"><span class="sc-size" title="${DATA.sizes[d.size].name}: beats ${DATA.sizes[DATA.sizes[d.size].beats].name}">${d.size}</span><span class="sc-rar">${rar.name}</span></div>
-      <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner)}" alt="${U.esc(t.name)}"></div>
+      <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner, d.variant || 0)}" alt="${U.esc(t.name)}"></div>
       <b class="sc-name" title="${U.esc(d.name)}">${U.esc(d.name)}</b><small class="sc-type">${t.name}</small>
       ${this.bar('sh', shield, shieldMax)}${this.bar('hu', hull, hullMax)}
       <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Maintenance per Cycle">⚙${d.upkeep}</span>` : ''}${d.quality != null && !opts.small && !t.structure ? `<span class="q ${d.quality >= 110 ? 'hi' : d.quality <= 90 ? 'lo' : ''}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${d.quality}</span>` : ''}</div>

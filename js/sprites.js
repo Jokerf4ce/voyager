@@ -193,13 +193,21 @@ const Sprites = {
     if (DATA.shipTypes[type] && DATA.shipTypes[type].monster) return 'monster';
     return DATA.shipPalettes[owner] ? owner : 'player';
   },
-  // The sprite of a ship type for an owner (faction) or an explicit palette object.
-  shipImg(type, owner = 'player') {
+  // How many designs a ship type has (1 if it has no variants).
+  shipVariants(type) { return (typeof ShipSprites !== 'undefined' && ShipSprites.variants && ShipSprites.variants[type]) || 1; },
+  // Template name of a design: 'scout' (design 0), 'scout_2', 'scout_3'.
+  shipTplName(type, variant = 0) {
+    const n = variant > 0 ? `${type}_${variant + 1}` : type;
+    return typeof ShipSprites !== 'undefined' && ShipSprites.images[n] ? n : type;
+  },
+  // The sprite of a ship type (and design variant) for an owner (faction) or an explicit palette object.
+  shipImg(type, owner = 'player', variant = 0) {
+    const name = this.shipTplName(type, variant || 0);
     const palKey = typeof owner === 'object' ? JSON.stringify(owner) : this.shipPaletteKey(type, owner);
-    const key = type + '|' + palKey;
+    const key = name + '|' + palKey;
     if (this.shipCache[key]) return this.shipCache[key];
-    const tpl = this.shipTpl[type];
-    if (!tpl) return (typeof ShipSprites !== 'undefined' && ShipSprites.images[type]) || ''; // grey until decoded
+    const tpl = this.shipTpl[name];
+    if (!tpl) return (typeof ShipSprites !== 'undefined' && ShipSprites.images[name]) || ''; // grey until decoded
     const ramps = this.shipRamps(typeof owner === 'object' ? owner : DATA.shipPalettes[palKey]);
     const c = this.canvas(tpl.width, tpl.height), ctx = c.getContext('2d');
     const img = ctx.createImageData(tpl.width, tpl.height), src = tpl.data, dst = img.data;

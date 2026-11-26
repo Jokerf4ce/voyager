@@ -31,7 +31,7 @@ const Battle = {
   unitFrom(ship, side, ref) {
     const m = side === 'player' ? State.mods() : { hp: 1, atk: 1 };
     return {
-      side, ref, name: ship.name, type: ship.type, size: ship.size, rarity: ship.rarity,
+      side, ref, name: ship.name, type: ship.type, variant: ship.variant || 0, size: ship.size, rarity: ship.rarity,
       shieldMax: Math.round(ship.shield * m.hp), shield: Math.round(ship.shield * m.hp),
       hullMax: Math.round(ship.hull * m.hp), hull: Math.max(1, Math.round((ship.hullNow == null ? ship.hull : ship.hullNow) * m.hp)),
       speed: ship.speed, maneuver: ship.maneuver, dmgMult: m.atk,

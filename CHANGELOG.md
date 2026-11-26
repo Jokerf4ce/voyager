@@ -2,6 +2,20 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.32.0 — 2026-11-26
+- **Two more designs for every ship type** (three each). A new ship rolls one of its type's designs and keeps it, so fleets look varied:
+  - Scout: sensor picket with a dish and antenna ring · needle probe with solar panels
+  - Fighter: four wings in an X · forward-swept interceptor with twin tails
+  - Heavy Fighter: torpedo bomber · twin-boom gunship
+  - Corvette: arrowhead with a dorsal fin · hammerhead
+  - Frigate: spinal frigate with a habitat ring and reactor · twin-hulled frigate
+  - Gunboat: spinal cannon with capacitor coils · weapons block with radiator wings
+  - Destroyer: dagger with dorsal and ventral fins · lance with missile wings
+  - Battleship: cathedral with spires and buttresses · wedge dreadnought
+  - Carrier: twin-hull carrier · hive carrier lined with launch bays
+- Like all ship art they are grey templates (`assets/ships/<type>_2.png`, `_3.png`) coloured in the game, so every design works in every faction's colours and in your own fleet colours.
+- Ships from older saves keep the first design.
+
 ## 0.31.0 — 2026-11-26
 Battle screen:
 - **Fleet power** of each side, live (living ships, current shields and hull), with a bar comparing the two.
