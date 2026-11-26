@@ -327,6 +327,12 @@ DATA.names = {
   suffix: ['', '', '', ' Prime', ' IV', ' VII', ' Secundus', "'s Grave", ' Reach', ' Hollow'],
 };
 
+// Building costs rise with level, to reward expanding wide (more colonies) over building tall:
+// up to softCap each level costs perLevel more of the base price; past it, each level multiplies by expBase.
+//   level:  1     2      3     4      5     6     7      8
+//   cost:   1×    1.15×  1.3×  1.45×  1.6×  3.2×  6.4×   12.8×   (× the colony's habitability multiplier)
+DATA.levelCost = { perLevel: 0.15, softCap: 5, expBase: 2 };
+
 DATA.config = {
   systemCount: 22,
   startExplored: 1,  // systems already charted at the start (1 = only home; neighbours show as '?')

@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.33.0 — 2026-11-26
+- **Building costs rise with level.** Each level costs 15 % of the base price more up to level 5 (1×, 1.15×, 1.3×, 1.45×, 1.6×); from level 6 every level doubles (3.2×, 6.4×, 12.8×, …), on top of the colony's habitability multiplier. Expanding wide is now the way to grow; very tall buildings get very expensive.
+- Prices show their level multiplier (×1.45); it turns red past level 5. **Auto** already compares output per cost, so it now spreads buildings across colonies by itself.
+- Tuned in `DATA.levelCost` (`perLevel`, `softCap`, `expBase`).
+- In bot tests over 150 Cycles, buildings now top out around level 6 instead of 27, and income grows with the number of colonies instead of running away.
+
 ## 0.32.0 — 2026-11-26
 - **Two more designs for every ship type** (three each). A new ship rolls one of its type's designs and keeps it, so fleets look varied:
   - Scout: sensor picket with a dish and antenna ring · needle probe with solar panels

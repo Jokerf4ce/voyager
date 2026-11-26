@@ -58,12 +58,20 @@ const Colonies = {
     return (this.sysLevel(s, 'bastion') * 6 + this.sysLevel(s, 'platform') * 10) * mod;
   },
 
+  // Cost multiplier for building a level (1 = a new building): +15 % of base per level up to level 5,
+  // then doubling every level (DATA.levelCost).
+  levelMult(level) {
+    const c = DATA.levelCost;
+    if (level <= c.softCap) return 1 + c.perLevel * (level - 1);
+    return (1 + c.perLevel * (c.softCap - 1)) * Math.pow(c.expBase, level - c.softCap);
+  },
+  // Price of the next level of a building: base price × habitability multiplier × level multiplier.
   buildCost(p, layer, key) {
     const def = DATA.buildings[key];
     const out = {};
-    const hm = this.habMult(p, layer);
-    // Flat cost: the building's base price × the colony layer's habitability multiplier (no growth with level or count).
-    for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * hm);
+    const next = (p.colony && p.colony[layer] && p.colony[layer][key] || 0) + 1;
+    const m = this.habMult(p, layer) * this.levelMult(next);
+    for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * m);
     return out;
   },
 

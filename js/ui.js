@@ -345,7 +345,7 @@ const UI = {
           const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k);
           const inf = this.capText(b.cap);
           return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
-            <div class="right">${U.costText(cost)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}</div></div>`;
+            <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}</div></div>`;
         };
         return `<div class="layer"><h4>${DATA.layers[L]} <span class="${used >= max ? 'bad' : 'muted'}">${used}/${max} slots</span></h4>
           ${built.map(row).join('')}
@@ -388,7 +388,7 @@ const UI = {
           <h4>Build at</h4>
           ${spots.length ? spots.map((x, i) => `<div class="kv spot ${x === best ? 'best' : ''}"><span>${where(x)} ${x.lvl ? `<span class="muted">Lv ${x.lvl} → ${x.lvl + 1}</span>` : '<span class="muted">new slot</span>'}
               ${d.gathers || Object.values(d.cap || {}).some((v) => v < 0) ? `<span class="muted">· output ×${U.fmt1(x.value)}</span>` : ''} ${x === best ? '<span class="res-power">★ Auto pick</span>' : ''}</span>
-              <span>${U.costText(x.cost)} ${x.why && x.why !== 'Not enough resources' ? `<small class="bad">${x.why}</small>` : ''} ${this.btn(x.lvl ? 'Upgrade' : 'Build', 'bplace', `${x.ref}:${x.layer}:${k}`, !!x.why, 'small')}</span></div>`).join('')
+              <span>${U.costText(x.cost)}${this.levelTag(x.lvl + 1)} ${x.why && x.why !== 'Not enough resources' ? `<small class="bad">${x.why}</small>` : ''} ${this.btn(x.lvl ? 'Upgrade' : 'Build', 'bplace', `${x.ref}:${x.layer}:${k}`, !!x.why, 'small')}</span></div>`).join('')
             : `<p class="muted small">No colony has a free ${d.layers.join(' or ')} slot${d.gathers ? ' on a planet with this resource' : ''}. Settle more planets.</p>`}
         </div>`;
       }
@@ -403,7 +403,7 @@ const UI = {
         ${detail}
       </div>`;
     };
-    return `<p class="muted small">Every building in your empire. <b>Auto</b> builds where it produces the most for its cost (hover it to see where). Click a row to see where it stands or to pick the colony yourself. Costs depend on the colony's habitability.</p>` +
+    return `<p class="muted small">Every building in your empire. <b>Auto</b> builds where it produces the most for its cost (hover it to see where). Click a row to see where it stands or to pick the colony yourself. Costs depend on the colony's habitability and rise with level: +15 % per level up to level 5, then doubling every level (the ×-number after a price), so new colonies beat tall towers.</p>` +
       groups.map((g) => this.panel(g, keys.filter((k) => Colonies.group(k) === g).map(row).join(''))).join('');
   },
 
@@ -450,6 +450,14 @@ const UI = {
         : this.btn('Open tester mode', 'slot', 'tester')}</span></div>
       <p class="muted small">Tester mode has its own save (extra colonies with random buildings, ships of every rarity, plenty of resources). Your real game is not touched. You can also open it with <code>#tester</code> at the end of the address.</p>
       <p class="muted small">Voyager v${VERSION.number} (${VERSION.date}) · saves stay in this browser (localStorage).</p>`);
+  },
+
+  // "×1.45" after a cost; red once a level is past the soft cap (expanding wide is cheaper).
+  levelTag(level) {
+    const m = Colonies.levelMult(level);
+    if (level <= 1) return '';
+    const steep = level > DATA.levelCost.softCap;
+    return ` <small class="${steep ? 'bad' : 'muted'}" title="Level ${level} costs ×${+m.toFixed(2)} the base price${steep ? `. Past level ${DATA.levelCost.softCap} every level doubles: a new colony is cheaper.` : ''}">×${+m.toFixed(2)}</small>`;
   },
 
   colorPreview() {
