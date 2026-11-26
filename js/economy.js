@@ -75,7 +75,9 @@ const Colonies = {
     const def = DATA.buildings[key];
     if (!def.layers.includes(layer)) return 'Wrong layer';
     if (!(p.colony[layer][key] > 0) && this.slotsUsed(p, layer) >= this.slots(p, layer)) return `No free ${layer} slots`;
-    if (def.infra > 0 && Economy.infraFree() < def.infra) return 'Not enough Infrastructure';
+    if (def.gathers && !(Economy.rating(p, def.gathers) > 0 || (def.also && Economy.rating(p, def.also) > 0))) return `Nothing to gather here`;
+    const short = Economy.capShortfall(def.cap);
+    if (short) return `Not enough ${DATA.capacities[short].name}`;
     if (!this.canAfford(this.buildCost(p, layer, key))) return 'Not enough resources';
     return null;
   },
@@ -112,94 +114,125 @@ const Colonies = {
 };
 
 const Economy = {
-  // --- Infrastructure (capacity) ---
-  planetInfraCap(p) {
-    const t = Planets.mult(p);
-    let cap = DATA.infra.colonyBase;
-    for (const layer of ['surface', 'orbit']) for (const [k, lvl] of Object.entries(p.colony[layer])) {
-      const d = DATA.buildings[k];
-      if (d && d.infra < 0) cap += -d.infra * lvl;
-    }
-    return cap * (t.infra || 1) * State.mods().infra;
+  // --- Gathered resources ---
+  // Rating 0–3 of a planet for a gathered resource (dwarfs get +1 Rare Minerals).
+  rating(p, res) {
+    const r = Planets.cls(p).yields[res] || 0;
+    return r + (res === 'rare' ? (DATA.planetSizes[p.size].rareBonus || 0) : 0);
   },
 
-  planetInfraUsed(p) {
-    let used = 0;
-    for (const layer of ['surface', 'orbit']) for (const [k, lvl] of Object.entries(p.colony[layer])) {
-      const d = DATA.buildings[k];
-      if (d && d.infra > 0) used += d.infra * lvl;
+  // --- Capacities (Power, Infrastructure, Compute) ---
+  // What a planet provides and uses: { power: { give, use }, ... }
+  planetCaps(p) {
+    const m = State.mods(), t = Planets.mult(p);
+    const out = {};
+    for (const k in DATA.capacities) out[k] = { give: DATA.capacities[k].base, use: 0 };
+    out.power.give *= DATA.starClasses[p.star || 'G'].solar; // a colony's own power is partly solar
+    for (const layer of ['surface', 'orbit']) for (const [key, lvl] of Object.entries(p.colony[layer])) {
+      const d = DATA.buildings[key];
+      if (!d || !lvl) continue;
+      for (const [k, v] of Object.entries(d.cap || {})) {
+        if (v < 0) out[k].give += -v * lvl * (d.solar ? DATA.starClasses[p.star || 'G'].solar : 1);
+        else out[k].use += v * lvl;
+      }
     }
-    return used;
+    for (const k in out) out[k].give *= (t[k] || 1) * (m[k] || 1);
+    return out;
   },
 
-  infra() {
-    let cap = 0, buildings = 0, ships = 0;
-    for (const { p } of Colonies.playerPlanets()) { cap += this.planetInfraCap(p); buildings += this.planetInfraUsed(p); }
+  shipCaps(type) { return DATA.ships[type].cap || {}; },
+
+  // Empire-wide capacities. eff = rationing factor when any capacity is over its cap.
+  caps() {
+    const out = {};
+    for (const k in DATA.capacities) out[k] = { cap: 0, used: 0, buildings: 0, ships: 0 };
+    for (const { p } of Colonies.playerPlanets()) {
+      const c = this.planetCaps(p);
+      for (const k in c) { out[k].cap += c[k].give; out[k].buildings += c[k].use; }
+    }
     for (const f of G.fleets) if (f.owner === 'player') {
-      for (const [t, n] of Object.entries(f.ships)) ships += DATA.ships[t].infra * n;
+      for (const [t, n] of Object.entries(f.ships)) for (const [k, v] of Object.entries(this.shipCaps(t))) out[k].ships += v * n;
     }
-    const used = buildings + ships;
-    const eff = used <= cap ? 1 : Math.max(DATA.infra.minEfficiency, cap / used);
-    return { cap, used, buildings, ships, eff };
+    let eff = 1;
+    for (const k in out) {
+      out[k].used = out[k].buildings + out[k].ships;
+      out[k].free = out[k].cap - out[k].used;
+      if (out[k].used > out[k].cap) eff = Math.min(eff, out[k].cap / out[k].used);
+    }
+    out.eff = Math.max(DATA.minEfficiency, eff);
+    return out;
   },
 
-  infraFree() { const i = this.infra(); return i.cap - i.used; },
+  // First capacity that a new need would push over its cap, or null.
+  capShortfall(need = {}) {
+    const c = this.caps();
+    for (const [k, v] of Object.entries(need)) if (v > 0 && c[k].free < v - 1e-9) return k;
+    return null;
+  },
 
   // --- Production ---
-  // Output of one planet. eff = rationing factor. Refinery inputs are reported separately.
+  // Output of one planet per Cycle. eff = rationing factor. Refinery inputs are reported in `inputs`.
   planetYield(p, eff = 1) {
-    const m = State.mods();
+    const m = State.mods(), st = DATA.starClasses[p.star || 'G'];
     const L = (k) => Colonies.level(p, k);
-    const t = Planets.mult(p);
-    const k = m.all * (1 + 0.1 * L('fusion')) * eff;
-    return {
-      metal: (2 + L('mine') * 3) * (t.metal || 1) * m.metal * k,
-      rare: (L('drill') * 1.5) * (t.rare || 1) * m.rare * k,
-      compute: (1 + L('cogitator') * 2) * (t.compute || 1) * m.compute * k,
-      polymers: (L('refinery') * 2 + L('skimmer') * 1.5) * (t.polymers || 1) * m.polymers * k, // if refineries are fed
-      refMetal: L('refinery') * 2 * eff, // refinery inputs; bonuses raise output, not inputs
-      refRare: L('refinery') * 0.5 * eff,
-      refOut: L('refinery') * 2 * (t.polymers || 1) * m.polymers * k,
-    };
+    const size = DATA.planetSizes[p.size].yield;
+    const k = m.all * eff;
+    const out = { metal: 0, rare: 0, organics: 0, polymers: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 } };
+    // gathered: base colony output plus 2 × rating per gathering building level
+    for (const res of ['metal', 'rare', 'organics']) {
+      let lv = 0;
+      for (const [key, d] of Object.entries(DATA.buildings)) if (d.gathers === res || d.also === res) lv += L(key);
+      out[res] = this.rating(p, res) * size * (1 + 2 * lv) * (m[res] || 1) * ((st.mult || {})[res] || 1) * k;
+    }
+    // refined: fixed inputs, bonuses raise output only
+    for (const [key, d] of Object.entries(DATA.buildings)) {
+      if (!d.refines || !L(key)) continue;
+      out[d.refines.out] += d.refines.amount * L(key) * (m[d.refines.out] || 1) * k;
+      for (const [r, v] of Object.entries(d.refines.in)) out.inputs[r] += v * L(key) * eff;
+    }
+    out.research = (L('lab') * 2 + (p.colony.capital ? 1 : 0)) * m.research * k;
+    return out;
   },
 
   income() {
-    const inf = this.infra();
+    const caps = this.caps();
     const m = State.mods();
     const starShards = Colonies.playerSystems().reduce((a, s) => a + (DATA.starClasses[s.star].shards || 0), 0);
-    const out = { metal: 0, rare: 0, compute: 0, polymersMax: 0, refOut: 0, refMetal: 0, refRare: 0, shards: Math.floor(m.shardIncome) + starShards, infra: inf };
+    const out = { metal: 0, rare: 0, organics: 0, polymers: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 },
+      shards: Math.floor(m.shardIncome) + starShards, caps };
     for (const { p } of Colonies.playerPlanets()) {
-      const y = this.planetYield(p, inf.eff);
-      out.metal += y.metal; out.rare += y.rare; out.compute += y.compute;
-      out.polymersMax += y.polymers; out.refOut += y.refOut; out.refMetal += y.refMetal; out.refRare += y.refRare;
+      const y = this.planetYield(p, caps.eff);
+      for (const k of ['metal', 'rare', 'organics', 'polymers', 'chemicals', 'research']) out[k] += y[k];
+      for (const k in y.inputs) out.inputs[k] += y.inputs[k];
     }
     return out;
   },
 
-  // Net change per Cycle as shown in the UI (assumes refineries have their inputs).
+  // Net change per Cycle as shown in the UI (assumes refineries get their inputs).
   net() {
     const i = this.income();
-    return { metal: i.metal - i.refMetal, rare: i.rare - i.refRare, polymers: i.polymersMax, compute: i.compute, shards: i.shards, infra: i.infra };
+    return { metal: i.metal - i.inputs.metal, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
+      polymers: i.polymers, chemicals: i.chemicals, research: i.research, shards: i.shards, caps: i.caps };
   },
 
   tick() {
     const inc = this.income();
-    G.res.metal += inc.metal;
-    G.res.rare += inc.rare;
-    G.res.compute += inc.compute;
+    for (const k of ['metal', 'rare', 'organics', 'research']) G.res[k] += inc[k];
     G.res.shards += inc.shards;
     if (G.cycle % 5 === 0) G.res.shards += 1;
-    // Skimmers always produce; refineries run as far as the stockpile allows.
-    G.res.polymers += inc.polymersMax - inc.refOut;
-    if (inc.refOut > 0) {
-      const ratio = Math.min(1, inc.refMetal ? G.res.metal / inc.refMetal : 1, inc.refRare ? G.res.rare / inc.refRare : 1);
-      G.res.polymers += inc.refOut * ratio;
-      G.res.metal -= inc.refMetal * ratio;
-      G.res.rare -= inc.refRare * ratio;
-      if (ratio < 1 && G.cycle % 5 === 0) Log.add('Refineries stall: not enough Metal or Rare Minerals to feed them.', 'bad');
+    // Refineries and chemical plants run as far as the stockpile allows.
+    const need = inc.inputs;
+    const ratio = Math.min(1, ...Object.entries(need).filter(([, v]) => v > 0).map(([k, v]) => G.res[k] / v));
+    if (inc.polymers + inc.chemicals > 0) {
+      G.res.polymers += inc.polymers * ratio;
+      G.res.chemicals += inc.chemicals * ratio;
+      for (const [k, v] of Object.entries(need)) G.res[k] -= v * ratio;
+      if (ratio < 1 && G.cycle % 5 === 0) Log.add('Refineries stall: not enough Metals, Organics or Rare Minerals to feed them.', 'bad');
     }
-    if (inc.infra.eff < 1 && G.cycle % 3 === 0) {
-      Log.add(`Rationing! Infrastructure ${Math.round(inc.infra.used)}/${Math.round(inc.infra.cap)}. Production is down to ${Math.round(inc.infra.eff * 100)}%. Build Hab Domes, Habitat Rings or Fusion Cores, or scrap ships.`, 'bad');
+    const c = inc.caps;
+    if (c.eff < 1 && G.cycle % 3 === 0) {
+      const over = Object.keys(DATA.capacities).filter((k) => c[k].used > c[k].cap).map((k) => `${DATA.capacities[k].name} ${Math.round(c[k].used)}/${Math.round(c[k].cap)}`).join(', ');
+      Log.add(`Rationing! Over capacity: ${over}. Production is down to ${Math.round(c.eff * 100)}%.`, 'bad');
     }
     for (const s of G.systems) if (s.owner) s.garrison = Math.min(Colonies.maxGarrison(s), (s.garrison || 0) + 5);
   },

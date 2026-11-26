@@ -97,20 +97,45 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 ## 4b. Resources
 
-**Decided:** Metal, Rare Minerals, Polymers, Compute and Infrastructure, plus Void Shards for the gacha. Energy is folded into Infrastructure. Compute replaces Research. Infrastructure is a capacity cap. Light production chains.
+**Decided:** three gathered resources, two refined goods and three capacities, plus Research and Void Shards.
+- Gathered: Metals, Rare Minerals, Organics.
+- Refined: Polymers and Chemicals. These are only spent on building.
+- Capacities: Power, Compute and Infrastructure.
+- Research is its own points, made by Research Labs. Compute only limits advanced buildings and ships.
 
 | Resource | Type | Source | Used for |
 |---|---|---|---|
-| **Metal** | stockpile | Deep Mines (Iron Desert ×2, Ash World ×1.5) | almost everything; refinery input |
-| **Rare Minerals** | stockpile | Core Drills (Toxic Mire ×2) | advanced ships, Fusion Cores, Bastions; refinery input |
-| **Polymers** | stockpile, refined | Polymer Refinery: 2 Metal + 0.5 Rare → 2 Polymers; Gas Skimmers in orbit (Gas Giant ×2) | Arks, Frigates and better, Habitat Rings, Cogitators, Shipyards |
-| **Compute** | stockpile | Cogitator Arrays (Hollow World ×2) | research |
-| **Infrastructure** | capacity | each settled planet (base 5), Hab Domes, Habitat Rings, Fusion Cores (Frozen Tomb ×1.5) | used by production buildings (1 per level) and ship crews |
-| **Void Shards** | stockpile | exploration, battles, events, some techs and relics | Void Signals (gacha) |
+| **Metals** | gathered | Deep Mines on rocky worlds | almost everything; Polymer input |
+| **Rare Minerals** | gathered | Core Drills, Atmosphere Skimmers; hot worlds, dwarfs, stellar remnants | advanced buildings and ships; Polymer and Chemical input |
+| **Organics** | gathered | Bio-Harvesters on living and icy worlds; Atmosphere Skimmers on gas giants | Chemical input; feeding survivors |
+| **Polymers** | refined | Polymer Refinery: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, Arks, warships, settling |
+| **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, Arks, warships, settling |
+| **Research** | points | Research Labs (+2 each), capital +1 | technology |
+| **Void Shards** | points | exploration, battles, events, techs, relics, pulsars and black holes | Void Signals (gacha) |
+| **Power** ϟ | capacity | colony base 2 × starlight, Fusion Reactors (+6), Solar Arrays in orbit (+4 × starlight); hot worlds ×1.3 | almost every building |
+| **Infrastructure** ⌂ | capacity | colony base 5, Hab Domes (+5), Habitat Rings (+6); ice/water ×1.3, temperate ×1.2 | workers in production buildings and labs; ship crews |
+| **Compute** ☍ | capacity | Cogitator Arrays (+4); frozen ×1.5, pulsar ×2, black hole ×2.5 | Research Labs, Defense Platforms, Frigates and bigger warships |
 
-**Infrastructure rules** (proposed and in the POC):
-- You cannot build a building or ship whose crew or workers would push usage past capacity.
-- If usage ends up over capacity (for example a colony with Habitat Rings is lost), all production is rationed to capacity ÷ usage, down to a minimum of 25%.
+**Planet yields** (decided). Each planet class rates the three gathered resources from 0 to 3:
+
+| Planet class | Metals | Rare | Organics |
+|---|---|---|---|
+| Terran World | 2 | 1 | 3 |
+| Ocean World | 1 | 0 | 3 |
+| Ice World | 0 | 1 | 2 |
+| Steam World | 0 | 2 | 1 |
+| Frozen Rock | 3 | 1 | 0 |
+| Scorched Rock | 2 | 3 | 0 |
+| Cold Gas Giant | 0 | 0 | 2 (methane, ammonia) |
+| Hot Gas Giant | 0 | 1 | 1 (hydrocarbons) |
+
+A colony gathers rating × size per turn, and each gathering building level adds 2 × that. Size multiplies yields: giant and large ×1.5, average ×1, dwarf ×0.6. Dwarfs get +1 Rare (exposed cores). White dwarfs, pulsars and black holes give ×1.5 Rare Minerals. A building can't be built where its resource is rated 0.
+
+**Capacity rules:**
+- You cannot build a building or ship that would push any capacity past its cap.
+- If usage ends up over a cap (for example after losing a colony), all production is rationed to the worst cap ÷ usage, down to a minimum of 25%.
+
+The capital starts with the whole chain running: Mine, Bio-Harvester, Polymer Refinery, Hab Dome, Fusion Reactor ×2, Shipyard, Research Lab, Cogitator and Chemical Plant.
 
 ## 5. Setting and tone
 

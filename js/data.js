@@ -2,19 +2,31 @@
 
 const DATA = {};
 
-// Stockpiled resources. Infrastructure is not stockpiled: it is a capacity (see DATA.infra).
+// Stockpiled resources.
+//   gathered: Metals, Rare Minerals, Organics (from planets; see DATA.planetClasses yields)
+//   refined:  Polymers (Metals + Rare Minerals), Chemicals (Organics + Rare Minerals). Only spent on building.
+//   Research points (made by Research Labs) and Void Shards (the gacha currency).
 DATA.resources = {
-  metal:    { name: 'Metal',         icon: '▣', color: '#a8a8b0', desc: 'Mined everywhere. Hulls, walls, everything.' },
-  rare:     { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', desc: 'Scarce crystals and heavy elements for advanced tech.' },
-  polymers: { name: 'Polymers',      icon: '⬡', color: '#d08a50', desc: 'Refined from metal and rare minerals. Needed for advanced builds.' },
-  compute:  { name: 'Compute',       icon: '☍', color: '#70c0c8', desc: 'Raw thinking power. Spent on research.' },
-  shards:   { name: 'Void Shards',   icon: '◆', color: '#a35ad9', desc: 'Currency of the Void Signals.' },
+  metal:     { name: 'Metals',        icon: '▣', color: '#a8a8b0', kind: 'gathered', desc: 'Mined from rocky worlds. Hulls, walls, everything.' },
+  rare:      { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', kind: 'gathered', desc: 'Heavy elements from hot worlds, dwarfs and dead stars.' },
+  organics:  { name: 'Organics',      icon: '❦', color: '#9ab050', kind: 'gathered', desc: 'Biomass, hydrocarbons and frozen volatiles from living worlds, ice and gas giants.' },
+  polymers:  { name: 'Polymers',      icon: '⬡', color: '#d08a50', kind: 'refined',  desc: 'Produced from Metals and Rare Minerals. Advanced construction.' },
+  chemicals: { name: 'Chemicals',     icon: '⚗', color: '#d0c060', kind: 'refined',  desc: 'Converted from Organics and Rare Minerals. Fuel, explosives, reagents.' },
+  research:  { name: 'Research',      icon: '✎', color: '#70c0c8', kind: 'points',   desc: 'Made by Research Labs. Spent on technology.' },
+  shards:    { name: 'Void Shards',   icon: '◆', color: '#a35ad9', kind: 'points',   desc: 'Currency of the Void Signals.' },
 };
 
-// Infrastructure: power, life support, meals, habitation.
-// Every colony and Habitat/Fusion building provides capacity; production buildings and ship crews use it.
-// You cannot build past the cap. If usage ends up over the cap (a colony is lost), all production is rationed.
-DATA.infra = { name: 'Infrastructure', icon: '⌂', colonyBase: 5, minEfficiency: 0.25 };
+// Capacities: not stockpiled. Buildings provide them and buildings/ships use them.
+// You cannot build past a cap. If usage ends up over a cap (a colony is lost), all production is rationed.
+//   Power:          used by almost every building.
+//   Infrastructure: life support, meals and bunks for colony workers and ship crews.
+//   Compute:        needed by Research Labs, Defense Platforms and advanced warships.
+DATA.capacities = {
+  power:   { name: 'Power',          icon: 'ϟ', color: '#e0d070', base: 2, desc: 'Electricity from reactors and starlight. Every building draws it.' },
+  infra:   { name: 'Infrastructure', icon: '⌂', color: '#d8c070', base: 5, desc: 'Life support, meals and bunks for workers and ship crews.' },
+  compute: { name: 'Compute',        icon: '☍', color: '#70c0c8', base: 0, desc: 'Cogitator capacity for labs, defense grids and advanced warships.' },
+};
+DATA.minEfficiency = 0.25;
 
 // Habitability 1–5: 1 Extremely Hazardous (Venus, Jupiter) … 5 Natural Life Support (old Earth).
 // surface / orbit multiply the cost of building on that layer. Settling uses the surface rate
@@ -30,7 +42,7 @@ DATA.habitability = {
 // Stars use the Morgan–Keenan stellar classification (main sequence O B A F G K M).
 // weight: how common (real galaxies are ~75% M dwarfs; flattened here for play).
 // planets: [min, max] planets in the system. temps: bias on planet temperature rolls.
-// solar: Infrastructure multiplier for every planet in the system (power from starlight).
+// solar: Power multiplier for every planet in the system (starlight for solar arrays).
 // habMod: added to planet habitability (hard radiation around hot giants).
 // radius: in solar radii (typical main-sequence values), used to draw the solar system map to scale.
 DATA.starClasses = {
@@ -43,11 +55,12 @@ DATA.starClasses = {
   // Not main sequence: a luminosity class 0 red hypergiant (like VY Canis Majoris). Never rolled randomly;
   // the galaxy places one near the start for show.
   H: { name: 'Red Hypergiant', color: '#ff5a32', size: 4, radius: 1400, weight: 0, planets: [1, 3], temps: { hot: 3, temperate: 0.2, frozen: 1 }, solar: 2.0, habMod: -2, desc: 'A dying star wider than the orbit of Jupiter, shedding its own skin into the dark. Its light is overwhelming; nothing living belongs here.' },
-  // Stellar remnants: rare special systems. kind picks how they are drawn. mult: extra planet bonuses.
+  // Stellar remnants: rare special systems. kind picks how they are drawn. mult: extra planet bonuses
+  // (all remnants are rich in Rare Minerals).
   // shards: Void Shards per Cycle while you hold the system.
   D: { kind: 'dwarf',    name: 'White Dwarf',       color: '#e8f0ff', size: 1, radius: 0.012, weight: 0.8, planets: [1, 3], temps: { hot: 0.3, temperate: 0.2, frozen: 3 }, solar: 0.4, habMod: -1, mult: { rare: 1.5 }, shards: 0, desc: 'The cooling corpse of a star, no bigger than a world. Its old planets are scorched cinders rich in heavy elements.' },
-  N: { kind: 'pulsar',   name: 'Pulsar',            color: '#a0e0ff', size: 1, radius: 0.00002, weight: 0.5, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.3, habMod: -2, mult: { compute: 2 }, shards: 1, desc: 'A spinning neutron star sweeping beams of hard radiation across its system, faster than a heartbeat. Its ticking is perfect; cogitators sync to it.' },
-  X: { kind: 'blackhole',name: 'Black Hole',        color: '#ff9a40', size: 1, radius: 0.00004, weight: 0.3, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.2, habMod: -2, mult: { compute: 2.5 }, shards: 3, desc: 'A wound in space ringed by burning gas. Time runs slow near the edge. The Void Signals are loudest here.' },
+  N: { kind: 'pulsar',   name: 'Pulsar',            color: '#a0e0ff', size: 1, radius: 0.00002, weight: 0.5, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.3, habMod: -2, mult: { rare: 1.5, compute: 2 }, shards: 1, desc: 'A spinning neutron star sweeping beams of hard radiation across its system, faster than a heartbeat. Its ticking is perfect; cogitators sync to it.' },
+  X: { kind: 'blackhole',name: 'Black Hole',        color: '#ff9a40', size: 1, radius: 0.00004, weight: 0.3, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.2, habMod: -2, mult: { rare: 1.5, compute: 2.5 }, shards: 3, desc: 'A wound in space ringed by burning gas. Time runs slow near the edge. The Void Signals are loudest here.' },
   M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, radius: 0.35, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
 };
 
@@ -59,88 +72,104 @@ DATA.starClasses = {
 // An Extremely Hazardous (habitability 1) planet has no buildable surface.
 // radius: range in Earth radii, used to draw the solar system map to scale
 // (giants: Neptune-sized to bloated hot Jupiters; large: super-Earths; dwarf: Mars-sized and smaller).
+// yield: multiplies gathered resources. rareBonus: dwarfs' exposed cores add to the Rare Minerals rating.
 DATA.planetSizes = {
-  giant:   { name: 'Giant',   slots: { surface: 0, orbit: 5 }, sprite: 32, radius: [3.9, 12] },
-  large:   { name: 'Large',   slots: { surface: 5, orbit: 4 }, sprite: 30, radius: [1.4, 2.2] },
-  average: { name: 'Average', slots: { surface: 4, orbit: 3 }, sprite: 24, radius: [0.8, 1.25] },
-  dwarf:   { name: 'Dwarf',   slots: { surface: 2, orbit: 2 }, sprite: 16, radius: [0.3, 0.6], habMod: -1 },
+  giant:   { name: 'Giant',   slots: { surface: 0, orbit: 5 }, sprite: 32, radius: [3.9, 12], yield: 1.5 },
+  large:   { name: 'Large',   slots: { surface: 5, orbit: 4 }, sprite: 30, radius: [1.4, 2.2], yield: 1.5 },
+  average: { name: 'Average', slots: { surface: 4, orbit: 3 }, sprite: 24, radius: [0.8, 1.25], yield: 1 },
+  dwarf:   { name: 'Dwarf',   slots: { surface: 2, orbit: 2 }, sprite: 16, radius: [0.3, 0.6], habMod: -1, rareBonus: 1, yield: 0.6 },
 };
 DATA.solarRadiusInEarths = 109;
 
+// Composition and temperature now only shape the capacities a planet is good for.
 DATA.compositions = {
-  gas:      { name: 'Gas',       sizes: ['giant'],                     temps: ['frozen', 'hot'],              mult: { polymers: 2.0 } },
+  gas:      { name: 'Gas',       sizes: ['giant'],                     temps: ['frozen', 'hot'],              mult: {} },
   water:    { name: 'Ice/Water', sizes: ['large', 'average', 'dwarf'], temps: ['frozen', 'temperate', 'hot'], mult: { infra: 1.3 } },
-  silicate: { name: 'Silicate',  sizes: ['large', 'average', 'dwarf'], temps: ['frozen', 'temperate', 'hot'], mult: { metal: 1.5, rare: 1.2 } },
+  silicate: { name: 'Silicate',  sizes: ['large', 'average', 'dwarf'], temps: ['frozen', 'temperate', 'hot'], mult: {} },
 };
 
 DATA.temperatures = {
   frozen:    { name: 'Frozen',    mult: { compute: 1.5 } }, // free cooling for cogitators
   temperate: { name: 'Temperate', mult: { infra: 1.2 } },
-  hot:       { name: 'Hot',       mult: { rare: 1.5 } },    // volcanism brings heavy elements up
+  hot:       { name: 'Hot',       mult: { power: 1.3 } },   // geothermal and strong starlight
 };
 
 // Planet classes: one per composition + temperature. hab = habitability roll [min, max] before size.
-// weight = how often it appears.
+// weight = how often it appears. yields = rating 0–3 for each gathered resource
+// (a colony gathers rating × size yield per Cycle, each gathering building level adds 2 × that).
 DATA.planetClasses = {
-  gas_frozen:         { name: 'Cold Gas Giant', hab: [1, 1], weight: 3, palette: ['#141a28', '#28384e', '#4a6478', '#90b0c0'] },
-  gas_hot:            { name: 'Hot Gas Giant',  hab: [1, 1], weight: 2, palette: ['#2a1410', '#5a2a1a', '#a0502a', '#e0a060'] },
-  water_frozen:       { name: 'Ice World',      hab: [2, 3], weight: 5, palette: ['#1a2430', '#3a5060', '#6a8a98', '#c8dce4'] },
-  water_temperate:    { name: 'Ocean World',    hab: [3, 4], weight: 3, palette: ['#0a1420', '#14304a', '#2a5a78', '#70a0b8'] },
-  water_hot:          { name: 'Steam World',    hab: [1, 2], weight: 2, palette: ['#1a1a20', '#3a3a48', '#70707e', '#b0b0b8'] },
-  silicate_frozen:    { name: 'Frozen Rock',    hab: [2, 3], weight: 5, palette: ['#18181c', '#34343c', '#5e5e68', '#a0a0a8'] },
-  silicate_temperate: { name: 'Terran World',   hab: [4, 5], weight: 2, palette: ['#0e1a0e', '#24401e', '#4a6a2a', '#8a9a50'] },
-  silicate_hot:       { name: 'Scorched Rock',  hab: [1, 2], weight: 4, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
+  gas_frozen:         { name: 'Cold Gas Giant', hab: [1, 1], weight: 3, yields: { metal: 0, rare: 0, organics: 2 }, palette: ['#141a28', '#28384e', '#4a6478', '#90b0c0'] },
+  gas_hot:            { name: 'Hot Gas Giant',  hab: [1, 1], weight: 2, yields: { metal: 0, rare: 1, organics: 1 }, palette: ['#2a1410', '#5a2a1a', '#a0502a', '#e0a060'] },
+  water_frozen:       { name: 'Ice World',      hab: [2, 3], weight: 5, yields: { metal: 0, rare: 1, organics: 2 }, palette: ['#1a2430', '#3a5060', '#6a8a98', '#c8dce4'] },
+  water_temperate:    { name: 'Ocean World',    hab: [3, 4], weight: 3, yields: { metal: 1, rare: 0, organics: 3 }, palette: ['#0a1420', '#14304a', '#2a5a78', '#70a0b8'] },
+  water_hot:          { name: 'Steam World',    hab: [1, 2], weight: 2, yields: { metal: 0, rare: 2, organics: 1 }, palette: ['#1a1a20', '#3a3a48', '#70707e', '#b0b0b8'] },
+  silicate_frozen:    { name: 'Frozen Rock',    hab: [2, 3], weight: 5, yields: { metal: 3, rare: 1, organics: 0 }, palette: ['#18181c', '#34343c', '#5e5e68', '#a0a0a8'] },
+  silicate_temperate: { name: 'Terran World',   hab: [4, 5], weight: 2, yields: { metal: 2, rare: 1, organics: 3 }, palette: ['#0e1a0e', '#24401e', '#4a6a2a', '#8a9a50'] },
+  silicate_hot:       { name: 'Scorched Rock',  hab: [1, 2], weight: 4, yields: { metal: 2, rare: 3, organics: 0 }, palette: ['#200a06', '#5a1a0a', '#a0400a', '#f0a040'] },
 };
 
 DATA.layers = { surface: 'Surface', orbit: 'Orbit' };
 
 // Buildings. layers: where they can be built (a building allowed in both layers is built separately in each).
-// Cost grows by costGrowth^level. infra: capacity used per level (negative = provided).
-// Light production chain: Mine → Metal, Drill → Rare Minerals, Refinery turns Metal + Rare into Polymers.
+// Cost grows by costGrowth^level and is multiplied by habitability. cap: capacity per level,
+// positive = uses, negative = provides. gathers: which gathered resource the building extracts.
 DATA.buildings = {
-  mine:     { name: 'Deep Mine',        layers: ['surface'], desc: '+3 Metal',                                cost: { metal: 30 },               costGrowth: 1.55, infra: 1 },
-  drill:    { name: 'Core Drill',       layers: ['surface'], desc: '+1.5 Rare Minerals',                      cost: { metal: 45 },               costGrowth: 1.6,  infra: 1 },
-  refinery: { name: 'Polymer Refinery', layers: ['surface'], desc: 'Turns 2 Metal + 0.5 Rare into 2 Polymers', cost: { metal: 50, rare: 10 },    costGrowth: 1.6,  infra: 1 },
-  dome:     { name: 'Hab Dome',         layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',   cost: { metal: 30, polymers: 10 }, costGrowth: 1.5,  infra: -5 },
-  bastion:  { name: 'Bastion',          layers: ['surface'], desc: '+25 garrison, fires on attackers',         cost: { metal: 50, rare: 5 },      costGrowth: 1.6,  infra: 0 },
-  fusion:   { name: 'Fusion Core',      layers: ['surface', 'orbit'], desc: '+5 Infrastructure, +10% planet output', cost: { metal: 60, rare: 20 }, costGrowth: 1.7, infra: -5 },
-  cogitator:{ name: 'Cogitator Array',  layers: ['surface', 'orbit'], desc: '+2 Compute',                      cost: { metal: 40, polymers: 15 }, costGrowth: 1.65, infra: 1 },
-  ring:     { name: 'Habitat Ring',     layers: ['orbit'],   desc: '+6 Infrastructure',                        cost: { metal: 35, polymers: 15 }, costGrowth: 1.5,  infra: -6 },
-  skimmer:  { name: 'Gas Skimmer',      layers: ['orbit'],   desc: '+1.5 Polymers, no inputs (Gas Giant ×2)',  cost: { metal: 55, rare: 10 },     costGrowth: 1.6,  infra: 1 },
-  shipyard: { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, polymers: 10 }, costGrowth: 1.8, infra: 1 },
-  platform: { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',   cost: { metal: 60, polymers: 10, rare: 10 }, costGrowth: 1.6, infra: 0 },
+  // gathering
+  mine:      { name: 'Deep Mine',        layers: ['surface'], gathers: 'metal',    desc: 'Mines Metals (+2 × planet rating)',        cost: { metal: 30 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
+  drill:     { name: 'Core Drill',       layers: ['surface'], gathers: 'rare',     desc: 'Drills Rare Minerals (+2 × planet rating)', cost: { metal: 45 },                          costGrowth: 1.6,  cap: { power: 1, infra: 1 } },
+  harvester: { name: 'Bio-Harvester',    layers: ['surface'], gathers: 'organics', desc: 'Harvests Organics (+2 × planet rating)',    cost: { metal: 35 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
+  skimmer:   { name: 'Atmosphere Skimmer', layers: ['orbit'], gathers: 'organics', also: 'rare', desc: 'Skims Organics and Rare Minerals from the atmosphere below', cost: { metal: 50 }, costGrowth: 1.6, cap: { power: 1, infra: 1 } },
+  // refining
+  refinery:  { name: 'Polymer Refinery', layers: ['surface', 'orbit'], desc: 'Turns 2 Metals + 0.5 Rare into 2 Polymers',    cost: { metal: 50, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'polymers', in: { metal: 2, rare: 0.5 }, amount: 2 } },
+  chemplant: { name: 'Chemical Plant',   layers: ['surface', 'orbit'], desc: 'Turns 2 Organics + 0.5 Rare into 2 Chemicals', cost: { metal: 45, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'chemicals', in: { organics: 2, rare: 0.5 }, amount: 2 } },
+  // capacities
+  fusion:    { name: 'Fusion Reactor',   layers: ['surface', 'orbit'], desc: '+6 Power',                     cost: { metal: 60, rare: 15, chemicals: 10 }, costGrowth: 1.6,  cap: { power: -6 } },
+  solar:     { name: 'Solar Array',      layers: ['orbit'],   desc: '+4 Power × the star\'s light',              cost: { metal: 40, polymers: 10 },          costGrowth: 1.5,  cap: { power: -4 }, solar: true },
+  dome:      { name: 'Hab Dome',         layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',     cost: { metal: 30, polymers: 10 },          costGrowth: 1.5,  cap: { infra: -5, power: 1 } },
+  ring:      { name: 'Habitat Ring',     layers: ['orbit'],   desc: '+6 Infrastructure',                         cost: { metal: 35, polymers: 15 },          costGrowth: 1.5,  cap: { infra: -6, power: 1 } },
+  cogitator: { name: 'Cogitator Array',  layers: ['surface', 'orbit'], desc: '+4 Compute',                   cost: { metal: 40, polymers: 15, rare: 10 }, costGrowth: 1.65, cap: { compute: -4, power: 2 } },
+  // research, ships, defense
+  lab:       { name: 'Research Lab',     layers: ['surface', 'orbit'], desc: '+2 Research',                  cost: { metal: 40, polymers: 10, chemicals: 5 }, costGrowth: 1.6, cap: { power: 1, infra: 1, compute: 2 } },
+  shipyard:  { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, polymers: 10 }, costGrowth: 1.8, cap: { power: 2, infra: 1 } },
+  bastion:   { name: 'Bastion',          layers: ['surface'], desc: '+25 garrison, fires on attackers',          cost: { metal: 50, chemicals: 10 },         costGrowth: 1.6,  cap: { power: 1 } },
+  platform:  { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',     cost: { metal: 60, polymers: 10, chemicals: 10 }, costGrowth: 1.6, cap: { power: 2, compute: 1 } },
 };
 
 // Settling another planet in a system you already hold (no Ark needed). Grows with planets owned.
-DATA.settleCost = { metal: 60, polymers: 20 };
+DATA.settleCost = { metal: 60, polymers: 20, chemicals: 10 };
 DATA.settleGrowth = 1.2;
 
-// Ship types. infra = crew life support capacity used while the ship exists.
+// Ship types. cap = capacity used while the ship exists (crew life support, cogitators for advanced ships).
 DATA.ships = {
-  scout:    { name: 'Scout',        atk: 0,  hp: 5,   cost: { metal: 15 },                                infra: 0.5, role: 'Explores unknown systems' },
-  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { metal: 60, polymers: 25 },                  infra: 2,   role: 'Founds a colony, consumed on use' },
-  corvette: { name: 'Corvette',     atk: 3,  hp: 10,  cost: { metal: 25 },                                infra: 1,   role: 'Cheap line ship' },
-  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { metal: 50, polymers: 15 },                  infra: 2,   role: 'Solid warship', req: { tech: 'frigates' } },
-  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { metal: 50, rare: 20, polymers: 15 },        infra: 2,   role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
-  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { metal: 160, rare: 50, polymers: 60 },       infra: 6,   role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
-  lurker:   { name: 'Lurker',       atk: 4,  hp: 16,  cost: {}, infra: 0, role: 'Something from the dark', monster: true },
+  scout:    { name: 'Scout',        atk: 0,  hp: 5,   cost: { metal: 15 },                                          cap: { infra: 0.5 },          role: 'Explores unknown systems' },
+  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { metal: 60, polymers: 25, chemicals: 15 },             cap: { infra: 2 },            role: 'Founds a colony, consumed on use' },
+  corvette: { name: 'Corvette',     atk: 3,  hp: 10,  cost: { metal: 25, chemicals: 5 },                            cap: { infra: 1 },            role: 'Cheap line ship' },
+  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { metal: 50, polymers: 15, chemicals: 10 },             cap: { infra: 2, compute: 1 }, role: 'Solid warship', req: { tech: 'frigates' } },
+  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { metal: 50, rare: 20, polymers: 15, chemicals: 15 },   cap: { infra: 2, compute: 2 }, role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
+  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { metal: 160, rare: 50, polymers: 60, chemicals: 40 },  cap: { infra: 6, compute: 4 }, role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
+  lurker:   { name: 'Lurker',       atk: 4,  hp: 16,  cost: {}, cap: {}, role: 'Something from the dark', monster: true },
 };
 
-// Research, paid in Compute. repeat:true techs can be researched forever with growing cost (incremental layer).
+// Research, paid in Research points. repeat:true techs can be researched forever with growing cost (incremental layer).
 DATA.techs = {
-  deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metal' },
+  deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metals' },
   frigates:   { name: 'Frigate Hulls',        cost: 40,  mods: {},                  desc: 'Unlocks Frigates' },
-  cracking:   { name: 'Catalytic Cracking',   cost: 45,  mods: { polymers: 0.3 },   desc: '+30% Polymers' },
+  biovats:    { name: 'Bio-Vat Cultures',     cost: 40,  mods: { organics: 0.25 },  desc: '+25% Organics' },
+  cracking:   { name: 'Catalytic Cracking',   cost: 45,  mods: { polymers: 0.3 },   desc: '+30% Polymers from the same inputs' },
+  catalysis:  { name: 'Reagent Catalysis',    cost: 45,  mods: { chemicals: 0.3 },  desc: '+30% Chemicals from the same inputs' },
   rationing:  { name: 'Ration Protocols',     cost: 50,  mods: { infra: 0.2 },      desc: '+20% Infrastructure' },
+  gridreactors:{name: 'Reactor Litanies',     cost: 50,  mods: { power: 0.2 },      desc: '+20% Power' },
   voidlisten: { name: 'Void Listening',       cost: 60,  mods: { shardIncome: 1 },  desc: '+1 Void Shard per Cycle' },
   prospect:   { name: 'Deep Prospecting',     cost: 65,  mods: { rare: 0.3 },       desc: '+30% Rare Minerals' },
-  ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { compute: 0.3 },    desc: '+30% Compute' },
+  coldlogic:  { name: 'Cold Logic Engines',   cost: 65,  mods: { compute: 0.25 },   desc: '+25% Compute' },
+  ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { research: 0.3 },   desc: '+30% Research' },
   bastionwalls:{name: 'Martyr Walls',         cost: 75,  mods: { bastion: 0.5 },    desc: '+50% garrison strength' },
   plasmaweave:{ name: 'Plasma Weave',         cost: 80,  mods: { atk: 0.2 },        desc: '+20% ship attack' },
   bonehulls:  { name: 'Bone-grown Hulls',     cost: 90,  mods: { hp: 0.25 },        desc: '+25% ship hull' },
-  forge:      { name: 'Forge Doctrine',       cost: 50,  mods: { metal: 0.1 },      desc: '+10% Metal per level', repeat: true, growth: 1.45 },
+  forge:      { name: 'Forge Doctrine',       cost: 50,  mods: { metal: 0.1 },      desc: '+10% Metals per level', repeat: true, growth: 1.45 },
+  harvest:    { name: 'Harvest Doctrine',     cost: 50,  mods: { organics: 0.1 },   desc: '+10% Organics per level', repeat: true, growth: 1.45 },
   arcology:   { name: 'Arcology Doctrine',    cost: 60,  mods: { infra: 0.08 },     desc: '+8% Infrastructure per level', repeat: true, growth: 1.5 },
-  cogitator:  { name: 'Cogitator Doctrine',   cost: 60,  mods: { compute: 0.1 },    desc: '+10% Compute per level', repeat: true, growth: 1.5 },
+  archives:   { name: 'Archive Doctrine',     cost: 60,  mods: { research: 0.1 },   desc: '+10% Research per level', repeat: true, growth: 1.5 },
 };
 
 // Factions. 'player' is you; others are AI. 'monster' are neutral horrors guarding systems.
@@ -163,16 +192,16 @@ DATA.pullCost = 10;
 
 DATA.gachaPool = [
   // Common
-  { id: 'l_vell',   kind: 'leader', rarity: 'common', name: 'Quartermaster Vell', mods: { metal: 0.1 },  desc: '+10% Metal. Counts every bolt twice.' },
-  { id: 'l_moro',   kind: 'leader', rarity: 'common', name: 'Tech-Adept Moro',    mods: { compute: 0.1 }, desc: '+10% Compute. Half of him is cogitator now.' },
-  { id: 'r_icon',   kind: 'relic',  rarity: 'common', name: 'Rusted Icon',        mods: { infra: 0.08 },  desc: '+8% Infrastructure. The saint\'s face is worn away.' },
+  { id: 'l_vell',   kind: 'leader', rarity: 'common', name: 'Quartermaster Vell', mods: { metal: 0.1 },  desc: '+10% Metals. Counts every bolt twice.' },
+  { id: 'l_moro',   kind: 'leader', rarity: 'common', name: 'Tech-Adept Moro',    mods: { research: 0.1 }, desc: '+10% Research. Half of him is cogitator now.' },
+  { id: 'r_icon',   kind: 'relic',  rarity: 'common', name: 'Rusted Icon',        mods: { power: 0.08 },  desc: '+8% Power. The saint\'s face is worn away.' },
   { id: 'r_compass',kind: 'relic',  rarity: 'common', name: 'Bone Compass',       mods: { exploreShards: 1 }, desc: '+1 Shard per system explored.' },
-  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { metal: 60, polymers: 20 }, desc: '+60 Metal, +20 Polymers, once.' },
-  { id: 'c_data',   kind: 'cache',  rarity: 'common', name: 'Corrupted Datacore', gives: { compute: 40 }, desc: '+40 Compute, once.' },
+  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { metal: 60, polymers: 20, chemicals: 10 }, desc: '+60 Metals, +20 Polymers, +10 Chemicals, once.' },
+  { id: 'c_data',   kind: 'cache',  rarity: 'common', name: 'Corrupted Datacore', gives: { research: 40 }, desc: '+40 Research, once.' },
   // Rare
   { id: 'l_kesh',   kind: 'leader', rarity: 'rare', name: 'Admiral Kesh',        mods: { atk: 0.15 }, desc: '+15% ship attack. Never asks how many died.' },
   { id: 'l_sallow', kind: 'leader', rarity: 'rare', name: 'Governor Sallow',     mods: { all: 0.1 },  desc: '+10% all production. Rules by quota.' },
-  { id: 'r_weep',   kind: 'relic',  rarity: 'rare', name: 'Weeping Reliquary',   mods: { compute: 0.25, infra: -0.05 }, cursed: true, desc: '+25% Compute, −5% Infrastructure. It weeps oil.' },
+  { id: 'r_weep',   kind: 'relic',  rarity: 'rare', name: 'Weeping Reliquary',   mods: { research: 0.25, power: -0.05 }, cursed: true, desc: '+25% Research, −5% Power. It weeps oil.' },
   { id: 'bp_lancer',kind: 'blueprint', rarity: 'rare', name: 'Blueprint: Void Lancer', unlock: 'lancer', desc: 'Unlocks the Void Lancer.' },
   // Mythic
   { id: 'l_saint',  kind: 'leader', rarity: 'mythic', name: 'The Hollow Saint',  mods: { all: 0.25, hp: 0.2 }, desc: '+25% all production, +20% hull. No one has seen its face.' },
@@ -188,8 +217,8 @@ DATA.events = {
     choices: [
       { label: 'Strip it for salvage', effect: (G, c) => {
         G.res.metal += 50;
-        if (Math.random() < 0.3) { Fleets.killOneShip(c.fleetId); return 'Salvage recovered (+50 Metal). Something followed the boarding party back. A ship is lost.'; }
-        return 'Salvage recovered (+50 Metal). The breathing stopped when the reactor was cut.';
+        if (Math.random() < 0.3) { Fleets.killOneShip(c.fleetId); return 'Salvage recovered (+50 Metals). Something followed the boarding party back. A ship is lost.'; }
+        return 'Salvage recovered (+50 Metals). The breathing stopped when the reactor was cut.';
       } },
       { label: 'Leave it to the dark', effect: () => 'You leave the hulk behind. The breathing is in the comm logs now.' },
     ],
@@ -200,7 +229,7 @@ DATA.events = {
     choices: [
       { label: 'Listen', effect: (G) => {
         G.res.shards += 8;
-        if (Math.random() < 0.35) { G.res.compute = Math.max(0, G.res.compute - 30); return 'You listen (+8 Shards). Three archivists clawed out their eyes. −30 Compute.'; }
+        if (Math.random() < 0.35) { G.res.research = Math.max(0, G.res.research - 30); return 'You listen (+8 Shards). Three archivists clawed out their eyes. −30 Research.'; }
         return 'You listen (+8 Shards). It knows you now.';
       } },
       { label: 'Burn the receiver', effect: () => 'The receiver is burned. The voice keeps speaking on a frequency you no longer have.' },
@@ -210,7 +239,7 @@ DATA.events = {
     title: 'Ruins Older Than Stars',
     text: 'Cyclopean structures cover the planet. The geometry hurts to look at.',
     choices: [
-      { label: 'Excavate', effect: (G) => { G.res.compute += 30; G.res.rare += 20; return 'Excavation complete (+30 Compute, +20 Rare Minerals). The dig team will not say what they saw.'; } },
+      { label: 'Excavate', effect: (G) => { G.res.research += 30; G.res.rare += 20; return 'Excavation complete (+30 Research, +20 Rare Minerals). The dig team will not say what they saw.'; } },
       { label: 'Seal it away', effect: (G) => { G.res.shards += 3; return 'The ruins are sealed under ferrocrete (+3 Shards). Sometimes the seal is warm.'; } },
     ],
   },
@@ -218,8 +247,8 @@ DATA.events = {
     title: 'Survivors',
     text: 'A crippled transport carries the last survivors of a fallen colony. They beg for rescue.',
     choices: [
-      { label: 'Take them in', effect: (G) => { G.res.polymers = Math.max(0, G.res.polymers - 20); G.res.shards += 4; return 'The survivors are taken aboard (−20 Polymers for bunks and rations, +4 Shards). Their prayers seem to reach something.'; } },
-      { label: 'Strip their vessel', effect: (G) => { G.res.metal += 50; G.res.polymers += 15; return 'Their vessel is stripped (+50 Metal, +15 Polymers). The transport goes dark. Nobody speaks of it.'; } },
+      { label: 'Take them in', effect: (G) => { G.res.organics = Math.max(0, G.res.organics - 25); G.res.shards += 4; return 'The survivors are taken aboard (−25 Organics to feed them, +4 Shards). Their prayers seem to reach something.'; } },
+      { label: 'Strip their vessel', effect: (G) => { G.res.metal += 50; G.res.chemicals += 15; return 'Their vessel is stripped (+50 Metals, +15 Chemicals). The transport goes dark. Nobody speaks of it.'; } },
     ],
   },
   cache: {
@@ -246,5 +275,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v8',
+  saveKey: 'voyager_save_v9',
 };

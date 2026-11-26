@@ -19,8 +19,8 @@ Open `index.html` in a browser. No server or build step is needed. Saves are kep
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
 - Explore with scouts; exploration events with grim choices
 - Expand with Colony Arks into new systems, then settle more planets in systems you hold
-- Resources: Metal, Rare Minerals, Polymers (refined), Compute (research) and Infrastructure (capacity cap)
-- Research paid in Compute, including endlessly repeatable "Doctrine" techs for the incremental layer
+- Resources: Metals, Rare Minerals and Organics (gathered); Polymers and Chemicals (refined); Power, Compute and Infrastructure (capacities); Research
+- Research made by Research Labs, including endlessly repeatable "Doctrine" techs for the incremental layer
 - Ships, fleets, auto-resolved battles, sieges and capturing colonies
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
 - Void Signals gacha: shards earned in play, rarities, pity, rank-ups, cursed relics, ship blueprints

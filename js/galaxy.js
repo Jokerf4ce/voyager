@@ -105,7 +105,8 @@ const Galaxy = {
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
     G.homePlanet = capital.idx;
-    Colonies.found(home.id, capital.idx, 'player', { mine: 1, drill: 1, dome: 1, bastion: 1 }, { shipyard: 1, ring: 1, cogitator: 1 });
+    Colonies.found(home.id, capital.idx, 'player', { mine: 1, harvester: 1, refinery: 1, dome: 1, fusion: 2 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
+    capital.colony.capital = true;
     Colonies.found(chorus.id, this.bestPlanet(chorus), 'chorus', { bastion: 1 });
     Colonies.found(remnant.id, this.bestPlanet(remnant), 'remnant', { bastion: 1 });
     G.ai.chorus.homeId = chorus.id;

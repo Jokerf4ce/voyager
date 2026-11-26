@@ -56,10 +56,12 @@ const UI = {
     const r = (k, val, perCycle) => `<div class="res res-${k}" title="${DATA.resources[k].name}: ${DATA.resources[k].desc}">
       <span class="ico">${DATA.resources[k].icon}</span><b>${U.fmt(val)}</b>
       ${perCycle != null ? `<small class="${perCycle < 0 ? 'neg' : ''}">${perCycle >= 0 ? '+' : ''}${U.fmt1(perCycle)}</small>` : ''}</div>`;
-    const inf = net.infra;
-    this.$('top-res').innerHTML = ['metal', 'rare', 'polymers', 'compute', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
-      `<div class="res res-infra ${inf.used > inf.cap ? 'over' : ''}" title="Infrastructure: power, life support, meals. Used / capacity. Over capacity means rationing.">
-        <span class="ico">${DATA.infra.icon}</span><b>${U.fmt(inf.used)}/${U.fmt(inf.cap)}</b>${inf.eff < 1 ? `<small class="neg">${Math.round(inf.eff * 100)}%</small>` : ''}</div>`;
+    const c = net.caps;
+    const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" title="${DATA.capacities[k].name} (capacity, used / available): ${DATA.capacities[k].desc}">
+        <span class="ico">${DATA.capacities[k].icon}</span><b>${U.fmt(c[k].used)}/${U.fmt(c[k].cap)}</b></div>`;
+    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'polymers', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
+      '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
+      (c.eff < 1 ? `<div class="res over" title="Over capacity: all production is rationed"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     this.$('cycle').textContent = 'CYCLE ' + G.cycle;
     this.$('btn-auto').classList.toggle('on', !!Game.autoTimer);
     this.$('btn-auto').textContent = Game.autoTimer ? '❚❚ AUTO' : '▶ AUTO';
@@ -79,10 +81,25 @@ const UI = {
     return `<button class="btn ${cls}" data-act="${act}" data-a="${a}" ${disabled ? 'disabled' : ''}>${label}</button>`;
   },
   yieldText(p) {
-    const y = Economy.planetYield(p, Economy.infra().eff);
-    const parts = ['metal', 'rare', 'polymers', 'compute'].filter((k) => y[k] > 0)
+    const y = Economy.planetYield(p, Economy.caps().eff);
+    const parts = ['metal', 'rare', 'organics', 'polymers', 'chemicals', 'research'].filter((k) => y[k] > 0.05)
       .map((k) => `<span class="res-${k}">${DATA.resources[k].icon}${U.fmt1(y[k])}</span>`);
-    return parts.join(' ') + (y.refMetal ? ` <small class="muted">(refinery eats ${U.fmt1(y.refMetal)}▣ ${U.fmt1(y.refRare)}◇)</small>` : '');
+    const eats = Object.entries(y.inputs).filter(([, v]) => v > 0).map(([k, v]) => `${U.fmt1(v)}${DATA.resources[k].icon}`).join(' ');
+    return (parts.join(' ') || '<span class="muted">no output</span>') + (eats ? ` <small class="muted">(refining eats ${eats})</small>` : '');
+  },
+  // Gathering ratings, e.g. "▣●●○ ◇●○○ ❦●●●"
+  ratingText(p) {
+    return ['metal', 'rare', 'organics'].map((k) => {
+      const r = Math.min(4, Economy.rating(p, k));
+      return `<span class="res-${k}" title="${DATA.resources[k].name} rating ${r}">${DATA.resources[k].icon}${'●'.repeat(r)}${'○'.repeat(Math.max(0, 3 - r))}</span>`;
+    }).join(' ');
+  },
+  capText(cap, verb = true) {
+    const part = (sign) => Object.entries(cap || {}).filter(([, v]) => v * sign > 0)
+      .map(([k, v]) => `<span class="res-${k}" title="${DATA.capacities[k].name}">${Math.abs(v)}${DATA.capacities[k].icon}</span>`).join(' ');
+    const gives = part(-1), uses = part(1);
+    if (!verb) return [gives, uses].filter(Boolean).join(' ');
+    return [gives && `<span class="muted">gives</span> ${gives}`, uses && `<span class="muted">uses</span> ${uses}`].filter(Boolean).join(' · ');
   },
   planetImg(s, p, size = 48) {
     // Sprites are drawn at their size class (dwarfs are small) on a fixed 32px frame.
@@ -97,7 +114,8 @@ const UI = {
       ${compact ? '' : `<span class="muted">· costs ${p.slots.surface ? pct(Colonies.habMult(p, 'surface')) + ' surface' : 'no surface'}, ${pct(Colonies.habMult(p, 'orbit'))} orbit</span>`}`;
   },
   planetMods(p) {
-    return Object.entries(Planets.mult(p)).map(([k, v]) => k === 'infra' ? `${DATA.infra.icon}×${v}` : `${DATA.resources[k].icon}×${v}`).join(' ');
+    const icon = (k) => (DATA.capacities[k] || DATA.resources[k]).icon;
+    return [this.ratingText(p), ...Object.entries(Planets.mult(p)).map(([k, v]) => `<span class="res-${k}">${icon(k)}×${v}</span>`)].join(' ');
   },
   shipsText(ships) {
     return Object.entries(ships).filter(([, n]) => n > 0).map(([t, n]) => `${n}× ${DATA.ships[t].name}`).join(', ') || '—';
@@ -105,7 +123,7 @@ const UI = {
 
   // ---------- screens ----------
   screen_overview() {
-    const net = Economy.net(), inc = Economy.income(), inf = net.infra;
+    const net = Economy.net(), inc = Economy.income(), c = net.caps;
     const cols = Colonies.playerPlanets();
     const myFleets = G.fleets.filter((f) => f.owner === 'player');
     const power = myFleets.reduce((a, f) => a + Fleets.stats(f).atk, 0);
@@ -131,17 +149,16 @@ const UI = {
           <div><small>Worlds taken</small><b>${G.stats.coloniesTaken}</b></div>
         </div>`)}
       ${this.panel('Per Cycle', `
-        <div class="kv"><span>Metal <small class="muted">(mined ${U.fmt1(inc.metal)}, refineries use ${U.fmt1(inc.refMetal)})</small></span><b class="res-metal">${U.fmt1(net.metal)}</b></div>
-        <div class="kv"><span>Rare Minerals <small class="muted">(drilled ${U.fmt1(inc.rare)}, refineries use ${U.fmt1(inc.refRare)})</small></span><b class="res-rare">${U.fmt1(net.rare)}</b></div>
-        <div class="kv"><span>Polymers</span><b class="res-polymers">+${U.fmt1(net.polymers)}</b></div>
-        <div class="kv"><span>Compute</span><b class="res-compute">+${U.fmt1(net.compute)}</b></div>
+        ${['metal', 'rare', 'organics'].map((k) => `<div class="kv"><span>${DATA.resources[k].name} <small class="muted">(gathered ${U.fmt1(inc[k])}${inc.inputs[k] ? `, refining uses ${U.fmt1(inc.inputs[k])}` : ''})</small></span><b class="res-${k}">${net[k] >= 0 ? '+' : ''}${U.fmt1(net[k])}</b></div>`).join('')}
+        <div class="kv"><span>Polymers <small class="muted">(refined)</small></span><b class="res-polymers">+${U.fmt1(net.polymers)}</b></div>
+        <div class="kv"><span>Chemicals <small class="muted">(refined)</small></span><b class="res-chemicals">+${U.fmt1(net.chemicals)}</b></div>
+        <div class="kv"><span>Research <small class="muted">(Research Labs)</small></span><b class="res-research">+${U.fmt1(net.research)}</b></div>
         <div class="kv"><span>Void Shards</span><b class="res-shards">+${U.fmt1(net.shards)} <small>(+1 every 5 Cycles)</small></b></div>
-        <h4>Infrastructure</h4>
-        <div class="kv"><span>Capacity (colonies, Habitat Rings, Fusion Cores)</span><b class="res-infra">${U.fmt1(inf.cap)}</b></div>
-        <div class="kv"><span>Used by buildings</span><b>${U.fmt1(inf.buildings)}</b></div>
-        <div class="kv"><span>Used by ship crews</span><b>${U.fmt1(inf.ships)}</b></div>
-        <div class="bar infra ${inf.used > inf.cap ? 'over' : ''}"><i style="width:${Math.min(100, inf.used / Math.max(1, inf.cap) * 100)}%"></i></div>
-        ${inf.eff < 1 ? `<p class="bad small">Over capacity. Rationing has cut all production to ${Math.round(inf.eff * 100)}%.</p>` : `<p class="muted small">${U.fmt1(inf.cap - inf.used)} free. You cannot build past the cap.</p>`}
+        <h4>Capacities</h4>
+        ${Object.entries(DATA.capacities).map(([k, d]) => `<div class="kv"><span class="res-${k}">${d.icon} ${d.name}</span><b>${U.fmt1(c[k].used)} / ${U.fmt1(c[k].cap)}</b></div>
+          <div class="small muted">buildings ${U.fmt1(c[k].buildings)}${c[k].ships ? ` · ships ${U.fmt1(c[k].ships)}` : ''}</div>
+          <div class="bar cap-${k} ${c[k].used > c[k].cap ? 'over' : ''}"><i style="width:${Math.min(100, c[k].used / Math.max(1, c[k].cap) * 100)}%"></i></div>`).join('')}
+        ${c.eff < 1 ? `<p class="bad small">Over capacity. Rationing has cut all production to ${Math.round(c.eff * 100)}%.</p>` : `<p class="muted small">You cannot build past a capacity.</p>`}
         <p class="muted small">While the game is closed, your empire keeps producing at ${DATA.config.offlineEfficiency * 100}% efficiency (1 Cycle per ${DATA.config.offlineSecondsPerCycle}s, max ${DATA.config.offlineMaxCycles}).</p>`)}
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
       ${this.panel('Battle Reports', reps)}
@@ -181,7 +198,7 @@ const UI = {
     const st = DATA.starClasses[s.star];
     let body = `<h3>${U.esc(s.name)}</h3>
       <div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b></div>
-      <div class="small muted">${st.desc} Infrastructure ×${st.solar}${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => DATA.resources[k].name + ' ×' + v).join(', ') : ''}${st.shards ? `, +${st.shards} Void Shard${st.shards > 1 ? 's' : ''} per Cycle while held` : ''}.</div>
+      <div class="small muted">${st.desc} Starlight ×${st.solar} Power${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => (DATA.capacities[k] || DATA.resources[k]).name + ' ×' + v).join(', ') : ''}${st.shards ? `, +${st.shards} Void Shard${st.shards > 1 ? 's' : ''} per Cycle while held` : ''}.</div>
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.owner ? `<div class="muted small">Garrison ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)}</div>` : ''}
       <h4>Planets</h4>`;
@@ -267,7 +284,7 @@ const UI = {
         const row = (k) => {
           const b = DATA.buildings[k], lvl = p.colony[L][k] || 0;
           const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k);
-          const inf = b.infra > 0 ? `<span class="res-infra">uses ${b.infra}${DATA.infra.icon}</span>` : b.infra < 0 ? `<span class="res-infra">gives ${-b.infra}${DATA.infra.icon}</span>` : '';
+          const inf = this.capText(b.cap);
           return `<div class="bld ${lvl ? '' : 'new'}"><div><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
             <div class="right">${U.costText(cost)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}</div></div>`;
         };
@@ -281,11 +298,11 @@ const UI = {
         <div class="small muted">${Planets.factors(p)}</div>
         <div class="small">${this.habText(p)}</div>
         <div>${this.yieldText(p)}</div>
-        <div class="small res-infra">Infrastructure: provides ${U.fmt1(Economy.planetInfraCap(p))}, buildings use ${U.fmt1(Economy.planetInfraUsed(p))}</div></div></div>
+        <div class="small">${Object.entries(Economy.planetCaps(p)).map(([k, v]) => `<span class="res-${k}">${DATA.capacities[k].icon} ${U.fmt1(v.use)}/${U.fmt1(v.give)}</span>`).join(' · ')} <span class="muted">(used/provided here)</span></div></div></div>
         <div class="layers">${layer('surface')}${layer('orbit')}</div></div>`;
     }).join('');
     const st = DATA.starClasses[s.star];
-    return tabs + `<div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b> <span class="muted small">Infrastructure ×${st.solar}</span></div><p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
+    return tabs + `<div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b> <span class="muted small">Starlight ×${st.solar} Power</span></div><p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
   },
 
   screen_research() {
@@ -296,7 +313,7 @@ const UI = {
       const lvl = Research.level(id), avail = Research.available(id);
       return `<div class="tech ${cur === id ? 'cur' : ''} ${!avail ? 'done' : ''}">
         <div><b>${t.name}</b>${t.repeat ? ` <span class="lvl">Lv ${lvl}</span>` : lvl ? ' <span class="lvl">✓</span>' : ''}<br><small class="muted">${t.desc}</small></div>
-        <div class="right"><span class="res-compute">☍${U.fmt(Research.cost(id))}</span><br>${avail ? this.btn(cur === id ? 'Researching' : 'Research', 'research', id, cur === id) : ''}</div></div>`;
+        <div class="right"><span class="res-research">${DATA.resources.research.icon}${U.fmt(Research.cost(id))}</span><br>${avail ? this.btn(cur === id ? 'Researching' : 'Research', 'research', id, cur === id) : ''}</div></div>`;
     }).join('');
     return this.panel('Current Project', curHtml) + this.panel('Archives of the Covenant', `<p class="muted small">Research is paid in Compute. Doctrines can be researched forever, each level costing more and growing your empire further.</p>${list}`);
   },
@@ -312,8 +329,8 @@ const UI = {
       const cost = Fleets.shipCost(t, this.yard), why = Fleets.blocker(t, this.yard);
       const req = d.req ? (d.req.tech ? 'Requires ' + DATA.techs[d.req.tech].name : 'Requires ' + Gacha.item(d.req.blueprint).name + ' (Void Signals)') : '';
       return `<div class="bld ${ok ? '' : 'locked'}"><div class="shiprow"><img class="px" src="${Sprites.ship(t, '#d8c8a0')}" width="44" height="36">
-        <div><b>${d.name}</b><br><small class="muted">${d.role} · ATK ${d.atk} · HULL ${d.hp} · crew <span class="res-infra">${d.infra}${DATA.infra.icon}</span></small>${!ok ? `<br><small class="bad">${req}</small>` : ''}</div></div>
-        <div class="right">${U.costText(cost)}<br>${why === 'Not enough Infrastructure for the crew' ? '<small class="bad">Infrastructure full</small><br>' : ''}${this.btn('Build', 'buildship', t, !!why)}</div></div>`;
+        <div><b>${d.name}</b><br><small class="muted">${d.role} · ATK ${d.atk} · HULL ${d.hp} · needs ${this.capText(d.cap, false)}</small>${!ok ? `<br><small class="bad">${req}</small>` : ''}</div></div>
+        <div class="right">${U.costText(cost)}<br>${why && why.startsWith('Not enough ') && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn('Build', 'buildship', t, !!why)}</div></div>`;
     }).join('');
     return this.panel('Shipyard', sel + list);
   },
@@ -356,9 +373,11 @@ const UI = {
     const unknown = DATA.gachaPool.filter((x) => !G.collection[x.id] && x.kind !== 'cache').length;
     const pct = (v) => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
     return this.panel('Empire Modifiers', `<div class="stats">
-        <div><small>Metal</small><b>${pct(m.metal)}</b></div><div><small>Rare Minerals</small><b>${pct(m.rare)}</b></div>
-        <div><small>Polymers</small><b>${pct(m.polymers)}</b></div><div><small>Compute</small><b>${pct(m.compute)}</b></div>
-        <div><small>Infrastructure</small><b>${pct(m.infra)}</b></div><div><small>All production</small><b>${pct(m.all)}</b></div>
+        <div><small>Metals</small><b>${pct(m.metal)}</b></div><div><small>Rare Minerals</small><b>${pct(m.rare)}</b></div>
+        <div><small>Organics</small><b>${pct(m.organics)}</b></div><div><small>Polymers</small><b>${pct(m.polymers)}</b></div>
+        <div><small>Chemicals</small><b>${pct(m.chemicals)}</b></div><div><small>Research</small><b>${pct(m.research)}</b></div>
+        <div><small>Power</small><b>${pct(m.power)}</b></div><div><small>Infrastructure</small><b>${pct(m.infra)}</b></div>
+        <div><small>Compute</small><b>${pct(m.compute)}</b></div><div><small>All production</small><b>${pct(m.all)}</b></div>
         <div><small>Ship attack</small><b>${pct(m.atk)}</b></div><div><small>Ship hull</small><b>${pct(m.hp)}</b></div>
         <div><small>Garrisons</small><b>${pct(m.bastion)}</b></div><div><small>Shards/Cycle</small><b>+${m.shardIncome}</b></div></div>`) +
       this.panel(`Collection (${owned.length} found · ${unknown} unknown signals remain)`,

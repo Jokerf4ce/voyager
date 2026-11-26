@@ -55,7 +55,8 @@ const Fleets = {
   // Why a ship can't be built right now, or null if it can.
   blocker(type, ref) {
     if (!this.unlocked(type)) return 'Locked';
-    if (Economy.infraFree() < DATA.ships[type].infra) return 'Not enough Infrastructure for the crew';
+    const short = Economy.capShortfall(Economy.shipCaps(type));
+    if (short) return `Not enough ${DATA.capacities[short].name}`;
     if (!Colonies.canAfford(this.shipCost(type, ref))) return 'Not enough resources';
     return null;
   },

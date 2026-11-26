@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.11.0 — 2026-11-26
+- New resource system. Gathered: Metals, Rare Minerals, Organics. Refined: Polymers (Metals + Rare), Chemicals (Organics + Rare).
+- Power, Compute and Infrastructure are capacities. Research is made by Research Labs.
+- Each planet class has its own yields for the gathered resources, scaled by planet size; dwarfs and stellar remnants are rich in Rare Minerals.
+- New buildings: Bio-Harvester, Atmosphere Skimmer, Chemical Plant, Solar Array, Research Lab. The Fusion Core is now a Fusion Reactor (Power).
+- The capital starts with the whole production chain running.
+- Old saves start a new game.
+
 ## 0.10.0 — 2026-11-26
 - Version display in the bottom-right corner of the screen, and this changelog.
 

@@ -33,13 +33,21 @@ small, .small { font-size: 16px; }
 #top { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: var(--coal);
   border-bottom: 2px solid var(--edge); box-shadow: 0 2px 0 #000; flex-wrap: wrap; }
 .logo { font-size: 20px; color: var(--bone); text-shadow: 2px 2px 0 var(--blood); letter-spacing: 4px; }
-#top-res { display: flex; gap: 14px; flex-wrap: wrap; }
+#top-res { display: flex; gap: 8px; flex-wrap: wrap; }
 .res { display: flex; align-items: baseline; gap: 4px; padding: 2px 8px; background: var(--soot); border: 1px solid var(--edge); }
 .res .ico { font-size: 16px; }
 .res b { font-size: 21px; font-weight: normal; }
 .res small { color: #8aa070; font-size: 15px; }
 .res small.neg { color: #d05050; }
-.res-metal { color: #b8b8c4; } .res-rare { color: #60d0a8; } .res-polymers { color: #d89a60; } .res-compute { color: #70c0c8; } .res-shards { color: #c080f0; } .res-infra { color: #d8c070; }
+.res-metal { color: #b8b8c4; } .res-rare { color: #60d0a8; } .res-organics { color: #9ac050; } .res-polymers { color: #d89a60; } .res-chemicals { color: #d8c860; }
+.res-research { color: #80c8e0; } .res-shards { color: #c080f0; }
+.res-power { color: #f0d060; } .res-infra { color: #d0a878; } .res-compute { color: #70c0c8; }
+.res.cap { border-style: dashed; }
+.res-sep { width: 1px; align-self: stretch; background: var(--edge); margin: 0 2px; }
+.bar.cap-power i { background: repeating-linear-gradient(90deg, #c0a840 0 6px, #907c2c 6px 8px); }
+.bar.cap-infra i { background: repeating-linear-gradient(90deg, #b08a58 0 6px, #86683e 6px 8px); }
+.bar.cap-compute i { background: repeating-linear-gradient(90deg, #4a9aa0 0 6px, #3a7a80 6px 8px); }
+.bar.over i { background: repeating-linear-gradient(90deg, #c04040 0 6px, #902828 6px 8px) !important; }
 .res.over { border-color: var(--blood); background: #2a1010; }
 .bar.infra i { background: repeating-linear-gradient(90deg, #b8a050 0 6px, #8a7838 6px 8px); }
 .bar.infra.over i { background: repeating-linear-gradient(90deg, #c04040 0 6px, #902828 6px 8px); }

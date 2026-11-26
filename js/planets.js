@@ -12,9 +12,10 @@ const Planets = {
   // Resource multipliers from composition and temperature, combined.
   mult(p) {
     const out = {};
+    // Capacity and resource bonuses from composition, temperature and the star (starlight is handled
+    // separately: it only scales a colony's base Power and its Solar Arrays).
     const st = DATA.starClasses[p.star || 'G'];
-    const solar = { infra: st.solar };
-    for (const src of [DATA.compositions[p.comp].mult, DATA.temperatures[p.temp].mult, solar, st.mult || {}]) {
+    for (const src of [DATA.compositions[p.comp].mult, DATA.temperatures[p.temp].mult, st.mult || {}]) {
       for (const k in src) out[k] = Math.round((out[k] || 1) * src[k] * 100) / 100;
     }
     for (const k in out) if (out[k] === 1) delete out[k];
