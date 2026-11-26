@@ -1,5 +1,7 @@
 // Voyager — turn-based card battles. Two sides of up to five ships face each other.
-// Every round each ship acts once, fastest first: it fires one ready weapon at one enemy.
+// Every round each ship acts once, fastest first: it fires one ready weapon.
+// Ships stand in lanes (their position in the fleet). Targeting is automatic: the ship opposite, else the
+// nearest one by DATA.targetOrder (right, left, two right, two left …). Shots across lanes hit far less often.
 // Shields soak damage first, then hull. Physical weapons hit hull hard, energy weapons strip shields.
 // Sizes beat each other: Small > Large > Medium > Small.
 //
@@ -66,12 +68,31 @@ const Battle = {
       b.threat.ships.forEach((ship, i) => units.push(this.unitFrom(ship, 'enemy', i)));
     }
     b.units = units;
+    this.lanes();
     b.round = 0;
     this.say(b.kind === 'attack' ? `Battle at ${s.name}: ${f ? f.name : 'your fleet'} engages ${(Missions.guard(s) || { name: DATA.factions[s.owner].name }).name}.`
       : `${b.threat.name} reaches ${s.name}!`);
     if (!this.alive('player').length) return this.finish('lose');
     if (!this.alive('enemy').length) return this.finish('win');
     this.newRound();
+  },
+
+  // ---------- lanes and targets ----------
+  // Lane = position on its side, in fleet order (the Planetary Defenses take the next free lane).
+  lanes() {
+    for (const side of ['player', 'enemy']) G.battle.units.filter((u) => u.side === side).forEach((u, i) => { if (u.lane == null) u.lane = i; });
+  },
+  laneCount() { return Math.max(DATA.fleetMax, ...G.battle.units.map((u) => u.lane + 1)); },
+
+  // The ship this unit shoots at: the one opposite, else by DATA.targetOrder.
+  targetFor(u) {
+    this.lanes();
+    const foes = this.alive(u.side === 'player' ? 'enemy' : 'player');
+    for (const off of DATA.targetOrder) {
+      const t = foes.find((f) => f.lane === u.lane + off);
+      if (t) return t;
+    }
+    return foes[0] || null;
   },
 
   // ---------- turn flow ----------
@@ -115,18 +136,17 @@ const Battle = {
     const u = this.current();
     if (!u) return false;
     if (u.side === 'player' && !b.auto) return false;
-    const foes = this.alive(u.side === 'player' ? 'enemy' : 'player');
-    const pick = this.choose(u, foes);
+    const pick = this.choose(u);
     if (pick) this.fire(u, pick.w, pick.t); else { this.say(`${u.name} holds.`); this.endTurn(); }
     return true;
   },
 
-  // The player's action: weapon index and target unit index.
-  act(wIdx, targetIdx) {
-    const b = G.battle, u = this.current();
+  // The player's action: which weapon to fire. The target is automatic.
+  act(wIdx) {
+    const u = this.current();
     if (!u || u.side !== 'player') return false;
-    const w = u.weapons[wIdx], t = b.units[targetIdx];
-    if (!w || w.cdLeft > 0 || !t || t.dead || t.side === 'player') return false;
+    const w = u.weapons[wIdx], t = this.targetFor(u);
+    if (!w || w.cdLeft > 0 || !t) return false;
     this.fire(u, w, t);
     return true;
   },
@@ -153,7 +173,11 @@ const Battle = {
     if (DATA.sizes[t.size].beats === a.size) return DATA.sizeDisadvantage;
     return 1;
   },
-  hitChance(w, t) { return Math.max(0.05, (w.acc / 100) * (1 - t.maneuver / 100)); },
+  // a = attacker (for the lane penalty); without it, the chance as if shooting straight ahead
+  hitChance(w, t, a) {
+    const lane = a && a.lane !== t.lane ? DATA.offLaneHit : 1;
+    return Math.max(0.05, (w.acc / 100) * (1 - t.maneuver / 100) * lane);
+  },
 
   // Damage a weapon would do right now: { shield, hull } taken off the target (before randomness).
   preview(a, w, t, roll = 1) {
@@ -171,8 +195,9 @@ const Battle = {
   fire(a, w, t) {
     const b = G.battle;
     w.cdLeft = w.cd + 1;
-    if (Math.random() > this.hitChance(w, t)) {
-      this.say(`${a.name} fires ${w.name} at ${t.name}: evaded.`, a.side);
+    const across = a.lane !== t.lane ? ' (across lanes)' : '';
+    if (Math.random() > this.hitChance(w, t, a)) {
+      this.say(`${a.name} fires ${w.name} at ${t.name}${across}: missed.`, a.side);
       return this.endTurn();
     }
     const d = this.preview(a, w, t, U.rand(0.9, 1.1));
@@ -182,27 +207,31 @@ const Battle = {
     const parts = [];
     if (d.shield >= 0.5) parts.push(`${Math.round(d.shield)} shield`);
     if (d.hull >= 0.5) parts.push(`${Math.round(d.hull)} hull`);
-    let line = `${a.name} hits ${t.name} with ${w.name}: ${parts.join(' + ') || 'no damage'}${sm > 1 ? ' (size advantage!)' : sm < 1 ? ' (size disadvantage)' : ''}.`;
+    let line = `${a.name} hits ${t.name}${across} with ${w.name}: ${parts.join(' + ') || 'no damage'}${sm > 1 ? ' (size advantage!)' : sm < 1 ? ' (size disadvantage)' : ''}.`;
     if (t.hull <= 0) { t.dead = true; line += ` ${t.name} is destroyed!`; }
     this.say(line, a.side);
     b.lastHit = { from: b.units.indexOf(a), to: b.units.indexOf(t), t: Date.now() };
     this.endTurn();
   },
 
-  // Enemy (and Auto) choice: the best expected damage, favouring kills.
-  choose(u, foes) {
+  // Enemy (and Auto) choice: the target is fixed by lane; pick the weapon with the best expected damage.
+  choose(u) {
+    const t = this.targetFor(u);
+    if (!t) return null;
     let best = null;
     for (const w of u.weapons) {
       if (w.cdLeft > 0) continue;
-      for (const t of foes) {
-        const d = this.preview(u, w, t);
-        let v = (d.shield * 0.6 + d.hull) * this.hitChance(w, t);
-        if (d.hull >= t.hull) v *= 2.5;
-        v *= U.rand(0.85, 1.15);
-        if (!best || v > best.v) best = { w, t, v };
-      }
+      const v = this.expected(u, w, t) * U.rand(0.9, 1.1);
+      if (!best || v > best.v) best = { w, t, v };
     }
     return best;
+  },
+  // Expected value of a shot (hull counts more, kills count most).
+  expected(u, w, t) {
+    const d = this.preview(u, w, t);
+    let v = (d.shield * 0.6 + d.hull) * this.hitChance(w, t, u);
+    if (d.hull >= t.hull) v *= 2.5;
+    return v;
   },
 
   say(text, side) {

@@ -181,6 +181,15 @@ const Ships = {
     for (const f of G.fleets) f.ships = f.ships.filter((id) => G.ships[id]);
     G.fleets = G.fleets.filter((f) => f.ships.length || f.keep);
   },
+  // Move a ship one place left (-1) or right (+1) in its fleet: its position is its lane in battle.
+  shift(shipId, dir) {
+    const f = this.fleetOf(shipId);
+    if (!f || f.mission) return false;
+    const i = f.ships.indexOf(shipId), j = i + dir;
+    if (j < 0 || j >= f.ships.length) return false;
+    [f.ships[i], f.ships[j]] = [f.ships[j], f.ships[i]];
+    return true;
+  },
   rename(fleetId, name) { const f = this.fleet(fleetId); if (f && name) f.name = name.slice(0, 24); },
 
   // ---------- weapons ----------

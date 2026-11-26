@@ -5,7 +5,6 @@ Object.assign(UI, {
   selShip: null,      // ship id selected on the Fleets screen
   lastShip: null,     // ship just built (shown big on the Shipyard)
   lastWeapon: null,   // weapon just forged
-  bWeapon: null,      // weapon picked in battle, waiting for a target
 
   factionColor(owner) { return (DATA.factions[owner] || DATA.factions.player).color; },
 
@@ -94,7 +93,7 @@ Object.assign(UI, {
       const canDrop = sel && !f.mission && selFleet !== f && !(selFleet && selFleet.mission);
       const slots = [];
       for (let i = 0; i < DATA.fleetMax; i++) {
-        if (ships[i]) slots.push(cardOf(ships[i], !!f.mission));
+        if (ships[i]) slots.push(`<div class="lanewrap"><span class="lanelbl">Lane ${i + 1}</span>${cardOf(ships[i], !!f.mission)}</div>`);
         else slots.push(canDrop ? this.emptySlot('assign', `${sel.id}|${f.id}`, '＋ move here') : this.emptySlot());
       }
       const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : '<span class="muted">at home · ready</span>';
@@ -104,7 +103,7 @@ Object.assign(UI, {
     }).join('');
     const hangar = Ships.hangar();
     const up = Ships.upkeep();
-    const left = this.panel('Fleets', `<p class="small muted">Click a ship to select it, then click a free slot to move it. Fleets on a mission can't be changed. Up to ${DATA.fleetMax} ships per fleet. Send fleets out from the Star Map.</p>
+    const left = this.panel('Fleets', `<p class="small muted">Click a ship to select it, then click a free slot to move it. A ship's position is its <b>lane in battle</b>: it shoots the enemy opposite first, so put your heaviest guns where they face the biggest threats. Fleets on a mission can't be changed. Up to ${DATA.fleetMax} ships per fleet. Send fleets out from the Star Map.</p>
         <div class="small">${Ships.all().length} ships · maintenance <b class="res-metal">${U.fmt1(up)}</b> Metals + <b class="res-chemicals">${U.fmt1(up / 2)}</b> Chemicals per Cycle${G.unpaid ? ' · <span class="bad">unpaid: no repairs</span>' : ''}</div>
         ${fleets || '<p class="muted">No fleets. Build ships at the Shipyard.</p>'}`) +
       this.panel(`Hangar (${hangar.length})`, `<div class="cardrow wrap">${hangar.map((sh) => cardOf(sh)).join('')}
@@ -128,7 +127,9 @@ Object.assign(UI, {
       weps += `<div class="wslot"><div>${this.weaponChip(w)}</div>
         ${!busy && spare.length ? `<details data-key="fit-${sh.id}-${i}"><summary>Swap (${spare.length} in armory)</summary>${spare.map((x) => `<div class="kv">${this.weaponChip(x)}${this.btn('Fit', 'fit', `${sh.id}|${i}|${x.id}`, false, 'small')}</div>`).join('')}</details>` : ''}</div>`;
     }
-    const moves = busy ? '<p class="small muted">On a mission: no changes until it returns.</p>' : `<div class="btnrow">
+    const pos = f ? f.ships.indexOf(sh.id) : -1;
+    const lane = f && !busy ? `<div class="kv"><span>Lane</span><span class="btnrow">${this.btn('◀', 'shift', `${sh.id}|-1`, pos <= 0, 'small')}<b>${pos + 1} of ${f.ships.length}</b>${this.btn('▶', 'shift', `${sh.id}|1`, pos >= f.ships.length - 1, 'small')}</span></div>` : '';
+    const moves = busy ? '<p class="small muted">On a mission: no changes until it returns.</p>' : lane + `<div class="btnrow">
         ${G.fleets.filter((x) => x !== f && !x.mission && x.ships.length < DATA.fleetMax).map((x) => this.btn('→ ' + U.esc(x.name), 'assign', `${sh.id}|${x.id}`, false, 'small')).join('')}
         ${f ? this.btn('→ Hangar', 'assign', `${sh.id}|hangar`, false, 'small') : ''}
         ${this.btn('New fleet with it', 'newfleet', sh.id, false, 'small')}
@@ -204,39 +205,50 @@ Object.assign(UI, {
     const cur = Battle.current();
     const curIdx = cur ? b.units.indexOf(cur) : -1;
     const myTurn = Battle.waiting();
-    const w = myTurn && this.bWeapon != null ? cur.weapons[this.bWeapon] : null;
+    const tgt = cur ? Battle.targetFor(cur) : null;
     const hit = b.lastHit && Date.now() - b.lastHit.t < 900 ? b.lastHit : null;
+    const lanes = Battle.laneCount();
     const unitCard = (u, i) => {
-      const cls = [u.dead ? 'dead' : '', i === curIdx ? 'acting' : '', hit && hit.to === i ? 'hit' : '', w && u.side === 'enemy' && !u.dead ? 'target' : ''].join(' ');
-      let extra = '';
-      if (w && u.side === 'enemy' && !u.dead) {
-        const d = Battle.preview(cur, w, u);
-        extra = `<div class="preview">≈${Math.round(d.shield)}<i class="sh">sh</i> ${Math.round(d.hull)}<i class="hu">hu</i> · ${Math.round(Battle.hitChance(w, u) * 100)}%${Battle.sizeMult(cur, u) > 1 ? ' ★' : Battle.sizeMult(cur, u) < 1 ? ' ▽' : ''}</div>`;
-      }
+      const isT = u === tgt;
+      const cls = [u.dead ? 'dead' : '', i === curIdx ? 'acting' : '', hit && hit.to === i ? 'hit' : '', isT ? 'target' : ''].join(' ');
+      const extra = isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
       const owner = u.side === 'player' ? 'player' : (b.kind === 'attack' ? (s.guard && s.guard.owner) || s.owner : b.threat.owner);
-      return this.shipCard(u, { flip: u.side === 'enemy', color: this.factionColor(owner), cls, extra, act: w && u.side === 'enemy' && !u.dead ? 'btarget' : '', a: i });
+      return this.shipCard(u, { flip: u.side === 'enemy', color: this.factionColor(owner), cls, extra });
     };
-    const side = (name) => b.units.map((u, i) => [u, i]).filter(([u]) => u.side === name).map(([u, i]) => unitCard(u, i)).join('');
+    // each side is a row of lanes; lane i faces lane i on the other side
+    const side = (name) => {
+      const cells = [];
+      for (let l = 0; l < lanes; l++) {
+        const i = b.units.findIndex((u) => u.side === name && u.lane === l);
+        cells.push(i >= 0 ? unitCard(b.units[i], i) : '<div class="lane-empty"></div>');
+      }
+      return cells.join('');
+    };
     const order = b.order.map((i) => b.units[i]).map((u, k) => `<span class="ord ${u.side} ${u.dead ? 'dead' : ''} ${k === b.turn ? 'now' : ''}" title="${U.esc(u.name)} · speed ${u.speed}">${U.esc(u.name.split(' ')[0])}</span>`).join('');
     let controls = '';
     if (b.phase === 'over') {
       const res = { win: ['VICTORY', 'good'], lose: ['DEFEAT', 'bad'], retreat: ['WITHDRAWN', ''], draw: ['STALEMATE', ''] }[b.result];
       controls = `<div class="bresult ${res[1]}"><h2>${res[0]}</h2><p>${U.esc(b.log[b.log.length - 1].t)}</p>${this.btn(G.battleQueue.length ? 'Next battle ▸' : 'Continue', 'bclose', '', false, 'gold')}</div>`;
     } else if (myTurn) {
-      controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b>. ${w ? 'Now pick a target.' : 'Pick a weapon.'}</div>
-        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn ${this.bWeapon === i ? 'on' : ''}" data-act="bweapon" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${x.cdLeft > 0 ? `<small>recharging ${x.cdLeft}</small>` : ''}</button>`).join('')}</div>`;
+      const pv = (x) => {
+        if (x.cdLeft > 0 || !tgt) return `<small>recharging ${x.cdLeft}</small>`;
+        const d = Battle.preview(cur, x, tgt), sm = Battle.sizeMult(cur, tgt);
+        return `<small>≈${Math.round(d.shield)} sh + ${Math.round(d.hull)} hu · ${Math.round(Battle.hitChance(x, tgt, cur) * 100)}% hit${sm > 1 ? ' ★' : sm < 1 ? ' ▽' : ''}</small>`;
+      };
+      controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b> targets <b>${U.esc(tgt.name)}</b>${cur.lane !== tgt.lane ? ' <span class="bad">(across lanes: half the hit chance)</span>' : ''}. Pick a weapon to fire.</div>
+        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}</div>`;
     } else if (cur) {
-      controls = `<div class="bprompt muted">${cur.side === 'enemy' ? 'Enemy turn' : 'Auto'}: ${U.esc(cur.name)}…</div>`;
+      controls = `<div class="bprompt muted">${cur.side === 'enemy' ? 'Enemy turn' : 'Auto'}: ${U.esc(cur.name)} → ${tgt ? U.esc(tgt.name) : '…'}</div>`;
     }
     const tools = b.phase === 'fight' ? `<div class="btnrow">${this.btn(b.auto ? '❚❚ Auto: on' : '▶ Auto', 'battleauto', '', false, b.auto ? 'on' : '')}${this.btn('Resolve instantly', 'bresolve')}${this.btn('Retreat', 'bretreat', '', false, 'danger')}</div>` : '';
     return `<div class="board">
       <div class="bhead2"><h3>⚔ ${U.esc(s.name)}</h3><span class="muted small">${b.kind === 'attack' ? 'Attack' : 'Defense'} · Round ${b.round}${G.battleQueue.length ? ` · ${G.battleQueue.length} more battle${G.battleQueue.length > 1 ? 's' : ''} waiting` : ''}</span>${tools}</div>
-      <div class="bside enemy">${side('enemy')}</div>
+      <div class="bside enemy" style="--lanes:${lanes}">${side('enemy')}</div>
       <div class="border">${order}</div>
-      <div class="bside player">${side('player')}</div>
+      <div class="bside player" style="--lanes:${lanes}">${side('player')}</div>
       <div class="bcontrols">${controls}</div>
       <div class="blog">${b.log.slice(-9).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
-      <p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}).</p>
+      <p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance. Order your fleet on the Fleets screen.</p>
     </div>`;
   },
 

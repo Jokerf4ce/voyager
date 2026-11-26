@@ -47,7 +47,7 @@ const Game = {
   newGame() {
     this.stopAuto();
     this.overShown = false;
-    UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null; UI.bWeapon = null;
+    UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null;
     if (State.slot === 'admin') Admin.newTestGame(); else State.newGame();
     UI.selSys = G.homeId;
     UI.screen = 'map';
@@ -71,6 +71,7 @@ const Game = {
     close: () => { UI.closeModal(); },
     // fleets and ships
     selship: (a) => { UI.selShip = UI.selShip === a ? null : a; },
+    shift: (a) => { const [sid, d] = a.split('|'); Ships.shift(sid, +d); },
     assign: (a) => { const [sid, fid] = a.split('|'); Ships.assign(sid, fid === 'hangar' ? null : +fid); },
     newfleet: (a) => { const f = Ships.newFleet(); f.keep = true; if (a) Ships.assign(a, f.id); delete f.keep; Ships.cleanup(); },
     fit: (a) => { const [sid, slot, wid] = a.split('|'); Ships.fit(sid, +slot, wid); },
@@ -89,13 +90,12 @@ const Game = {
     gofleets: (a) => { UI.screen = 'fleets'; if (a) UI.selShip = null; },
     // battles
     gobattle: () => { UI.screen = 'battle'; },
-    bweapon: (a) => { UI.bWeapon = +a; },
-    btarget: (a) => { const w = UI.bWeapon; if (w != null && Battle.act(w, +a)) UI.bWeapon = null; },
+    bfire: (a) => { Battle.act(+a); },
     battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
     bresolve: () => { Battle.resolve(); },
     bretreat: () => { Battle.retreat(); },
     bdefend: (a) => { Battle.defendWith(a ? +a : null); },
-    bclose: () => { Battle.close(); UI.bWeapon = null; if (!G.battle) UI.screen = UI.afterBattle || 'map'; },
+    bclose: () => { Battle.close(); if (!G.battle) UI.screen = UI.afterBattle || 'map'; },
     settle: (a) => { const [sid, pi] = a.split(':'); Colonies.settle(+sid, +pi); },
     // a = "sysId" (open that system's colonies) or "sysId:planetIdx" (open one colony).
     gocolony: (a) => {
@@ -162,7 +162,7 @@ document.addEventListener('input', (ev) => {
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
-  if (ev.code === 'Escape') { if (UI.bWeapon != null) UI.bWeapon = null; else if (UI.selShip) UI.selShip = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
+  if (ev.code === 'Escape') { if (UI.selShip) UI.selShip = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
 });
 
 window.addEventListener('DOMContentLoaded', () => {

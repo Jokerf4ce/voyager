@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.26.0 — 2026-11-26
+- **Lanes and automatic targeting.** Each side stands in five lanes, set by fleet order. Every ship shoots the enemy directly opposite; if that lane is empty, the nearest one to its right, then left, then two right, two left, and so on. Shots at a ship that isn't directly opposite have **half the hit chance**.
+- In battle you now only choose the **weapon**: the target is marked ◎, and each weapon button shows the expected damage and hit chance against it. The enemy (and Auto) picks the best weapon for its target.
+- Fleets screen: slots are labelled Lane 1–5, and ◀ ▶ in a ship's panel moves it within its fleet.
+- `docs/combat.md` updated (lanes, targeting, hit formula, formation tips).
+
 ## 0.25.0 — 2026-11-26
 - New voice trigger **`combat`**: at the start of every battle (attacks and raid defenses) the Assistant says one of the combat lines at random ("Warning! Hostile forces inbound!", "Commander! Give them hell!" …).
 - Combat lines are shown as a **red alert transmission** ("▲ AI Assistant · Alert", pulsing red border) instead of the normal blue. Any trigger or line can use this look with `style: 'danger'` in `js/voicelines.js`.

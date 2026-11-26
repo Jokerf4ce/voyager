@@ -1,6 +1,6 @@
 # Voyager — Combat Mechanics
 
-How ships, fleets and battles work, as built in v0.24. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
+How ships, fleets and battles work, as built in v0.26. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
 
 ---
 
@@ -182,32 +182,55 @@ If the target of a colony expedition has been taken or guarded by the time it ar
   - **Alien world:** the alien garrison plus the system's Planetary Defenses.
 - **Defense:** an alien raid reaches one of your systems.
   - **Choosing defenders:** you pick an idle fleet to defend, or no fleet. The system's Planetary Defenses always join.
-  - **The capital:** it always has defenses (see 4.7).
+  - **The capital:** it always has defenses (see 4.8).
 
 While a battle is waiting, the Cycle can't advance; **End Cycle** takes you to the battle. Several battles in one Cycle queue up and are fought one after another.
 
-### 4.2 Turn order
+### 4.2 Lanes and targets
+
+Each side stands in a row of **lanes**, five wide, and lane *n* faces lane *n* on the other side.
+
+- **Your lanes:** your fleet order on the Fleets screen. The first ship takes lane 1, and so on; move ships with ◀ ▶ in the ship's panel. Planetary Defenses take the next free lane.
+- **Enemy lanes:** their ships take lanes in the order they are listed.
+
+**Targeting is automatic.** A ship always shoots:
+
+1. the enemy **directly opposite**;
+2. if that lane is empty or destroyed, the one **one lane to its right**;
+3. then **one to its left**;
+4. then **two to the right**, then **two to the left**, and further out the same way.
+
+"Right" and "left" are as seen on screen, for both sides.
+
+**Shooting across lanes** (at anything that isn't directly opposite) **halves the hit chance** (×0.5, `DATA.offLaneHit`).
+
+So formation matters: put the ships that can best take on each enemy across from it. A side with fewer ships leaves enemies with no one opposite them, and those enemies shoot across lanes at half the hit chance.
+
+### 4.3 Turn order
 
 1. Each **round**, every surviving ship acts once, **fastest first**. Ties are broken at random.
 2. At the start of a ship's turn, each of its weapons recharges one step.
 3. If no weapon is ready, the ship skips its turn ("recharges its weapons").
-4. Otherwise it fires **one** ready weapon at **one** enemy:
-   - **Your ships:** you pick the weapon, then the target. Each target card shows a preview of the expected shield and hull damage, the hit chance, and ★/▽ for size.
-   - **Enemy ships, and yours on Auto:** the computer picks (see 4.6).
+4. Otherwise it fires **one** ready weapon at its target (see 4.2):
+   - **Your ships:** you pick the weapon. The target is marked ◎ on the board, and each weapon button shows the expected shield and hull damage, the hit chance and ★/▽ for size.
+   - **Enemy ships, and yours on Auto:** the computer picks the weapon (see 4.7).
 
 The battle ends when one side has no ships left. If 25 rounds pass without that:
 - An **attack** ends in a **stalemate**: your ships withdraw.
 - A **defense** counts as **held**: the raid withdraws.
 
-### 4.3 Hitting
+### 4.4 Hitting
 
 ```
-hit chance = weapon accuracy × (1 − target evasion), at least 5 %
+hit chance = weapon accuracy × (1 − target evasion) × lane factor, at least 5 %
+lane factor = 1 if the target is directly opposite, 0.5 if not
 ```
 
-Example: a Railgun (80 %) against a Scout (30 % evasion) hits 0.8 × 0.7 = **56 %** of the time.
+Examples:
+- A Railgun (80 %) against a Scout (30 % evasion) directly opposite hits 0.8 × 0.7 = **56 %** of the time.
+- The same shot one lane over hits **28 %** of the time.
 
-### 4.4 Damage
+### 4.5 Damage
 
 ```
 base = weapon damage × attacker's damage bonus × size multiplier × (0.9 – 1.1)
@@ -229,30 +252,30 @@ The base is then applied to the target's shield first, then its hull:
 - *Plasma Weave*: +20 % weapon damage.
 - *Bone-grown Hulls*: +25 % shield and hull.
 
-### 4.5 Your controls
+### 4.6 Your controls
 
 | Button | What it does |
 |---|---|
-| Weapon, then target | fire (your turn only) |
+| A weapon | fire it at the ship's target (your turn only) |
 | **Auto** | the computer plays your side too, one step at a time; press again to take back control |
 | **Resolve instantly** | plays the rest of the battle at once on Auto |
 | **Retreat** | ends the battle now; in an attack your ships withdraw, in a defense the system falls |
 
-### 4.6 How the computer picks a shot
+### 4.7 How the computer picks a weapon
 
-For every ready weapon and every living target, the computer scores:
+The target is fixed by the lanes (4.2). For every ready weapon, the computer scores:
 
 ```
 (expected shield damage × 0.6 + expected hull damage) × hit chance
 ```
 
 - The score is **×2.5** if the shot would destroy the target.
-- It then gets a random ±15 %.
+- It then gets a random ±10 %.
 - The highest score fires.
 
-In practice the computer prefers kills, likes hull damage over shield damage, and uses size advantages.
+In practice the computer picks the weapon type that suits the target (energy for shields, physical for hull) and prefers a weapon that would finish the target off.
 
-### 4.7 Planetary Defenses
+### 4.8 Planetary Defenses
 
 A system's Bastions (surface) and Defense Platforms (orbit) fight together as **one Medium card** with speed 3 and 0 % evasion.
 
@@ -347,4 +370,8 @@ Every ship costs its **maintenance** in Metals each Cycle, plus **half as much i
 - **Weapon choice:**
   - Fast ships act first: a Scout or Fighter can finish off a wounded enemy before it fires.
   - Heavy weapons (Torpedo, Particle Beam) hit very hard but then sit out three turns.
+- **Formation:**
+  - Put each ship across from the enemy its size beats.
+  - Fill all five lanes when you can, so no enemy gets a free target.
+  - A short enemy line forces your outer ships to shoot across lanes at half the hit chance, so send a fleet about as wide as theirs.
 - **Raids:** keep one fleet at home. A raid on an undefended system usually takes it.
