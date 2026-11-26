@@ -123,13 +123,8 @@ const Ships = {
   unlocked(size) { const req = DATA.sizes[size].req; return !req || Research.level(req) > 0; },
 
   // ---------- building (the gacha) ----------
-  buildCost(size) {
-    const yard = Math.max(0, ...Colonies.yards().map(({ p }) => p.colony.orbit.shipyard || 0));
-    const disc = Math.max(0.6, 1 - 0.05 * (yard - 1));
-    const out = {};
-    for (const k in DATA.sizes[size].cost) out[k] = Math.ceil(DATA.sizes[size].cost[k] * disc);
-    return out;
-  },
+  // A hull's price: DATA.sizes (shipyard levels don't make ships cheaper; they add hangar space).
+  buildCost(size) { return Object.assign({}, DATA.sizes[size].cost); },
   blocker(size) {
     if (!Colonies.yards().length) return 'No Orbital Shipyard';
     if (!this.unlocked(size)) return 'Requires ' + DATA.techs[DATA.sizes[size].req].name;

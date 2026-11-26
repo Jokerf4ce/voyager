@@ -141,7 +141,7 @@ const Colonies = {
     if (d.gathers) return 'Gathering';
     if (d.refines) return 'Refining';
     if (Object.values(d.cap || {}).some((v) => v < 0)) return 'Power, habitation & compute';
-    return 'Research, ships & defense';
+    return 'Research, finance, ships & defense';
   },
 
   // How much one more level would produce at this colony layer (relative; used to pick the best spot).
@@ -278,7 +278,7 @@ const Economy = {
     const L = (k) => Colonies.level(p, k);
     const size = DATA.planetSizes[p.size].yield;
     const k = m.all * eff;
-    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 } };
+    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, crypto: 0, inputs: { metal: 0, rare: 0, organics: 0 } };
     // gathered: base colony output plus 2 × rating per gathering building level
     for (const res of ['metal', 'rare', 'organics']) {
       let lv = 0;
@@ -292,16 +292,18 @@ const Economy = {
       for (const [r, v] of Object.entries(d.refines.in)) out.inputs[r] += v * L(key) * eff;
     }
     out.research = (L('lab') * 2 + (p.colony.capital ? 1 : 0)) * m.research * k;
+    // Finance Districts mine Crypto Shards (tiny amounts by design)
+    for (const [key, d] of Object.entries(DATA.buildings)) if (d.crypto) out.crypto += d.crypto * L(key) * k;
     return out;
   },
 
   income() {
     const caps = this.caps();
     const m = State.mods();
-    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 }, caps };
+    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, crypto: 0, inputs: { metal: 0, rare: 0, organics: 0 }, caps };
     for (const { p } of Colonies.playerPlanets()) {
       const y = this.planetYield(p, caps.eff);
-      for (const k of ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research']) out[k] += y[k];
+      for (const k of ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'crypto']) out[k] += y[k];
       for (const k in y.inputs) out.inputs[k] += y.inputs[k];
     }
     return out;
@@ -312,12 +314,12 @@ const Economy = {
     const i = this.income();
     const up = Ships.upkeep();
     return { metal: i.metal - i.inputs.metal - up, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
-      electronics: i.electronics, chemicals: i.chemicals - up * 0.5, research: i.research, caps: i.caps, upkeep: up };
+      electronics: i.electronics, chemicals: i.chemicals - up * 0.5, research: i.research, crypto: i.crypto, caps: i.caps, upkeep: up };
   },
 
   tick() {
     const inc = this.income();
-    for (const k of ['metal', 'rare', 'organics', 'research']) G.res[k] += inc[k];
+    for (const k of ['metal', 'rare', 'organics', 'research', 'crypto']) G.res[k] += inc[k];
     // Refineries and chemical plants run as far as the stockpile allows.
     const need = inc.inputs;
     const ratio = Math.min(1, ...Object.entries(need).filter(([, v]) => v > 0).map(([k, v]) => G.res[k] / v));

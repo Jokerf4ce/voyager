@@ -258,6 +258,7 @@ const Sprites = {
     cogitator: ['kkkkkkkkkkkk', 'k==========k', 'k=g=b======k', 'kkkkkkkkkkkk', 'k==========k', 'k=b=g=g====k', 'kkkkkkkkkkkk', 'k==========k', 'k=g=b======k', 'kkkkkkkkkkkk', '.k#......#k.', '............'],
     lab: ['....kkkk....', '.....kk.....', '.....k=k....', '.....k=k....', '....k==pk...', '...kpppppk..', '..kpppwpppk.', '..kppppwppk.', '.kpppppppppk', '.kpppppppppk', '..kkkkkkkkk.', '............'],
     shipyard: ['k..........k', 'k=kkkkkkkk=k', 'k=........=k', 'k=..kkk...=k', 'k=.k=o=kk.=k', 'k=k=====wk=k', 'k=.k===kk.=k', 'k=..kkk...=k', 'k=........=k', 'k=kkkkkkkk=k', 'k..........k', '............'],
+    finance: ['.yyy....kk..', 'yywyy..k==k.', '.yyy...k=yk.', '..kk...k==k.', '.k==k..k=yk.', '.k=yk.kk==k.', '.k==kk=k=yk.', '.k=yk=yk==k.', '.k==k==k=yk.', 'kk=yk=yk==kk', '############', '............'],
     bastion: ['.k.k.k.k.k..', '.kkkkkkkkk..', '.k=======k..', '.k=kk=kk=k..', '.k=======k..', '.k==rrr==k..', '.k=r###r=k..', '.k=r###r=k..', 'kk=======kk.', 'k#########k.', 'kkkkkkkkkkk.', '............'],
     platform: ['............', '........kk..', '.......kwk..', '......k=k...', '...kkk=k....', '..k===kk....', '.k=rr===k...', '.k=rr====kkk', '..k========k', '...kkkkkkkk.', '....k....k..', '............'],
   },

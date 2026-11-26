@@ -5,13 +5,15 @@ const DATA = {};
 // Stockpiled resources.
 //   gathered: Metals, Rare Minerals, Organics (from planets; see DATA.planetClasses yields)
 //   refined:  Electronics (Metals + Rare Minerals), Chemicals (Organics + Rare Minerals). Only spent on building.
-//   Research points (made by Research Labs).
+//   Research points (made by Research Labs) and Crypto Shards (made by Finance Districts; for trade later).
+// decimals: how many decimals the amount is shown with (Crypto Shards come in tiny amounts).
 DATA.resources = {
   metal:     { name: 'Metals',        icon: '▣', color: '#a8a8b0', kind: 'gathered', desc: 'Mined from rocky worlds. Hulls, walls, everything.' },
   rare:      { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', kind: 'gathered', desc: 'Heavy elements from hot worlds, dwarfs and dead stars.' },
   organics:  { name: 'Organics',      icon: '❦', color: '#9ab050', kind: 'gathered', desc: 'Biomass, hydrocarbons and frozen volatiles from living worlds, ice and gas giants.' },
   electronics: { name: 'Electronics', icon: '⍯', color: '#d08a50', kind: 'refined',  desc: 'Circuits and components made from Metals and Rare Minerals. Advanced construction.' },
   chemicals: { name: 'Chemicals',     icon: '⚗', color: '#d0c060', kind: 'refined',  desc: 'Converted from Organics and Rare Minerals. Fuel, explosives, reagents.' },
+  crypto:    { name: 'Crypto Shards', icon: '◈', color: '#e080d0', kind: 'currency', decimals: 2, desc: 'An interstellar crypto currency, mined by Finance Districts. Scarce by design: it will be used for trade.' },
   research:  { name: 'Research',      icon: '✎', color: '#70c0c8', kind: 'points',   desc: 'Made by Research Labs. Spent on technology.' },
 };
 
@@ -128,7 +130,8 @@ DATA.buildings = {
   cogitator: { name: 'Datacenter',       layers: ['surface', 'orbit'], desc: '+4 Compute',                   cost: { metal: 40, electronics: 15, rare: 10 }, cap: { compute: -4, power: 2 } },
   // research, ships, defense
   lab:       { name: 'Research Lab',     layers: ['surface', 'orbit'], desc: '+2 Research',                  cost: { metal: 40, electronics: 10, chemicals: 5 }, cap: { power: 1, infra: 1, compute: 2 } },
-  shipyard:  { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, electronics: 10 }, cap: { power: 2, infra: 1 } },
+  shipyard:  { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Holds 10 ships in its hangar, +2 for every level after 1', cost: { metal: 60, electronics: 10 }, cap: { power: 2, infra: 1 } },
+  finance:   { name: 'Finance District', layers: ['surface'], desc: '+0.05 Crypto Shards', crypto: 0.05,   cost: { metal: 80, electronics: 30, rare: 15 }, cap: { power: 2, infra: 2, compute: 1 } },
   bastion:   { name: 'Bastion',          layers: ['surface'], desc: '+25 garrison, fires on attackers',          cost: { metal: 50, chemicals: 10 },         cap: { power: 1 } },
   platform:  { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',     cost: { metal: 60, electronics: 10, chemicals: 10 }, cap: { power: 2, compute: 1 } },
 };
@@ -354,7 +357,7 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v14',
+  saveKey: 'voyager_save_v15',
 };
 
 // ---------- Tutorial ----------
@@ -365,7 +368,7 @@ DATA.tutorial = [
   { screen: 'map', title: 'Wake up, Commander',
     text: 'The Ark has crossed the dark and found a new galaxy. The frozen faithful sleep in its holds, and all you hold is a single star system.<br><br>Out there are two xeno empires: <b style="color:#7fbf3f">The Chorus</b> and the <b style="color:#d06030">Iron Remnant</b>. Take every world they hold to win. Lose all of yours and the Covenant ends.<br><br>This short tour shows you around. You can skip it at any time.' },
   { target: '#top-res', title: 'Resources',
-    text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.<br><br>Point at any of them (or tap it) for details.' },
+    text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology. <b>Crypto Shards</b> ◈, mined in tiny amounts by Finance Districts, are an interstellar currency for trade.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.<br><br>Point at any of them (or tap it) for details.' },
   { target: '#btn-end', title: 'Cycles',
     text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time.' },
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',

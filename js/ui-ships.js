@@ -52,7 +52,6 @@ Object.assign(UI, {
   screen_shipyard() {
     const yards = Colonies.yards();
     if (!yards.length) return this.panel('Shipyard', '<p>No planet has an Orbital Shipyard. Build one in orbit on the Buildings or Colonies screen.</p>');
-    const best = Math.max(...yards.map(({ p }) => p.colony.orbit.shipyard || 0));
     const tile = (size) => {
       const z = DATA.sizes[size], why = Ships.blocker(size);
       const types = Object.values(DATA.shipTypes).filter((t) => t.size === size && !t.monster && !t.structure);
@@ -73,7 +72,7 @@ Object.assign(UI, {
         <div class="btnrow">${this.btn('Show in Hangar', 'gofleets')}</div></div></div>` : '';
     const lw = this.lastWeapon && G.armory.find((w) => w.id === this.lastWeapon);
     return this.panel('Shipyard', `<p class="flavor">Every hull is laid down blind. The forge-priests swear the machine-spirit chooses what it becomes.</p>
-        <p class="small muted">Choose a size and pay; the type, rarity, stats and weapons are rolled. Every stat is drawn from a normal distribution around the type's average, so no two ships are alike; Q on a card shows how well it rolled (100 = average). Rarity shifts the average up. Rates: ${this.rarityRates()}. Your best shipyard (Lv ${best}) cuts costs by ${Math.round(Math.min(40, 5 * (best - 1)))}%.</p>
+        <p class="small muted">Choose a size and pay; the type, rarity, stats and weapons are rolled. Every stat is drawn from a normal distribution around the type's average, so no two ships are alike; Q on a card shows how well it rolled (100 = average). Rarity shifts the average up. Rates: ${this.rarityRates()}.</p>
         <div class="buildtiles">${['S', 'M', 'L'].map(tile).join('')}</div>${reveal}`) +
       `<div class="grid2">` +
       this.panel('Weapon Forge', `<p class="small">${DATA.forge.desc} Fit forged weapons to ships on the Hangar screen.</p>

@@ -64,12 +64,12 @@ const UI = {
   renderTop() {
     const net = Economy.net();
     const r = (k, val, perCycle) => `<div class="res res-${k}" data-tip="res:${k}" tabindex="0">
-      <span class="ico">${DATA.resources[k].icon}</span><b>${U.fmt(val)}</b>
-      ${perCycle != null ? `<small class="${perCycle < 0 ? 'neg' : ''}">${perCycle >= 0 ? '+' : ''}${U.fmt1(perCycle)}</small>` : ''}</div>`;
+      <span class="ico">${DATA.resources[k].icon}</span><b>${U.amount(k, val)}</b>
+      ${perCycle != null ? `<small class="${perCycle < 0 ? 'neg' : ''}">${perCycle >= 0 ? '+' : ''}${U.rate(k, perCycle)}</small>` : ''}</div>`;
     const c = net.caps;
     const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" data-tip="cap:${k}" tabindex="0">
         <span class="ico">${DATA.capacities[k].icon}</span><b>${U.fmt(c[k].used)}/${U.fmt(c[k].cap)}</b></div>`;
-    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research'].map((k) => r(k, G.res[k], net[k])).join('') +
+    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'crypto'].map((k) => r(k, G.res[k], net[k])).join('') +
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
       (c.eff < 1 ? `<div class="res over" data-tip="ration" tabindex="0"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     const fighting = !!(G.battle && G.battle.phase !== 'over');
@@ -91,11 +91,11 @@ const UI = {
     const [kind, k] = key.split(':');
     if (kind === 'res') {
       const d = DATA.resources[k], per = net[k];
-      const kindName = { gathered: 'Gathered resource', refined: 'Refined good', points: 'Points' }[d.kind] || '';
+      const kindName = { gathered: 'Gathered resource', refined: 'Refined good', points: 'Points', currency: 'Currency' }[d.kind] || '';
       return `<div class="tip-head res-${k}"><span class="tip-ico">${d.icon}</span><div><b>${d.name}</b><small>${kindName}</small></div></div>
         <p>${d.desc}</p>
-        <div class="tip-row"><span>In store</span><b>${U.fmt(G.res[k])}</b></div>
-        <div class="tip-row"><span>Per Cycle</span><b class="${per < 0 ? 'neg' : 'pos'}">${per >= 0 ? '+' : ''}${U.fmt1(per)}</b></div>`;
+        <div class="tip-row"><span>In store</span><b>${U.amount(k, G.res[k])}</b></div>
+        <div class="tip-row"><span>Per Cycle</span><b class="${per < 0 ? 'neg' : 'pos'}">${per >= 0 ? '+' : ''}${U.rate(k, per)}</b></div>`;
     }
     if (kind === 'cap') {
       const d = DATA.capacities[k], x = c[k], over = x.used > x.cap;
@@ -135,8 +135,8 @@ const UI = {
   },
   yieldText(p) {
     const y = Economy.planetYield(p, Economy.caps().eff);
-    const parts = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research'].filter((k) => y[k] > 0.05)
-      .map((k) => `<span class="res-${k}">${DATA.resources[k].icon}${U.fmt1(y[k])}</span>`);
+    const parts = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'crypto'].filter((k) => y[k] > 0.001)
+      .map((k) => `<span class="res-${k}">${DATA.resources[k].icon}${U.rate(k, y[k])}</span>`);
     const eats = Object.entries(y.inputs).filter(([, v]) => v > 0).map(([k, v]) => `${U.fmt1(v)}${DATA.resources[k].icon}`).join(' ');
     return (parts.join(' ') || '<span class="muted">no output</span>') + (eats ? ` <small class="muted">(refining eats ${eats})</small>` : '');
   },
@@ -229,6 +229,7 @@ const UI = {
         <div class="kv"><span>Electronics <small class="muted">(refined)</small></span><b class="res-electronics">+${U.fmt1(net.electronics)}</b></div>
         <div class="kv"><span>Chemicals <small class="muted">(refined)</small></span><b class="res-chemicals">+${U.fmt1(net.chemicals)}</b></div>
         <div class="kv"><span>Research <small class="muted">(Research Labs)</small></span><b class="res-research">+${U.fmt1(net.research)}</b></div>
+        <div class="kv"><span>Crypto Shards <small class="muted">(Finance Districts)</small></span><b class="res-crypto">+${U.rate('crypto', net.crypto)}</b></div>
         ${net.upkeep ? `<div class="kv"><span>Fleet maintenance <small class="muted">(included above)</small></span><b class="neg">−${U.fmt1(net.upkeep)} ▣ −${U.fmt1(net.upkeep / 2)} ⚗</b></div>` : ''}
         <h4>Capacities</h4>
         ${Object.entries(DATA.capacities).map(([k, d]) => `<div class="kv"><span class="res-${k}">${d.icon} ${d.name}</span><b>${U.fmt1(c[k].used)} / ${U.fmt1(c[k].cap)}</b></div>

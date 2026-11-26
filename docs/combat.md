@@ -16,7 +16,7 @@ Every ship is a **card**. It has a size, a type, a rarity, stats and 1–3 weapo
 | **M** Medium | Small | Large | 10 | 70 Metals, 20 Electronics, 10 Chemicals |
 | **L** Large | Medium | Small | 18 | 160 Metals, 40 Rare Minerals, 50 Electronics, 30 Chemicals |
 
-All three sizes can be built from the start (since v0.45; before, Medium and Large needed the *Medium Hulls* and *Capital Hulls* research).
+Hull prices are fixed: since v0.47 shipyard levels no longer make ships cheaper (they only add hangar space). All three sizes can be built from the start (since v0.45; before, Medium and Large needed the *Medium Hulls* and *Capital Hulls* research).
 
 **Hangar space** (v0.45): ships in no fleet wait in the hangar. Each Orbital Shipyard holds **10** ships, plus **2** for every level above 1, and all your shipyards add up (`DATA.hangar`). When the hangar is full, a new ship can only be built if a fleet at home has room for it, and no ship can be moved out of a fleet into the hangar.
 

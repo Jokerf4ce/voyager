@@ -20,9 +20,12 @@ const U = {
     return String(n);
   },
   fmt1: (n) => (Math.round(n * 10) / 10).toString(),
+  // A resource amount: whole numbers, or with DATA.resources[k].decimals (Crypto Shards: 0.05).
+  amount: (k, n) => { const d = (DATA.resources[k] || {}).decimals; return d ? (Math.abs(n) >= 1000 ? U.fmt(n) : (Math.floor(n * 10 ** d + 1e-6) / 10 ** d).toFixed(d)) : U.fmt(n); },
+  rate: (k, n) => { const d = (DATA.resources[k] || {}).decimals; return d ? (Math.round(n * 10 ** d) / 10 ** d).toFixed(d) : U.fmt1(n); },
   esc: (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])),
   costText: (cost) => Object.entries(cost).filter(([, v]) => v > 0)
-    .map(([k, v]) => `<span class="res-${k}">${DATA.resources[k].icon}${U.fmt(v)}</span>`).join(' '),
+    .map(([k, v]) => `<span class="res-${k}">${DATA.resources[k].icon}${U.amount(k, v)}</span>`).join(' '),
 
   // Mouse position in canvas pixels. The canvas is scaled with object-fit: contain, so the drawing
   // can be letterboxed inside the element: account for that, not just the element's box.

@@ -35,7 +35,7 @@ const Tester = {
     }
     this.fixCaps();
 
-    for (const k in G.res) G.res[k] = 1500;
+    for (const k in G.res) G.res[k] = k === 'crypto' ? 5 : 1500;
 
     // Ships of every size and rarity: two fleets and a full hangar, plus spare weapons and Arks.
     const add = (type, rarity, fleet) => { const sh = Ships.make(type, { rarity }); G.ships[sh.id] = sh; if (fleet) fleet.ships.push(sh.id); return sh; };

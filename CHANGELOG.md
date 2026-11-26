@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.47.0 — 2026-11-27
+- **New resource: Crypto Shards ◈**, an interstellar crypto currency that will be used for trade. It comes in tiny amounts, so it is shown with two decimals: in the top bar, its hover card, the Overview, colony yields and offline progress.
+- **New building: Finance District** (surface). +0.05 Crypto Shards per level per Cycle.
+  - Costs 80 Metals, 30 Electronics and 15 Rare Minerals.
+  - Uses 2 Power, 2 Infrastructure and 1 Compute.
+  - Has its own pixel icon; listed under *Research, finance, ships & defense*.
+- **Shipyards no longer make ships cheaper** (it broke the economy). Hull prices are fixed; shipyard levels only add hangar space.
+- Tutorial updated: the resources step introduces Crypto Shards.
+- **New save format:** old saves start a new game.
+
 ## 0.46.1 — 2026-11-27
 - Battle: Omega ships no longer pulse on the board (a steady red glow instead), so the active ship stands out. They still pulse in the hangar and shipyard.
 

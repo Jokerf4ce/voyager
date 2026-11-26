@@ -5,9 +5,9 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 14,
+      version: 15,
       cycle: 1,
-      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0 },
+      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, crypto: 0 },
       systems: [],
       ships: {},          // every Covenant ship card, by id (js/ships.js)
       fleets: [],         // [{ id, name, ships: [shipId], mission }]
@@ -64,7 +64,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 14) return false;
+      if (!data || data.version !== 15) return false;
       // technologies that no longer exist (e.g. the old hull techs, removed in v0.45) are dropped
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) delete data.techs[id];
       if (data.researching && !DATA.techs[data.researching]) { data.researching = null; data.researchProgress = 0; }
@@ -80,7 +80,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 14) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 15) throw new Error('Not a Voyager save');
     G = data;
   },
 
@@ -99,11 +99,12 @@ const State = {
       electronics: inc.electronics * cycles * eff,
       chemicals: inc.chemicals * cycles * eff,
       research: inc.research * cycles * eff,
+      crypto: inc.crypto * cycles * eff,
     };
     for (const k in gained) G.res[k] += gained[k];
     const completed = Research.tick();
     const mins = Math.floor(secs / 60);
-    Log.add(`While you were away (${mins} min), the Covenant endured: ` + Object.entries(gained).map(([k, v]) => `+${U.fmt(v)} ${DATA.resources[k].name}`).join(', ') + '.', 'good');
+    Log.add(`While you were away (${mins} min), the Covenant endured: ` + Object.entries(gained).map(([k, v]) => `+${U.amount(k, v)} ${DATA.resources[k].name}`).join(', ') + '.', 'good');
     return { mins, cycles, gained, completed };
   },
 };
