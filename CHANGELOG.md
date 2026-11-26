@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.37.1 — 2026-11-26
+- Removed three test screenshots that were committed by mistake.
+
 ## 0.37.0 — 2026-11-26
 - **Star Map and Solar System are now separate screens.** The new **◉ Solar System** menu entry shows the selected system's star and planets, much larger.
   - **Star Map:** the map fills the screen, with the system panel (missions, planets) beside it.
