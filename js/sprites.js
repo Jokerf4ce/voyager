@@ -64,6 +64,88 @@ const Sprites = {
     return this.cache[`cv:p:${Planets.classKey(p)}:${size}:${seedKey}`];
   },
 
+  mix(hex, to, t) {
+    const a = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    const b = [1, 3, 5].map((i) => parseInt(to.slice(i, i + 2), 16));
+    return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+  },
+
+  // Star portraits, in the same dithered pixel style as the planets. 32×32, transparent background.
+  // Normal stars: a glowing disc with granulation and limb darkening, sized by class.
+  // White dwarf: a tiny hot point. Pulsar: a point with two beams. Black hole: dark disc and accretion disc.
+  star(cls, seedKey) {
+    const key = `st:${cls}:${seedKey}`;
+    if (this.cache[key]) return this.cache[key];
+    const st = DATA.starClasses[cls];
+    const S = 32, c = S / 2;
+    const cv = this.canvas(S, S), ctx = cv.getContext('2d');
+    const rnd = this.seeded(key);
+    const px = (x, y, col, alpha = 1) => { if (x < 0 || y < 0 || x >= S || y >= S) return; ctx.globalAlpha = alpha; ctx.fillStyle = col; ctx.fillRect(x, y, 1, 1); ctx.globalAlpha = 1; };
+    const dith = (x, y) => this.bayer[((y % 4) + 4) % 4][((x % 4) + 4) % 4] / 16;
+    const glow = (r0, r1, col, strength) => {
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+        const d = Math.hypot(x + 0.5 - c, y + 0.5 - c);
+        if (d <= r0 || d > r1) continue;
+        const k = 1 - (d - r0) / (r1 - r0);
+        if (dith(x, y) < k * strength) px(x, y, col, 0.35 + 0.5 * k);
+      }
+    };
+
+    if (st.kind === 'blackhole') {
+      const hot = '#fff0c0', warm = st.color, cool = '#a03818';
+      const disc = (front) => {
+        for (let y = -14; y <= 14; y++) for (let x = -15; x <= 15; x++) {
+          const d = Math.hypot(x, y / 0.32);
+          if (d < 6 || d > 15 || (y > 0) !== front) continue;
+          const t = (d - 6) / 9;
+          if (dith(x + 64, y + 64) > 1.15 - t) continue;
+          px(c + x, c + y, t < 0.25 ? hot : t < 0.6 ? warm : cool);
+        }
+      };
+      disc(false);
+      for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) {
+        const d = Math.hypot(x, y);
+        if (d <= 5) px(c + x, c + y, '#000000');
+        else if (d <= 6.2) px(c + x, c + y, hot);
+      }
+      disc(true);
+    } else if (st.kind === 'pulsar') {
+      const ang = -0.8 + rnd() * 0.3;
+      for (const dir of [1, -1]) for (let r = 2; r < 22; r++) {
+        const spread = r * 0.18;
+        for (let w = -spread; w <= spread; w += 0.7) {
+          const x = Math.round(c + dir * (Math.cos(ang) * r - Math.sin(ang) * w)), y = Math.round(c + dir * (Math.sin(ang) * r + Math.cos(ang) * w));
+          const fade = 1 - r / 22 - Math.abs(w) / (spread + 1) * 0.5;
+          if (dith(x, y) < fade) px(x, y, st.color, 0.6);
+        }
+      }
+      glow(1.5, 6, st.color, 0.9);
+      for (const [x, y] of [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]]) px(c - 1 + x, c - 1 + y, x || y ? st.color : '#ffffff');
+    } else {
+      // radius by class; the hypergiant fills the whole frame
+      const R = { O: 13, B: 12, A: 11, F: 10, G: 10, K: 9, M: 7, H: 15.5, D: 3 }[cls] || 9;
+      const shades = [this.mix(st.color, '#000000', 0.5), this.mix(st.color, '#000000', 0.22), st.color, this.mix(st.color, '#ffffff', 0.45)];
+      glow(R, Math.min(15.5, R + (cls === 'D' ? 6 : 4)), st.color, cls === 'D' ? 1 : 0.8);
+      // coarse noise for convection cells and starspots
+      const g = 7, grid = [];
+      for (let i = 0; i < g * g; i++) grid.push(rnd());
+      const noise = (x, y) => {
+        const gx = (x / S) * (g - 1), gy = (y / S) * (g - 1), x0 = Math.floor(gx), y0 = Math.floor(gy), fx = gx - x0, fy = gy - y0;
+        const v = (i, j) => grid[Math.min(g - 1, j) * g + Math.min(g - 1, i)];
+        return (v(x0, y0) * (1 - fx) + v(x0 + 1, y0) * fx) * (1 - fy) + (v(x0, y0 + 1) * (1 - fx) + v(x0 + 1, y0 + 1) * fx) * fy;
+      };
+      for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+        const d = Math.hypot(x + 0.5 - c, y + 0.5 - c);
+        if (d > R) continue;
+        const limb = Math.sqrt(Math.max(0, 1 - (d / R) * (d / R)));  // darker towards the edge
+        let v = limb * 0.75 + noise(x, y) * (cls === 'D' ? 0.1 : 0.45) - 0.05 + (dith(x, y) - 0.5) * 0.25;
+        if (cls === 'D') v += 0.35;
+        px(x, y, shades[Math.max(0, Math.min(3, Math.floor(v * 4)))]);
+      }
+    }
+    return (this.cache[key] = cv.toDataURL());
+  },
+
   // Symmetric masked faces: leaders and relics.
   portrait(id, rarity, kind) {
     const key = `f:${id}`;

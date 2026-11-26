@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.17.0 — 2026-11-26
+- Star pictures: every star class has a pixel-art portrait in the same style as the planets (glowing disc with convection cells and a darker edge, sized by class; tiny white dwarf; pulsar with beams; black hole with its accretion disc; the hypergiant fills the frame).
+- Shown in the system panel, on the Colonies screen and in exploration events.
+
 ## 0.16.0 — 2026-11-26
 - New Assistant trigger `random`: a ship announcement at a random moment every 5–30 minutes while you play. It never repeats the same line twice in a row, waits while the tab is hidden, and keeps at least a minute from other lines.
 - New announcements: "Attention! Colonel Gagarin, please report to Medbay!" and "Attention! Rear admiral Shepard, your keycard was found in engineering!"

@@ -117,6 +117,9 @@ const UI = {
     return `<span class="hab" style="color:${h.color}" title="Habitability ${p.hab}/5. Building costs ${pct(Colonies.habMult(p, 'surface'))} on the surface, ${pct(Colonies.habMult(p, 'orbit'))} in orbit.">${pips} ${h.name}</span>
       ${compact ? '' : `<span class="muted">· costs ${p.slots.surface ? pct(Colonies.habMult(p, 'surface')) + ' surface' : 'no surface'}, ${pct(Colonies.habMult(p, 'orbit'))} orbit</span>`}`;
   },
+  starImg(s, size = 64) {
+    return `<span class="planet-frame star-frame" style="width:${size}px;height:${size}px"><img class="px" src="${Sprites.star(s.star, s.id)}" width="${size}" height="${size}" alt="${U.esc(DATA.starClasses[s.star].name)}"></span>`;
+  },
   planetMods(p) {
     const icon = (k) => (DATA.capacities[k] || DATA.resources[k]).icon;
     return [this.ratingText(p), ...Object.entries(Planets.mult(p)).map(([k, v]) => `<span class="res-${k}">${icon(k)}×${v}</span>`)].join(' ');
@@ -200,8 +203,7 @@ const UI = {
     const ark = Fleets.at(s.id, 'player').find((f) => Fleets.has(f, 'ark') && !f.path.length);
     const hostile = Fleets.at(s.id).some((x) => x.owner !== 'player');
     const st = DATA.starClasses[s.star];
-    let body = `<h3>${U.esc(s.name)}</h3>
-      <div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b></div>
+    let body = `<div class="sys-head">${this.starImg(s, 64)}<div><h3>${U.esc(s.name)}</h3><b style="color:${st.color}">${st.name}</b></div></div>
       <div class="small muted">${st.desc} Starlight ×${st.solar} Power${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => (DATA.capacities[k] || DATA.resources[k]).name + ' ×' + v).join(', ') : ''}${st.shards ? `, +${st.shards} Void Shard${st.shards > 1 ? 's' : ''} per Cycle while held` : ''}.</div>
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.owner ? `<div class="muted small">Garrison ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)}</div>` : ''}
@@ -306,7 +308,7 @@ const UI = {
         <div class="layers">${layer('surface')}${layer('orbit')}</div></div>`;
     }).join('');
     const st = DATA.starClasses[s.star];
-    return tabs + `<div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b> <span class="muted small">Starlight ×${st.solar} Power</span></div><p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
+    return tabs + `<div class="star-line">${this.starImg(s, 40)}<b style="color:${st.color}">${st.name}</b> <span class="muted small">Starlight ×${st.solar} Power</span></div><p class="muted small">Garrison of ${U.esc(s.name)}: ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)} (Bastions and Defense Platforms from every planet add up).</p>` + planets;
   },
 
   screen_research() {
@@ -435,7 +437,7 @@ const UI = {
     if (!pe) return false;
     const ev = DATA.events[pe.ev];
     this.modal(`<h2>${ev.title}</h2><div class="muted small">${U.esc(G.systems[pe.sys].name)}</div>
-      <img class="px event-img" src="${Sprites.planet(G.systems[pe.sys].planets[0], pe.sys + '-0')}" width="128" height="128">
+      <img class="px event-img" src="${Sprites.star(G.systems[pe.sys].star, pe.sys)}" width="128" height="128">
       <p class="flavor">${ev.text}</p><div class="btnrow col">${ev.choices.map((c, i) => this.btn(c.label, 'eventchoice', i)).join('')}</div>`);
     return true;
   },
