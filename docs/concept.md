@@ -196,7 +196,17 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **In the POC:** original generative music synthesised with the Web Audio API in `js/music.js`, so there are no audio files. A choir chants in D minor over a drone, in plainchant phrases generated as random walks, so it never repeats exactly. Slow strings and war drums come in during "rise" sections, and swell whenever a battle happens. Players can mute it with the ♪ button and set the volume in Settings.
 
-**Open:** sound effects (buttons, battles, gacha pulls), or real recorded music later.
+**Tracks** (decided: multiple tracks). Each track is a small composition in `js/tracks.js`, played by the engine in `js/music.js`. They play as a playlist: in order, on shuffle, or one track on repeat.
+
+| Track | Mood | Key / tempo |
+|---|---|---|
+| Cathedral of Ash | monk choir over a drone; strings and war drums rise and fall | D minor, 54 bpm |
+| Cold Drift | exploring: slow pads, distant bells, a faint choir | E Dorian, 46 bpm |
+| Iron Tide | war: drum ostinato, low brass, pulsing strings, choir | C harmonic minor, 72 bpm |
+
+Recorded audio files can be added as tracks alongside the generated ones.
+
+**Open:** sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
 
 ## 10. Technical
 

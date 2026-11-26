@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.13.0 — 2026-11-26
+- Music playlist: several tracks that play in order, on shuffle or on repeat, with a track list, Play buttons and Next track in Settings. Choices are remembered.
+- The existing piece is now the track "Cathedral of Ash" (unchanged).
+- New track "Cold Drift": slow pads, distant FM bells and a faint choir, for exploring.
+- New track "Iron Tide": a driving drum ostinato, low brass, pulsing strings and a choir, for war.
+- New instruments: bell and low brass.
+- Recorded tracks are supported: add `{ id, name, src: 'assets/music/file.mp3' }` to `js/tracks.js`.
+
 ## 0.12.0 — 2026-11-26
 - Music: an original generative soundtrack synthesised live in the browser. A monk choir chants over a low drone, with slow strings and war drums that swell during battles. Inspired by the mood of Halo's choral scores; no audio files.
 - Music on/off button (♪) in the top bar, and a volume slider in Settings; both are remembered.

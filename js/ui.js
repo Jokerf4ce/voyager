@@ -68,7 +68,7 @@ const UI = {
     const playing = !!Music.timer;
     this.$('btn-music').classList.toggle('on', playing);
     this.$('btn-music').classList.toggle('off', !playing);
-    this.$('btn-music').title = playing ? 'Music on (click to mute)' : Music.enabled ? 'Music starts after your first click' : 'Music off (click to play)';
+    this.$('btn-music').title = playing ? `Now playing: ${Music.find(Music.trackId).name} (click to mute)` : Music.enabled ? 'Music starts after your first click' : 'Music off (click to play)';
   },
 
   renderNav() {
@@ -396,6 +396,12 @@ const UI = {
     return this.panel('Settings', `
       <div class="kv"><span>Music</span><span class="btnrow">${this.btn(Music.enabled ? 'On' : 'Off', 'music', '', false, Music.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Music.volume * 100)}" data-input="volume" aria-label="Music volume" class="slider"></span></div>
+      <div class="kv"><span>Playlist</span><span class="btnrow">${[['order', 'In order'], ['shuffle', 'Shuffle'], ['repeat', 'Repeat one']].map(([m, l]) => this.btn(l, 'musicmode', m, false, Music.mode === m ? 'on' : '')).join('')}${this.btn('Next track ▸▸', 'musicskip', '', !Music.timer)}</span></div>
+      <div class="tracks">${Music.tracks.map((t) => {
+        const now = Music.timer && Music.trackId === t.id;
+        return `<div class="track ${now ? 'now' : ''}"><div><b>${now ? '♪ ' : ''}${U.esc(t.name)}</b><br><small class="muted">${U.esc(t.mood || '')}</small></div>
+          ${this.btn(now ? 'Playing' : '▶ Play', 'musicplay', t.id, now, now ? 'on' : '')}</div>`;
+      }).join('')}</div>
       <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>

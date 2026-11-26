@@ -161,6 +161,9 @@ details summary:hover { color: var(--bone); }
 .btn.icon { font-family: var(--font-body); font-size: 18px; padding: 1px 10px; text-transform: none; }
 .btn.icon.off { opacity: .45; text-decoration: line-through; }
 .slider { accent-color: var(--rust); width: 140px; vertical-align: middle; }
+.tracks { margin: 6px 0 12px; }
+.track { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid #2a2420; background: #141210; margin-bottom: 4px; }
+.track.now { border-color: var(--edge-hi); box-shadow: inset 3px 0 0 var(--rust); }
 
 /* version tag, bottom right */
 #version { position: fixed; right: 8px; bottom: 6px; z-index: 5; font-family: var(--font-head); font-size: 10px; letter-spacing: 1px; color: #8a8070; background: rgba(12, 11, 10, .85); border: 1px solid var(--edge); padding: 2px 6px; pointer-events: none; }

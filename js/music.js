@@ -1,40 +1,37 @@
-// Voyager — generative soundtrack, synthesised live with the Web Audio API (no audio files).
-// Mood: a solemn monk choir chanting in a minor key over a low drone, slow strings,
-// and distant war drums that swell when battles break out. Original music: melodies are
-// generated as a random walk over the scale, so it never repeats exactly.
+// Voyager — music engine: a playlist of tracks (js/tracks.js), synthesised live with the Web Audio API.
+// Generative tracks are composed bar by bar; recorded tracks (src: audio file) are played as-is.
+// Battles raise `intensity`, which every track can use (usually: more drums and strings).
 
 const Music = {
   ctx: null,
   enabled: true,
   volume: 0.6,
+  mode: 'order',         // 'order' | 'shuffle' | 'repeat'
+  trackId: null,         // the track playing (or last played)
+  track: null,
+  trackBar: 0,           // bar within the current track
   intensity: 0,          // 0..1, raised by battles, decays over time
-  bar: 0,
   nextBarTime: 0,
   timer: null,
+  audioEl: null,         // for recorded tracks
   prefsKey: 'voyager_audio',
 
-  // ---- music theory ----
-  root: 38,                                   // D2 (MIDI)
-  scale: [0, 2, 3, 5, 7, 8, 10],              // D natural minor (Aeolian)
-  bpm: 54,
-  get beat() { return 60 / this.bpm; },
-  get barLen() { return this.beat * 4; },
-  // Chord roots as scale degrees: i, VI, VII, v / i, iv, VI, VII / i, VII, VI, v
-  progressions: [[0, 5, 6, 4], [0, 3, 5, 6], [0, 6, 5, 4]],
-  // Song form, one entry per 4-bar phrase.
-  form: ['chant', 'chant', 'choir', 'rise', 'rise', 'choir', 'hush'],
   vowels: {
     ah: [700, 1100, 2600],
     oh: [450, 800, 2830],
     oo: [325, 700, 2530],
   },
 
+  get tracks() { return MusicTracks; },
+  get beat() { return 60 / (this.track && this.track.bpm || 60); },
+  get barLen() { return this.beat * 4; },
+
   midiHz(m) { return 440 * Math.pow(2, (m - 69) / 12); },
-  // MIDI note of a scale degree (degrees beyond 7 wrap into higher octaves).
+  // MIDI note of a scale degree of the current track (degrees beyond 7 wrap into higher octaves).
   degree(d, octave = 0) {
-    const n = this.scale.length;
+    const scale = this.track.scale, n = scale.length;
     const o = Math.floor(d / n), i = ((d % n) + n) % n;
-    return this.root + 12 * (octave + o) + this.scale[i];
+    return this.track.root + 12 * (octave + o) + scale[i];
   },
   triad(d, octave) { return [this.degree(d, octave), this.degree(d + 2, octave), this.degree(d + 4, octave)]; },
 
@@ -44,10 +41,13 @@ const Music = {
       const p = JSON.parse(localStorage.getItem(this.prefsKey) || '{}');
       if (typeof p.enabled === 'boolean') this.enabled = p.enabled;
       if (typeof p.volume === 'number') this.volume = p.volume;
+      if (['order', 'shuffle', 'repeat'].includes(p.mode)) this.mode = p.mode;
+      if (this.tracks.some((t) => t.id === p.trackId)) this.trackId = p.trackId;
     } catch (e) { /* storage unavailable */ }
+    if (!this.trackId) this.trackId = this.tracks[0].id;
   },
   savePrefs() {
-    try { localStorage.setItem(this.prefsKey, JSON.stringify({ enabled: this.enabled, volume: this.volume })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(this.prefsKey, JSON.stringify({ enabled: this.enabled, volume: this.volume, mode: this.mode, trackId: this.trackId })); } catch (e) { /* ignore */ }
   },
 
   // ---- audio graph ----
@@ -119,7 +119,7 @@ const Music = {
     this.send(env, 0.5, 0.8);
   },
 
-  // Low bowed strings: soft saws through a slowly opening low-pass filter.
+  // Bowed strings: soft saws through a slowly opening low-pass filter.
   strings(t, midi, dur, vel) {
     const ctx = this.ctx, f0 = this.midiHz(midi);
     const env = ctx.createGain();
@@ -161,7 +161,7 @@ const Music = {
     o.frequency.setValueAtTime(95 * pitch, t);
     o.frequency.exponentialRampToValueAtTime(42 * pitch, t + 0.45);
     const g = ctx.createGain();
-    g.gain.setValueAtTime(vel, t);
+    g.gain.setValueAtTime(Math.max(0.0001, vel), t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
     o.connect(g); o.start(t); o.stop(t + 1);
     const len = Math.floor(ctx.sampleRate * 0.25);
@@ -175,66 +175,104 @@ const Music = {
     this.send(g, 0.35, 0.9);
   },
 
-  // ---- composition ----
-  // A plainchant-like phrase over 4 bars: stepwise random walk, long final note on a chord tone.
-  chantPhrase(t, prog) {
-    let deg = 7 + [0, 2, 4][Math.floor(Math.random() * 3)];
-    let beat = 0;
-    const total = 16;
-    while (beat < total - 4) {
-      const len = Math.random() < 0.65 ? 1 : 2;
-      const vowel = Math.random() < 0.7 ? 'ah' : 'oh';
-      this.voice(t + beat * this.beat, this.degree(deg, 1), len * this.beat * 1.05, 0.22, vowel, 2);
-      beat += len;
-      const r = Math.random();
-      deg += r < 0.4 ? -1 : r < 0.75 ? 1 : r < 0.87 ? -2 : 2;
-      deg = Math.max(5, Math.min(12, deg));
-    }
-    // cadence: land on the root or fifth of the last chord and hold
-    const last = prog[3];
-    const target = 7 + (Math.random() < 0.5 ? last : last + 4) % 7;
-    this.voice(t + beat * this.beat, this.degree(target, 1), (total - beat) * this.beat, 0.24, 'oh', 2);
+  // A cold metallic bell: two-operator FM with a long decay.
+  bell(t, midi, vel) {
+    const ctx = this.ctx, f0 = this.midiHz(midi);
+    const car = ctx.createOscillator(), mod = ctx.createOscillator(), modGain = ctx.createGain();
+    car.frequency.value = f0; mod.frequency.value = f0 * 3.5;
+    modGain.gain.setValueAtTime(f0 * 2.2, t);
+    modGain.gain.exponentialRampToValueAtTime(f0 * 0.05, t + 2.5);
+    mod.connect(modGain); modGain.connect(car.frequency);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vel, t + 0.005);
+    env.gain.exponentialRampToValueAtTime(0.0005, t + 4);
+    car.connect(env);
+    car.start(t); mod.start(t); car.stop(t + 4.1); mod.stop(t + 4.1);
+    this.send(env, 0.35, 1);
   },
 
-  scheduleBar(t) {
-    const phrase = Math.floor(this.bar / 4), inPhrase = this.bar % 4;
-    const section = this.form[phrase % this.form.length];
-    const prog = this.progressions[Math.floor(phrase / this.form.length) % this.progressions.length];
-    const chord = prog[inPhrase];
-    const hot = this.intensity;
-
-    if (inPhrase === 0) this.drone(t, this.root, this.barLen * 4, section === 'hush' ? 0.16 : 0.22);
-
-    // choir pad on the chord (low male voices)
-    if (section !== 'hush') {
-      const [a, b, c] = this.triad(chord, 1);
-      const vel = section === 'chant' ? 0.07 : 0.11;
-      for (const m of [a - 12, a, b, c]) this.voice(t, m, this.barLen * 1.02, vel, section === 'chant' ? 'oo' : 'ah');
+  // Low brass: bright saws through a swelling filter, a little growl.
+  brass(t, midi, dur, vel) {
+    const ctx = this.ctx, f0 = this.midiHz(midi);
+    const env = ctx.createGain();
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vel, t + 0.12);
+    env.gain.linearRampToValueAtTime(vel * 0.75, t + dur * 0.6);
+    env.gain.linearRampToValueAtTime(0, t + dur);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2;
+    lp.frequency.setValueAtTime(250, t);
+    lp.frequency.linearRampToValueAtTime(1100, t + 0.25);
+    lp.frequency.linearRampToValueAtTime(500, t + dur);
+    for (const [d, type] of [[-5, 'sawtooth'], [5, 'sawtooth'], [0, 'square']]) {
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = f0; o.detune.value = d;
+      o.connect(lp); o.start(t); o.stop(t + dur + 0.05);
     }
+    lp.connect(env);
+    this.send(env, 0.6, 0.5);
+  },
 
-    if (section === 'chant' && inPhrase === 0) this.chantPhrase(t, prog);
-    if (section === 'rise' && inPhrase === 0 && Math.random() < 0.7) this.chantPhrase(t, prog);
+  // ---- playlist ----
+  find(id) { return this.tracks.find((t) => t.id === id) || this.tracks[0]; },
 
-    // strings in the louder sections, or when battle is near
-    if (section === 'choir' || section === 'rise' || hot > 0.3) {
-      const [a, , c] = this.triad(chord, 0);
-      this.strings(t, a, this.barLen, 0.05 + 0.05 * hot);
-      this.strings(t, c, this.barLen, 0.035 + 0.04 * hot);
+  nextTrackId() {
+    const list = this.tracks, i = list.findIndex((t) => t.id === this.trackId);
+    if (this.mode === 'repeat') return this.trackId;
+    if (this.mode === 'shuffle' && list.length > 1) {
+      let j; do { j = Math.floor(Math.random() * list.length); } while (j === i);
+      return list[j].id;
     }
+    return list[(i + 1) % list.length].id;
+  },
 
-    // war drums: on in 'rise', and pulled in by battles
-    const drums = section === 'rise' ? 0.6 + 0.4 * hot : hot;
-    if (drums > 0.15) {
-      this.drum(t, 0.5 * drums, 1);
-      this.drum(t + this.beat * 2, 0.35 * drums, 1.15);
-      if (drums > 0.5) this.drum(t + this.beat * 2.5, 0.25 * drums, 1.3);
-      if (inPhrase === 3 && drums > 0.4) {
-        for (let i = 0; i < 6; i++) this.drum(t + this.beat * (3 + i / 6), (0.15 + i * 0.05) * drums, 1.2);
+  // Switch to a track. Generative notes already scheduled ring out under the new track.
+  load(id) {
+    this.stopRecorded();
+    this.trackId = id;
+    this.track = this.find(id);
+    this.trackBar = 0;
+    this.savePrefs();
+    if (this.track.src) this.playRecorded(this.track);
+    if (typeof UI !== 'undefined' && G) UI.renderTop();
+  },
+
+  // Play a specific track now (from the Settings list).
+  play(id) {
+    if (!this.timer) { this.enabled = true; this.trackId = id; this.start(); return; }
+    this.load(id);
+    this.nextBarTime = this.ctx.currentTime + 0.3; // start now; the old track's last notes ring out underneath
+    this.tick();
+  },
+
+  skip() { if (this.timer) this.play(this.nextTrackId()); },
+
+  setMode(m) { this.mode = m; this.savePrefs(); },
+
+  playRecorded(track) {
+    try {
+      const a = new Audio(track.src);
+      a.onended = () => { if (this.audioEl === a && this.timer) { this.load(this.nextTrackId()); this.nextBarTime = this.ctx.currentTime + 0.3; } };
+      const src = this.ctx.createMediaElementSource(a);
+      src.connect(this.out);
+      this.audioEl = a;
+      a.play().catch(() => {});
+    } catch (e) { this.audioEl = null; }
+  },
+  stopRecorded() { if (this.audioEl) { this.audioEl.onended = null; this.audioEl.pause(); this.audioEl = null; } },
+
+  tick() {
+    if (!this.track || this.track.src) return; // recorded tracks run on their own
+    while (this.nextBarTime < this.ctx.currentTime + 1.5) {
+      if (this.trackBar >= this.track.bars) {
+        this.load(this.nextTrackId());
+        this.nextBarTime += this.beat; // a breath between tracks
+        if (this.track.src) return;
       }
+      this.track.bar(this, this.nextBarTime, this.trackBar);
+      this.trackBar++;
+      this.intensity *= 0.85;
+      this.nextBarTime += this.barLen;
     }
-
-    this.intensity *= 0.85;
-    this.bar++;
   },
 
   // ---- playback ----
@@ -244,20 +282,21 @@ const Music = {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     try {
-      if (!this.ctx || this.ctx instanceof (window.OfflineAudioContext || Object)) this.build(new AC());
+      if (!this.ctx || !(this.ctx instanceof AC)) this.build(new AC());
       this.ctx.resume();
     } catch (e) { return; }
     this.out.gain.cancelScheduledValues(this.ctx.currentTime);
     this.out.gain.setValueAtTime(0, this.ctx.currentTime);
     this.out.gain.linearRampToValueAtTime(this.gainFor(this.volume), this.ctx.currentTime + 3);
     this.nextBarTime = this.ctx.currentTime + 0.2;
-    this.timer = setInterval(() => {
-      while (this.nextBarTime < this.ctx.currentTime + 1.5) { this.scheduleBar(this.nextBarTime); this.nextBarTime += this.barLen; }
-    }, 250);
+    this.timer = setInterval(() => this.tick(), 250);
+    this.load(this.trackId || this.tracks[0].id);
+    this.tick();
   },
 
   stop() {
     clearInterval(this.timer); this.timer = null;
+    this.stopRecorded();
     if (this.ctx && this.ctx.state === 'running') {
       const now = this.ctx.currentTime;
       this.out.gain.cancelScheduledValues(now);
@@ -282,13 +321,14 @@ const Music = {
   // Battles push the music towards drums and strings.
   battle(strength = 0.7) { this.intensity = Math.min(1, this.intensity + strength); },
 
-  // Render a stretch of music offline (for testing or exporting a sample).
-  async render(seconds = 30, sampleRate = 44100) {
+  // Render part of a generative track offline (for testing or exporting a sample).
+  async render(seconds = 30, trackId = this.tracks[0].id, sampleRate = 44100) {
     const off = new OfflineAudioContext(2, Math.floor(seconds * sampleRate), sampleRate);
-    const keep = { ctx: this.ctx, out: this.out, dry: this.dry, verb: this.verb, wet: this.wet, bar: this.bar };
+    const keep = { ctx: this.ctx, out: this.out, dry: this.dry, verb: this.verb, wet: this.wet, track: this.track, trackBar: this.trackBar };
     this.build(off);
-    this.bar = 0;
-    for (let t = 0.1; t < seconds; t += this.barLen) this.scheduleBar(t);
+    this.track = this.find(trackId);
+    let i = 0;
+    for (let t = 0.1; t < seconds; t += this.barLen) this.track.bar(this, t, i++);
     const buf = await off.startRendering();
     Object.assign(this, keep);
     return buf;
