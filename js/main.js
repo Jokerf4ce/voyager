@@ -81,6 +81,8 @@ const Game = {
     musicplay: (a) => { Music.play(a); },
     musicskip: () => { Music.skip(); },
     musicmode: (a) => { Music.setMode(a); },
+    voice: () => { Voice.toggle(); },
+    voicetest: () => { Voice.enabled = true; Voice.speaking = false; Voice.say('welcome_back'); },
     autospeed: (a) => { Game.autoMs = +a; if (Game.autoTimer) Game.startAuto(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },
     export: () => { UI.$('savebox').value = State.exportSave(); },
@@ -111,6 +113,7 @@ document.addEventListener('click', (ev) => {
 document.addEventListener('input', (ev) => {
   const el = ev.target.closest('[data-input]');
   if (el && el.dataset.input === 'volume') Music.setVolume(el.value / 100);
+  if (el && el.dataset.input === 'voicevol') Voice.setVolume(el.value / 100);
 });
 
 document.addEventListener('keydown', (ev) => {
@@ -128,7 +131,8 @@ window.addEventListener('DOMContentLoaded', () => {
   Music.loadPrefs();
   UI.$('btn-music').onclick = (ev) => { ev.stopPropagation(); if (!Music.timer && Music.enabled) Music.start(); else Music.toggle(); UI.renderTop(); if (UI.screen === 'settings') UI.render(); };
   // Only refresh the top bar here: a full re-render would replace the element being clicked and swallow the click.
-  const firstGesture = () => { Music.start(); UI.renderTop(); };
+  Voice.init();
+  const firstGesture = () => { Music.start(); Voice.trigger('start'); UI.renderTop(); };
   document.addEventListener('pointerdown', firstGesture, { once: true });
   document.addEventListener('keydown', firstGesture, { once: true });
   UI.$('btn-menu').onclick = () => document.body.classList.toggle('nav-collapsed');

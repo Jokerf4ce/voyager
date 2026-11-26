@@ -208,6 +208,12 @@ Recorded audio files can be added as tracks alongside the generated ones.
 
 **Open:** sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
 
+**Ship's computer voice** (decided: a lightly distorted, glitching British female computer voice). Lines and their triggers are data in `js/voicelines.js`, so more can be added later. The engine is `js/voice.js`.
+- **Browser voice:** the browser's built-in en-GB female voice. The glitch is built around it: stuttered fragments, pitch slips, and static under the voice.
+- **Recorded files:** lines can instead point to an audio file, which gets real distortion and stutter applied.
+- **Triggers so far:** `start` (first click after loading) and `return` (back after more than 5 minutes away).
+- **Ideas for later triggers:** battle won or lost, colony founded or lost, a mythic Void Signal, an alien warhost spotted.
+
 ## 10. Technical
 
 **Decided:** HTML, JavaScript and CSS, with image files for graphics.

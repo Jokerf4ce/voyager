@@ -26,6 +26,7 @@ Open `index.html` in a browser. No server or build step is needed. Saves are kep
 - Void Signals gacha: shards earned in play, rarities, pity, rank-ups, cursed relics, ship blueprints
 - Auto-cycle, offline progress, save export/import
 - Generative soundtrack synthesised in the browser: three tracks in a playlist (mute with ♪, tracks and volume in Settings)
+- Ship's computer voice ("Welcome back, Commander."), with lines and triggers in `js/voicelines.js`
 - Placeholder pixel art generated in code (planets, portraits, ships), to be replaced with real sprites
 
 ## Versions
@@ -53,6 +54,8 @@ js/gacha.js       Void Signals
 js/sprites.js     procedural placeholder pixel art
 js/music.js       music engine and playlist (Web Audio)
 js/tracks.js      the soundtrack's tracks
+js/voice.js       ship's computer voice engine
+js/voicelines.js  voice lines and their triggers
 js/map.js         star map canvas (galaxy)
 js/sysmap.js      solar system map canvas (one system)
 js/ui.js          screens and modals

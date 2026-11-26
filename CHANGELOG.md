@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.14.0 — 2026-11-26
+- Ship's computer voice: a British female voice says "Welcome back, Commander." when you start playing and when you return after more than 5 minutes away.
+- Glitch effect: stuttered word fragments, small pitch slips, static, clicks and digital squelches, with the music ducked while she speaks.
+- Reusable system: lines and triggers in `js/voicelines.js`; call `Voice.trigger('name')` from the game. Lines can also use recorded audio files, which get real distortion and stutter.
+- Voice on/off, volume and a Test button in Settings.
+
 ## 0.13.0 — 2026-11-26
 - Music playlist: several tracks that play in order, on shuffle or on repeat, with a track list, Play buttons and Next track in Settings. Choices are remembered.
 - The existing piece is now the track "Cathedral of Ash" (unchanged).
