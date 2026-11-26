@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.35.1 — 2026-11-26
+- The game moved to https://voyager.playle.io/ (new GitHub Pages custom domain); README and notes updated.
+
 ## 0.35.0 — 2026-11-26
 - **Demolish buildings.** A red ✕ next to *Upgrade* on a colony, and next to each colony in a building's list on the Buildings screen, tears the building down. That covers all levels and frees the slot.
 - **Refund:** you get back **25 % of everything invested**, which is the price of every level paid at that colony, rounded down. The confirm dialog shows the refund and the total invested.

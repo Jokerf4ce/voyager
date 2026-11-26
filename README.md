@@ -6,7 +6,7 @@ See [docs/concept.md](docs/concept.md) for the design.
 
 ## Play
 
-**Play online:** https://voyager.weidmann.cloud/ (GitHub Pages, updated automatically on every push to `main`).
+**Play online:** https://voyager.playle.io/ (GitHub Pages, updated automatically on every push to `main`).
 
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
