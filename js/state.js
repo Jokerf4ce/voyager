@@ -48,9 +48,9 @@ const State = {
     return m;
   },
 
-  // Save slots: 'main' is the real game; 'admin' is a generated test game (js/admin.js) kept separately.
+  // Save slots: 'main' is the real game; 'tester' is a generated test game (js/tester.js) kept separately.
   slot: 'main',
-  key() { return DATA.config.saveKey + (this.slot === 'admin' ? '_admin' : ''); },
+  key() { return DATA.config.saveKey + (this.slot === 'tester' ? '_tester' : ''); },
 
   save() {
     if (!G) return;

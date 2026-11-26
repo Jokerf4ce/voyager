@@ -1,7 +1,7 @@
-// Voyager — admin test game: a separate save slot with a ready-made empire for testing.
-// Open it from Settings or by adding #admin to the address. The real save is never touched.
+// Voyager — tester mode: a separate save slot with a ready-made empire for testing.
+// Open it from Settings or by adding #tester to the address. The real save is never touched.
 
-const Admin = {
+const Tester = {
   extraColonies: 3,
   explored: 10,
 
@@ -48,9 +48,9 @@ const Admin = {
     // an alien raid already on its way, to try a defense battle
     const target = AI.pickTarget('chorus');
     if (target) G.threats.push({ id: 't' + (G.nextThreatId++), owner: 'chorus', name: 'Chorus Raid', target: target.s.id, eta: 2, total: 2, ships: AI.team('chorus', 3) });
-    G.admin = true;
+    G.tester = true;
     G.log = [];
-    Log.add('Admin test game: ' + out.length + ' extra colonies with random buildings.');
+    Log.add('Tester mode: ' + out.length + ' extra colonies with random buildings.');
   },
 
   // Random buildings at random levels (1–4) for one layer of a planet, filling its slots.

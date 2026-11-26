@@ -64,7 +64,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Start** (decided, changed in v0.19): the game begins with only the home system charted and only the capital settled. Neighbours show as "?".
 
-**Admin test game** (decided): a separate save slot (`voyager_save_v11_admin`) generated with 3 extra colonies holding random buildings, 10 systems charted and full stores, for testing. Opened from Settings or `#admin`; it never touches the real save.
+**Tester mode** (decided; called the admin test game before v0.30.1): a separate save slot (`voyager_save_v12_tester`) generated with 3 extra colonies holding random buildings, 10 systems charted, fleets of every rarity and full stores, for testing. Opened from Settings or `#tester` (the old `#admin` still works); it never touches the real save.
 
 **Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes, guards (pips), your missions (gold) and incoming raids (red). The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and any hostile guard at the jump point. The Solar System map draws sizes to scale, using real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of a big star fits on screen. Two exceptions keep things visible: small worlds are drawn at least 8 px across, and pulsars and black holes are enlarged. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
 

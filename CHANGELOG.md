@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.30.1 — 2026-11-26
+- The admin test game is now called **tester mode**: open it with `#tester` (the old `#admin` link still works and switches to `#tester`) or Settings → *Open tester mode*. The top bar shows "TESTER". The file is `js/tester.js`.
+- The tester game now saves under its own new name, so an earlier admin test game is not picked up; a fresh one is generated.
+
 ## 0.30.0 — 2026-11-26
 - **Big guns can't track small ships.** Weapons on Large ships have −40 % hit chance against Small ships (`DATA.largeVsSmallHit = 0.6`). Together with the size advantage, Small ships are now the answer to capital ships. Applies to every side, Leviathans included. The weapon buttons note "(small target)".
 - `docs/combat.md` updated.

@@ -48,19 +48,19 @@ const Game = {
     this.stopAuto();
     this.overShown = false;
     UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null;
-    if (State.slot === 'admin') Admin.newTestGame(); else State.newGame();
+    if (State.slot === 'tester') Tester.newTestGame(); else State.newGame();
     UI.selSys = G.homeId;
     UI.screen = 'map';
     State.save();
     UI.render();
   },
 
-  // Switch between the real game and the admin test game (separate save slots).
+  // Switch between the real game and tester mode (separate save slots).
   switchSlot(slot) {
     State.save();
     this.stopAuto();
     State.slot = slot;
-    history.replaceState(null, '', slot === 'admin' ? '#admin' : location.pathname + location.search);
+    history.replaceState(null, '', slot === 'tester' ? '#tester' : location.pathname + location.search);
     if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); }
     else this.newGame();
   },
@@ -135,7 +135,7 @@ const Game = {
       catch (e) { alertLog('Import failed: ' + e.message); }
     },
     newgame: () => {
-      UI.modal(State.slot === 'admin' ? `<h2>Regenerate the test game?</h2><p>A new random test galaxy replaces this one. Your real game is not touched.</p>
+      UI.modal(State.slot === 'tester' ? `<h2>Regenerate the tester game?</h2><p>A new random test galaxy replaces this one. Your real game is not touched.</p>
         <div class="btnrow">${UI.btn('Regenerate', 'newgame-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>` : `<h2>Abandon this galaxy?</h2><p>Your current game will be lost.</p>
         <div class="btnrow">${UI.btn('Yes, start over', 'newgame-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
     },
@@ -193,7 +193,10 @@ window.addEventListener('DOMContentLoaded', () => {
   nav.addEventListener('mouseleave', armNav);
   UI.$('btn-menu').onclick = () => { document.body.classList.toggle('nav-collapsed'); if (!nav.matches(':hover')) armNav(); };
   armNav();
-  if (location.hash === '#admin') State.slot = 'admin';
+  if (location.hash === '#tester' || location.hash === '#admin') { // #admin: the old name
+    State.slot = 'tester';
+    if (location.hash === '#admin') history.replaceState(null, '', '#tester');
+  }
   if (State.load()) {
     const off = State.applyOffline();
     UI.selSys = G.homeId;
