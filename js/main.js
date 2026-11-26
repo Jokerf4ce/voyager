@@ -49,15 +49,26 @@ const Game = {
     this.stopAuto();
     this.overShown = false;
     UI.selSys = null; UI.selFleet = null; UI.lastPull = null; UI.yard = null;
-    State.newGame();
+    if (State.slot === 'admin') Admin.newTestGame(); else State.newGame();
     UI.selSys = G.homeId;
     UI.screen = 'map';
     State.save();
     UI.render();
   },
 
+  // Switch between the real game and the admin test game (separate save slots).
+  switchSlot(slot) {
+    State.save();
+    this.stopAuto();
+    State.slot = slot;
+    history.replaceState(null, '', slot === 'admin' ? '#admin' : location.pathname + location.search);
+    if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); }
+    else this.newGame();
+  },
+
   actions: {
     screen: (a) => { UI.screen = a; },
+    slot: (a) => { Game.switchSlot(a); },
     close: () => { UI.closeModal(); },
     selfleet: (a) => { const id = +a; UI.selFleet = UI.selFleet === id ? null : id; },
     halt: (a) => { const f = Fleets.get(+a); if (f) f.path = []; },
@@ -96,7 +107,8 @@ const Game = {
       catch (e) { alertLog('Import failed: ' + e.message); }
     },
     newgame: () => {
-      UI.modal(`<h2>Abandon this galaxy?</h2><p>Your current game will be lost.</p>
+      UI.modal(State.slot === 'admin' ? `<h2>Regenerate the test game?</h2><p>A new random test galaxy replaces this one. Your real game is not touched.</p>
+        <div class="btnrow">${UI.btn('Regenerate', 'newgame-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>` : `<h2>Abandon this galaxy?</h2><p>Your current game will be lost.</p>
         <div class="btnrow">${UI.btn('Yes, start over', 'newgame-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
     },
     'newgame-confirm': () => { UI.modalOpen = false; UI.$('modal').classList.remove('show'); Game.newGame(); },
@@ -141,6 +153,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('pointerdown', firstGesture, { once: true });
   document.addEventListener('keydown', firstGesture, { once: true });
   UI.$('btn-menu').onclick = () => document.body.classList.toggle('nav-collapsed');
+  if (location.hash === '#admin') State.slot = 'admin';
   if (State.load()) {
     const off = State.applyOffline();
     UI.selSys = G.homeId;

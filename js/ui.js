@@ -64,7 +64,8 @@ const UI = {
     this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
       (c.eff < 1 ? `<div class="res over" title="Over capacity: all production is rationed"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
-    this.$('cycle').textContent = 'CYCLE ' + G.cycle;
+    this.$('cycle').textContent = (State.slot === 'admin' ? 'ADMIN TEST · ' : '') + 'CYCLE ' + G.cycle;
+    this.$('cycle').classList.toggle('admin', State.slot === 'admin');
     this.$('btn-auto').classList.toggle('on', !!Game.autoTimer);
     this.$('btn-auto').textContent = Game.autoTimer ? '❚❚ AUTO' : '▶ AUTO';
     const playing = !!Music.timer;
@@ -459,7 +460,11 @@ const UI = {
       <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>
-      <div class="btnrow">${this.btn('Abandon and start a new galaxy', 'newgame', '', false, 'danger')}</div>
+      <div class="btnrow">${this.btn(State.slot === 'admin' ? 'Regenerate the test game' : 'Abandon and start a new galaxy', 'newgame', '', false, 'danger')}</div>
+      <div class="kv"><span>Admin test game</span><span class="btnrow">${State.slot === 'admin'
+        ? this.btn('Back to the real game', 'slot', 'main', false, 'gold')
+        : this.btn('Open admin test game', 'slot', 'admin')}</span></div>
+      <p class="muted small">The test game has its own save (extra colonies with random buildings, plenty of resources). Your real game is not touched. You can also open it with <code>#admin</code> at the end of the address.</p>
       <p class="muted small">Voyager v${VERSION.number} (${VERSION.date}) · saves stay in this browser (localStorage).</p>`);
   },
 

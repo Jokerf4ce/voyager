@@ -130,14 +130,15 @@ const Galaxy = {
     const evKeys = Object.keys(DATA.events);
     for (const s of S) if (!homes.includes(s.id) && Math.random() < 0.5) s.anomaly = U.pick(evKeys);
 
-    // The Covenant's old star charts cover the nearest systems.
+    // Systems already charted at the start (by default only home; its neighbours show as '?').
     const dH = U.distances(home.id);
-    const charted = S.slice().sort((a, b) => dH[a.id] - dH[b.id]).slice(0, DATA.config.startExplored);
-    for (const s of charted) s.explored = true;
+    const byDist = S.slice().sort((a, b) => dH[a.id] - dH[b.id]);
+    for (const s of byDist.slice(0, DATA.config.startExplored)) s.explored = true;
 
-    // A red hypergiant in the charted space, for show: not home, not next door, not an alien home.
-    const pick = charted.filter((s) => !homes.includes(s.id) && dH[s.id] >= 2 && !s.owner);
-    const hyper = pick[pick.length - 1] || charted.find((s) => s.id !== home.id && !s.owner);
+    // A red hypergiant close to home, for show: not home, not next door, not an alien home.
+    const nearby = byDist.slice(0, DATA.config.hypergiantWithin);
+    const pick = nearby.filter((s) => !homes.includes(s.id) && dH[s.id] >= 2 && !s.owner);
+    const hyper = pick[pick.length - 1] || nearby.find((s) => s.id !== home.id && !s.owner);
     if (hyper) {
       hyper.star = 'H';
       hyper.planets = this.makePlanets('H');

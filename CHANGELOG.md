@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.19.0 — 2026-11-26
+- A new game now starts with only the home system charted and only the capital settled; neighbouring systems show as "?". The Red Hypergiant is still placed close to home (among the 10 nearest systems), waiting to be found.
+- **Admin test game**: a separate save slot for testing, opened from Settings or with `#admin` at the end of the address. It generates the capital plus 3 extra colonies (two at home, one in a neighbouring system) with random buildings at levels 1–4, the 10 nearest systems charted, capacity buildings raised so nothing is rationed, and 1,500 of every resource (500 Shards). The top bar shows "ADMIN TEST". Your real save is never touched; "Back to the real game" returns to it, and "Regenerate the test game" rolls a new one.
+
 ## 0.18.1 — 2026-11-26
 - Assistant: lines sharing a trigger (e.g. `return`) are now picked purely at random. Before, the no-repeat rule made two lines strictly alternate; it now applies only to `random` announcements (`noRepeat` option).
 - The Test button plays any voice line at random.

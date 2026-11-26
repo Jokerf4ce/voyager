@@ -269,7 +269,8 @@ DATA.names = {
 
 DATA.config = {
   systemCount: 22,
-  startExplored: 10, // systems already charted at the start, nearest to home
+  startExplored: 1,  // systems already charted at the start (1 = only home; neighbours show as '?')
+  hypergiantWithin: 10, // the red hypergiant is placed among this many systems nearest to home
   monsterSystems: 6,
   autoCycleMs: 3000,
   offlineSecondsPerCycle: 60,

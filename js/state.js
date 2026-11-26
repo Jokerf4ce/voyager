@@ -47,15 +47,19 @@ const State = {
     return m;
   },
 
+  // Save slots: 'main' is the real game; 'admin' is a generated test game (js/admin.js) kept separately.
+  slot: 'main',
+  key() { return DATA.config.saveKey + (this.slot === 'admin' ? '_admin' : ''); },
+
   save() {
     if (!G) return;
     G.lastSeen = Date.now();
-    try { localStorage.setItem(DATA.config.saveKey, JSON.stringify(G)); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem(this.key(), JSON.stringify(G)); } catch (e) { /* storage unavailable */ }
   },
 
   load() {
     let raw = null;
-    try { raw = localStorage.getItem(DATA.config.saveKey); } catch (e) { return false; }
+    try { raw = localStorage.getItem(this.key()); } catch (e) { return false; }
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
@@ -66,7 +70,7 @@ const State = {
   },
 
   wipe() {
-    try { localStorage.removeItem(DATA.config.saveKey); } catch (e) { /* ignore */ }
+    try { localStorage.removeItem(this.key()); } catch (e) { /* ignore */ }
   },
 
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },

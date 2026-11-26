@@ -60,9 +60,11 @@ Rare special systems (decided to add, effects proposed). These are stellar remna
 | Pulsar (spinning neutron star with radiation beams) | 1–2 | ×0.3 | −2 | Compute ×2, +1 Void Shard per Cycle while held |
 | Black Hole (with accretion disc) | 1–2 | ×0.2 | −2 | Compute ×2.5, +3 Void Shards per Cycle while held |
 
-Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1,400 solar radii), with 1–3 scorched planets, Infrastructure ×2 and habitability −2. It never appears at random. One is placed among the charted systems at the start, for show.
+Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1,400 solar radii), with 1–3 scorched planets, Infrastructure ×2 and habitability −2. It never appears at random. One is placed among the 10 systems nearest to home at the start, for show (to be found by exploring).
 
-**Start** (decided): the game begins with about 10 systems already charted, the ones nearest to home.
+**Start** (decided, changed in v0.19): the game begins with only the home system charted and only the capital settled. Neighbours show as "?".
+
+**Admin test game** (decided): a separate save slot (`voyager_save_v10_admin`) generated with 3 extra colonies holding random buildings, 10 systems charted and full stores, for testing. Opened from Settings or `#admin`; it never touches the real save.
 
 **Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes and fleets. The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and fleets at the jump point. The Solar System map draws sizes to scale, using real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of a big star fits on screen. Two exceptions keep things visible: small worlds are drawn at least 8 px across, and pulsars and black holes are enlarged. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
 

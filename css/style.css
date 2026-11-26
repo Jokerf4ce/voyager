@@ -55,6 +55,7 @@ small, .small { font-size: 16px; }
 .bar.infra.over i { background: repeating-linear-gradient(90deg, #c04040 0 6px, #902828 6px 8px); }
 .spacer { flex: 1; }
 #cycle { font-size: 13px; color: var(--ash); }
+#cycle.admin { color: #e05050; }
 
 /* buttons */
 .btn { background: #2a221c; color: var(--bone); border: 2px solid var(--edge-hi); padding: 5px 10px; font-size: 11px;

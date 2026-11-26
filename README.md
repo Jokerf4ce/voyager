@@ -12,11 +12,12 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
 - **Star Map:** click a system to inspect it, double-click to open its **Solar System** map. Select one of your fleets, then click a system to send it there.
+- **Admin test game:** Settings → *Open admin test game*, or add `#admin` to the address. A separate save with extra colonies, random buildings and full stores, for testing. The real save is not touched.
 - While the game is closed, the empire keeps producing at 50% efficiency (1 Cycle per 60 s, max 120 Cycles).
 
 ## Proof of concept (v0.1)
 
-- Procedural galaxy of 22 systems with hyperlanes and fog of war; the 10 nearest are charted at the start, including one Red Hypergiant
+- Procedural galaxy of 22 systems with hyperlanes and fog of war; only home is charted at the start; a Red Hypergiant waits among the 10 nearest systems
 - Each system has a star class (O B A F G K M), or rarely a white dwarf, pulsar or black hole, and 1–5 planets
 - Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
@@ -54,6 +55,7 @@ js/explore.js     exploration, fog of war, events
 js/combat.js      battles and sieges
 js/ai.js          alien empire AI
 js/gacha.js       Void Signals
+js/admin.js       Admin test game (separate save slot)
 js/sprites.js     procedural placeholder pixel art
 js/music.js       music engine and playlist (Web Audio)
 js/tracks.js      the soundtrack's tracks
