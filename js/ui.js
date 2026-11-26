@@ -15,6 +15,7 @@ const UI = {
     ['overview', '☩', 'Overview'],
     ['battle', '⚔', 'Battle'],
     ['map', '✦', 'Star Map'],
+    ['system', '◉', 'Solar System'],
     ['buildings', '▦', 'Buildings'],
     ['colonies', '⌂', 'Colonies'],
     ['research', '☍', 'Research'],
@@ -44,12 +45,14 @@ const UI = {
       this.colSys = null;
     }
     this.lastScreen = this.screen;
-    document.body.classList.toggle('map-screen', this.screen === 'map' || this.screen === 'battle'); // these screens hide the Chronicle
+    document.body.classList.toggle('map-screen', ['map', 'system', 'battle'].includes(this.screen)); // these screens hide the Chronicle
     if (this.screen === 'battle') this.drawBattleArrow();
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
-      if (cv.offsetParent) { StarMap.draw(cv); StarMap.attach(cv); } // hidden behind the Solar System tab on phones // drag to pan, wheel/pinch to zoom, click to select, hover card on mouse
+      StarMap.draw(cv); StarMap.attach(cv); // drag to pan, wheel/pinch to zoom, click to select, hover card on mouse
       if (this.hover) this.showHover(); // keep the hover card through re-renders (e.g. Auto)
+    }
+    if (this.screen === 'system') {
       const sc = this.$('syscanvas');
       if (sc) {
         SystemMap.draw(sc);
@@ -187,47 +190,56 @@ const UI = {
     </div>`;
   },
 
-  // Scroll down to the selected system's solar system map.
+  // Open the selected system on the Solar System screen.
   openSystem() {
     this.selPlanet = null;
-    if (this.narrow()) { const s = G.systems[this.selSys]; if (s && s.explored) this.mapMode = 'system'; }
+    this.screen = 'system';
     this.render();
-    const el = this.$('sysrow');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   },
 
   // Phone-width layout (matches the 820 px breakpoint in style.css).
   narrow() { return window.matchMedia('(max-width: 820px)').matches; },
 
-  // Star map across the full width (hover a star for a summary), the selected system's solar system below.
-  // On phones the two maps don't fit together, so tabs switch between them (the system panel stays below both).
+  // The star map fills the screen; the selected system's panel (missions, planets) sits beside it.
   screen_map() {
     const s = this.selSys != null ? G.systems[this.selSys] : null;
-    if (this.mapMode === 'system' && !(s && s.explored)) this.mapMode = 'galaxy';
-    const sysMode = this.mapMode === 'system';
-    const tabs = `<div class="btnrow maptabs">${this.btn('✦ Star Map', 'mapmode', 'galaxy', false, sysMode ? '' : 'on')}${this.btn('◉ Solar System' + (s && s.explored ? ': ' + U.esc(s.name) : ''), 'mapmode', 'system', !(s && s.explored), sysMode ? 'on' : '')}</div>`;
     const hint = this.narrow()
       ? 'Drag to pan, pinch to zoom, tap a system to select it. Double-tap opens its solar system.'
-      : 'Drag to pan, scroll or pinch to zoom. Hover a system for a summary, click to select it; missions and its solar system appear below. The galaxy grows as you explore.';
-    let below = '';
-    if (s) {
-      const sysMap = s.explored
-        ? `<div class="sysmapbox"><h3 class="sysmap-title">◉ ${U.esc(s.name)}</h3><canvas id="syscanvas" width="${SystemMap.W}" height="${SystemMap.H}"></canvas>
-            <div class="maphint">Click a planet to inspect it. Hot worlds orbit close to the star, frozen ones far out.</div></div>`
-        : `<div class="sysmapbox"><h3 class="sysmap-title">? ${U.esc(s.name)}</h3><p class="flavor">Uncharted. Send a survey probe to see its star and planets.</p></div>`;
-      below = `<div class="sysrow" id="sysrow">${sysMap}<aside class="side">${this.systemPanel()}</aside></div>`;
+      : 'Drag to pan, scroll or pinch to zoom. Hover a system for a summary, click to select it, double-click to open its solar system. The galaxy grows as you explore.';
+    const open = s && s.explored ? `<div class="btnrow side-top">${this.btn('◉ Open solar system', 'opensys', '', false, 'gold')}</div>` : '';
+    return `<div class="mapscreen fitscreen">
+      <div class="mapcol">
+        <div class="mapbox"><canvas id="mapcanvas"></canvas>
+          <div class="mapctl">
+            <button class="btn" data-act="mapzoom" data-a="1.4" title="Zoom in">+</button>
+            <button class="btn" data-act="mapzoom" data-a="0.714" title="Zoom out">−</button>
+            <button class="btn" data-act="maphome" title="Centre on the home system">⌂</button>
+            ${s ? `<button class="btn" data-act="mapcenter" title="Centre on ${U.esc(s.name)}">◎</button>` : ''}
+          </div>
+          <div id="maphover" class="maphover"></div></div>
+        <div class="maphint">${hint}</div>
+      </div>
+      <aside class="side">${open}${this.systemPanel()}</aside>
+    </div>`;
+  },
+
+  // The selected system up close: star and planets, with the same panel beside it.
+  screen_system() {
+    let s = this.selSys != null ? G.systems[this.selSys] : null;
+    if (!s) { this.selSys = G.homeId; s = G.systems[G.homeId]; }
+    const back = this.btn('✦ Star Map', 'mapsys', s.id);
+    if (!s.explored) {
+      return `<div class="sysscreen fitscreen"><div class="mapcol"><h3 class="sysmap-title">? ${U.esc(s.name)} ${back}</h3>
+          <p class="flavor">Uncharted. Send a survey probe to see its star and planets.</p></div>
+        <aside class="side">${this.systemPanel()}</aside></div>`;
     }
-    return `<div class="mapscreen mode-${sysMode ? 'system' : 'galaxy'}">${tabs}
-      <div class="mapbox"><canvas id="mapcanvas"></canvas>
-        <div class="mapctl">
-          <button class="btn" data-act="mapzoom" data-a="1.4" title="Zoom in">+</button>
-          <button class="btn" data-act="mapzoom" data-a="0.714" title="Zoom out">−</button>
-          <button class="btn" data-act="maphome" title="Centre on the home system">⌂</button>
-          ${s ? `<button class="btn" data-act="mapcenter" title="Centre on ${U.esc(s.name)}">◎</button>` : ''}
-        </div>
-        <div id="maphover" class="maphover"></div>
-        <div class="maphint">${hint}</div></div>
-      ${below}
+    return `<div class="sysscreen fitscreen">
+      <div class="mapcol">
+        <div class="sysmap-title"><h3>◉ ${U.esc(s.name)}</h3>${back}</div>
+        <div class="sysbox"><canvas id="syscanvas" width="${SystemMap.W}" height="${SystemMap.H}"></canvas></div>
+        <div class="maphint">Click a planet to inspect it. Hot worlds orbit close to the star, frozen ones far out.</div>
+      </div>
+      <aside class="side">${this.systemPanel()}</aside>
     </div>`;
   },
 

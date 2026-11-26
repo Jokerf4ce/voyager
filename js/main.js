@@ -136,7 +136,7 @@ const Game = {
     bplace: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     selplanet: (a) => { UI.selPlanet = UI.selPlanet === +a ? null : +a; },
     mapsys: (a) => { UI.selSys = +a; UI.screen = 'map'; StarMap.centerOn(G.systems[+a]); },
-    mapmode: (a) => { UI.mapMode = a; UI.selPlanet = null; },
+    opensys: () => { UI.openSystem(); },
     mapzoom: (a) => { StarMap.zoomBy(+a); },
     maphome: () => { StarMap.centerOn(G.systems[G.homeId]); },
     mapcenter: () => { if (UI.selSys != null) StarMap.centerOn(G.systems[UI.selSys]); },
@@ -214,8 +214,8 @@ window.addEventListener('resize', () => {
   if (UI.screen === 'battle') UI.drawBattleArrow();
   if (UI.screen === 'map') {
     const n = UI.narrow();
-    if (n !== UI.wasNarrow) { UI.wasNarrow = n; UI.render(); } // tabs appear or vanish at the phone breakpoint
-    else { const cv = UI.$('mapcanvas'); if (cv && cv.offsetParent) StarMap.draw(cv); }
+    if (n !== UI.wasNarrow) { UI.wasNarrow = n; UI.render(); } // the hint text differs on phones
+    else { const cv = UI.$('mapcanvas'); if (cv) StarMap.draw(cv); }
   }
 });
 

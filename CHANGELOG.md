@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.37.0 — 2026-11-26
+- **Star Map and Solar System are now separate screens.** The new **◉ Solar System** menu entry shows the selected system's star and planets, much larger.
+  - **Star Map:** the map fills the screen, with the system panel (missions, planets) beside it.
+  - **Getting there:** double-click a charted system on the Star Map or press **Open solar system** in its panel; **✦ Star Map** goes back.
+  - **Phones:** the panel sits below the map and the old map tabs are gone.
+- **The game uses at most 95 % of the screen height.** The bottom 5 % stays empty; the version label, tutorial panel and Assistant subtitles move up with it.
+- The tutorial's Star Map step mentions the new screen.
+
 ## 0.36.0 — 2026-11-26
 - **Tutorial.** The first game in a browser opens a 12-step guided tour. It covers the goal, resources and capacities, Cycles and Auto, the Star Map, surveys and colony expeditions, colonies, buildings (going wide, demolishing), research, the shipyard and rarities, fleets and raids, and battles.
 - Each step opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath, so you can try things as you go.

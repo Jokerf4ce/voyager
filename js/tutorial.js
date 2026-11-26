@@ -33,7 +33,7 @@ const Tutorial = {
   go() {
     const st = DATA.tutorial[this.i];
     if (st.prepare && this.prepare[st.prepare]) this.prepare[st.prepare]();
-    if (st.screen) { UI.screen = st.screen; if (st.screen === 'map') UI.mapMode = 'galaxy'; }
+    if (st.screen) { UI.screen = st.screen; }
     if (st.nav) document.body.classList.remove('nav-collapsed');
     UI.render(); // calls refresh()
     const t = this.targets()[0];

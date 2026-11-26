@@ -72,7 +72,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Star Map camera** (decided, v0.34): the Star Map is a pan/zoom view of the world (drag, wheel, pinch; buttons for zoom, home and the selected system; a minimap). The pixel art is drawn into a low-resolution buffer and scaled up (3 screen px per art pixel, 2 on phones), keeping the chunky look; names and markers are drawn on top at full resolution for readability, without overlapping.
 
-**Map screen layout** (decided, v0.21): the Star Map fills the screen width; hovering a system shows a summary card (star, owner, planets with habitability, fleets). The selected system's Solar System map and its full panel (planets, settle, fleets) sit below the star map, in place of the Chronicle, which is hidden on this screen. On phones (≤ 820 px, decided v0.34.1) the two maps don't fit together, so tabs switch between them; the system panel stays below both.
+**Map screens** (decided, v0.37; replaces the v0.21 layout with both maps on one page): **Star Map** and **Solar System** are two separate screens in the menu. Each fills the screen height, with the selected system's panel (missions, planets, settle) on the right; neither shows the Chronicle. Hovering a system on the Star Map shows a summary card. Double-clicking a charted system, or *Open solar system* in its panel, opens the Solar System screen, and *✦ Star Map* goes back. On phones the panel moves below the map and the page scrolls.
 
 
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
@@ -206,6 +206,8 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 **Decided:** mostly menus, plus a star system map.
 
 **Tutorial** (decided, v0.36): the first game in a browser opens a guided tour of 12 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath. It can be skipped, and Settings → *Replay tutorial* shows it again. It is remembered per browser (localStorage `voyager_tutorial_done`), not in the save, and tester mode never starts it.
+
+**Screen height** (decided, v0.37): the whole game uses at most **95 % of the screen height** (`body` is 95vh). Anything pinned to the bottom (version label, tutorial panel, Assistant subtitles) sits above the unused 5 %. New screens must fit within that.
 
 **Proposed layout:** a top bar with resources and the Cycle counter, a left menu for screens, the main content in the centre, and a "End Cycle" button that is always visible.
 
