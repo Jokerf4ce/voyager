@@ -230,6 +230,8 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - A pixel font for headings, and a readable font for body text.
 - Emojis or simple placeholders until the art exists.
 
+**Ship sprites** (decided v0.27): a 3/4 view like a model kit seen from above, made from small low-poly models in `tools/shipart/render.py` and rendered to pixel art (flat shading, 1 px panel lines, dark outline, rim light, dithered engine glow). All ships share one scale (50 px per model unit), so a Battleship is about twice a Fighter. Palettes: the Covenant bone/rust/cyan, the Chorus pale green chitin/toxic green/amber, the Iron Remnant iron grey/blood orange/red, monsters flesh/bone/sinew/yellow eyes. Views: *front* (nose toward the viewer, lower left) on cards and for enemies in battle; *rear* (nose up-right) for your ships in battle, so the two lines face each other. Regenerate with `python3 tools/shipart/render.py` after changing a model.
+
 ## 9b. Audio
 
 **Decided:** add music; inspired by Halo's choral scores ("One Final Effort").

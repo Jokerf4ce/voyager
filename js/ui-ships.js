@@ -21,17 +21,16 @@ Object.assign(UI, {
     return `<div class="sbar ${cls}" title="${cls === 'sh' ? 'Shield' : 'Hull'} ${Math.round(now)}/${Math.round(max)}"><i style="width:${pct}%"></i><span>${Math.round(now)}</span></div>`;
   },
 
-  // A ship card. d: a ship or a battle unit. opts: { act, a, cls, flip, color, extra, small }
+  // A ship card. d: a ship or a battle unit. opts: { act, a, cls, owner, view ('front' | 'rear'), extra, small }
   shipCard(d, opts = {}) {
     const t = DATA.shipTypes[d.type], rar = DATA.shipRarities[d.rarity] || DATA.shipRarities.normal;
-    const color = opts.color || this.factionColor(d.owner || 'player');
-    const sz = Sprites.shipSize(d.type), scale = opts.small ? 3 : 4;
+    const owner = opts.owner || d.owner || 'player';
     const shield = d.shieldMax != null ? d.shield : d.shield, shieldMax = d.shieldMax != null ? d.shieldMax : d.shield;
     const hull = d.hullMax != null ? d.hull : d.hullNow, hullMax = d.hullMax != null ? d.hullMax : d.hull;
     const act = opts.act ? `data-act="${opts.act}" data-a="${opts.a}"` : '';
     return `<div class="scard r-${d.rarity} ${opts.cls || ''} ${opts.small ? 'small' : ''}" style="--rc:${rar.color}" ${act}>
       <div class="sc-top"><span class="sc-size" title="${DATA.sizes[d.size].name}: beats ${DATA.sizes[DATA.sizes[d.size].beats].name}">${d.size}</span><span class="sc-rar">${rar.name}</span></div>
-      <div class="sc-img"><img class="px" src="${Sprites.ship(d.type, color, !!opts.flip)}" width="${sz.w * scale}" height="${sz.h * scale}" alt=""></div>
+      <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner, opts.view || 'front')}" alt="${U.esc(t.name)}"></div>
       <b class="sc-name" title="${U.esc(d.name)}">${U.esc(d.name)}</b><small class="sc-type">${t.name}</small>
       ${this.bar('sh', shield, shieldMax)}${this.bar('hu', hull, hullMax)}
       <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Maintenance per Cycle">⚙${d.upkeep}</span>` : ''}${d.quality != null && !opts.small && !t.structure ? `<span class="q ${d.quality >= 110 ? 'hi' : d.quality <= 90 ? 'lo' : ''}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${d.quality}</span>` : ''}</div>
@@ -59,7 +58,7 @@ Object.assign(UI, {
       return `<div class="buildtile ${Ships.unlocked(size) ? '' : 'locked'}">
         <h3>${z.name} hull <span class="sc-size">${size}</span></h3>
         <div class="small muted">Beats ${DATA.sizes[z.beats].name}, weak to ${DATA.sizes[Object.keys(DATA.sizes).find((k) => DATA.sizes[k].beats === size)].name}.</div>
-        <div class="tile-ships">${types.map((t) => `<span title="${U.esc(t.desc)}"><img class="px" src="${Sprites.ship(Object.keys(DATA.shipTypes).find((k) => DATA.shipTypes[k] === t), '#d8c8a0')}" width="${Sprites.shipSize(Object.keys(DATA.shipTypes).find((k) => DATA.shipTypes[k] === t)).w * 3}">${t.name}</span>`).join('')}</div>
+        <div class="tile-ships">${types.map((t) => `<span title="${U.esc(t.desc)}"><img class="px" src="${Sprites.shipImg(Object.keys(DATA.shipTypes).find((k) => DATA.shipTypes[k] === t))}" alt="">${t.name}</span>`).join('')}</div>
         <div>${U.costText(Ships.buildCost(size))}</div>
         ${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small>` : ''}
         ${this.btn('Lay down a hull', 'buildship', size, !!why, 'gold')}
@@ -153,7 +152,7 @@ Object.assign(UI, {
     const g = Missions.guard(s);
     if (s.explored && g) {
       out += `<h4>${U.esc(g.name)} <span class="muted small">power ${Ships.groupPower(g.ships)}</span></h4>
-        <div class="cardrow wrap">${g.ships.map((sh) => this.shipCard(sh, { small: true, flip: true, color: this.factionColor(g.owner) })).join('')}</div>`;
+        <div class="cardrow wrap">${g.ships.map((sh) => this.shipCard(sh, { small: true, owner: g.owner })).join('')}</div>`;
     }
     const opts = [];
     const eta = Missions.distance(s.id);
@@ -196,7 +195,7 @@ Object.assign(UI, {
       const idle = Ships.idleFleets();
       const def = Ships.defenseCard(s);
       return this.panel(`⚠ ${U.esc(b.threat.name)} at ${U.esc(s.name)}`, `<p class="flavor">${DATA.factions[b.threat.owner].name} drops out of the warp above ${U.esc(s.name)}. Choose who stands between them and your people.</p>
-        <div class="cardrow wrap">${b.threat.ships.map((sh) => this.shipCard(sh, { flip: true, color: this.factionColor(b.threat.owner), small: true })).join('')}</div>
+        <div class="cardrow wrap">${b.threat.ships.map((sh) => this.shipCard(sh, { owner: b.threat.owner, small: true })).join('')}</div>
         <p class="small muted">Enemy power ${Ships.groupPower(b.threat.ships)}.${def ? ' Your Planetary Defenses fight alongside whoever you send.' : ' This system has no Bastions or Defense Platforms.'}</p>
         <div class="btnrow big">${idle.map((f) => this.btn(`Defend with ${U.esc(f.name)} <small>power ${Ships.groupPower(Ships.fleetShips(f))} · ${f.ships.length} ships</small>`, 'bdefend', f.id, false, 'gold')).join('')}
         ${this.btn(def ? 'Defenses only' : 'Leave them undefended', 'bdefend', '', false, 'danger')}</div>
@@ -213,7 +212,7 @@ Object.assign(UI, {
       const cls = [u.dead ? 'dead' : '', i === curIdx ? 'acting' : '', hit && hit.to === i ? 'hit' : '', isT ? 'target' : ''].join(' ');
       const extra = isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
       const owner = u.side === 'player' ? 'player' : (b.kind === 'attack' ? (s.guard && s.guard.owner) || s.owner : b.threat.owner);
-      return this.shipCard(u, { flip: u.side === 'enemy', color: this.factionColor(owner), cls, extra });
+      return this.shipCard(u, { owner, view: u.side === 'player' ? 'rear' : 'front', cls, extra });
     };
     // each side is a row of lanes; lane i faces lane i on the other side
     const side = (name) => {

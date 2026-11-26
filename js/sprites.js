@@ -1,4 +1,4 @@
-// Voyager — procedural placeholder pixel art (planets, portraits, ships, building icons).
+// Voyager — pixel art: procedural planets, stars and building icons; rendered ship sprites (assets/ships).
 // Real hand-drawn sprites can replace these later: anything here returns an image URL.
 
 const Sprites = {
@@ -146,31 +146,14 @@ const Sprites = {
     return (this.cache[key] = cv.toDataURL());
   },
 
-  // Ship art, pointing up (enemy ships are drawn flipped). # hull in the faction colour, + lights, o engines.
-  shipArt: {
-    scout: ['....#....', '...#+#...', '...###...', '..#####..', '.##.#.##.', '#...#...#', '....#....', '...o.o...'],
-    fighter: ['....#....', '....#....', '...#+#...', '#..###..#', '##.###.##', '#########', '#.#####.#', '...o.o...'],
-    heavy: ['...#.#...', '...#.#...', '..##+##..', '#.#####.#', '#########', '#########', '##.###.##', '#..o.o..#'],
-    corvette: ['......#......', '.....###.....', '.....#+#.....', '....#####....', '....#####....', '...###+###...', '..#########..', '.##.#####.##.', '.#..#####..#.', '....o...o....'],
-    frigate: ['......#......', '.....###.....', '....##+##....', '....#####....', '...#######...', '..##.###.##..', '.###+###+###.', '.###########.', '..#.#####.#..', '...o..o..o...'],
-    gunboat: ['....#...#....', '....#...#....', '...###.###...', '...#######...', '..####+####..', '..#########..', '.###########.', '.###########.', '.##.#####.##.', '..o..o.o..o..'],
-    destroyer: ['........#........', '........#........', '.......###.......', '.......#+#.......', '......#####......', '......#####......', '.....###+###.....', '....#########....', '...###########...', '..####.###.####..', '.###...###...###.', '.......o.o.......'],
-    battleship: ['.......###.......', '......##+##......', '......#####......', '.....#######.....', '....###+#+###....', '...###########...', '..#############..', '.###+#######+###.', '.###############.', '.###############.', '..###.#####.###..', '....o..o.o..o....'],
-    carrier: ['......#####......', '.....#+++++#.....', '.....#######.....', '....#########....', '....#.#.#.#.#....', '...###########...', '...#.#.#.#.#.#...', '..#############..', '..#############..', '.###.#######.###.', '.###.#######.###.', '....o...o...o....'],
-    lurker: ['.#.....#.', '..#...#..', '.#######.', '##+...+##', '.#######.', '#.#.#.#.#', '.#.#.#.#.'],
-    maw: ['.#.........#.', '..#.......#..', '..#########..', '.###########.', '##+#######+##', '##.........##', '##.#.#.#.#.##', '.###########.', '..#.#.#.#.#..', '.#.........#.'],
-    leviathan: ['.#.............#.', '..#...........#..', '...###########...', '..#############..', '.###+#######+###.', '#################', '##.............##', '##.#.#.#.#.#.#.##', '.###############.', '..#############..', '...#.#.#.#.#.#...', '..#...........#..', '.#.............#.'],
-    defense: ['......#......', '......#......', '....#####....', '...#+###+#...', '#############', '#+#########+#', '#############', '...#######...', '....#####....', '......#......', '......#......'],
-    ark: ['...#####...', '..#+++++#..', '.#########.', '.#+++++++#.', '.#########.', '.#+++++++#.', '..#######..', '...o.o.o...'],
+  // Ship sprites are rendered images (tools/shipart/render.py → assets/ships/<type>_<palette>_<view>.png).
+  // view 'front': nose toward the viewer (cards, enemies in battle); 'rear': nose away (your ships in battle).
+  shipPalette(type, owner) {
+    if (DATA.shipTypes[type] && DATA.shipTypes[type].monster) return 'monster';
+    return ['chorus', 'remnant'].includes(owner) ? owner : 'player';
   },
-
-  drawShip(ctx, type, ox, oy, color) {
-    const art = this.shipArt[type] || this.shipArt.fighter;
-    art.forEach((row, y) => [...row].forEach((ch, x) => {
-      if (ch === '.') return;
-      ctx.fillStyle = ch === '#' ? color : ch === '+' ? '#f0e0a0' : '#e07030';
-      ctx.fillRect(ox + x, oy + y, 1, 1);
-    }));
+  shipImg(type, owner = 'player', view = 'front') {
+    return `assets/ships/${type}_${this.shipPalette(type, owner)}_${view}.png`;
   },
 
   // 12×12 building icons. k outline, = light metal, # dark metal, o ember, y light, w glint, b glass, g bio, p rare, r blood.
@@ -206,16 +189,4 @@ const Sprites = {
     return (this.cache[k] = c.toDataURL());
   },
 
-  // A ship sprite on a transparent canvas sized to the art (+1 px margin). flip = pointing down (enemies).
-  ship(type, color, flip = false) {
-    const key = `s:${type}:${color}:${flip}`;
-    if (this.cache[key]) return this.cache[key];
-    const art = this.shipArt[type] || this.shipArt.fighter;
-    const w = art[0].length + 2, h = art.length + 2;
-    const c = this.canvas(w, h), ctx = c.getContext('2d');
-    if (flip) { ctx.translate(0, h); ctx.scale(1, -1); }
-    this.drawShip(ctx, type, 1, 1, color);
-    return (this.cache[key] = c.toDataURL());
-  },
-  shipSize(type) { const art = this.shipArt[type] || this.shipArt.fighter; return { w: art[0].length + 2, h: art.length + 2 }; },
 };

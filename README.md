@@ -34,6 +34,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge for Shards
 - Auto-cycle, offline progress, save export/import
 - Generative soundtrack synthesised in the browser: six tracks in a playlist (mute with ♪, tracks and volume in Settings)
+- Ship sprites in a 3/4 view, rendered from small 3D models (`tools/shipart/render.py`): every type in the Covenant's, the Chorus's and the Remnant's colours, plus monsters; a front view for cards and enemies, a rear view for your ships in battle
 - The Assistant, the ship's computer voice ("Welcome back, Commander."): mp3 lines in `assets/voice/`, listed with their triggers in `js/voicelines.js`
 - Placeholder pixel art generated in code (planets, portraits, ships), to be replaced with real sprites
 
@@ -62,7 +63,8 @@ js/explore.js     exploration, fog of war, events
 js/battle.js      turn-based card battles
 js/ai.js          alien empire AI: garrisons, expansion, raids
 js/admin.js       Admin test game (separate save slot)
-js/sprites.js     procedural placeholder pixel art
+js/sprites.js     pixel art: procedural planets, stars, building icons; ship sprite paths
+tools/shipart/    render.py: generates the ship sprites in assets/ships/ from small 3D models
 js/music.js       music engine and playlist (Web Audio)
 js/tracks.js      the soundtrack's tracks
 js/voice.js       ship's computer voice engine
