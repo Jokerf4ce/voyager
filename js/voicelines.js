@@ -25,12 +25,14 @@
 // The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
 
 const VoiceLines = {
-  welcome_back: { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
-  slipspace:    { text: 'Slipspace rupture detected!', triggers: ['test', 'random'], glitch: 0.35 }, // played by the Test button in Settings
-  gagarin:      { text: 'Attention! Colonel Gagarin, please report to Medbay!', triggers: ['random'], glitch: 0.35 },
-  shepard:      { text: 'Attention! Rear admiral Shepard, your keycard was found in engineering!', triggers: ['random'], glitch: 0.35 },
-  still_here:   { text: 'Hey, are you still here?', triggers: ['random', 'return'], glitch: 0.35 },
-  hydrated:     { text: 'Commander, Make sure you stay hydrated', triggers: ['random'], glitch: 0.35 },
+  welcome_back:   { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
+  slipspace:      { text: 'Slipspace rupture detected!', triggers: ['test', 'random'], glitch: 0.35 }, // played by the Test button in Settings
+  gagarin:        { text: 'Attention! Colonel Gagarin, please report to Medbay!', triggers: ['random'], glitch: 0.35 },
+  shepard:        { text: 'Attention! Rear admiral Shepard, your keycard was found in engineering!', triggers: ['random'], glitch: 0.35 },
+  still_here:     { text: 'Hey, are you still here?', triggers: ['random', 'return'], glitch: 0.35 },
+  hydrated:       { text: 'Commander, Make sure you stay hydrated', triggers: ['random'], glitch: 0.35 },
+  second_monitor: { text: 'Commander, what is that on your second monitor?', triggers: ['random'], glitch: 0.35 },
+  posture:        { text: 'Commander, make sure to keep a healthy posture!', triggers: ['random'], glitch: 0.35 },
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
