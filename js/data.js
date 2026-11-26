@@ -40,6 +40,9 @@ DATA.starClasses = {
   F: { name: 'F-type Yellow-White Star', color: '#f8f7ff', size: 2, radius: 1.3, weight: 4, planets: [2, 5], temps: { hot: 1.3, temperate: 1.3, frozen: 0.9 }, solar: 1.1,  habMod: 0,  desc: 'A little hotter than the old Sun. Good odds for temperate worlds.' },
   G: { name: 'G-type Yellow Dwarf',      color: '#fff4c8', size: 2, radius: 1.0, weight: 5, planets: [2, 5], temps: { hot: 1, temperate: 2, frozen: 1 },       solar: 1.0,  habMod: 0,  desc: 'Like the Sun the Covenant fled. The best chance of a living world.' },
   K: { name: 'K-type Orange Dwarf',      color: '#ffd2a1', size: 1, radius: 0.75, weight: 6, planets: [2, 5], temps: { hot: 0.8, temperate: 1.3, frozen: 1.4 }, solar: 0.9,  habMod: 0,  desc: 'Calm and long-lived. Cooler worlds, steady light.' },
+  // Not main sequence: a luminosity class 0 red hypergiant (like VY Canis Majoris). Never rolled randomly;
+  // the galaxy places one near the start for show.
+  H: { name: 'Red Hypergiant', color: '#ff5a32', size: 4, radius: 1400, weight: 0, planets: [1, 3], temps: { hot: 3, temperate: 0.2, frozen: 1 }, solar: 2.0, habMod: -2, desc: 'A dying star wider than the orbit of Jupiter, shedding its own skin into the dark. Its light is overwhelming; nothing living belongs here.' },
   M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, radius: 0.35, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
 };
 
@@ -232,10 +235,11 @@ DATA.names = {
 
 DATA.config = {
   systemCount: 22,
+  startExplored: 10, // systems already charted at the start, nearest to home
   monsterSystems: 6,
   autoCycleMs: 3000,
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v7',
+  saveKey: 'voyager_save_v8',
 };

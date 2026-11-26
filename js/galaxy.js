@@ -129,6 +129,18 @@ const Galaxy = {
     const evKeys = Object.keys(DATA.events);
     for (const s of S) if (!homes.includes(s.id) && Math.random() < 0.5) s.anomaly = U.pick(evKeys);
 
-    Explore.reveal(home.id);
+    // The Covenant's old star charts cover the nearest systems.
+    const dH = U.distances(home.id);
+    const charted = S.slice().sort((a, b) => dH[a.id] - dH[b.id]).slice(0, DATA.config.startExplored);
+    for (const s of charted) s.explored = true;
+
+    // A red hypergiant in the charted space, for show: not home, not next door, not an alien home.
+    const pick = charted.filter((s) => !homes.includes(s.id) && dH[s.id] >= 2 && !s.owner);
+    const hyper = pick[pick.length - 1] || charted.find((s) => s.id !== home.id && !s.owner);
+    if (hyper) {
+      hyper.star = 'H';
+      hyper.planets = this.makePlanets('H');
+      hyper.anomaly = null;
+    }
   },
 };

@@ -57,7 +57,8 @@ const StarMap = {
     const st = DATA.starClasses[s.star];
     ctx.fillStyle = st.color;
     // size 1: red/orange dwarfs, 2: sun-like, 3: blue giants with longer spikes
-    if (st.size >= 2) ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
+    if (st.size >= 4) { ctx.globalAlpha = 0.35; ctx.fillRect(p.x - 3, p.y - 3, 7, 7); ctx.globalAlpha = 1; ctx.fillRect(p.x - 2, p.y - 2, 5, 5); }
+    else if (st.size >= 2) ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
     const spike = st.size + 1;
     ctx.fillRect(p.x - spike, p.y, spike * 2 + 1, 1); ctx.fillRect(p.x, p.y - spike, 1, spike * 2 + 1);
     ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x, p.y, 1, 1);

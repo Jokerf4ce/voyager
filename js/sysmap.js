@@ -21,7 +21,7 @@ const SystemMap = {
   // Lay planets out left to right with equal gaps between their edges.
   layout(s) {
     const radii = s.planets.map((p) => Math.max(2, Math.round(this.radiusEarth(s, p) * this.earthPx)));
-    const start = this.limbX + 22, end = this.W - 14;
+    const start = this.limbX + (DATA.starClasses[s.star].size >= 4 ? 52 : 22), end = this.W - 14;
     const used = radii.reduce((a, r) => a + r * 2, 0);
     const gap = Math.max(6, (end - start - used) / Math.max(1, radii.length));
     let x = start + gap / 2;
@@ -34,26 +34,48 @@ const SystemMap = {
     });
   },
 
+  mix(hex, to, t) {
+    const a = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    const b = [1, 3, 5].map((i) => parseInt(to.slice(i, i + 2), 16));
+    return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * t).toString(16).padStart(2, '0')).join('');
+  },
+
+  // Smooth seeded noise for star surfaces (granulation, starspots).
+  noise(x, y, cell, seed) {
+    const h = (i, j) => { let n = (i * 374761393 + j * 668265263 + seed * 982451653) | 0; n = (n ^ (n >>> 13)) * 1274126177; return ((n ^ (n >>> 16)) >>> 0) / 4294967296; };
+    const gx = x / cell, gy = y / cell, x0 = Math.floor(gx), y0 = Math.floor(gy), fx = gx - x0, fy = gy - y0;
+    const sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    return (h(x0, y0) * (1 - sx) + h(x0 + 1, y0) * sx) * (1 - sy) + (h(x0, y0 + 1) * (1 - sx) + h(x0 + 1, y0 + 1) * sx) * sy;
+  },
+
   drawStar(ctx, s) {
     const st = DATA.starClasses[s.star];
     const R = this.starRadiusPx(s);
     const cx = this.limbX - R;
-    const corona = 14;
+    const hyper = st.size >= 4;
+    const corona = hyper ? 46 : 14;
+    const shades = [this.mix(st.color, '#000000', 0.45), this.mix(st.color, '#000000', 0.2), st.color, this.mix(st.color, '#ffffff', 0.35)];
     const maxX = Math.min(this.W, this.limbX + corona + 1);
     for (let y = 0; y < this.H; y++) for (let x = 0; x < maxX; x++) {
       const d = Math.hypot(x - cx, y - this.cy);
+      const dither = Sprites.bayer[y % 4][x % 4] / 16;
       if (d <= R) {
-        // limb darkening: the edge of a star is dimmer than its middle
-        const depth = (R - d) / Math.min(R, 40);
-        ctx.fillStyle = st.color;
-        if (depth < 0.15 && Sprites.bayer[y % 4][x % 4] / 16 > depth / 0.15) ctx.globalAlpha = 0.75;
+        // convection cells and starspots, darker towards the limb
+        const n = this.noise(x, y, hyper ? 9 : 5, s.id) * 0.7 + this.noise(x, y, hyper ? 23 : 11, s.id + 7) * 0.3;
+        const limb = Math.min(1, (R - d) / 10);
+        const v = n * 0.75 + limb * 0.45 - 0.2 + (dither - 0.5) * 0.25;
+        ctx.fillStyle = shades[Math.max(0, Math.min(3, Math.floor(v * 4)))];
         ctx.fillRect(x, y, 1, 1);
-        ctx.globalAlpha = 1;
-      } else if (d - R < corona && Sprites.bayer[y % 4][x % 4] / 16 > (d - R) / corona) {
-        ctx.fillStyle = st.color;
-        ctx.globalAlpha = 0.3;
-        ctx.fillRect(x, y, 1, 1);
-        ctx.globalAlpha = 1;
+      } else if (d - R < corona) {
+        // corona; a hypergiant also throws off streamers of its own atmosphere
+        let k = (d - R) / corona;
+        if (hyper) k -= (this.noise(0, y, 14, s.id + 3) - 0.5) * 0.9 * (1 - k);
+        if (dither > k) {
+          ctx.fillStyle = k < 0.3 ? st.color : shades[1];
+          ctx.globalAlpha = hyper ? 0.45 * (1 - k) + 0.1 : 0.3;
+          ctx.fillRect(x, y, 1, 1);
+          ctx.globalAlpha = 1;
+        }
       }
     }
   },
