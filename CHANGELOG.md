@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.14.2 — 2026-11-26
+- Fix: in browsers that block speech (Brave, Firefox with fingerprinting resistance), the voice played only noises. The game now detects this, keeps the static short, and shows the line as an on-screen transmission instead.
+- Voice lines appear as glitching on-screen transmissions ("◆ SHIP AI") in every browser; Subtitles can be turned off in Settings.
+- Settings explains when the browser has no usable voice.
+
 ## 0.14.1 — 2026-11-26
 - Playable online through GitHub Pages: https://jokerf4ce.github.io/voyager/ (deploys on every push to `main`).
 - Added `.nojekyll` so GitHub serves the files as they are.

@@ -212,6 +212,7 @@ Recorded audio files can be added as tracks alongside the generated ones.
 - **Browser voice:** the browser's built-in en-GB female voice. The glitch is built around it: stuttered fragments, pitch slips, and static under the voice.
 - **Recorded files:** lines can instead point to an audio file, which gets real distortion and stutter applied.
 - **Triggers so far:** `start` (first click after loading) and `return` (back after more than 5 minutes away).
+- **Browsers without voices:** Brave and Firefox with fingerprinting resistance hide speech voices for privacy. Lines are always also shown as glitching on-screen transmissions, so nothing is lost there. Recorded voice files would make her speak in every browser.
 - **Ideas for later triggers:** battle won or lost, colony founded or lost, a mythic Void Signal, an alien warhost spotted.
 
 ## 10. Technical

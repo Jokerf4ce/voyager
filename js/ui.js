@@ -403,8 +403,8 @@ const UI = {
           ${this.btn(now ? 'Playing' : '▶ Play', 'musicplay', t.id, now, now ? 'on' : '')}</div>`;
       }).join('')}</div>
       <div class="kv"><span>Computer voice</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
-        <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Test', 'voicetest')}</span></div>
-      <p class="muted small">Voice: ${U.esc(Voice.voiceName())}. She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away.</p>
+        <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
+      <p class="muted small">Voice: ${U.esc(Voice.voiceName())}. ${Voice.canSpeak() ? '' : 'Lines are shown as on-screen transmissions instead. For the spoken voice, use Chrome, Edge or Safari. '}She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away.</p>
       <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>

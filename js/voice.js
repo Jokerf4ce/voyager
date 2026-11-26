@@ -17,6 +17,8 @@ const Voice = {
   lastActivity: Date.now(),
   hiddenAt: null,
   voice: null,              // chosen SpeechSynthesisVoice
+  subtitles: true,          // show lines as on-screen transmissions
+  speechBroken: false,      // set when the browser accepted speech but never spoke (e.g. Brave)
   prefsKey: 'voyager_voice',
 
   // Voice names to prefer, in order (Chrome, Edge/Windows, macOS/iOS, Android).
@@ -28,10 +30,16 @@ const Voice = {
       const p = JSON.parse(localStorage.getItem(this.prefsKey) || '{}');
       if (typeof p.enabled === 'boolean') this.enabled = p.enabled;
       if (typeof p.volume === 'number') this.volume = p.volume;
+      if (typeof p.subtitles === 'boolean') this.subtitles = p.subtitles;
     } catch (e) { /* storage unavailable */ }
   },
   savePrefs() {
-    try { localStorage.setItem(this.prefsKey, JSON.stringify({ enabled: this.enabled, volume: this.volume })); } catch (e) { /* ignore */ }
+    try { localStorage.setItem(this.prefsKey, JSON.stringify({ enabled: this.enabled, volume: this.volume, subtitles: this.subtitles })); } catch (e) { /* ignore */ }
+  },
+
+  // Can this browser actually speak? Brave (and Firefox with fingerprinting resistance) hide the voices.
+  canSpeak() {
+    return 'speechSynthesis' in window && !this.speechBroken && speechSynthesis.getVoices().length > 0;
   },
 
   // ---- choosing a voice ----
@@ -48,9 +56,10 @@ const Voice = {
   },
 
   voiceName() {
-    if (!('speechSynthesis' in window)) return 'not supported by this browser';
+    if (!('speechSynthesis' in window)) return 'this browser has no speech engine';
+    if (this.speechBroken) return 'this browser blocked speech';
     const v = this.voice || this.pickVoice();
-    return v ? `${v.name} (${v.lang})` : 'no voice found yet';
+    return v ? `${v.name} (${v.lang})` : 'this browser offers no voices (Brave hides them for privacy)';
   },
 
   init() {
@@ -105,6 +114,8 @@ const Voice = {
     this.speaking = true;
     this.duck(true);
     const done = () => { this.speaking = false; this.duck(false); };
+    const glitch = line.glitch ?? 0.35;
+    if (this.subtitles || (!line.src && !this.canSpeak())) this.subtitle(line.text, line.text.length * 0.075 + 2.2, glitch);
     if (line.src) this.playFile(line, done);
     else this.speak(line, done);
     return true;
@@ -137,21 +148,26 @@ const Voice = {
   },
 
   speak(line, done) {
-    if (!('speechSynthesis' in window)) { this.glitchBed(1.2, line.glitch ?? 0.35); setTimeout(done, 1200); return; }
+    // No usable voice: just open and close the comm channel; the line is shown on screen.
+    if (!this.canSpeak()) { this.glitchBed(0.6, (line.glitch ?? 0.35) * 0.5); setTimeout(done, 1200); return; }
     speechSynthesis.cancel();
     const glitch = line.glitch ?? 0.35;
     const parts = this.fragments(line.text, glitch);
     const voice = this.voice || this.pickVoice();
     const est = line.text.length * 0.075 + parts.length * 0.25 + 0.6; // seconds, for the static bed
     this.glitchBed(est, glitch);
-    let finished = false;
+    let finished = false, started = false;
     const finish = () => { if (!finished) { finished = true; done(); } };
+    // Some browsers accept the request but never speak. Notice that and stop trying.
+    setTimeout(() => { if (!started && !finished) { this.speechBroken = true; speechSynthesis.cancel(); finish(); } }, 2500);
     parts.forEach((txt, i) => {
       const u = new SpeechSynthesisUtterance(txt);
-      if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'en-GB';
+      u.lang = 'en-GB';
+      try { if (voice) { u.voice = voice; u.lang = voice.lang; } } catch (e) { /* odd voice object: let the browser choose */ }
       u.volume = this.volume;
       u.rate = 0.94 + (Math.random() - 0.5) * 0.08 * glitch;
       u.pitch = 1.05 + (Math.random() - 0.5) * 0.35 * glitch;
+      u.onstart = () => { started = true; };
       if (i === parts.length - 1) { u.onend = finish; u.onerror = finish; }
       speechSynthesis.speak(u);
     });
@@ -249,6 +265,32 @@ const Voice = {
       // file missing or unreadable: fall back to the browser voice
       this.speak(line, done);
     }
+  },
+
+  // On-screen transmission: the line types out with glitching characters, then fades.
+  subtitle(text, seconds, glitch) {
+    let box = document.getElementById('comms');
+    if (!box) { box = document.createElement('div'); box.id = 'comms'; document.body.appendChild(box); }
+    clearInterval(this.subTimer); clearTimeout(this.subHide);
+    box.innerHTML = '<span class="comms-src">◆ SHIP AI</span><span class="comms-text"></span>';
+    box.className = 'show';
+    const el = box.querySelector('.comms-text');
+    const junk = '█▓▒░#%&@$<>/\\|';
+    let i = 0;
+    this.subTimer = setInterval(() => {
+      i = Math.min(text.length, i + 1);
+      let shown = text.slice(0, i);
+      if (i < text.length && Math.random() < 0.6) shown += junk[Math.floor(Math.random() * junk.length)];
+      // now and then corrupt a letter that is already shown
+      if (Math.random() < glitch * 0.25 && shown.length > 2) {
+        const k = Math.floor(Math.random() * (shown.length - 1));
+        shown = shown.slice(0, k) + junk[Math.floor(Math.random() * junk.length)] + shown.slice(k + 1);
+        box.classList.add('jolt'); setTimeout(() => box.classList.remove('jolt'), 90);
+      }
+      el.textContent = shown;
+      if (i >= text.length) { clearInterval(this.subTimer); el.textContent = text; }
+    }, 45);
+    this.subHide = setTimeout(() => { box.className = ''; }, seconds * 1000);
   },
 
   toggle() { this.enabled = !this.enabled; this.savePrefs(); if (!this.enabled && 'speechSynthesis' in window) speechSynthesis.cancel(); },

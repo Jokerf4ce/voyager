@@ -165,6 +165,18 @@ details summary:hover { color: var(--bone); }
 .track { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid #2a2420; background: #141210; margin-bottom: 4px; }
 .track.now { border-color: var(--edge-hi); box-shadow: inset 3px 0 0 var(--rust); }
 
+/* ship AI transmissions */
+#comms { position: fixed; left: 50%; bottom: 140px; transform: translateX(-50%); z-index: 20; max-width: min(640px, 90vw);
+  background: rgba(10, 14, 16, .92); border: 1px solid #3a6a70; box-shadow: 0 0 0 1px #000, 0 0 18px rgba(90, 200, 210, .25), 4px 4px 0 #000;
+  padding: 8px 14px; color: #a8e8f0; font-size: 22px; letter-spacing: 1px; pointer-events: none;
+  opacity: 0; transition: opacity .6s; text-shadow: 1px 0 rgba(255, 60, 60, .55), -1px 0 rgba(60, 200, 255, .55);
+  background-image: repeating-linear-gradient(0deg, rgba(120, 220, 230, .05) 0 1px, transparent 1px 3px); }
+#comms.show { opacity: 1; animation: comms-flicker 2.2s steps(1) infinite; }
+#comms.jolt { transform: translateX(calc(-50% + 3px)) skewX(-4deg); }
+#comms .comms-src { display: block; font-family: var(--font-head); font-size: 9px; letter-spacing: 2px; color: #5aa0a8; margin-bottom: 2px; }
+@keyframes comms-flicker { 0%, 100% { opacity: 1; } 47% { opacity: .82; } 48% { opacity: 1; } 83% { opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { #comms.show { animation: none; } }
+
 /* version tag, bottom right */
 #version { position: fixed; right: 8px; bottom: 6px; z-index: 5; font-family: var(--font-head); font-size: 10px; letter-spacing: 1px; color: #8a8070; background: rgba(12, 11, 10, .85); border: 1px solid var(--edge); padding: 2px 6px; pointer-events: none; }
 
