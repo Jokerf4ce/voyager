@@ -219,6 +219,7 @@ DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon
 // capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
 // per empire, and waits cooldown Cycles after launching one.
 DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
+DATA.battleFxMs = 2000;                    // how long MISS / RESTORED float over a card
 DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of max shields / hull regained
 // Hangar: ships in no fleet wait at an Orbital Shipyard. Each shipyard holds `base` ships at level 1, plus
 // `perLevel` for every level above 1; all shipyards add up.

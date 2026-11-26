@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.46.0 — 2026-11-27
+- **Battle: Planetary Defenses can move** (and be pushed aside) like any ship, by drag and drop or with ◀ ▶.
+- **Battle: no holes in a row.** Ships can only move within their row, so the lanes stay packed. Wrecks keep their place, and rows that had gaps are closed up.
+- **Battle: wrecks stay visible.** Destroyed ships remain on the board, clearer than before and stamped **✕ DESTROYED**.
+- **Battle: move preview.** While you drag a ship over a lane (or pick one with ◀ ▶), the ships that would make room slide aside, opening a gap where it will land; the dragged card fades.
+- **Battle: MISS (and + RESTORED) stay up for about 2 seconds** and no longer vanish when the screen updates (`DATA.battleFxMs`).
+
 ## 0.45.0 — 2026-11-27
 - **All hull sizes from the start.** The *Medium Hulls* and *Capital Hulls* research is gone. Medium and Large ships (and weapons at the forge) can be built right away.
 - **Limited hangar space.** Each Orbital Shipyard holds 10 ships that are in no fleet, plus 2 for every level above 1; all shipyards add up.

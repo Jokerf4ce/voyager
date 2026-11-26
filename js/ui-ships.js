@@ -29,7 +29,7 @@ Object.assign(UI, {
     const shield = d.shieldMax != null ? d.shield : d.shield, shieldMax = d.shieldMax != null ? d.shieldMax : d.shield;
     const hull = d.hullMax != null ? d.hull : d.hullNow, hullMax = d.hullMax != null ? d.hullMax : d.hull;
     const act = (opts.act ? `data-act="${opts.act}" data-a="${opts.a}"` : '') + (opts.attrs ? ' ' + opts.attrs : '');
-    return `<div class="scard r-${d.rarity} ${opts.cls || ''} ${opts.small ? 'small' : ''}" style="--rc:${rar.color}" ${act}>
+    return `<div class="scard r-${d.rarity} ${opts.cls || ''} ${opts.small ? 'small' : ''}" style="--rc:${rar.color};${opts.style || ''}" ${act}>
       <div class="sc-top"><span class="sc-size" title="${DATA.sizes[d.size].name}: beats ${DATA.sizes[DATA.sizes[d.size].beats].name}">${d.size}</span><span class="sc-rar">${rar.name}</span></div>
       <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner, d.variant || 0)}" alt="${U.esc(t.name)}"></div>
       <b class="sc-name" title="${U.esc(d.name)}">${U.esc(d.name)}</b><small class="sc-type">${t.name}</small>
@@ -235,18 +235,24 @@ Object.assign(UI, {
     if (!this.swapPick || this.swapPick.key !== turnKey || !myTurn) this.swapPick = { key: turnKey, lane: null };
     const pick = this.swapPick.lane;
     const enemyOwner = b.kind === 'attack' ? (s.guard && s.guard.owner) || s.owner : b.threat.owner;
+    const planned = new Map(pick != null && cur ? Battle.pushed(cur, pick).map(([x, l]) => [x, l - x.lane]) : []);
     const unitCard = (u, i) => {
       const isT = u === tgt, acting = i === curIdx;
       const struck = hit && hit.to === i;
       const cls = [u.dead ? 'dead' : '', acting ? 'acting' : '', struck && !hit.miss && !hit.restore ? 'hit' : '', struck && hit.miss ? 'missed' : '', isT ? 'target' : '', u.side === 'player' && pick === u.lane ? 'swap-dest' : ''].join(' ');
-      let extra = struck && hit.miss ? '<div class="floater miss">MISS</div>' : struck && hit.restore ? '<div class="floater restore">+ RESTORED</div>' : '';
+      // floating labels keep their place in the animation across re-renders (negative delay = already running)
+      const fx = (b.fx || []).filter((f) => f.unit === i && Date.now() - f.t < DATA.battleFxMs).pop();
+      let extra = fx ? `<div class="floater ${fx.kind}" style="animation-duration:${DATA.battleFxMs}ms;animation-delay:-${Date.now() - fx.t}ms">${fx.kind === 'miss' ? 'MISS' : '+ RESTORED'}</div>` : '';
+      if (u.dead) extra += '<div class="wreck-stamp">✕ DESTROYED</div>';
       extra += isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
       // the acting ship gets little arrows to pick a lane to swap to
-      if (acting && myTurn && !DATA.shipTypes[u.type].structure) {
+      if (acting && myTurn) {
         extra += `<div class="swapnav"><button class="btn small" data-act="bswapnav" data-a="-1" title="Pick a lane to the left">◀</button><span>swap</span><button class="btn small" data-act="bswapnav" data-a="1" title="Pick a lane to the right">▶</button></div>`;
       }
       const attrs = `data-unit="${i}"` + (u.side === 'player' ? ` data-droplane="${u.lane}"` : '') + (acting && myTurn ? ' draggable="true" data-drag="1"' : '');
-      return this.shipCard(u, { owner: u.side === 'player' ? 'player' : enemyOwner, cls, extra, attrs });
+      // a planned move (arrows) shows the ships that would make room, nudged aside
+      const nudge = planned.get(u);
+      return this.shipCard(u, { owner: u.side === 'player' ? 'player' : enemyOwner, cls, extra, attrs, style: nudge ? `--shift:${nudge * 26}px` : '' });
     };
     // each side is a row of lanes; lane i faces lane i on the other side
     const side = (name) => {
@@ -306,6 +312,17 @@ Object.assign(UI, {
       <div class="blog">${b.log.slice(-30).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
       <details data-key="battle-rules"><summary class="small">Rules of engagement</summary><p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance, and Large ships hit Small ones at ×${DATA.largeVsSmallHit}. Instead of firing, a ship can <b>move</b> to any lane on its side (the ships in between slide over), or <b>Restore</b>: regain ${Math.round(DATA.restore.shield * 100)} % of its max shields and ${Math.round(DATA.restore.hull * 100)} % of its max hull.</p></details>
     </aside></div>`;
+  },
+
+  // While a ship is dragged over a lane: nudge the ships that would make room, opening a gap (null = reset).
+  previewMove(lane) {
+    const b = G.battle, cur = b && Battle.current();
+    document.querySelectorAll('.bside.player .scard[data-unit]').forEach((c) => c.style.removeProperty('--shift'));
+    if (lane == null || !cur || !Battle.canSwapTo(cur, lane)) return;
+    for (const [x, l] of Battle.pushed(cur, lane)) {
+      const c = document.querySelector(`.bside.player .scard[data-unit="${b.units.indexOf(x)}"]`);
+      if (c) c.style.setProperty('--shift', `${(l - x.lane) * 26}px`);
+    }
   },
 
   // Move the planned swap one lane left/right (skipping lanes it can't go to); 0 cancels.

@@ -81,6 +81,7 @@ const Battle = {
   // Lane = position on its side, in fleet order (the Planetary Defenses take the next free lane).
   lanes() {
     for (const side of ['player', 'enemy']) G.battle.units.filter((u) => u.side === side).forEach((u, i) => { if (u.lane == null) u.lane = i; });
+    this.pack();
   },
   laneCount() { return Math.max(DATA.fleetMax, ...G.battle.units.map((u) => u.lane + 1)); },
 
@@ -148,16 +149,20 @@ const Battle = {
   // The ship (or wreck) in a lane on a side, or null if the lane is empty.
   inLane(side, lane) { return G.battle.units.find((x) => x.side === side && x.lane === lane) || null; },
   // Moving works like reordering a list: the ship is taken out of its lane and put into the new one, and
-  // every ship (or wreck) in between slides one lane towards the gap it left. Planetary Defenses can't move
-  // and can't be pushed, so no move may pass over them.
+  // every ship (or wreck) in between slides one lane towards the gap it left. Wrecks keep their place in the
+  // row, and a ship can only move within the row (lanes 0 to the number of ships on its side − 1), so the row
+  // never gets holes. Planetary Defenses move like any ship.
   pushed(u, lane) {
     const a = u.lane, lo = Math.min(a, lane), hi = Math.max(a, lane), dir = lane > a ? -1 : 1;
     return G.battle.units.filter((x) => x !== u && x.side === u.side && x.lane >= lo && x.lane <= hi).map((x) => [x, x.lane + dir]);
   },
+  rowSize(side) { return G.battle.units.filter((x) => x.side === side).length; },
   canSwapTo(u, lane) {
-    if (lane === u.lane || lane < 0 || lane >= this.laneCount()) return false;
-    const fixed = (x) => x && DATA.shipTypes[x.type].structure; // Planetary Defenses stay where they are
-    return !fixed(u) && !this.pushed(u, lane).some(([x]) => fixed(x));
+    return !u.dead && lane !== u.lane && lane >= 0 && lane < this.rowSize(u.side);
+  },
+  // Close any holes in a row (older saves, or rows that started with gaps), keeping the order.
+  pack() {
+    for (const side of ['player', 'enemy']) G.battle.units.filter((u) => u.side === side).sort((a, c) => a.lane - c.lane).forEach((u, i) => { u.lane = i; });
   },
   // Apply a move (returns a function that undoes it, for the computer's what-if checks).
   shift(u, lane) {
@@ -228,6 +233,13 @@ const Battle = {
     return true;
   },
 
+  // Floating labels over a card (MISS, RESTORED) that stay up for a while: DATA.battleFxMs.
+  fx(unit, kind) {
+    const b = G.battle, now = Date.now();
+    b.fx = (b.fx || []).filter((f) => now - f.t < DATA.battleFxMs && f.unit !== unit);
+    b.fx.push({ unit, kind, t: now });
+  },
+
   // ---------- restore ----------
   // Instead of firing: hold position and patch up (DATA.restore of the ship's max shields and hull).
   restoreGain(u) {
@@ -242,6 +254,7 @@ const Battle = {
     const parts = [g.shield && `${g.shield} shield`, g.hull && `${g.hull} hull`].filter(Boolean).join(' and ');
     this.say(`${u.name} holds position and restores ${parts}.`, u.side);
     G.battle.lastHit = { to: G.battle.units.indexOf(u), t: Date.now(), restore: true };
+    this.fx(G.battle.units.indexOf(u), 'restore');
     this.endTurn();
     return true;
   },
@@ -307,6 +320,7 @@ const Battle = {
     if (Math.random() > this.hitChance(w, t, a)) {
       this.say(`${a.name} fires ${w.name} at ${t.name}${across}: missed.`, a.side);
       b.lastHit = { from: b.units.indexOf(a), to: b.units.indexOf(t), t: Date.now(), miss: true };
+      this.fx(b.units.indexOf(t), 'miss');
       return this.endTurn();
     }
     const d = this.preview(a, w, t, U.rand(0.9, 1.1));

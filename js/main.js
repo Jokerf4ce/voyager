@@ -233,7 +233,8 @@ document.addEventListener('drop', (ev) => {
 
 // Battle: drag the acting ship onto another of your lanes to swap places.
 document.addEventListener('dragstart', (ev) => {
-  if (ev.target.closest && ev.target.closest('[data-drag]')) { ev.dataTransfer.setData('text/plain', 'swap'); ev.dataTransfer.effectAllowed = 'move'; }
+  const card = ev.target.closest && ev.target.closest('[data-drag]');
+  if (card) { ev.dataTransfer.setData('text/plain', 'swap'); ev.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.classList.add('dragging'), 0); }
 });
 document.addEventListener('dragover', (ev) => {
   const el = ev.target.closest && ev.target.closest('[data-droplane]');
@@ -242,12 +243,15 @@ document.addEventListener('dragover', (ev) => {
   ev.preventDefault();
   document.querySelectorAll('.dragover').forEach((x) => x !== el && x.classList.remove('dragover'));
   el.classList.add('dragover');
+  UI.previewMove(+el.dataset.droplane);
 });
+document.addEventListener('dragend', () => UI.previewMove(null));
 document.addEventListener('dragleave', (ev) => { const el = ev.target.closest && ev.target.closest('[data-droplane]'); if (el) el.classList.remove('dragover'); });
 document.addEventListener('drop', (ev) => {
   const el = ev.target.closest && ev.target.closest('[data-droplane]');
   if (!el || !G || !G.battle) return;
   ev.preventDefault();
+  UI.previewMove(null);
   if (Battle.swapTurn(+el.dataset.droplane)) { UI.swapPick = null; State.save(); }
   UI.render();
 });

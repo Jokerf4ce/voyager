@@ -219,7 +219,7 @@ So formation matters: put the ships that can best take on each enemy across from
 3. If no weapon is ready, the ship skips its turn ("recharges its weapons").
 4. Otherwise it does one of three things:
    - **Fire** one ready weapon at its target (see 4.2).
-   - **Move** (v0.42; before that, ships traded places): the ship goes to **any** lane on its side, like reordering a list. Every ship or wreck between its old and new lane slides one lane towards the gap it left; ships beyond are untouched. Planetary Defenses never move, and no move may pass over them. The new lanes hold for the rest of the battle, and targets follow them (4.2).
+   - **Move** (v0.42; before that, ships traded places): the ship goes to **any** lane of its row, like reordering a list. Every ship or wreck between its old and new lane slides one lane towards the gap it left; ships beyond are untouched. Since v0.46 Planetary Defenses move (and get pushed) like any ship, and a row never has holes: wrecks keep their lane, and a ship can't move past the end of its row. The new lanes hold for the rest of the battle, and targets follow them (4.2).
    - **Restore** (v0.42): the ship holds position and regains **25 % of its max shields and 10 % of its max hull** (never above the max). `DATA.restore`.
    - Moving and restoring use the turn, so the ship doesn't fire.
 5. When it fires:
@@ -279,7 +279,9 @@ The base is then applied to the target's shield first, then its hull:
 
 **On screen:**
 - Each side shows its live **fleet power** (living ships, current shields and hull); a bar across the top of the board compares the two.
-- A missed shot shows **MISS** over the target card, and a Restore shows **+ RESTORED**.
+- A missed shot shows **MISS** over the target card, and a Restore shows **+ RESTORED**; both stay up for about 2 seconds (`DATA.battleFxMs`).
+- Destroyed ships stay on the board as wrecks, stamped ✕ DESTROYED.
+- While you drag a ship (or pick a lane with ◀ ▶), the ships that would make room slide aside, opening a gap where it would go.
 - An **arrow** floats from the acting ship to its target.
 - The **turn order** for the round is pinned to the bottom of the screen.
 
