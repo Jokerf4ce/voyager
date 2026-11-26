@@ -407,7 +407,7 @@ const UI = {
       <p class="muted small">The Assistant's lines are mp3 files in <code>${Voice.folder}</code>. She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away. Test plays <code>slipspace.mp3</code>.</p>
       <div class="voice-files small">${Object.keys(VoiceLines).map((id) => {
         const st = Voice.status[id];
-        const label = st === 'ready' ? '<span class="good">✓ playing with effects</span>' : st === 'basic' ? '<span class="res-power">✓ playing without live effects (opened from disk or restricted browser)</span>' : st === 'missing' ? '<span class="bad">✗ could not be played (missing or blocked)</span>' : '<span class="muted">not played yet</span>';
+        const label = st === 'ready' || st === 'basic' ? '<span class="good">✓ plays</span>' : st === 'missing' ? '<span class="bad">✗ could not be played (missing or blocked)</span>' : '<span class="muted">not played yet</span>';
         return `<div><code>${U.esc(id)}.mp3</code> ${label}</div>`;
       }).join('')}</div>
       <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>

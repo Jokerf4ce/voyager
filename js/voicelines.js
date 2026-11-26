@@ -3,7 +3,7 @@
 // Each line is an mp3 file named after the line id: assets/voice/<id>.mp3 (e.g. assets/voice/welcome_back.mp3).
 //   text      what she says; also shown on screen as a "SHIP AI" transmission
 //   triggers  game events that can play this line (see the list below)
-//   glitch    0..1 how broken-up it sounds: distortion, stutters, dropouts, static (default 0.35)
+//   glitch    0..1 how much the on-screen transmission text glitches (default 0.35); the audio plays as recorded
 //   chance    0..1 probability the line plays when triggered (default 1)
 //   src       optional: a different file path instead of assets/voice/<id>.mp3
 //
@@ -17,10 +17,11 @@
 //   test    the Test button in Settings (Assistant)
 //
 // Lines with an empty text play without an on-screen transmission.
+// The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
 
 const VoiceLines = {
   welcome_back: { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
-  slipspace:    { text: '', triggers: ['test'], glitch: 0.35 }, // played by the Test button in Settings
+  slipspace:    { text: 'Slipspace rupture detected!', triggers: ['test'], glitch: 0.35 }, // played by the Test button in Settings
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.

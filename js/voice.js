@@ -1,9 +1,9 @@
-// Voyager — the ship's computer voice: a lightly distorted, glitching British female voice.
+// Voyager — the Assistant: the ship's computer voice.
 // Lines and triggers live in js/voicelines.js. Call Voice.trigger(name) from anywhere in the game.
 //
-// Each line is an mp3 file, by default assets/voice/<line id>.mp3. It is played through Web Audio with
-// radio filtering, soft distortion and random stutters/dropouts, over a bed of static and digital glitches,
-// and shown on screen as a "SHIP AI" transmission. If the file is missing, only the transmission is shown.
+// Each line is an mp3 file, by default assets/voice/<line id>.mp3, played exactly as recorded (the robotic
+// effect is part of the file). The line is also shown on screen as a "SHIP AI" transmission. If the file
+// cannot be played, only the transmission is shown.
 
 const Voice = {
   enabled: true,
@@ -101,62 +101,9 @@ const Voice = {
     g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(target, t + (on ? 0.25 : 1.2));
   },
 
-  // Static, clicks and digital squelches under the voice, so it sounds like a damaged ship's computer.
-  glitchBed(seconds, glitch) {
-    const ctx = this.audio();
-    if (!ctx) return;
-    const t0 = ctx.currentTime + 0.05;
-    const out = ctx.createGain(); out.gain.value = this.volume * 0.5; out.connect(ctx.destination);
-    // a short burst of static at the start and end, like a comm channel opening and closing
-    for (const [at, len, v] of [[0, 0.18, 0.5], [seconds, 0.22, 0.4]]) this.noise(t0 + at, len, v, 2500, out);
-    // a faint hum bed
-    const hum = ctx.createOscillator(); hum.type = 'sawtooth'; hum.frequency.value = 50;
-    const hl = ctx.createBiquadFilter(); hl.type = 'lowpass'; hl.frequency.value = 180;
-    const hg = ctx.createGain();
-    hg.gain.setValueAtTime(0, t0); hg.gain.linearRampToValueAtTime(0.05, t0 + 0.1);
-    hg.gain.setValueAtTime(0.05, t0 + seconds); hg.gain.linearRampToValueAtTime(0, t0 + seconds + 0.3);
-    hum.connect(hl); hl.connect(hg); hg.connect(out); hum.start(t0); hum.stop(t0 + seconds + 0.4);
-    // random glitches while she speaks
-    const n = Math.round(seconds * (2 + glitch * 8));
-    for (let i = 0; i < n; i++) {
-      const at = t0 + 0.15 + Math.random() * seconds;
-      const r = Math.random();
-      if (r < 0.45) this.noise(at, 0.02 + Math.random() * 0.06, 0.25 + Math.random() * 0.3, 1500 + Math.random() * 5000, out);
-      else if (r < 0.8) this.click(at, 0.3 + Math.random() * 0.4, out);
-      else this.squelch(at, 0.05 + Math.random() * 0.1, out);
-    }
-  },
-
-  noise(t, len, vel, freq, out) {
-    const ctx = this.ctx, n = Math.max(1, Math.floor(ctx.sampleRate * len));
-    const buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
-    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < 0.3 ? 1 : 0.4); // crackly
-    const src = ctx.createBufferSource(); src.buffer = buf;
-    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 0.8;
-    const g = ctx.createGain(); g.gain.setValueAtTime(vel, t); g.gain.linearRampToValueAtTime(0, t + len);
-    src.connect(bp); bp.connect(g); g.connect(out); src.start(t);
-  },
-
-  click(t, vel, out) {
-    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'square'; o.frequency.value = 1200 + Math.random() * 2400;
-    g.gain.setValueAtTime(vel * 0.3, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
-    o.connect(g); g.connect(out); o.start(t); o.stop(t + 0.02);
-  },
-
-  // A falling digital chirp, like data corruption.
-  squelch(t, len, out) {
-    const ctx = this.ctx, o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = 'square';
-    o.frequency.setValueAtTime(2200 + Math.random() * 1500, t);
-    o.frequency.exponentialRampToValueAtTime(180, t + len);
-    g.gain.setValueAtTime(0.06, t); g.gain.linearRampToValueAtTime(0, t + len);
-    o.connect(g); g.connect(out); o.start(t); o.stop(t + len + 0.01);
-  },
-
   src(id, line) { return line.src || this.folder + id + '.mp3'; },
 
-  // Load and decode a line for the effects chain. Fails on missing files, and when the page is opened
+  // Load and decode a line for Web Audio playback. Fails on missing files, and when the page is opened
   // straight from disk (file://), where browsers block fetch().
   async load(id, line) {
     if (this.buffers[id]) return this.buffers[id];
@@ -166,7 +113,7 @@ const Voice = {
     return (this.buffers[id] = await this.ctx.decodeAudioData(await res.arrayBuffer()));
   },
 
-  // Plain playback with an <audio> element: no live effects, but works almost everywhere (also from disk).
+  // Plain playback with an <audio> element: works almost everywhere, also when opened from disk.
   playBasic(id, line, glitch, done) {
     let a;
     try { a = new Audio(this.src(id, line)); } catch (e) { a = null; }
@@ -179,22 +126,20 @@ const Voice = {
     a.play().then(() => {
       this.status[id] = 'basic';
       if (this.subtitles && line.text) this.subtitle(line.text, (a.duration || 2) + 2, glitch);
-      if (this.ctx) this.glitchBed(a.duration || 2, glitch * 0.4);
       setTimeout(end, ((a.duration || 3) + 1) * 1000);
     }).catch(() => { if (!ended) { ended = true; this.noFile(id, line, glitch, done); } });
   },
 
-  // No playable file: show the transmission and open/close the comm channel.
+  // No playable file: show the transmission only.
   noFile(id, line, glitch, done) {
     this.status[id] = 'missing';
     this.failedAt[id] = Date.now();
     if (line.text) this.subtitle(line.text, line.text.length * 0.075 + 3, glitch);
-    if (this.ctx) this.glitchBed(0.6, glitch * 0.5);
     setTimeout(done, 1200);
     if (typeof UI !== 'undefined' && UI.screen === 'settings') UI.render();
   },
 
-  // ---- playing a line: real distortion and stutter ----
+  // ---- playing a line, exactly as recorded ----
   async playFile(id, line, done) {
     const ctx = this.audio();
     const glitch = line.glitch ?? 0.35;
@@ -205,32 +150,15 @@ const Voice = {
     delete this.failedAt[id];
     if (ctx.state === 'suspended') ctx.resume();
     if (this.subtitles && line.text) this.subtitle(line.text, buf.duration + 2, glitch);
-    // radio tone: band-limit, then soft-clip
-    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 280;
-    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5200;
-    const shaper = ctx.createWaveShaper();
-    const curve = new Float32Array(1024), k = 4 + glitch * 20;
-    for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; curve[i] = ((1 + k) * x) / (1 + k * Math.abs(x)); }
-    shaper.curve = curve;
-    const g = ctx.createGain(); g.gain.value = this.volume * 0.8;
-    hp.connect(lp); lp.connect(shaper); shaper.connect(g); g.connect(ctx.destination);
-    // play in slices; now and then repeat a slice (stutter) or drop it (dropout)
-    const t0 = ctx.currentTime + 0.05;
-    let t = t0, pos = 0;
-    const slice = 0.09;
-    while (pos < buf.duration) {
-      const len = Math.min(slice, buf.duration - pos);
-      const reps = Math.random() < glitch * 0.08 ? 2 + Math.floor(Math.random() * 2) : 1;
-      for (let r = 0; r < reps; r++) {
-        if (Math.random() < glitch * 0.03) { t += len; continue; } // dropout
-        const src = ctx.createBufferSource(); src.buffer = buf;
-        src.playbackRate.value = Math.random() < glitch * 0.05 ? 0.92 : 1;
-        src.connect(hp); src.start(t, pos, len); t += len / src.playbackRate.value;
-      }
-      pos += len;
-    }
-    this.glitchBed(t - t0, glitch * 0.6);
-    setTimeout(done, (t - t0 + 0.4) * 1000);
+    const g = ctx.createGain(); g.gain.value = this.volume;
+    g.connect(ctx.destination);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    src.connect(g);
+    let finished = false;
+    const finish = () => { if (!finished) { finished = true; done(); } };
+    src.onended = finish;
+    src.start(ctx.currentTime + 0.05);
+    setTimeout(finish, (buf.duration + 1.5) * 1000); // in case onended never fires
   },
 
   // On-screen transmission: the line types out with glitching characters, then fades.

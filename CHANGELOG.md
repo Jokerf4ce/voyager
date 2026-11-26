@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.15.5 — 2026-11-26
+- Assistant voice files now play exactly as recorded: removed the game's extra distortion, radio filter, stutters, dropouts and static (the robotic effect is in the mp3s).
+- Caption for `slipspace.mp3`: "Slipspace rupture detected!"
+
 ## 0.15.4 — 2026-11-26
 - The game is now served at https://voyager.weidmann.cloud/ (GitHub Pages custom domain); README and notes updated.
 
