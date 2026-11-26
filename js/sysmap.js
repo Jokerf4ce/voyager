@@ -179,19 +179,16 @@ const SystemMap = {
     ctx.fillStyle = '#5a5048';
     const stc = DATA.starClasses[s.star];
     ctx.fillText(stc.kind === 'blackhole' ? 'BLACK HOLE AND DISC ENLARGED · DISTANCES NOT TO SCALE' : stc.kind === 'pulsar' ? 'PULSAR ENLARGED · DISTANCES NOT TO SCALE' : 'SIZES TO SCALE · DISTANCES NOT', 60, this.H - 6);
-    // fleets wait at the jump point
-    const here = Fleets.at(s.id);
-    if (here.length) {
-      const jx = this.W - 18, jy = 14;
+    // a guard (monster lair or alien garrison) waits at the jump point
+    const g = Missions.guard(s);
+    if (g) {
+      const jx = this.W - 22, jy = 14;
       ctx.textAlign = 'center';
       ctx.fillStyle = '#5a5048';
       ctx.fillText('JUMP', jx, jy - 4);
-      here.forEach((f, i) => {
-        const fx = jx - 4, fy = jy + i * 6;
-        ctx.fillStyle = f.id === UI.selFleet ? '#ffffff' : DATA.factions[f.owner].color;
-        ctx.fillRect(fx, fy, 5, 1); ctx.fillRect(fx, fy + 1, 3, 1); ctx.fillRect(fx, fy + 2, 1, 1);
-        ctx.fillText(String(Fleets.size(f)), fx + 12, fy + 4);
-      });
+      ctx.fillStyle = DATA.factions[g.owner].color;
+      g.ships.forEach((x, i) => { const fx = jx - 8 + (i % 3) * 6, fy = jy + Math.floor(i / 3) * 5; ctx.fillRect(fx, fy, 4, 1); ctx.fillRect(fx, fy + 1, 2, 1); ctx.fillRect(fx, fy + 2, 1, 1); });
+      ctx.fillText(g.ships.length + ' HOSTILE', jx, jy + 16);
     }
   },
 

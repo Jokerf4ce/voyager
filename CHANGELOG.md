@@ -2,6 +2,18 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.23.0 — 2026-11-26
+New fleet and combat system. **Old saves start a new game** (save format v11).
+- **Ship cards.** Ships come in three sizes that beat each other like rock-paper-scissors (Small > Large > Medium > Small), with three types each: Scout, Fighter, Heavy Fighter · Corvette, Frigate, Gunboat · Destroyer, Battleship, Carrier. Stats: shield, hull, speed (turn order), maneuverability (evasion), 1–3 weapon slots, maintenance.
+- **Building is a gacha.** Choose a size at the Shipyard and pay; type, rarity, stats and weapons are rolled: Normal 76.9 %, Strong 20 %, Epic 2 %, Legendary 1 %, Omega 0.1 %. Medium and Large hulls are unlocked by research (Medium Hulls, Capital Hulls).
+- **Weapons**: physical (strong vs hull, weak vs shields) or energy (the reverse), with damage, accuracy and recharge times. Swap them on the Fleets screen; spare weapons wait in the armory (from scrapped ships, wrecks after victories, and the new Weapon Forge for 15 Shards).
+- **Global fleets.** The Fleets screen shows every fleet (up to 5 ships), the hangar and the armory. Fleets no longer move on the map: from a system on the Star Map you send them to **explore** (needs a Scout) or **attack**; the Colony Ark is built at the Shipyard and sent to settle. Missions take Cycles by distance.
+- **Turn-based card battles.** Your cards face the enemy's; each round every ship acts once, fastest first: pick a weapon, then a target (with a damage and hit-chance preview). Auto, Resolve instantly and Retreat are always there. Losses are permanent; hull damage is repaired at home.
+- **Alien raids** show up as threats with a countdown. When one arrives you pick a fleet to defend; Bastions and Defense Platforms fight as a Planetary Defenses card (the capital always has one). Monster lairs and alien worlds are guarded by ship cards.
+- **Maintenance**: each ship costs Metals (plus half as much Chemicals) per Cycle.
+- **Removed**: the Void Signals gacha, leaders, relics, blueprints and the Archive screen.
+- The admin test game now also has fleets of every rarity, spare weapons, Arks and an incoming raid.
+
 ## 0.22.0 — 2026-11-26
 - Three new dark, unsettling music tracks (Settings → Playlist):
   - **The Hollow Choir**: B Locrian. A drone grinding against a ghost a semitone above, a choir in semitone clusters, wind through empty decks, a wail sliding down, distant metal.

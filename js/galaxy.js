@@ -113,18 +113,29 @@ const Galaxy = {
     G.ai.chorus.homeId = chorus.id;
     G.ai.remnant.homeId = remnant.id;
 
-    Fleets.create('player', home.id, { scout: 1 }, 'Pathfinder');
-    Fleets.create('player', home.id, { scout: 1 }, 'Wayseeker');
-    Fleets.create('player', home.id, { corvette: 3 }, 'Home Guard');
-    Fleets.create('chorus', chorus.id, { corvette: 4 }, 'Chorus Swarm');
-    Fleets.create('remnant', remnant.id, { corvette: 3, frigate: 1 }, 'Remnant Cohort');
+    // Starting fleets: two scouts and a small guard of fighters, all Normal cards.
+    const give = (type, fleet) => { const sh = Ships.make(type, { rarity: 'normal' }); G.ships[sh.id] = sh; fleet.ships.push(sh.id); };
+    give('scout', Ships.newFleet('Pathfinder'));
+    give('scout', Ships.newFleet('Wayseeker'));
+    const guard = Ships.newFleet('Home Guard');
+    give('fighter', guard); give('fighter', guard); give('heavy', guard);
+    G.arks = 1;
+    AI.setGuard(chorus, 'chorus', 4);
+    AI.setGuard(remnant, 'remnant', 4);
 
     // Monsters guard random systems away from the homes.
     const homes = [home.id, chorus.id, remnant.id];
     const near = new Set(homes.flatMap((h) => [h, ...S[h].lanes]));
     const candidates = U.shuffle(S.filter((s) => !near.has(s.id)));
     candidates.slice(0, DATA.config.monsterSystems).forEach((s, i) => {
-      Fleets.create('monster', s.id, { lurker: U.randInt(2, 4) + Math.floor(i / 2) }, 'Lurkers');
+      // lairs farther down the list are nastier: more ships, bigger monsters
+      const n = Math.min(DATA.fleetMax, U.randInt(2, 3) + Math.floor(i / 2));
+      const ships = [];
+      for (let k = 0; k < n; k++) {
+        const r = Math.random() * (1 + i * 0.25);
+        ships.push(Ships.make(r > 1.4 ? 'leviathan' : r > 0.8 ? 'maw' : 'lurker', { owner: 'monster', rarity: Ships.rollRarity(i * 0.3) }));
+      }
+      s.guard = { owner: 'monster', name: i > 3 ? 'Lurker Brood' : 'Lurkers', ships };
     });
 
     // Some systems hold exploration events.

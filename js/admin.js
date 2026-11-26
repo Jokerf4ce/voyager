@@ -22,7 +22,7 @@ const Admin = {
     const out = picks.map((p) => ({ s: home, p }));
     for (const s of byDist) {
       if (out.length >= this.extraColonies) break;
-      if (s.id === home.id || !s.explored || s.owner || aiHomes.includes(s.id) || G.fleets.some((f) => f.sys === s.id && f.owner !== 'player')) continue;
+      if (s.id === home.id || !s.explored || s.owner || aiHomes.includes(s.id) || Missions.guard(s)) continue;
       const ps = free(s);
       if (ps.length) out.push({ s, p: ps[Math.floor(Math.random() * ps.length)] });
     }
@@ -35,6 +35,20 @@ const Admin = {
     this.fixCaps();
 
     for (const k in G.res) G.res[k] = k === 'shards' ? 500 : 1500;
+
+    // Ships of every size and rarity: two fleets and a full hangar, plus spare weapons and Arks.
+    G.techs.medium = 1; G.techs.capital = 1;
+    const add = (type, rarity, fleet) => { const sh = Ships.make(type, { rarity }); G.ships[sh.id] = sh; if (fleet) fleet.ships.push(sh.id); return sh; };
+    const strike = Ships.newFleet('Ash Lance');
+    add('destroyer', 'legendary', strike); add('frigate', 'epic', strike); add('corvette', 'strong', strike); add('heavy', 'strong', strike); add('fighter', 'normal', strike);
+    const wolves = Ships.newFleet('Grey Vigil');
+    add('battleship', 'omega', wolves); add('gunboat', 'normal', wolves); add('scout', 'strong', wolves);
+    for (const [t, r] of [['carrier', 'strong'], ['frigate', 'normal'], ['fighter', 'epic'], ['scout', 'normal'], ['heavy', 'normal'], ['gunboat', 'strong']]) add(t, r, null);
+    for (const z of ['S', 'M', 'L', 'S', 'M']) G.armory.push(Ships.makeWeapon(z, Ships.rollRarity(2)));
+    G.arks = 3;
+    // an alien raid already on its way, to try a defense battle
+    const target = AI.pickTarget('chorus');
+    if (target) G.threats.push({ id: 't' + (G.nextThreatId++), owner: 'chorus', name: 'Chorus Raid', target: target.s.id, eta: 2, total: 2, ships: AI.team('chorus', 3) });
     G.admin = true;
     G.log = [];
     Log.add('Admin test game: ' + out.length + ' extra colonies with random buildings.');

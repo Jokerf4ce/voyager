@@ -139,21 +139,84 @@ DATA.buildings = {
 DATA.settleCost = { metal: 60, electronics: 20, chemicals: 10 };
 DATA.settleGrowth = 1.2;
 
-// Ship types. cap = capacity used while the ship exists (crew life support, cogitators for advanced ships).
-DATA.ships = {
-  scout:    { name: 'Scout',        atk: 0,  hp: 5,   cost: { metal: 15 },                                          cap: { infra: 0.5 },          role: 'Explores unknown systems' },
-  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { metal: 60, electronics: 25, chemicals: 15 },             cap: { infra: 2 },            role: 'Founds a colony, consumed on use' },
-  corvette: { name: 'Corvette',     atk: 3,  hp: 10,  cost: { metal: 25, chemicals: 5 },                            cap: { infra: 1 },            role: 'Cheap line ship' },
-  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { metal: 50, electronics: 15, chemicals: 10 },             cap: { infra: 2, compute: 1 }, role: 'Solid warship', req: { tech: 'frigates' } },
-  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { metal: 50, rare: 20, electronics: 15, chemicals: 15 },   cap: { infra: 2, compute: 2 }, role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
-  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { metal: 160, rare: 50, electronics: 60, chemicals: 40 },  cap: { infra: 6, compute: 4 }, role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
-  lurker:   { name: 'Lurker',       atk: 4,  hp: 16,  cost: {}, cap: {}, role: 'Something from the dark', monster: true },
+// ---------------------------------------------------------------------------------------------
+// Ships are cards: every build rolls a type (within the size you chose), a rarity, stats and weapons.
+// Sizes beat each other like rock-paper-scissors: Small beats Large, Large beats Medium, Medium beats Small.
+DATA.sizes = {
+  S: { name: 'Small',  beats: 'L', req: null,      cost: { metal: 30, electronics: 6 },                          weaponDmg: 5 },
+  M: { name: 'Medium', beats: 'S', req: 'medium',  cost: { metal: 70, electronics: 20, chemicals: 10 },          weaponDmg: 10 },
+  L: { name: 'Large',  beats: 'M', req: 'capital', cost: { metal: 160, rare: 40, electronics: 50, chemicals: 30 }, weaponDmg: 18 },
 };
+DATA.sizeAdvantage = 1.5;    // damage multiplier against the size you beat
+DATA.sizeDisadvantage = 0.7; // ... and against the size that beats you
+
+// Base stats at Normal rarity. shield and hull are life points (shield first); speed sets turn order;
+// maneuver is the chance to evade (%); slots = weapon slots (1–3); upkeep = Metals per Cycle (plus half that in Chemicals).
+DATA.shipTypes = {
+  scout:      { name: 'Scout',         size: 'S', shield: 8,  hull: 10,  speed: 9, maneuver: 30, slots: 1, upkeep: 0.2, scout: true, desc: 'Fast and fragile. A fleet needs one to explore.' },
+  fighter:    { name: 'Fighter',       size: 'S', shield: 10, hull: 14,  speed: 8, maneuver: 25, slots: 1, upkeep: 0.3, desc: 'Cheap, quick, hard to hit.' },
+  heavy:      { name: 'Heavy Fighter', size: 'S', shield: 14, hull: 20,  speed: 6, maneuver: 18, slots: 2, upkeep: 0.5, desc: 'A fighter with a second gun and more armour.' },
+  corvette:   { name: 'Corvette',      size: 'M', shield: 25, hull: 30,  speed: 6, maneuver: 12, slots: 2, upkeep: 0.8, desc: 'Fast for a line ship.' },
+  frigate:    { name: 'Frigate',       size: 'M', shield: 35, hull: 40,  speed: 5, maneuver: 8,  slots: 2, upkeep: 1.0, desc: 'Solid all-round warship.' },
+  gunboat:    { name: 'Gunboat',       size: 'M', shield: 25, hull: 45,  speed: 4, maneuver: 6,  slots: 3, upkeep: 1.2, desc: 'Slow, but carries three guns.' },
+  destroyer:  { name: 'Destroyer',     size: 'L', shield: 60, hull: 70,  speed: 4, maneuver: 4,  slots: 3, upkeep: 2.0, desc: 'The quickest of the capital ships.' },
+  battleship: { name: 'Battleship',    size: 'L', shield: 80, hull: 110, speed: 2, maneuver: 2,  slots: 3, upkeep: 2.6, desc: 'A cathedral of war. Slow to turn, slower to die.' },
+  carrier:    { name: 'Carrier',       size: 'L', shield: 70, hull: 90,  speed: 3, maneuver: 3,  slots: 2, upkeep: 2.2, desc: 'A mothership; its hangars are still dark.' },
+  // monsters: never built, only met
+  lurker:     { name: 'Lurker',        size: 'S', shield: 0,  hull: 26,  speed: 7, maneuver: 22, slots: 1, upkeep: 0, monster: true, desc: 'Something from the dark.' },
+  maw:        { name: 'Maw',           size: 'M', shield: 0,  hull: 70,  speed: 4, maneuver: 8,  slots: 2, upkeep: 0, monster: true, desc: 'All teeth, no eyes.' },
+  leviathan:  { name: 'Leviathan',     size: 'L', shield: 20, hull: 160, speed: 2, maneuver: 1,  slots: 3, upkeep: 0, monster: true, desc: 'It has been asleep between the stars for a very long time.' },
+  // a colony's Bastions and Defense Platforms fight as one card
+  defense:    { name: 'Planetary Defenses', size: 'M', shield: 20, hull: 30, speed: 3, maneuver: 0, slots: 2, upkeep: 0, structure: true, desc: 'Bastions and Defense Platforms of the system.' },
+};
+
+// Rarity of a ship (and of a forged weapon). mult scales stats and weapon damage.
+DATA.shipRarities = {
+  normal:    { name: 'Normal',    rate: 0.769, mult: 1.0,  color: '#9a9080' },
+  strong:    { name: 'Strong',    rate: 0.20,  mult: 1.2,  color: '#4a9ad0' },
+  epic:      { name: 'Epic',      rate: 0.02,  mult: 1.45, color: '#a060d0', extraSlot: true },
+  legendary: { name: 'Legendary', rate: 0.01,  mult: 1.75, color: '#d0a020', extraSlot: true },
+  omega:     { name: 'Omega',     rate: 0.001, mult: 2.2,  color: '#e04040', extraSlot: true },
+};
+
+// Weapons: physical hits hull hard and bounces off shields; energy strips shields but barely scratches hull.
+DATA.damageTypes = {
+  physical: { name: 'Physical', icon: '▲', shield: 0.5, hull: 1.5, color: '#d09050' },
+  energy:   { name: 'Energy',   icon: '◆', shield: 1.5, hull: 0.5, color: '#60b0e0' },
+};
+// dmg multiplies the size's base weapon damage; cd = turns to recharge after firing; acc = hit chance before evasion.
+DATA.weaponModels = {
+  autocannon: { name: 'Autocannon',       kind: 'physical', dmg: 1.0, cd: 0, acc: 95, weight: 4 },
+  massdriver: { name: 'Mass Driver',      kind: 'physical', dmg: 1.6, cd: 1, acc: 85, weight: 3 },
+  railgun:    { name: 'Railgun',          kind: 'physical', dmg: 2.4, cd: 2, acc: 80, weight: 2 },
+  torpedo:    { name: 'Torpedo Rack',     kind: 'physical', dmg: 3.4, cd: 3, acc: 70, weight: 1 },
+  pulse:      { name: 'Pulse Laser',      kind: 'energy',   dmg: 1.0, cd: 0, acc: 100, weight: 4 },
+  ion:        { name: 'Ion Lance',        kind: 'energy',   dmg: 1.6, cd: 1, acc: 90, weight: 3 },
+  plasma:     { name: 'Plasma Projector', kind: 'energy',   dmg: 2.4, cd: 2, acc: 80, weight: 2 },
+  particle:   { name: 'Particle Beam',    kind: 'energy',   dmg: 3.4, cd: 3, acc: 75, weight: 1 },
+  // monster and structure weapons
+  claws:      { name: 'Rending Claws',    kind: 'physical', dmg: 1.3, cd: 0, acc: 90, weight: 0 },
+  spit:       { name: 'Acid Spit',        kind: 'energy',   dmg: 1.8, cd: 1, acc: 85, weight: 0 },
+  battery:    { name: 'Bastion Battery',  kind: 'physical', dmg: 1.4, cd: 0, acc: 90, weight: 0 },
+  lance:      { name: 'Orbital Lance',    kind: 'energy',   dmg: 1.4, cd: 0, acc: 95, weight: 0 },
+};
+
+DATA.ark = { name: 'Colony Ark', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony in a charted, unclaimed system. Consumed on arrival.' };
+DATA.forge = { cost: { shards: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
+DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
+DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
+DATA.scrapRefund = 0.3;      // part of the build cost returned when a ship is scrapped
+
+// Grim names for new ships.
+DATA.shipNames = ['Penitent', 'Ashborn', 'Last Rite', 'Mercy\'s End', 'Grave Hymn', 'Hollow Vow', 'Cinder Saint', 'Bitter Psalm', 'Iron Requiem', 'Pale Lantern',
+  'Ossuary', 'Widowmaker', 'Remembrance', 'Silent Choir', 'Black Candle', 'Martyr', 'Dirge', 'Shroudwalker', 'Vigil', 'Absolution', 'Emberfall', 'Thornvow',
+  'Lament', 'Sorrowblade', 'Grim Tithe', 'Final Oath', 'Cold Sermon', 'Kneeler', 'Starveling', 'Heretic\'s Debt', 'Reliquary', 'Gravewake', 'Nightwarden', 'Salt and Ash'];
 
 // Research, paid in Research points. repeat:true techs can be researched forever with growing cost (incremental layer).
 DATA.techs = {
   deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metals' },
-  frigates:   { name: 'Frigate Hulls',        cost: 40,  mods: {},                  desc: 'Unlocks Frigates' },
+  medium:     { name: 'Medium Hulls',         cost: 40,  mods: {},                  desc: 'Unlocks building Medium ships (Corvettes, Frigates, Gunboats)' },
+  capital:    { name: 'Capital Hulls',        cost: 110, mods: {},                  desc: 'Unlocks building Large ships (Destroyers, Battleships, Carriers)', req: 'medium' },
   biovats:    { name: 'Bio-Vat Cultures',     cost: 40,  mods: { organics: 0.25 },  desc: '+25% Organics' },
   microfab:   { name: 'Microfabrication',     cost: 45,  mods: { electronics: 0.3 }, desc: '+30% Electronics from the same inputs' },
   catalysis:  { name: 'Reagent Catalysis',    cost: 45,  mods: { chemicals: 0.3 },  desc: '+30% Chemicals from the same inputs' },
@@ -163,9 +226,9 @@ DATA.techs = {
   prospect:   { name: 'Deep Prospecting',     cost: 65,  mods: { rare: 0.3 },       desc: '+30% Rare Minerals' },
   coldlogic:  { name: 'Cold Logic Engines',   cost: 65,  mods: { compute: 0.25 },   desc: '+25% Compute' },
   ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { research: 0.3 },   desc: '+30% Research' },
-  bastionwalls:{name: 'Martyr Walls',         cost: 75,  mods: { bastion: 0.5 },    desc: '+50% garrison strength' },
-  plasmaweave:{ name: 'Plasma Weave',         cost: 80,  mods: { atk: 0.2 },        desc: '+20% ship attack' },
-  bonehulls:  { name: 'Bone-grown Hulls',     cost: 90,  mods: { hp: 0.25 },        desc: '+25% ship hull' },
+  bastionwalls:{name: 'Martyr Walls',         cost: 75,  mods: { bastion: 0.5 },    desc: '+50% Planetary Defenses strength' },
+  plasmaweave:{ name: 'Plasma Weave',         cost: 80,  mods: { atk: 0.2 },        desc: '+20% weapon damage' },
+  bonehulls:  { name: 'Bone-grown Hulls',     cost: 90,  mods: { hp: 0.25 },        desc: '+25% ship shields and hull' },
   forge:      { name: 'Forge Doctrine',       cost: 50,  mods: { metal: 0.1 },      desc: '+10% Metals per level', repeat: true, growth: 1.45 },
   harvest:    { name: 'Harvest Doctrine',     cost: 50,  mods: { organics: 0.1 },   desc: '+10% Organics per level', repeat: true, growth: 1.45 },
   arcology:   { name: 'Arcology Doctrine',    cost: 60,  mods: { infra: 0.08 },     desc: '+8% Infrastructure per level', repeat: true, growth: 1.5 },
@@ -180,35 +243,6 @@ DATA.factions = {
   monster: { name: 'Lurkers',           color: '#8a2a3a', short: 'Lurkers' },
 };
 
-// Void Signal gacha pool. kind: leader | relic | blueprint | cache.
-// mods add to empire multipliers; rank-ups multiply the bonus by (1 + 0.5 * (rank - 1)).
-DATA.rarities = {
-  common: { name: 'Common', color: '#9a9080', rate: 0.70 },
-  rare:   { name: 'Rare',   color: '#4a8ad0', rate: 0.25 },
-  mythic: { name: 'Mythic', color: '#d0a020', rate: 0.05 },
-};
-DATA.pity = { mythic: 40 };
-DATA.pullCost = 10;
-
-DATA.gachaPool = [
-  // Common
-  { id: 'l_vell',   kind: 'leader', rarity: 'common', name: 'Quartermaster Vell', mods: { metal: 0.1 },  desc: '+10% Metals. Counts every bolt twice.' },
-  { id: 'l_moro',   kind: 'leader', rarity: 'common', name: 'Tech-Adept Moro',    mods: { research: 0.1 }, desc: '+10% Research. Half of him is cogitator now.' },
-  { id: 'r_icon',   kind: 'relic',  rarity: 'common', name: 'Rusted Icon',        mods: { power: 0.08 },  desc: '+8% Power. The saint\'s face is worn away.' },
-  { id: 'r_compass',kind: 'relic',  rarity: 'common', name: 'Bone Compass',       mods: { exploreShards: 1 }, desc: '+1 Shard per system explored.' },
-  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { metal: 60, electronics: 20, chemicals: 10 }, desc: '+60 Metals, +20 Electronics, +10 Chemicals, once.' },
-  { id: 'c_data',   kind: 'cache',  rarity: 'common', name: 'Corrupted Datacore', gives: { research: 40 }, desc: '+40 Research, once.' },
-  // Rare
-  { id: 'l_kesh',   kind: 'leader', rarity: 'rare', name: 'Admiral Kesh',        mods: { atk: 0.15 }, desc: '+15% ship attack. Never asks how many died.' },
-  { id: 'l_sallow', kind: 'leader', rarity: 'rare', name: 'Governor Sallow',     mods: { all: 0.1 },  desc: '+10% all production. Rules by quota.' },
-  { id: 'r_weep',   kind: 'relic',  rarity: 'rare', name: 'Weeping Reliquary',   mods: { research: 0.25, power: -0.05 }, cursed: true, desc: '+25% Research, −5% Power. It weeps oil.' },
-  { id: 'bp_lancer',kind: 'blueprint', rarity: 'rare', name: 'Blueprint: Void Lancer', unlock: 'lancer', desc: 'Unlocks the Void Lancer.' },
-  // Mythic
-  { id: 'l_saint',  kind: 'leader', rarity: 'mythic', name: 'The Hollow Saint',  mods: { all: 0.25, hp: 0.2 }, desc: '+25% all production, +20% hull. No one has seen its face.' },
-  { id: 'bp_dread', kind: 'blueprint', rarity: 'mythic', name: 'Blueprint: Dreadnought', unlock: 'dread', desc: 'Unlocks the Dreadnought.' },
-  { id: 'r_heart',  kind: 'relic', rarity: 'mythic', name: 'Heart of the Abyss', mods: { rare: 0.3, shardIncome: 2, aiAggro: 0.25 }, cursed: true, desc: '+30% Rare Minerals, +2 Shards/Cycle. The aliens can hear it beating.' },
-];
-
 // Exploration events. effect(G, ctx) mutates the game and returns a log line.
 DATA.events = {
   derelict: {
@@ -217,7 +251,7 @@ DATA.events = {
     choices: [
       { label: 'Strip it for salvage', effect: (G, c) => {
         G.res.metal += 50;
-        if (Math.random() < 0.3) { Fleets.killOneShip(c.fleetId); return 'Salvage recovered (+50 Metals). Something followed the boarding party back. A ship is lost.'; }
+        if (Math.random() < 0.3 && Ships.loseRandom(c.fleetId)) return 'Salvage recovered (+50 Metals). Something followed the boarding party back. A ship is lost.';
         return 'Salvage recovered (+50 Metals). The breathing stopped when the reactor was cut.';
       } },
       { label: 'Leave it to the dark', effect: () => 'You leave the hulk behind. The breathing is in the comm logs now.' },
@@ -276,5 +310,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v10',
+  saveKey: 'voyager_save_v11',
 };

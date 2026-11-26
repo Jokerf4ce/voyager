@@ -146,58 +146,26 @@ const Sprites = {
     return (this.cache[key] = cv.toDataURL());
   },
 
-  // Symmetric masked faces: leaders and relics.
-  portrait(id, rarity, kind) {
-    const key = `f:${id}`;
-    if (this.cache[key]) return this.cache[key];
-    const rnd = this.seeded(id);
-    const W = 16, H = 16;
-    const c = this.canvas(W, H), ctx = c.getContext('2d');
-    ctx.fillStyle = '#0c0b0a'; ctx.fillRect(0, 0, W, H);
-    const accent = DATA.rarities[rarity].color;
-    if (kind === 'blueprint') {
-      ctx.fillStyle = '#16222c'; ctx.fillRect(1, 1, W - 2, H - 2);
-      ctx.fillStyle = accent;
-      for (let i = 2; i < W - 2; i += 3) { ctx.fillRect(i, 2, 1, H - 4); }
-      this.drawShip(ctx, id === 'bp_dread' ? 'dread' : 'lancer', 2, 4, '#c8d8e0');
-      return (this.cache[key] = c.toDataURL());
-    }
-    const bone = kind === 'relic' ? ['#3a2a1a', '#6a5030', '#a08050'] : ['#3a3430', '#7a6e60', '#c8bca0'];
-    for (let y = 2; y < H - 1; y++) for (let x = 0; x < W / 2; x++) {
-      const cx = x, cy = Math.abs(y - H / 2 - 1);
-      const p = 1.05 - cx * 0.1 - cy * 0.06 - (x > 5 && y > 11 ? 0.5 : 0);
-      if (rnd() < p) {
-        const shade = bone[Math.min(2, Math.floor(rnd() * 2 + (y < H / 2 ? 1 : 0)))];
-        ctx.fillStyle = shade;
-        ctx.fillRect(W / 2 - 1 - x, y, 1, 1);
-        ctx.fillRect(W / 2 + x, y, 1, 1);
-      }
-    }
-    // hood / helmet shadow
-    ctx.fillStyle = '#0c0b0a';
-    for (let x = 0; x < W; x++) if (rnd() < 0.5) ctx.fillRect(x, 2, 1, 1);
-    // eyes
-    const ey = 6 + Math.floor(rnd() * 3), ex = 2 + Math.floor(rnd() * 2);
-    ctx.fillStyle = '#000'; ctx.fillRect(W / 2 - ex - 2, ey, 2, 2); ctx.fillRect(W / 2 + ex, ey, 2, 2);
-    ctx.fillStyle = accent; ctx.fillRect(W / 2 - ex - 1, ey, 1, 1); ctx.fillRect(W / 2 + ex, ey, 1, 1);
-    // mouth grille
-    ctx.fillStyle = '#1a1614';
-    for (let x = W / 2 - 2; x < W / 2 + 2; x++) if (x % 2 === 0) ctx.fillRect(x, ey + 4, 1, 2);
-    return (this.cache[key] = c.toDataURL());
-  },
-
+  // Ship art, pointing up (enemy ships are drawn flipped). # hull in the faction colour, + lights, o engines.
   shipArt: {
-    scout:    ['....#....', '...###...', '..#.+.#..', '....o....'],
-    ark:      ['..#####..', '.#+++++#.', '#########', '.#+++++#.', '..o.o.o..'],
-    corvette: ['....#....', '...#+#...', '..#####..', '.#.#.#.#.', '...o.o...'],
-    frigate:  ['....#....', '...###...', '.#######.', '##+###+##', '.#######.', '..o...o..'],
-    lancer:   ['....#....', '....#....', '...#+#...', '..#####..', '.##.#.##.', '..o...o..'],
-    dread:    ['...###...', '..#+#+#..', '.#######.', '#########', '##+###+##', '.#######.', '.o.o.o.o.'],
-    lurker:   ['.#.....#.', '..#...#..', '.#######.', '##+...+##', '.#######.', '#.#.#.#.#'],
+    scout: ['....#....', '...#+#...', '...###...', '..#####..', '.##.#.##.', '#...#...#', '....#....', '...o.o...'],
+    fighter: ['....#....', '....#....', '...#+#...', '#..###..#', '##.###.##', '#########', '#.#####.#', '...o.o...'],
+    heavy: ['...#.#...', '...#.#...', '..##+##..', '#.#####.#', '#########', '#########', '##.###.##', '#..o.o..#'],
+    corvette: ['......#......', '.....###.....', '.....#+#.....', '....#####....', '....#####....', '...###+###...', '..#########..', '.##.#####.##.', '.#..#####..#.', '....o...o....'],
+    frigate: ['......#......', '.....###.....', '....##+##....', '....#####....', '...#######...', '..##.###.##..', '.###+###+###.', '.###########.', '..#.#####.#..', '...o..o..o...'],
+    gunboat: ['....#...#....', '....#...#....', '...###.###...', '...#######...', '..####+####..', '..#########..', '.###########.', '.###########.', '.##.#####.##.', '..o..o.o..o..'],
+    destroyer: ['........#........', '........#........', '.......###.......', '.......#+#.......', '......#####......', '......#####......', '.....###+###.....', '....#########....', '...###########...', '..####.###.####..', '.###...###...###.', '.......o.o.......'],
+    battleship: ['.......###.......', '......##+##......', '......#####......', '.....#######.....', '....###+#+###....', '...###########...', '..#############..', '.###+#######+###.', '.###############.', '.###############.', '..###.#####.###..', '....o..o.o..o....'],
+    carrier: ['......#####......', '.....#+++++#.....', '.....#######.....', '....#########....', '....#.#.#.#.#....', '...###########...', '...#.#.#.#.#.#...', '..#############..', '..#############..', '.###.#######.###.', '.###.#######.###.', '....o...o...o....'],
+    lurker: ['.#.....#.', '..#...#..', '.#######.', '##+...+##', '.#######.', '#.#.#.#.#', '.#.#.#.#.'],
+    maw: ['.#.........#.', '..#.......#..', '..#########..', '.###########.', '##+#######+##', '##.........##', '##.#.#.#.#.##', '.###########.', '..#.#.#.#.#..', '.#.........#.'],
+    leviathan: ['.#.............#.', '..#...........#..', '...###########...', '..#############..', '.###+#######+###.', '#################', '##.............##', '##.#.#.#.#.#.#.##', '.###############.', '..#############..', '...#.#.#.#.#.#...', '..#...........#..', '.#.............#.'],
+    defense: ['......#......', '......#......', '....#####....', '...#+###+#...', '#############', '#+#########+#', '#############', '...#######...', '....#####....', '......#......', '......#......'],
+    ark: ['...#####...', '..#+++++#..', '.#########.', '.#+++++++#.', '.#########.', '.#+++++++#.', '..#######..', '...o.o.o...'],
   },
 
   drawShip(ctx, type, ox, oy, color) {
-    const art = this.shipArt[type];
+    const art = this.shipArt[type] || this.shipArt.fighter;
     art.forEach((row, y) => [...row].forEach((ch, x) => {
       if (ch === '.') return;
       ctx.fillStyle = ch === '#' ? color : ch === '+' ? '#f0e0a0' : '#e07030';
@@ -238,11 +206,16 @@ const Sprites = {
     return (this.cache[k] = c.toDataURL());
   },
 
-  ship(type, color) {
-    const key = `s:${type}:${color}`;
+  // A ship sprite on a transparent canvas sized to the art (+1 px margin). flip = pointing down (enemies).
+  ship(type, color, flip = false) {
+    const key = `s:${type}:${color}:${flip}`;
     if (this.cache[key]) return this.cache[key];
-    const c = this.canvas(11, 9), ctx = c.getContext('2d');
+    const art = this.shipArt[type] || this.shipArt.fighter;
+    const w = art[0].length + 2, h = art.length + 2;
+    const c = this.canvas(w, h), ctx = c.getContext('2d');
+    if (flip) { ctx.translate(0, h); ctx.scale(1, -1); }
     this.drawShip(ctx, type, 1, 1, color);
     return (this.cache[key] = c.toDataURL());
   },
+  shipSize(type) { const art = this.shipArt[type] || this.shipArt.fighter; return { w: art[0].length + 2, h: art.length + 2 }; },
 };

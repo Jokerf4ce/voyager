@@ -6,16 +6,15 @@ const Game = {
 
   endCycle() {
     if (G.over || UI.modalOpen) return;
-    Fleets.moveAll();
-    const reportsBefore = G.reports.length && G.reports[0];
-    Combat.resolveAll();
-    if (G.reports[0] && G.reports[0] !== reportsBefore) Music.battle(G.reports[0].lost ? 1 : 0.7);
+    if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
+    Missions.tick();
     Economy.tick();
+    Ships.repair();
     Research.tick();
     AI.tick();
-    Fleets.cleanup();
-    if (UI.selFleet && !Fleets.get(UI.selFleet)) UI.selFleet = null;
+    Battle.checkFactions();
     G.cycle++;
+    if (G.battle) UI.screen = 'battle';
     State.save();
     UI.render();
     this.afterModal();
@@ -48,7 +47,7 @@ const Game = {
   newGame() {
     this.stopAuto();
     this.overShown = false;
-    UI.selSys = null; UI.selFleet = null; UI.lastPull = null; UI.yard = null;
+    UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null; UI.bWeapon = null;
     if (State.slot === 'admin') Admin.newTestGame(); else State.newGame();
     UI.selSys = G.homeId;
     UI.screen = 'map';
@@ -70,11 +69,32 @@ const Game = {
     screen: (a) => { UI.screen = a; },
     slot: (a) => { Game.switchSlot(a); },
     close: () => { UI.closeModal(); },
-    selfleet: (a) => { const id = +a; UI.selFleet = UI.selFleet === id ? null : id; },
-    halt: (a) => { const f = Fleets.get(+a); if (f) f.path = []; },
-    split: (a) => { const [id, t] = a.split(':'); Fleets.split(+id, t); },
-    merge: (a) => { Fleets.mergeAt(+a); },
-    colonize: (a) => { const [fid, pi] = a.split(':'); Fleets.colonize(+fid, +pi); UI.selFleet = null; },
+    // fleets and ships
+    selship: (a) => { UI.selShip = UI.selShip === a ? null : a; },
+    assign: (a) => { const [sid, fid] = a.split('|'); Ships.assign(sid, fid === 'hangar' ? null : +fid); },
+    newfleet: (a) => { const f = Ships.newFleet(); f.keep = true; if (a) Ships.assign(a, f.id); delete f.keep; Ships.cleanup(); },
+    fit: (a) => { const [sid, slot, wid] = a.split('|'); Ships.fit(sid, +slot, wid); },
+    scrap: (a) => {
+      const sh = G.ships[a];
+      if (!sh) return;
+      UI.modal(`<h2>Scrap "${U.esc(sh.name)}"?</h2><p>The ship is broken up. Its weapons go to the armory and you get back ${Math.round(DATA.scrapRefund * 100)}% of a ${DATA.sizes[sh.size].name} hull's cost.</p>
+        <div class="btnrow">${UI.btn('Scrap it', 'scrap-confirm', a, false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
+    },
+    'scrap-confirm': (a) => { UI.closeModal(); Ships.scrap(a); if (UI.selShip === a) UI.selShip = null; },
+    renamefleet: (a) => { const f = Ships.fleet(+a); if (!f) return; const n = window.prompt('Fleet name', f.name); if (n) Ships.rename(f.id, n.trim()); },
+    mission: (a) => { const [fid, kind, sid] = a.split('|'); Missions.launch(+fid, kind, +sid); },
+    recall: (a) => { Missions.recall(+a); },
+    sendark: (a) => { Missions.colonize(+a); },
+    gofleets: (a) => { UI.screen = 'fleets'; if (a) UI.selShip = null; },
+    // battles
+    gobattle: () => { UI.screen = 'battle'; },
+    bweapon: (a) => { UI.bWeapon = +a; },
+    btarget: (a) => { const w = UI.bWeapon; if (w != null && Battle.act(w, +a)) UI.bWeapon = null; },
+    battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
+    bresolve: () => { Battle.resolve(); },
+    bretreat: () => { Battle.retreat(); },
+    bdefend: (a) => { Battle.defendWith(a ? +a : null); },
+    bclose: () => { Battle.close(); UI.bWeapon = null; if (!G.battle) UI.screen = UI.afterBattle || 'map'; },
     settle: (a) => { const [sid, pi] = a.split(':'); Colonies.settle(+sid, +pi); },
     // a = "sysId" (open that system's colonies) or "sysId:planetIdx" (open one colony).
     gocolony: (a) => {
@@ -85,18 +105,18 @@ const Game = {
     },
     colsys: (a) => { UI.colSys = +a; },
     colopen: (a) => { UI.colOpen[a] = !UI.colOpen[a]; },
-    goyard: (a) => { UI.yard = a; UI.screen = 'shipyard'; },
-    yard: (a) => { UI.yard = a; },
+    goyard: () => { UI.screen = 'shipyard'; },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
-    buildship: (a) => { Fleets.build(a, UI.yard); },
+    buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastWeapon = null; } },
+    buildark: () => { Ships.buildArk(); },
+    forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
     research: (a) => { Research.select(a); Research.tick(); },
     bopen: (a) => { UI.bOpen = UI.bOpen === a ? null : a; },
     bshow: (a) => { UI.bOpen = a; UI.screen = 'buildings'; },
     bauto: (a) => { Colonies.buildAuto(a); },
     bplace: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     selplanet: (a) => { UI.selPlanet = UI.selPlanet === +a ? null : +a; },
-    mapfleet: (a) => { const f = Fleets.get(+a); UI.selFleet = f.id; UI.selSys = f.sys; UI.screen = 'map'; },
-    pull: (a) => { const r = Gacha.pull(+a); if (r) UI.lastPull = r; },
+    mapsys: (a) => { UI.selSys = +a; UI.screen = 'map'; },
     eventchoice: (a) => { Explore.resolveEvent(+a); UI.closeModal(); },
     music: () => { Music.toggle(); },
     musicplay: (a) => { Music.play(a); },
@@ -142,7 +162,7 @@ document.addEventListener('input', (ev) => {
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
-  if (ev.code === 'Escape') { if (UI.selFleet) UI.selFleet = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
+  if (ev.code === 'Escape') { if (UI.bWeapon != null) UI.bWeapon = null; else if (UI.selShip) UI.selShip = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
 });
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -182,5 +202,10 @@ window.addEventListener('DOMContentLoaded', () => {
     Game.newGame();
   }
   setInterval(() => State.save(), 10000);
+  // Battles: enemy ships (and yours on Auto) act one at a time so you can follow along.
+  setInterval(() => {
+    if (!G || !G.battle || G.battle.phase !== 'fight' || UI.screen !== 'battle' || UI.modalOpen) return;
+    if (Battle.step()) { State.save(); UI.render(); }
+  }, 650);
   window.addEventListener('beforeunload', () => State.save());
 });

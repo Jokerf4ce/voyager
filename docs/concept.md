@@ -34,7 +34,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 - **Explore.** Scout ships reveal systems, anomalies, derelicts and alien ruins. Text events have choices, some of them risky or horrifying.
 - **Expand.** Colonise planets and build outposts. Each colony has a menu screen with buildings, population and unrest.
 - **Exploit.** Resources and production chains, research, and colony upgrades. This is where the incremental growth happens.
-- **Exterminate.** Fleets, ship designs from blueprints, and turn-resolved battles shown as a battle report with simple pixel-art visuals. Planets can be invaded, purged or razed.
+- **Exterminate.** Fleets of ship cards and turn-based card battles (see 4c). Planets can be invaded, purged or razed.
 
 ## 4a. Systems and planets
 
@@ -64,9 +64,9 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Start** (decided, changed in v0.19): the game begins with only the home system charted and only the capital settled. Neighbours show as "?".
 
-**Admin test game** (decided): a separate save slot (`voyager_save_v10_admin`) generated with 3 extra colonies holding random buildings, 10 systems charted and full stores, for testing. Opened from Settings or `#admin`; it never touches the real save.
+**Admin test game** (decided): a separate save slot (`voyager_save_v11_admin`) generated with 3 extra colonies holding random buildings, 10 systems charted and full stores, for testing. Opened from Settings or `#admin`; it never touches the real save.
 
-**Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes and fleets. The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and fleets at the jump point. The Solar System map draws sizes to scale, using real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of a big star fits on screen. Two exceptions keep things visible: small worlds are drawn at least 8 px across, and pulsars and black holes are enlarged. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
+**Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes, guards (pips), your missions (gold) and incoming raids (red). The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and any hostile guard at the jump point. The Solar System map draws sizes to scale, using real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of a big star fits on screen. Two exceptions keep things visible: small worlds are drawn at least 8 px across, and pulsars and black holes are enlarged. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
 
 **Map screen layout** (decided, v0.21): the Star Map fills the screen width; hovering a system shows a summary card (star, owner, planets with habitability, fleets). The selected system's Solar System map and its full panel (planets, settle, fleets) sit below the star map, in place of the Chronicle, which is hidden on this screen.
 
@@ -151,6 +151,30 @@ A colony gathers rating × size per turn, and each gathering building level adds
 
 The capital starts with the whole chain running: Mine, Bio-Harvester, Electronics Foundry, Hab Dome, Fusion Reactor ×2, Shipyard, Research Lab, Cogitator and Chemical Plant.
 
+## 4c. Fleets and combat
+
+**Decided (v0.23):**
+- **Fleets are global**, like the colonies: one Fleets screen lists every fleet, the hangar (ships in no fleet) and the armory (spare weapons). A fleet holds up to **five ships**, the size of one side in battle.
+- **No map positions.** Fleets are sent on **missions** from a system on the Star Map: **Explore** (needs a Scout in the fleet), **Attack** (monster lairs and alien systems), and the **Colony Ark** settles a charted, unclaimed system. A mission takes as many Cycles as hyperlane hops from the nearest Covenant system; the fleet then returns. Fleets out on a mission can't be changed.
+- **Ship sizes** beat each other like rock-paper-scissors: **Small beats Large, Large beats Medium, Medium beats Small** (×1.5 damage; ×0.7 the other way).
+  - Small: Scout, Fighter, Heavy Fighter. Medium: Corvette, Frigate, Gunboat. Large: Destroyer, Battleship, Carrier.
+  - The types differ only in base stats so far; type-specific abilities are open.
+- **Ship stats:** shield (first life points), hull (second life points), speed (turn order), maneuverability (evasion chance), weapon slots (1–3) and maintenance (upkeep per Cycle).
+- **Weapons** are rolled with the ship and can be swapped. **Physical** weapons do ×1.5 to hull and ×0.5 to shields; **energy** weapons the reverse. Heavier models hit harder but need turns to recharge (cooldown) and are less accurate.
+- **Building is a gacha:** you choose and pay for a size; the type, rarity, stats and weapons are rolled. Rarity sets the stats: **Normal 76.9 % (×1), Strong 20 % (×1.2), Epic 2 % (×1.45, +1 slot), Legendary 1 % (×1.75, +1 slot), Omega 0.1 % (×2.2, +1 slot).**
+- **Battles** are turn-based, like a card game or a Pokémon battle: both sides' cards face each other; every round each ship acts once, fastest first, firing one ready weapon at one target. You pick weapon and target for your ships, or switch on **Auto**; **Resolve instantly** and **Retreat** are always available. A battle ends when one side is destroyed (or after 25 rounds).
+- **Losses are permanent.** Damage to hull carries over and is repaired at home (20 % of max hull per Cycle, only while maintenance is paid). Shields recharge after every battle.
+- **The Void Signals gacha is removed** (no leaders, relics or blueprints). Void Shards now buy random weapons at the **Weapon Forge**.
+
+**Decided for now, easy to change:**
+- Maintenance is paid each Cycle in Metals, plus half as much in Chemicals.
+- Research unlocks Medium hulls (*Medium Hulls*) and Large hulls (*Capital Hulls*).
+- Weapons come from scrapping ships (which also refunds 30 % of a hull's cost), from wrecks after a victory (30 % chance per destroyed alien ship) and from the Weapon Forge (15 Shards, rarity rolled like a ship's).
+- Alien raids appear as threats with a countdown. When one arrives you choose a fleet to defend; the system's Bastions and Defense Platforms fight as one **Planetary Defenses** card (the capital always has one). If the defense loses, the system falls.
+- Monster lairs and alien worlds are guarded by ship cards. The Chorus leans on energy weapons, the Iron Remnant on physical ones. Alien ships get better rarities and bigger hulls as the Cycles pass.
+
+**Open:** abilities per ship type (for example Carriers launching fighters, Scouts spotting), boarding or capturing ships, fleet formations.
+
 ## 5. Setting and tone
 
 **Open, with suggestions.** These are placeholders to react to.
@@ -162,7 +186,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 ## 6. Gacha
 
-**Proposed.**
+**Changed in v0.23:** the Void Signals gacha (leaders, relics, blueprints) was removed. The gacha is now the ship build itself (see 4c) and the Weapon Forge. The original proposal, kept for reference:
 
 - **Pool:** leaders (admirals, governors, scientists), ship blueprints, relics (empire-wide passive bonuses).
 - **Rarity tiers** with a pity counter, so a guaranteed rare after X pulls.
@@ -183,7 +207,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - Research
 - Fleets and shipyard
 - Diplomacy
-- Void Signals (gacha)
+- Battle (shown when a battle is waiting)
 - Event / report log
 - Settings, save and load
 
@@ -248,7 +272,7 @@ Recorded audio files can be added as tracks alongside the generated ones.
 1. Who is the player faction, and what happened to the galaxy?
 2. How many AI alien empires, and what are they?
 3. Is the galaxy procedurally generated each run, or hand-made?
-4. Combat depth: automatic battle reports only, or some tactical choices?
+4. ~~Combat depth~~ Decided in v0.23: turn-based card battles with tactical choices (4c).
 5. Prestige/reset loop, or one endless campaign?
 6. How strong should idle/offline progress be compared with active play?
-7. Is the gacha a core system or a side system?
+7. ~~Is the gacha a core system?~~ Decided in v0.23: it is the shipbuilding itself (4c).

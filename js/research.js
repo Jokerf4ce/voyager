@@ -10,11 +10,13 @@ const Research = {
 
   available(id) {
     const t = DATA.techs[id];
+    if (t.req && !this.level(t.req)) return false;
     return t.repeat || this.level(id) === 0;
   },
 
   select(id) {
     if (!this.available(id)) return;
+    // locked techs can't be picked
     if (G.researching !== id) { G.researching = id; G.researchProgress = 0; }
   },
 

@@ -203,7 +203,6 @@ const Economy = {
     return out;
   },
 
-  shipCaps(type) { return DATA.ships[type].cap || {}; },
 
   // Empire-wide capacities. eff = rationing factor when any capacity is over its cap.
   caps() {
@@ -212,9 +211,6 @@ const Economy = {
     for (const { p } of Colonies.playerPlanets()) {
       const c = this.planetCaps(p);
       for (const k in c) { out[k].cap += c[k].give; out[k].buildings += c[k].use; }
-    }
-    for (const f of G.fleets) if (f.owner === 'player') {
-      for (const [t, n] of Object.entries(f.ships)) for (const [k, v] of Object.entries(this.shipCaps(t))) out[k].ships += v * n;
     }
     let eff = 1;
     for (const k in out) {
@@ -274,8 +270,9 @@ const Economy = {
   // Net change per Cycle as shown in the UI (assumes refineries get their inputs).
   net() {
     const i = this.income();
-    return { metal: i.metal - i.inputs.metal, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
-      electronics: i.electronics, chemicals: i.chemicals, research: i.research, shards: i.shards, caps: i.caps };
+    const up = Ships.upkeep();
+    return { metal: i.metal - i.inputs.metal - up, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
+      electronics: i.electronics, chemicals: i.chemicals - up * 0.5, research: i.research, shards: i.shards, caps: i.caps, upkeep: up };
   },
 
   tick() {
@@ -297,6 +294,14 @@ const Economy = {
       const over = Object.keys(DATA.capacities).filter((k) => c[k].used > c[k].cap).map((k) => `${DATA.capacities[k].name} ${Math.round(c[k].used)}/${Math.round(c[k].cap)}`).join(', ');
       Log.add(`Rationing! Over capacity: ${over}. Production is down to ${Math.round(c.eff * 100)}%.`, 'bad');
     }
-    for (const s of G.systems) if (s.owner) s.garrison = Math.min(Colonies.maxGarrison(s), (s.garrison || 0) + 5);
+    // Ship maintenance: Metals, plus half as much Chemicals.
+    const up = Ships.upkeep();
+    if (up > 0) {
+      const short = G.res.metal < up || G.res.chemicals < up * 0.5;
+      G.res.metal = Math.max(0, G.res.metal - up);
+      G.res.chemicals = Math.max(0, G.res.chemicals - up * 0.5);
+      if (short && G.cycle % 5 === 0) Log.add('The fleet\'s maintenance cannot be fully paid. Crews go hungry; nothing gets repaired.', 'bad');
+      G.unpaid = short;
+    } else G.unpaid = false;
   },
 };

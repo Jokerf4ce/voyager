@@ -5,19 +5,23 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 10,
+      version: 11,
       cycle: 1,
       res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, shards: 25 },
       systems: [],
-      fleets: [],
-      nextFleetId: 1,
+      ships: {},          // every Covenant ship card, by id (js/ships.js)
+      fleets: [],         // [{ id, name, ships: [shipId], mission }]
+      armory: [],         // spare weapons
+      arks: 0,            // Colony Arks ready to launch
+      arkMissions: [],
+      threats: [],        // alien raids on their way
+      battle: null,       // the battle being fought (js/battle.js)
+      battleQueue: [],
+      nextFleetId: 1, nextShipId: 1, nextWeaponId: 1, nextThreatId: 1,
       homeId: 0,
       techs: {},
       researching: 'deepcore',
       researchProgress: 0,
-      collection: {},
-      pity: 0,
-      pulls: 0,
       ai: {
         chorus: { ore: 40, homeId: null, alive: true, aggro: 1.0 },
         remnant: { ore: 40, homeId: null, alive: true, aggro: 0.8 },
@@ -33,17 +37,14 @@ const State = {
     Galaxy.placeStarts();
     Log.add('The Covenant fleet arrives at the edge of the Shroud. The homeworld is ash behind it, and the void ahead is full of things that hunger.', 'story');
     Log.add('Send your scouts into the dark. Find worlds. Survive.', 'story');
+    Log.add('Open the Star Map, pick a "?" system and send the Pathfinder to chart it.', 'story');
   },
 
-  // Sum of every bonus source: techs, leaders and relics.
+  // Sum of every bonus source (research).
   mods() {
     const m = { metal: 1, rare: 1, organics: 1, electronics: 1, chemicals: 1, research: 1, power: 1, infra: 1, compute: 1, atk: 1, hp: 1, bastion: 1, all: 1, shardIncome: 0, exploreShards: 0, aiAggro: 0 };
     const add = (mods, scale) => { for (const k in mods) m[k] = (m[k] || 0) + mods[k] * scale; };
     for (const [id, lvl] of Object.entries(G.techs)) if (lvl > 0) add(DATA.techs[id].mods, lvl);
-    for (const [id, c] of Object.entries(G.collection)) {
-      const item = Gacha.item(id);
-      if (item && item.mods) add(item.mods, 1 + 0.5 * (c.rank - 1));
-    }
     return m;
   },
 
@@ -63,7 +64,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 10) return false;
+      if (!data || data.version !== 11) return false;
       G = data;
       return true;
     } catch (e) { return false; }
@@ -76,7 +77,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 10) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 11) throw new Error('Not a Voyager save');
     G = data;
   },
 

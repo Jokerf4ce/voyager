@@ -113,17 +113,6 @@ const StarMap = {
       this.line(ctx, this.pos(s), this.pos(t), s.explored && t.explored ? '#4a4038' : '#2a2420', true);
     }
 
-    // planned paths
-    for (const f of G.fleets) {
-      if (f.owner !== 'player' || !f.path.length) continue;
-      let prev = this.pos(S[f.sys]);
-      for (const id of f.path) { const p = this.pos(S[id]); this.line(ctx, prev, p, f.id === UI.selFleet ? '#e0c060' : '#8a7040', false); prev = p; }
-    }
-    // visible hostile movements
-    for (const f of G.fleets) {
-      if (f.owner === 'player' || !f.path.length || !S[f.sys].explored) continue;
-      this.line(ctx, this.pos(S[f.sys]), this.pos(S[f.path[0]]), '#a03030', false);
-    }
 
     // systems
     ctx.font = '7px monospace';
@@ -142,15 +131,14 @@ const StarMap = {
         ctx.fillStyle = '#5a5048'; ctx.fillText('?', p.x, p.y - 4);
       }
       if (s.id === UI.selSys) this.brackets(ctx, p, 11, '#f0e8d0');
-      // fleets as stacked pips
-      if (s.explored) {
-        const here = Fleets.at(s.id);
-        here.forEach((f, i) => {
-          const fx = p.x + 9, fy = p.y - 7 + i * 4;
-          ctx.fillStyle = f.id === UI.selFleet ? '#ffffff' : DATA.factions[f.owner].color;
-          ctx.fillRect(fx, fy, 3, 1); ctx.fillRect(fx, fy + 1, 2, 1); ctx.fillRect(fx, fy + 2, 1, 1);
-        });
-      }
+      // guards as pips (one per ship), your missions as gold chevrons, raids as red ones
+      const pip = (fx, fy, col) => { ctx.fillStyle = col; ctx.fillRect(fx, fy, 3, 1); ctx.fillRect(fx, fy + 1, 2, 1); ctx.fillRect(fx, fy + 2, 1, 1); };
+      const g = s.explored && Missions.guard(s);
+      if (g) g.ships.forEach((x, i) => pip(p.x + 9 + Math.floor(i / 3) * 4, p.y - 7 + (i % 3) * 4, DATA.factions[g.owner].color));
+      let row = 0;
+      for (const f of G.fleets) if (f.mission && f.mission.target === s.id && f.mission.phase !== 'back') pip(p.x - 12, p.y - 7 + 4 * row++, '#e0c060');
+      for (const m of G.arkMissions) if (m.target === s.id) pip(p.x - 12, p.y - 7 + 4 * row++, '#9ac070');
+      for (const t of G.threats) if (t.target === s.id) { ctx.fillStyle = '#e04040'; ctx.fillText('!', p.x - 10, p.y + 9); this.brackets(ctx, p, 13, '#e04040'); }
     }
   },
 

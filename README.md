@@ -11,7 +11,10 @@ See [docs/concept.md](docs/concept.md) for the design.
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
-- **Star Map:** fills the screen width. Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and fleets appear below (double-click scrolls there). Select one of your fleets, then click a system to send it there.
+- **Star Map:** fills the screen width. Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and missions appear below (double-click scrolls there). From there, send fleets to **explore** or **attack**, or send a **Colony Ark** to settle.
+- **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
+- **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons.
+- **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
 - The side menu collapses on its own 10 seconds after the cursor leaves it; ☰ opens it again.
 - **Admin test game:** Settings → *Open admin test game*, or add `#admin` to the address. A separate save with extra colonies, random buildings and full stores, for testing. The real save is not touched.
 - While the game is closed, the empire keeps producing at 50% efficiency (1 Cycle per 60 s, max 120 Cycles).
@@ -26,9 +29,9 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Expand with Colony Arks into new systems, then settle more planets in systems you hold
 - Resources: Metals, Rare Minerals and Organics (gathered); Electronics and Chemicals (refined); Power, Compute and Infrastructure (capacities); Research
 - Research made by Research Labs, including endlessly repeatable "Doctrine" techs for the incremental layer
-- Ships, fleets, auto-resolved battles, sieges and capturing colonies
+- Ship cards in 3 sizes (rock-paper-scissors) and 9 types, rolled at 5 rarities; global fleets of up to 5; missions instead of map movement
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
-- Void Signals gacha: shards earned in play, rarities, pity, rank-ups, cursed relics, ship blueprints
+- Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge for Shards
 - Auto-cycle, offline progress, save export/import
 - Generative soundtrack synthesised in the browser: six tracks in a playlist (mute with ♪, tracks and volume in Settings)
 - The Assistant, the ship's computer voice ("Welcome back, Commander."): mp3 lines in `assets/voice/`, listed with their triggers in `js/voicelines.js`
@@ -44,18 +47,18 @@ The build version is shown in the bottom-right corner of the game. It is set in 
 index.html        page shell, loads the scripts in order
 js/version.js     build version shown in the corner
 css/style.css     UI styling
-js/data.js        all game content: buildings, ships, techs, gacha pool, events, factions
+js/data.js        all game content: buildings, ship types, rarities, weapons, techs, events, factions
 js/util.js        helpers (random, formatting, pathfinding)
 js/planets.js     planet classes: size × composition × temperature
 js/state.js       game state G, empire modifiers, save/load, offline progress
 js/galaxy.js      galaxy generation and starting positions
 js/economy.js     colonies, buildings, per-Cycle production
 js/research.js    research
-js/fleets.js      fleets, shipbuilding, orders, movement
+js/ships.js       ship cards: build gacha, weapons, fleets, hangar, armory, forge
+js/missions.js    missions (explore, attack, Colony Ark) and incoming raids
 js/explore.js     exploration, fog of war, events
-js/combat.js      battles and sieges
-js/ai.js          alien empire AI
-js/gacha.js       Void Signals
+js/battle.js      turn-based card battles
+js/ai.js          alien empire AI: garrisons, expansion, raids
 js/admin.js       Admin test game (separate save slot)
 js/sprites.js     procedural placeholder pixel art
 js/music.js       music engine and playlist (Web Audio)
@@ -65,5 +68,6 @@ js/voicelines.js  voice lines and their triggers
 js/map.js         star map canvas (galaxy)
 js/sysmap.js      solar system map canvas (one system)
 js/ui.js          screens and modals
+js/ui-ships.js    ship cards, Shipyard, Fleets and Battle screens
 js/main.js        turn loop, auto-cycle, input, boot
 ```
