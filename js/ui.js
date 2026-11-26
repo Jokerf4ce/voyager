@@ -404,7 +404,7 @@ const UI = {
       }).join('')}</div>
       <div class="kv"><span>Assistant</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
-      <p class="muted small">The Assistant's lines are mp3 files in <code>${Voice.folder}</code>. She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away. Test plays <code>slipspace.mp3</code>.</p>
+      <p class="muted small">The Assistant's lines are mp3 files in <code>${Voice.folder}</code>. She greets you when you start and when you come back after more than ${VoiceTriggers.return.idleMinutes} minutes away, and makes a ship announcement every ${VoiceTriggers.random.minMinutes}–${VoiceTriggers.random.maxMinutes} minutes. Test plays <code>slipspace.mp3</code>.</p>
       <div class="voice-files small">${Object.keys(VoiceLines).map((id) => {
         const st = Voice.status[id];
         const label = st === 'ready' || st === 'basic' ? '<span class="good">✓ plays</span>' : st === 'missing' ? '<span class="bad">✗ could not be played (missing or blocked)</span>' : '<span class="muted">not played yet</span>';

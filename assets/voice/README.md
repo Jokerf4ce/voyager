@@ -7,6 +7,8 @@ The ship's computer voice plays mp3 files from this folder. Each file is named a
 |---|---|---|
 | `welcome_back.mp3` | "Welcome back, Commander." | game start; returning after 5+ minutes away |
 | `slipspace.mp3` | "Slipspace rupture detected!" | the Test button in Settings → Assistant |
+| `gagarin.mp3` | "Attention! Colonel Gagarin, please report to Medbay!" | random announcement (every 5–30 min) |
+| `shepard.mp3` | "Attention! Rear admiral Shepard, your keycard was found in engineering!" | random announcement (every 5–30 min) |
 
 ## How the voice is made
 

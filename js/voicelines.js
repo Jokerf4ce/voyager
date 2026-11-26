@@ -15,6 +15,8 @@
 //   start   the first click or key press after the game loads
 //   return  coming back after more than 5 minutes away (tab hidden or no activity)
 //   test    the Test button in Settings (Assistant)
+//   random  ship announcements at a random moment every 5 to 30 minutes while you play
+//           (never the same line twice in a row if there is a choice; skipped while the tab is hidden)
 //
 // Lines with an empty text play without an on-screen transmission.
 // The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
@@ -22,8 +24,8 @@
 const VoiceLines = {
   welcome_back: { text: 'Welcome back, Commander.', triggers: ['start', 'return'], glitch: 0.35 },
   slipspace:    { text: 'Slipspace rupture detected!', triggers: ['test'], glitch: 0.35 }, // played by the Test button in Settings
-  gagarin:      { text: 'Attention! Colonel Gagarin, please report to Medbay!', triggers: [], glitch: 0.35 },
-  shepard:      { text: 'Attention! Rear admiral Shepard, your keycard was found in engineering!', triggers: [], glitch: 0.35 },
+  gagarin:      { text: 'Attention! Colonel Gagarin, please report to Medbay!', triggers: ['random'], glitch: 0.35 },
+  shepard:      { text: 'Attention! Rear admiral Shepard, your keycard was found in engineering!', triggers: ['random'], glitch: 0.35 },
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
@@ -31,4 +33,5 @@ const VoiceTriggers = {
   start:  { cooldown: 0 },
   return: { cooldown: 60, idleMinutes: 5 },
   test:   { cooldown: 0 },
+  random: { cooldown: 0, minMinutes: 5, maxMinutes: 30 },
 };

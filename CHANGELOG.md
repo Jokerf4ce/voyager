@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.16.0 — 2026-11-26
+- New Assistant trigger `random`: a ship announcement at a random moment every 5–30 minutes while you play. It never repeats the same line twice in a row, waits while the tab is hidden, and keeps at least a minute from other lines.
+- New announcements: "Attention! Colonel Gagarin, please report to Medbay!" and "Attention! Rear admiral Shepard, your keycard was found in engineering!"
+- The Assistant now waits for the player's first click before any line (browsers block sound until then).
+
 ## 0.15.5 — 2026-11-26
 - Assistant voice files now play exactly as recorded: removed the game's extra distortion, radio filter, stutters, dropouts and static (the robotic effect is in the mp3s).
 - Caption for `slipspace.mp3`: "Slipspace rupture detected!"

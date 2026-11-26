@@ -11,6 +11,11 @@ const Voice = {
   ctx: null,
   speaking: false,
   lastPlayed: {},           // trigger -> time (ms)
+  lastLine: {},             // trigger -> id of the line it played last
+  randomTimer: null,
+  activated: false,         // set on the player's first click or key press (sound is blocked before that)
+  lastSpokeAt: 0,           // time (ms) the last line started
+  nextRandomAt: null,       // time (ms) of the next random announcement
   lastActivity: Date.now(),
   hiddenAt: null,
   subtitles: true,          // show lines as on-screen transmissions
@@ -40,6 +45,7 @@ const Voice = {
     const idleLimit = () => (VoiceTriggers.return.idleMinutes || 5) * 60000;
     const activity = () => {
       const now = Date.now();
+      this.activated = true;
       if (now - this.lastActivity > idleLimit()) this.trigger('return');
       this.lastActivity = now;
     };
@@ -51,6 +57,30 @@ const Voice = {
       if (away > idleLimit()) this.trigger('return');
       this.lastActivity = Date.now();
     });
+    this.scheduleRandom();
+  },
+
+  // ---- random announcements ----
+  // Every 5–30 minutes (VoiceTriggers.random) a random line with the 'random' trigger plays. It waits while the tab
+  // is hidden, the Assistant is talking, or before the player's first click (browsers block sound until then).
+  scheduleRandom(delayMs) {
+    clearTimeout(this.randomTimer);
+    const cfg = VoiceTriggers.random;
+    if (!cfg) return;
+    if (delayMs == null) {
+      const lo = (cfg.minMinutes ?? 5) * 60000, hi = (cfg.maxMinutes ?? 30) * 60000;
+      delayMs = lo + Math.random() * (hi - lo);
+    }
+    this.nextRandomAt = Date.now() + delayMs;
+    this.randomTimer = setTimeout(() => this.randomTick(), delayMs);
+  },
+
+  randomTick() {
+    // not yet: before the first click, while hidden, or within a minute of another line
+    if (!this.activated || document.hidden || Date.now() - this.lastSpokeAt < 60000) { this.scheduleRandom(20000); return; }
+    if (this.speaking) { this.scheduleRandom(5000); return; }
+    this.trigger('random');
+    this.scheduleRandom();
   },
 
   // Share the music's audio context when it exists: one context is more reliable than two.
@@ -72,10 +102,13 @@ const Voice = {
     const cfg = VoiceTriggers[name] || {};
     const now = Date.now();
     if (!force && cfg.cooldown && this.lastPlayed[name] && now - this.lastPlayed[name] < cfg.cooldown * 1000) return false;
-    const lines = Object.entries(VoiceLines).filter(([, l]) => (l.triggers || []).includes(name) && Math.random() < (l.chance ?? 1));
+    let lines = Object.entries(VoiceLines).filter(([, l]) => (l.triggers || []).includes(name) && Math.random() < (l.chance ?? 1));
     if (!lines.length) return false;
+    // avoid repeating the line this trigger played last, when there is another one
+    if (lines.length > 1) lines = lines.filter(([lid]) => lid !== this.lastLine[name]);
     const [id] = lines[Math.floor(Math.random() * lines.length)];
     this.lastPlayed[name] = now;
+    this.lastLine[name] = id;
     return this.say(id);
   },
 
@@ -85,6 +118,7 @@ const Voice = {
     const ctx = this.audio();
     if (ctx && ctx.state === 'suspended') ctx.resume();
     this.speaking = true;
+    this.lastSpokeAt = Date.now();
     this.duck(true);
     const done = () => {
       this.speaking = false; this.duck(false);
