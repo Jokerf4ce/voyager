@@ -2,6 +2,18 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.49.0 — 2026-11-27
+- **Three new designs for every ship type** (six per type now). New ships roll one of the six; existing ships keep theirs. Like the others, they are grey templates painted in each faction's colours.
+  - **Scout:** ring-wing probe, outrigger skiff, lantern drone (a cut gem with a glowing eye).
+  - **Fighter:** crescent wing, canard dart, tri-engine skimmer.
+  - **Heavy Fighter:** armoured brick gunship, trident, carapace beetle.
+  - **Corvette:** stepped ziggurat, sensor catamaran, tusker.
+  - **Frigate:** container hauler, radiator-sail frigate, warp-ring frigate.
+  - **Gunboat:** twin rails, turtle shell, missile barge.
+  - **Destroyer:** outrigger trident, nacelle stiletto, monolith (a black slab with a glowing seam).
+  - **Battleship:** corner-tower fortress, broadside hammer, ring-cannon.
+  - **Carrier:** flat-top with an island, saucer mothership, drone tree.
+
 ## 0.48.1 — 2026-11-27
 - New icons: Metals ⬡, Crypto Shards ♃, Power ⏻, Infrastructure ⇄, Compute ⋇ (everywhere they appear, including building effects and costs).
 - Top bar: Research now comes after the capacities (after Compute), behind its own divider.

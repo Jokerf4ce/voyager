@@ -12,8 +12,8 @@ The sprites are colourless templates: every pixel is a grey level that stands fo
 (DATA.shipPalettes in js/data.js), so one image per ship type serves every faction.
 
 Output:
-  assets/ships/<type>.png   the grey templates (to look at); ship types have three designs: <type>.png,
-                            <type>_2.png and <type>_3.png (a ship rolls one when it is built)
+  assets/ships/<type>.png   the grey templates (to look at); ship types have six designs: <type>.png and
+                            <type>_2.png … <type>_6.png (a ship rolls one when it is built)
   js/shipsprites.js         the same templates as data URIs plus the grey -> (material, shade) table,
                             so the game can read the pixels even when opened straight from disk
 
@@ -574,9 +574,360 @@ def carrier_c(m):  # hive carrier: a spine lined with launch bays, a ring of han
     m.turret(0, 0.2, -0.65, 0.07, 0.22)
     for x, y in ((-0.12, -0.1), (0.12, -0.1), (-0.12, 0.1), (0.12, 0.1)): m.engine(x, y, -1.4, 0.07, 0.07, 0.12)
 
-VARIANTS = {'scout': [scout_b, scout_c], 'fighter': [fighter_b, fighter_c], 'heavy': [heavy_b, heavy_c],
-            'corvette': [corvette_b, corvette_c], 'frigate': [frigate_b, frigate_c], 'gunboat': [gunboat_b, gunboat_c],
-            'destroyer': [destroyer_b, destroyer_c], 'battleship': [battleship_b, battleship_c], 'carrier': [carrier_b, carrier_c]}
+# ---------------------------------------------------------------- variants 4-6: three more designs per ship type (v0.49)
+def xb(m, xa, xc, *a, **k):
+    """block with the x-range in any order (mirrored parts)"""
+    m.block(min(xa, xc), max(xa, xc), *a, **k)
+
+# Small
+def scout_d(m):    # ring-wing probe: an egg body inside an annular wing
+    m.egg(0.1, 0.1, -0.45, 0.6, 'hull', taper=0.3, mid=0.55)
+    m.block(-0.05, 0.05, 0.08, 0.13, 0.1, 0.35, 'glass', (0.6, 0.4))
+    m.ring(-0.2, 0.27, 0.035, 14, 'hull', 0.1)                                                  # the ring wing
+    m.ring(-0.2, 0.27, 0.037, 14, 'accent', 0.02)
+    for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):                                       # struts
+        cx, cy = 0.17 * math.cos(a), 0.17 * math.sin(a)
+        m.block(cx - 0.015, cx + 0.015, cy - 0.015, cy + 0.015, -0.28, -0.12, 'metal')
+    m.spike(0, -0.06, 0.55, 0.015, 0.25, 'metal')
+    m.engine(0, 0, -0.45, 0.07, 0.07, 0.1)
+
+def scout_e(m):    # outrigger skiff: a slim hull with two pods on long struts and a sensor mast
+    m.block(-0.06, 0.06, -0.05, 0.06, -0.5, 0.3)
+    m.block(-0.06, 0.06, -0.05, 0.06, 0.3, 0.6, 'hull', (0.25, 0.3))
+    m.block(-0.045, 0.045, 0.06, 0.11, 0.05, 0.3, 'glass', (0.6, 0.4))
+    for sd in (-1, 1):
+        m.plate(sd, 0.05, -0.15, 0.0, 0.32, -0.2, -0.05, 0.0, 0.012, 'metal')                 # struts
+        m.egg(0.045, 0.045, -0.4, 0.15, 'hull', x=sd * 0.34, taper=0.4)                          # pods
+        xb(m, sd * 0.3, sd * 0.38, 0.03, 0.05, -0.3, 0.0, 'accent')
+        m.engine(sd * 0.34, 0, -0.38, 0.035, 0.035, 0.08)
+    m.block(-0.012, 0.012, 0.06, 0.32, -0.3, -0.26, 'metal')                                       # mast
+    m.block(-0.07, 0.07, 0.3, 0.33, -0.31, -0.25, 'glass')
+    m.engine(0, 0, -0.5, 0.05, 0.05, 0.08)
+
+def scout_f(m):    # lantern drone: a cut gem with a glowing eye and four antenna spikes
+    m.block(-0.24, 0.24, -0.24, 0.24, 0.0, 0.42, 'hull', (0.15, 0.15))                            # front pyramid
+    m.block(-0.24, 0.24, -0.24, 0.24, 0.0, -0.4, 'hull', (0.2, 0.2))                              # back pyramid
+    m.block(-0.08, 0.08, -0.08, 0.08, 0.3, 0.42, 'glass')
+    m.block(-0.04, 0.04, -0.04, 0.04, 0.41, 0.45, 'glow')                                          # the eye
+    m.ring(0.0, 0.24, 0.03, 10, 'accent', 0.035)
+    for dx, dy in ((1, 1), (-1, 1), (1, -1), (-1, -1)):
+        m.spike(dx * 0.14, dy * 0.14, 0.05, 0.02, 0.42, 'metal', up=dy * 0.18, out=dx * 0.18)
+    m.engine(0, 0, -0.38, 0.07, 0.07, 0.14)
+
+def fighter_d(m):  # crescent: wings that curve forward at the tips
+    m.egg(0.12, 0.08, -0.5, 0.6, 'hull', taper=0.3, mid=0.4)
+    m.block(-0.07, 0.07, 0.07, 0.14, 0.0, 0.35, 'glass', (0.6, 0.3), (0, -0.02))
+    for sd in (-1, 1):
+        m.plate(sd, 0.1, -0.35, -0.05, 0.4, -0.3, -0.05, 0.0, 0.016)                          # inner wing, swept back
+        m.plate(sd, 0.4, -0.3, -0.05, 0.62, 0.05, 0.3, 0.0, 0.016)                             # outer wing, swept forward
+        m.gunpod(sd * 0.62, 0, 0.05, 0.3, 0.03, 0.2, twin=False)
+        xb(m, sd * 0.38, sd * 0.44, 0.0, 0.03, -0.3, -0.05, 'accent')
+        m.engine(sd * 0.08, -0.01, -0.5, 0.05, 0.05, 0.14)
+    m.fin(0, 0.07, 0.25, -0.5, -0.25)
+
+def fighter_e(m):  # canard dart: a long needle, small canards up front, a big delta at the back
+    m.block(-0.08, 0.08, -0.06, 0.06, -0.6, 0.35)
+    m.block(-0.08, 0.08, -0.06, 0.06, 0.35, 0.85, 'hull', (0.1, 0.2), (0, -0.02))
+    m.block(-0.06, 0.06, 0.06, 0.13, 0.05, 0.4, 'glass', (0.5, 0.3), (0, -0.02))
+    for sd in (-1, 1):
+        m.plate(sd, 0.07, 0.35, 0.5, 0.22, 0.38, 0.45, 0.0, 0.012, 'accent')                   # canards
+        m.plate(sd, 0.08, -0.6, 0.0, 0.48, -0.62, -0.45, -0.02, 0.016)                         # delta
+        m.gunpod(sd * 0.12, -0.06, 0.0, 0.3, 0.03, 0.3, twin=False)
+    m.fin(0, 0.06, 0.3, -0.6, -0.3, 0.018, 'hull', 0.4)
+    m.engine(0, 0, -0.6, 0.08, 0.06, 0.16)
+
+def fighter_f(m):  # tri-engine skimmer: a flat lens with three engines in a triangle
+    m.block(-0.3, 0.3, -0.05, 0.05, -0.4, 0.15, 'hull', (0.5, 0.8))
+    m.block(-0.3, 0.3, -0.05, 0.05, -0.4, -0.55, 'hull', (0.6, 0.8))
+    m.block(-0.15, 0.15, -0.05, 0.05, 0.15, 0.55, 'hull', (0.2, 0.6))
+    m.egg(0.09, 0.07, -0.15, 0.3, 'glass', y=0.07, taper=0.4)
+    for sd in (-1, 1):
+        m.gunpod(sd * 0.22, 0, 0.0, 0.25, 0.03, 0.25, twin=False)
+        xb(m, sd * 0.26, sd * 0.31, 0.04, 0.06, -0.4, -0.1, 'accent')
+        m.engine(sd * 0.16, -0.04, -0.55, 0.06, 0.05, 0.1)
+    m.engine(0, 0.06, -0.55, 0.06, 0.05, 0.1)
+
+def heavy_d(m):    # brick gunship: armoured box, quad engines, chin cannon
+    m.block(-0.22, 0.22, -0.14, 0.12, -0.5, 0.35)
+    m.block(-0.22, 0.22, -0.14, 0.12, 0.35, 0.5, 'hull', (0.8, 0.6), (0, -0.02))
+    m.block(-0.12, 0.12, 0.1, 0.16, 0.3, 0.46, 'glass', (0.8, 0.5))
+    for z in (-0.3, -0.05, 0.2):                                                                     # armour bands
+        m.block(-0.235, 0.235, -0.15, 0.13, z, z + 0.06, 'metal')
+    m.gunpod(0, -0.17, 0.2, 0.45, 0.05, 0.35)
+    m.turret(0, 0.12, -0.15, 0.07, 0.2)
+    for sd in (-1, 1):
+        for y in (-0.07, 0.06): m.engine(sd * 0.12, y, -0.5, 0.06, 0.05, 0.12)
+        xb(m, sd * 0.22, sd * 0.3, -0.05, 0.05, -0.45, -0.1, 'accent')
+
+def heavy_e(m):    # trident: three prongs, each a gun barrel, around a cockpit
+    m.egg(0.14, 0.1, -0.5, 0.3, 'hull', taper=0.5, mid=0.5)
+    m.block(-0.08, 0.08, 0.08, 0.15, -0.1, 0.2, 'glass', (0.7, 0.4))
+    m.block(-0.04, 0.04, -0.04, 0.04, 0.25, 0.85, 'metal', (0.4, 0.4))                             # centre prong
+    for sd in (-1, 1):
+        m.plate(sd, 0.1, -0.2, 0.15, 0.3, -0.05, 0.25, 0.0, 0.02)
+        m.block(sd * 0.3 - 0.04, sd * 0.3 + 0.04, -0.04, 0.04, 0.05, 0.7, 'metal', (0.4, 0.4))   # side prongs
+        xb(m, sd * 0.26, sd * 0.34, 0.03, 0.06, 0.0, 0.25, 'accent')
+        m.engine(sd * 0.1, 0, -0.5, 0.06, 0.06, 0.14)
+        m.fin(sd * 0.14, 0.06, 0.22, -0.5, -0.3)
+
+def heavy_f(m):    # carapace beetle: a low dome split into wing covers, mandible guns
+    m.egg(0.3, 0.13, -0.5, 0.35, 'hull', y=0.02, taper=0.5, mid=0.45)                              # carapace
+    m.block(-0.012, 0.012, 0.1, 0.16, -0.45, 0.25, 'void')                                          # the split
+    m.block(-0.14, 0.14, -0.1, 0.0, -0.4, 0.45, 'metal', (0.7, 0.8))                                # belly
+    m.block(-0.08, 0.08, -0.02, 0.06, 0.35, 0.5, 'glass', (0.8, 0.6))
+    for sd in (-1, 1):
+        m.block(sd * 0.15 - 0.03, sd * 0.15 + 0.03, -0.05, 0.02, 0.35, 0.65, 'metal', (0.4, 0.4), (-sd * 0.05, 0))  # mandibles
+        xb(m, sd * 0.18, sd * 0.28, 0.08, 0.11, -0.3, 0.1, 'accent')
+        m.engine(sd * 0.12, -0.04, -0.5, 0.06, 0.05, 0.12)
+
+# Medium
+def corvette_d(m): # stepped ziggurat with side sponsons
+    m.block(-0.32, 0.32, -0.14, 0.04, -0.75, 0.55, 'hull', (0.7, 0.8))
+    m.block(-0.32, 0.32, -0.14, 0.04, 0.55, 0.8, 'hull', (0.3, 0.5), (0, -0.03))
+    m.block(-0.22, 0.22, 0.04, 0.14, -0.6, 0.3, 'hull', (0.8, 1))
+    m.block(-0.13, 0.13, 0.14, 0.24, -0.45, 0.0, 'hull', (0.8, 1))
+    m.block(-0.1, 0.1, 0.18, 0.23, 0.0, 0.03, 'glass')
+    m.turret(0, 0.14, 0.2, 0.065, 0.22)
+    for sd in (-1, 1):
+        m.egg(0.07, 0.07, -0.55, 0.25, 'metal', x=sd * 0.38, y=-0.06, taper=0.5)                 # sponsons
+        m.gunpod(sd * 0.38, -0.06, 0.2, 0.35, 0.04, 0.22)
+        xb(m, sd * 0.3, sd * 0.33, -0.1, 0.02, -0.7, 0.4, 'accent')
+        m.engine(sd * 0.16, -0.05, -0.75, 0.08, 0.07, 0.12)
+
+def corvette_e(m): # sensor catamaran: two pontoons and a big array slung between them
+    for sd in (-1, 1):
+        x = sd * 0.3
+        m.egg(0.1, 0.1, -0.8, 0.75, 'hull', x=x, taper=0.35, mid=0.55)
+        m.block(x - 0.03, x + 0.03, 0.08, 0.11, -0.5, 0.4, 'accent')
+        m.engine(x, 0, -0.8, 0.07, 0.07, 0.12)
+    for z in (-0.4, 0.3): m.block(-0.3, 0.3, -0.03, 0.03, z - 0.06, z + 0.06, 'metal')
+    m.block(-0.2, 0.2, -0.02, 0.02, -0.3, 0.2, 'glass')                                            # the array
+    m.block(-0.08, 0.08, 0.02, 0.18, -0.15, 0.1, 'hull', (0.8, 1))
+    m.block(-0.06, 0.06, 0.13, 0.17, 0.1, 0.12, 'glass')
+    m.egg(0.12, 0.05, 0.25, 0.55, 'metal', y=-0.05, taper=0.5)                                       # forward dish
+    m.turret(0, 0.18, -0.05, 0.06, 0.2)
+
+def corvette_f(m): # tusker: two great forward tusks and an engine block
+    m.block(-0.22, 0.22, -0.13, 0.12, -0.7, 0.35, 'hull', (0.8, 0.85))
+    m.block(-0.22, 0.22, -0.13, 0.12, 0.35, 0.6, 'hull', (0.4, 0.5))
+    m.block(-0.1, 0.1, 0.12, 0.2, -0.1, 0.25, 'glass', (0.8, 0.5))
+    for sd in (-1, 1):
+        m.block(sd * 0.22 - 0.06, sd * 0.22 + 0.06, -0.12, -0.0, 0.0, 0.5, 'metal')                    # tusk roots
+        m.spike(sd * 0.24, -0.06, 0.5, 0.055, 0.55, 'accent', up=0.04, out=-sd * 0.05)                # tusks
+        m.plate(sd, 0.2, -0.7, -0.4, 0.42, -0.75, -0.6, 0.0, 0.014, 'metal', ty=-0.1)
+    m.turret(0, 0.12, -0.35, 0.07, 0.22)
+    m.block(-0.26, 0.26, -0.16, 0.15, -0.92, -0.7, 'metal')
+    for x in (-0.13, 0.13): m.engine(x, -0.01, -0.92, 0.08, 0.09, 0.12)
+
+def frigate_d(m):  # container hauler: a spine stacked with modules, guns on top
+    m.block(-0.07, 0.07, -0.07, 0.07, -1.0, 0.75, 'metal')
+    m.block(-0.2, 0.2, -0.12, 0.14, 0.7, 1.0, 'hull', (0.7, 0.7))
+    m.block(-0.12, 0.12, 0.1, 0.18, 0.75, 0.92, 'glass', (0.8, 0.6))
+    for i, z in enumerate((-0.6, -0.3, 0.0, 0.3)):
+        for sd in (-1, 1):
+            m.block(sd * 0.15 - 0.12, sd * 0.15 + 0.12, -0.11, 0.11, z - 0.12, z + 0.12, 'hull' if (i + (sd > 0)) % 2 else 'metal')
+        m.block(-0.28, 0.28, 0.105, 0.125, z - 0.02, z + 0.02, 'accent')
+    m.turret(0, 0.11, 0.45, 0.07, 0.24)
+    m.turret(0, 0.11, -0.8, 0.065, 0.2)
+    m.block(-0.011, 0.011, 0.14, 0.42, 0.82, 0.85, 'metal')
+    for x in (-0.12, 0.12): m.engine(x, 0, -1.0, 0.08, 0.08, 0.14)
+
+def frigate_e(m):  # radiator-sail frigate: a slim hull under tall dorsal and ventral sails
+    m.egg(0.16, 0.14, -0.95, 0.95, 'hull', taper=0.3, mid=0.55)
+    m.block(-0.1, 0.1, 0.1, 0.18, 0.5, 0.75, 'glass', (0.7, 0.5))
+    m.fin(0, 0.12, 0.62, -0.7, 0.2, 0.02, 'accent', 0.6)                                            # dorsal sail
+    m.block(-0.02, 0.02, -0.62, -0.12, -0.7, 0.1, 'accent', (1, 0.6), (0, 0.1))                     # ventral sail
+    for z in (-0.4, -0.1): m.block(-0.022, 0.022, 0.15, 0.55, z, z + 0.03, 'metal')                 # sail ribs
+    for sd in (-1, 1):
+        m.turret(sd * 0.12, 0.08, 0.3, 0.065, 0.22)
+        m.plate(sd, 0.14, -0.9, -0.55, 0.36, -0.95, -0.75, 0.0, 0.015)
+    m.engine(0, 0, -0.95, 0.12, 0.1, 0.16)
+
+def frigate_f(m):  # warp-ring frigate: a hull threaded through a great ring up front
+    m.block(-0.13, 0.13, -0.11, 0.11, -0.95, 0.5, 'hull', (0.8, 0.8))
+    m.block(-0.13, 0.13, -0.11, 0.11, 0.5, 0.85, 'hull', (0.3, 0.4))
+    m.block(-0.08, 0.08, 0.1, 0.17, 0.1, 0.4, 'glass', (0.7, 0.5))
+    m.ring(0.45, 0.42, 0.06, 18, 'metal', 0.05)                                                     # the warp ring
+    m.ring(0.45, 0.42, 0.062, 18, 'accent', 0.015)
+    for a in (math.pi / 4, 3 * math.pi / 4, 5 * math.pi / 4, 7 * math.pi / 4):
+        cx, cy = 0.27 * math.cos(a), 0.27 * math.sin(a)
+        m.block(cx - 0.03, cx + 0.03, cy - 0.03, cy + 0.03, 0.4, 0.5, 'metal')
+    m.turret(0, 0.11, -0.3, 0.07, 0.24)
+    for sd in (-1, 1): m.plate(sd, 0.12, -0.9, -0.5, 0.4, -0.95, -0.7, 0.0, 0.016, 'hull', ty=0.12)
+    for x in (-0.07, 0.07): m.engine(x, 0, -0.95, 0.06, 0.08, 0.14)
+
+def gunboat_d(m):  # twin rails: two long rail barrels with the ship at their back
+    m.block(-0.28, 0.28, -0.14, 0.12, -0.85, -0.15, 'hull', (0.85, 0.9))
+    m.block(-0.12, 0.12, 0.12, 0.24, -0.7, -0.3, 'hull', (0.8, 1))
+    m.block(-0.1, 0.1, 0.18, 0.23, -0.3, -0.27, 'glass')
+    for sd in (-1, 1):
+        x = sd * 0.13
+        m.block(x - 0.05, x + 0.05, -0.05, 0.05, -0.15, 1.0, 'metal')                                # rails
+        for z in (0.1, 0.4, 0.7): m.block(x - 0.07, x + 0.07, -0.07, 0.07, z - 0.04, z + 0.04, 'accent')
+        m.block(x - 0.025, x + 0.025, -0.025, 0.025, 1.0, 1.04, 'glow')
+        m.plate(sd, 0.28, -0.8, -0.5, 0.5, -0.85, -0.65, 0.0, 0.014, 'metal', ty=-0.08)
+        m.engine(sd * 0.15, -0.02, -0.85, 0.09, 0.08, 0.14)
+    m.block(-0.16, 0.16, -0.07, 0.07, 0.25, 0.32, 'metal')                                           # rail brace
+
+def gunboat_e(m):  # turtle: a broad armoured shell bristling with small turrets
+    m.egg(0.42, 0.18, -0.75, 0.7, 'hull', y=0.0, taper=0.55, mid=0.45)
+    m.block(-0.3, 0.3, -0.18, -0.06, -0.65, 0.6, 'metal', (0.7, 1))
+    m.block(-0.1, 0.1, 0.12, 0.2, 0.35, 0.55, 'glass', (0.8, 0.5))
+    for z, x in ((0.15, 0.0), (-0.2, 0.2), (-0.2, -0.2), (-0.5, 0.0)): m.turret(x, 0.15, z, 0.06, 0.2)
+    for sd in (-1, 1):
+        xb(m, sd * 0.36, sd * 0.43, -0.04, 0.04, -0.5, 0.3, 'accent')
+        m.engine(sd * 0.18, -0.05, -0.75, 0.09, 0.07, 0.12)
+    m.engine(0, -0.05, -0.75, 0.07, 0.07, 0.12)
+
+def gunboat_f(m):  # missile barge: a long block covered in launch cells
+    m.block(-0.24, 0.24, -0.14, 0.12, -0.85, 0.6)
+    m.block(-0.24, 0.24, -0.14, 0.12, 0.6, 0.85, 'hull', (0.5, 0.6), (0, -0.02))
+    for z in (-0.6, -0.35, -0.1, 0.15, 0.4):
+        for x in (-0.12, 0.0, 0.12):
+            m.block(x - 0.045, x + 0.045, 0.12, 0.14, z - 0.08, z + 0.08, 'metal', over={3: 'void'})  # launch cells
+    m.block(-0.08, 0.08, 0.12, 0.24, 0.6, 0.75, 'hull', (0.8, 0.8))
+    m.block(-0.07, 0.07, 0.18, 0.23, 0.75, 0.78, 'glass')
+    for sd in (-1, 1):
+        xb(m, sd * 0.24, sd * 0.28, -0.12, 0.1, -0.8, 0.55, 'accent')
+        m.block(sd * 0.18 - 0.02, sd * 0.18 + 0.02, -0.38, -0.14, -0.85, -0.5, 'metal', (1, 0.5), (0, 0.06))
+        m.engine(sd * 0.13, -0.02, -0.85, 0.08, 0.08, 0.14)
+
+# Large
+def destroyer_d(m):  # outrigger trident: a central hull and two forward outriggers
+    m.block(-0.2, 0.2, -0.14, 0.12, -1.4, 0.9, 'hull', (0.8, 0.9))
+    m.block(-0.2, 0.2, -0.14, 0.12, 0.9, 1.4, 'hull', (0.15, 0.3), (0, -0.03))
+    m.block(-0.12, 0.12, 0.12, 0.26, -0.7, -0.3, 'hull', (0.8, 1))
+    m.block(-0.1, 0.1, 0.2, 0.25, -0.3, -0.27, 'glass')
+    for z in (0.5, 0.1): m.turret(0, 0.12, z, 0.1, 0.32)
+    for sd in (-1, 1):
+        x = sd * 0.62
+        m.plate(sd, 0.18, -0.5, -0.1, 0.6, -0.4, 0.0, 0.0, 0.03)                                 # arms
+        m.egg(0.11, 0.1, -0.7, 1.1, 'hull', x=x, taper=0.3, mid=0.6)                              # outriggers
+        m.gunpod(x, 0.08, 0.6, 0.95, 0.045, 0.35)
+        xb(m, x - 0.03, x + 0.03, 0.08, 0.11, -0.6, 0.5, 'accent')
+        m.engine(x, 0, -0.7, 0.07, 0.07, 0.12)
+    for x in (-0.1, 0.1): m.engine(x, -0.01, -1.4, 0.08, 0.09, 0.14)
+
+def destroyer_e(m):  # nacelle stiletto: a slim blade with two big engine nacelles on short wings
+    m.block(-0.16, 0.16, -0.1, 0.1, -1.3, 0.8, 'hull', (0.8, 0.9))
+    m.block(-0.16, 0.16, -0.1, 0.1, 0.8, 1.55, 'hull', (0.05, 0.2), (0, -0.02))
+    m.block(-0.1, 0.1, 0.1, 0.18, 0.2, 0.6, 'glass', (0.6, 0.5))
+    m.turret(0, 0.1, -0.1, 0.09, 0.3)
+    m.turret(0, 0.1, -0.6, 0.08, 0.26)
+    for sd in (-1, 1):
+        x = sd * 0.55
+        m.plate(sd, 0.14, -0.9, -0.4, 0.5, -0.8, -0.45, 0.0, 0.03)
+        m.egg(0.13, 0.13, -1.35, -0.1, 'metal', x=x, taper=0.6, mid=0.4)                          # nacelles
+        m.ring(-0.6, 0.135, 0.03, 10, 'accent', 0.03, x=x)
+        m.engine(x, 0, -1.35, 0.1, 0.1, 0.12)
+    m.engine(0, 0, -1.3, 0.08, 0.07, 0.12)
+
+def destroyer_f(m):  # monolith: a tall black slab with a glowing seam
+    m.block(-0.13, 0.13, -0.55, 0.55, -1.2, 1.0, 'hull', (0.8, 0.85))
+    m.block(-0.13, 0.13, -0.55, 0.55, 1.0, 1.35, 'hull', (0.4, 0.3))
+    m.block(-0.135, 0.135, -0.02, 0.02, -1.15, 1.3, 'glow')                                          # the seam
+    m.block(-0.14, 0.14, 0.3, 0.45, 0.6, 0.9, 'glass')
+    for sd in (-1, 1):
+        for z, y in ((0.6, 0.28), (0.0, -0.28), (-0.6, 0.28)):
+            m.gunpod(sd * 0.18, y, z - 0.1, z + 0.15, 0.05, 0.25)
+        xb(m, sd * 0.13, sd * 0.16, -0.5, 0.5, -1.2, -1.0, 'accent')
+    for y in (-0.3, 0.0, 0.3): m.engine(0, y, -1.2, 0.09, 0.1, 0.12)
+
+def battleship_d(m):  # fortress: a vast block with a tower at every corner and a central keep
+    m.block(-0.55, 0.55, -0.22, 0.12, -1.3, 1.0)
+    m.block(-0.55, 0.55, -0.22, 0.12, 1.0, 1.4, 'hull', (0.5, 0.6), (0, -0.03))
+    for sx in (-1, 1):
+        for z in (-1.1, 0.75):
+            x = sx * 0.45
+            m.block(x - 0.11, x + 0.11, 0.12, 0.5, z - 0.11, z + 0.11, 'hull', (0.8, 1))             # corner towers
+            m.block(x - 0.12, x + 0.12, 0.44, 0.5, z - 0.12, z + 0.12, 'accent')
+            m.turret(x, 0.5, z, 0.06, 0.18)
+        for z in (-0.6, -0.2, 0.2): m.turret(sx * 0.42, 0.12, z, 0.08, 0.26)
+    m.block(-0.22, 0.22, 0.12, 0.42, -0.55, 0.1, 'hull', (0.85, 1))                                  # keep
+    m.block(-0.14, 0.14, 0.42, 0.62, -0.4, -0.05, 'hull', (0.8, 1))
+    m.block(-0.12, 0.12, 0.54, 0.6, -0.05, -0.02, 'glass')
+    m.block(-0.012, 0.012, 0.62, 0.95, -0.25, -0.22, 'metal')
+    m.block(-0.58, 0.58, -0.26, 0.16, -1.55, -1.3, 'metal')
+    for x in (-0.36, -0.12, 0.12, 0.36): m.engine(x, -0.05, -1.55, 0.09, 0.1, 0.12)
+
+def battleship_e(m):  # broadside hammer: a long hull, a hammer prow and stepped gun decks along both flanks
+    m.block(-0.3, 0.3, -0.2, 0.16, -1.5, 0.8)
+    m.block(-0.62, 0.62, -0.22, 0.18, 0.8, 1.25, 'hull', (0.85, 0.85))                                # hammer prow
+    m.block(-0.63, 0.63, 0.1, 0.16, 0.95, 1.1, 'accent')
+    m.block(-0.15, 0.15, 0.18, 0.3, 0.85, 1.15, 'glass', (0.8, 0.6))
+    for sd in (-1, 1):
+        for i, z in enumerate((-1.1, -0.7, -0.3, 0.1, 0.5)):
+            xb(m, sd * 0.3, sd * 0.44, -0.14, 0.06 + 0.02 * (i % 2), z - 0.16, z + 0.16, 'hull')    # gun decks
+            m.turret(sd * 0.38, 0.06 + 0.02 * (i % 2), z, 0.065, 0.2)
+        m.gunpod(sd * 0.5, -0.05, 1.0, 1.25, 0.05, 0.3)
+    m.block(-0.18, 0.18, 0.16, 0.38, -1.25, -0.7, 'hull', (0.8, 1))
+    m.block(-0.15, 0.15, 0.3, 0.36, -0.7, -0.67, 'glass')
+    m.block(-0.34, 0.34, -0.24, 0.2, -1.7, -1.5, 'metal')
+    for x in (-0.2, 0, 0.2): m.engine(x, -0.02, -1.7, 0.09, 0.11, 0.12)
+
+def battleship_f(m):  # ring-cannon: two great rings around a spinal gun the length of the ship
+    m.block(-0.32, 0.32, -0.22, 0.2, -1.5, -0.3)
+    m.block(-0.22, 0.22, -0.16, 0.15, -0.3, 0.4, 'hull', (0.8, 0.85))
+    m.block(-0.08, 0.08, -0.07, 0.07, 0.4, 1.6, 'metal')                                              # spinal gun
+    m.block(-0.04, 0.04, -0.04, 0.04, 1.6, 1.65, 'glow')
+    for z in (0.75, 1.25):
+        m.ring(z, 0.38, 0.06, 18, 'hull', 0.07)                                                       # the rings
+        m.ring(z, 0.38, 0.062, 18, 'accent', 0.02)
+        for a in (0, math.pi / 2, math.pi, 3 * math.pi / 2):
+            cx, cy = 0.22 * math.cos(a), 0.22 * math.sin(a)
+            m.block(cx - 0.025, cx + 0.025, cy - 0.025, cy + 0.025, z - 0.04, z + 0.04, 'metal')
+    m.block(-0.18, 0.18, 0.2, 0.42, -1.2, -0.6, 'hull', (0.8, 1))
+    m.block(-0.15, 0.15, 0.34, 0.4, -0.6, -0.57, 'glass')
+    for sd in (-1, 1):
+        m.turret(sd * 0.22, 0.2, -0.2, 0.08, 0.26)
+        m.plate(sd, 0.32, -1.45, -0.7, 0.75, -1.55, -1.2, 0.0, 0.02, 'metal', ty=0.1)
+    m.block(-0.35, 0.35, -0.25, 0.23, -1.7, -1.5, 'metal')
+    for x, y in ((-0.18, -0.1), (0.18, -0.1), (-0.18, 0.1), (0.18, 0.1)): m.engine(x, y, -1.7, 0.09, 0.08, 0.12)
+
+def carrier_d(m):  # flat-top: a long flight deck with an island tower on one side
+    m.block(-0.45, 0.45, -0.25, 0.06, -1.35, 1.2, 'hull', (0.9, 1))
+    m.block(-0.45, 0.45, -0.25, 0.06, 1.2, 1.4, 'hull', (0.7, 0.7))
+    m.block(-0.3, 0.3, -0.2, 0.0, 1.25, 1.41, 'void')                                                  # bow hangar
+    m.block(-0.4, 0.4, 0.06, 0.08, -1.2, 1.15, 'metal')                                                # the deck
+    for z in (-0.8, -0.2, 0.4, 1.0): m.block(-0.02, 0.02, 0.08, 0.09, z, z + 0.35, 'accent')            # deck markings
+    m.block(0.22, 0.4, 0.08, 0.42, -0.6, -0.1, 'hull', (0.9, 1))                                       # island
+    m.block(0.24, 0.38, 0.32, 0.38, -0.1, -0.07, 'glass')
+    m.block(0.3, 0.32, 0.42, 0.65, -0.4, -0.37, 'metal')
+    m.turret(-0.3, 0.08, -1.0, 0.065, 0.2)
+    m.turret(0.3, 0.08, 0.7, 0.065, 0.2)
+    for x in (-0.28, -0.1, 0.1, 0.28): m.engine(x, -0.1, -1.35, 0.07, 0.1, 0.12)
+
+def carrier_e(m):  # saucer mothership: a wide disc with bays around the rim and a tall command spire
+    m.egg(0.85, 0.16, -0.95, 0.95, 'hull', taper=0.6, mid=0.5)                                         # saucer
+    m.egg(0.5, 0.12, -0.6, 0.6, 'metal', y=-0.12, taper=0.6, mid=0.5)                                  # belly
+    for a in range(8):
+        ang = 2 * math.pi * a / 8 + math.pi / 8
+        cx, cz = 0.62 * math.sin(ang), 0.62 * math.cos(ang)
+        m.block(cx - 0.1, cx + 0.1, 0.05, 0.13, cz - 0.1, cz + 0.1, 'metal', over={3: 'void'})        # rim bays
+    m.block(-0.14, 0.14, 0.12, 0.45, -0.25, 0.1, 'hull', (0.6, 1))                                     # spire
+    m.block(-0.1, 0.1, 0.34, 0.42, 0.1, 0.13, 'glass')
+    m.block(-0.012, 0.012, 0.45, 0.75, -0.1, -0.07, 'metal')
+    m.block(-0.86, 0.86, -0.01, 0.01, -0.06, 0.06, 'accent')
+    m.block(-0.01, 0.01, -0.01, 0.17, -0.9, 0.9, 'accent')
+    for x in (-0.3, 0.0, 0.3): m.engine(x, -0.05, -0.95, 0.08, 0.07, 0.12)
+
+def carrier_f(m):  # drone tree: a spine with racks of drones hanging off its branches
+    m.block(-0.11, 0.11, -0.11, 0.11, -1.45, 1.0, 'metal')
+    m.block(-0.24, 0.24, -0.16, 0.18, 0.9, 1.4, 'hull', (0.5, 0.6))
+    m.block(-0.14, 0.14, 0.12, 0.2, 1.05, 1.25, 'glass', (0.7, 0.5))
+    for z in (-0.95, -0.45, 0.05, 0.55):
+        for sd in (-1, 1):
+            m.plate(sd, 0.1, z - 0.05, z + 0.05, 0.62, z - 0.1, z, 0.0, 0.02, 'metal', ty=0.12)        # branches
+            for k, x in enumerate((0.3, 0.46, 0.62)):
+                dx = sd * x
+                m.block(dx - 0.05, dx + 0.05, 0.02 + k * 0.04, 0.07 + k * 0.04, z - 0.1, z + 0.08, 'hull', (0.3, 0.5))  # drones
+            xb(m, sd * 0.62, sd * 0.66, 0.08, 0.16, z - 0.12, z + 0.02, 'accent')
+    m.turret(0, 0.11, 0.3, 0.07, 0.22)
+    m.block(-0.26, 0.26, -0.2, 0.2, -1.65, -1.45, 'metal')
+    for x, y in ((-0.12, -0.1), (0.12, -0.1), (-0.12, 0.1), (0.12, 0.1)): m.engine(x, y, -1.65, 0.08, 0.08, 0.12)
+
+VARIANTS = {t: [globals()[f'{t}_{c}'] for c in 'bcdef'] for t in
+            ('scout', 'fighter', 'heavy', 'corvette', 'frigate', 'gunboat', 'destroyer', 'battleship', 'carrier')}
 
 MODELS = {'scout': scout, 'fighter': fighter, 'heavy': heavy, 'corvette': corvette, 'frigate': frigate,
           'gunboat': gunboat, 'destroyer': destroyer, 'battleship': battleship, 'carrier': carrier,
@@ -708,7 +1059,7 @@ def main():
         designs = [fn] + VARIANTS.get(name, [])
         counts[name] = len(designs)
         for v, f in enumerate(designs):
-            key = name if v == 0 else f'{name}_{v + 1}'          # scout, scout_2, scout_3
+            key = name if v == 0 else f'{name}_{v + 1}'          # scout, scout_2 … scout_6
             img = render(f, TEMPLATE, VIEW)
             img.save(os.path.join(outdir, f'{key}.png'), optimize=True)
             buf = io.BytesIO(); img.save(buf, 'PNG', optimize=True)
