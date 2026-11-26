@@ -12,8 +12,9 @@ const Planets = {
   // Resource multipliers from composition and temperature, combined.
   mult(p) {
     const out = {};
-    const solar = { infra: DATA.starClasses[p.star || 'G'].solar };
-    for (const src of [DATA.compositions[p.comp].mult, DATA.temperatures[p.temp].mult, solar]) {
+    const st = DATA.starClasses[p.star || 'G'];
+    const solar = { infra: st.solar };
+    for (const src of [DATA.compositions[p.comp].mult, DATA.temperatures[p.temp].mult, solar, st.mult || {}]) {
       for (const k in src) out[k] = Math.round((out[k] || 1) * src[k] * 100) / 100;
     }
     for (const k in out) if (out[k] === 1) delete out[k];

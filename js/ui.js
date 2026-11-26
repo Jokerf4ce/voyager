@@ -181,7 +181,7 @@ const UI = {
     const st = DATA.starClasses[s.star];
     let body = `<h3>${U.esc(s.name)}</h3>
       <div class="star-line"><span class="star-dot" style="background:${st.color};box-shadow:0 0 6px ${st.color}"></span><b>${st.name}</b></div>
-      <div class="small muted">${st.desc} Infrastructure ×${st.solar}${st.habMod ? ', habitability ' + st.habMod : ''}.</div>
+      <div class="small muted">${st.desc} Infrastructure ×${st.solar}${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => DATA.resources[k].name + ' ×' + v).join(', ') : ''}${st.shards ? `, +${st.shards} Void Shard${st.shards > 1 ? 's' : ''} per Cycle while held` : ''}.</div>
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.owner ? `<div class="muted small">Garrison ${Math.round(s.garrison)}/${Colonies.maxGarrison(s)}</div>` : ''}
       <h4>Planets</h4>`;

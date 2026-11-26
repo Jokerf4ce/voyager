@@ -55,6 +55,30 @@ const StarMap = {
   // Star with its planets as coloured dots on little orbits.
   drawSystem(ctx, s, p) {
     const st = DATA.starClasses[s.star];
+    if (st.kind === 'blackhole') {
+      // dark centre in a ring of burning gas
+      ctx.fillStyle = st.color;
+      ctx.fillRect(p.x - 2, p.y - 1, 5, 3); ctx.fillRect(p.x - 1, p.y - 2, 3, 5);
+      ctx.fillStyle = '#000000'; ctx.fillRect(p.x - 1, p.y - 1, 3, 3);
+      ctx.fillStyle = '#ffe0a0'; ctx.fillRect(p.x - 4, p.y, 2, 1); ctx.fillRect(p.x + 3, p.y, 2, 1);
+    } else if (st.kind === 'pulsar') {
+      // a point with two long diagonal beams
+      ctx.fillStyle = st.color;
+      for (let i = 2; i <= 6; i++) { ctx.globalAlpha = 1 - i / 8; ctx.fillRect(p.x + i, p.y - i, 1, 1); ctx.fillRect(p.x - i, p.y + i, 1, 1); }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x, p.y, 1, 1); ctx.fillStyle = st.color; ctx.fillRect(p.x - 1, p.y, 3, 1); ctx.fillRect(p.x, p.y - 1, 1, 3);
+    } else if (st.kind === 'dwarf') {
+      ctx.fillStyle = st.color; ctx.fillRect(p.x - 1, p.y, 3, 1); ctx.fillRect(p.x, p.y - 1, 1, 3);
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(p.x, p.y, 1, 1);
+    }
+    if (st.kind) {
+      s.planets.forEach((pl, i) => {
+        const ang = (s.id * 1.7 + i * 2.4) % (Math.PI * 2), r = 5 + i * 1.6;
+        ctx.fillStyle = pl.colony && s.owner ? DATA.factions[s.owner].color : Planets.cls(pl).palette[3];
+        ctx.fillRect(Math.round(p.x + Math.cos(ang) * r), Math.round(p.y + Math.sin(ang) * r * 0.8), 1, 1);
+      });
+      return;
+    }
     ctx.fillStyle = st.color;
     // size 1: red/orange dwarfs, 2: sun-like, 3: blue giants with longer spikes
     if (st.size >= 4) { ctx.globalAlpha = 0.35; ctx.fillRect(p.x - 3, p.y - 3, 7, 7); ctx.globalAlpha = 1; ctx.fillRect(p.x - 2, p.y - 2, 5, 5); }

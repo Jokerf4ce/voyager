@@ -166,7 +166,8 @@ const Economy = {
   income() {
     const inf = this.infra();
     const m = State.mods();
-    const out = { metal: 0, rare: 0, compute: 0, polymersMax: 0, refOut: 0, refMetal: 0, refRare: 0, shards: Math.floor(m.shardIncome), infra: inf };
+    const starShards = Colonies.playerSystems().reduce((a, s) => a + (DATA.starClasses[s.star].shards || 0), 0);
+    const out = { metal: 0, rare: 0, compute: 0, polymersMax: 0, refOut: 0, refMetal: 0, refRare: 0, shards: Math.floor(m.shardIncome) + starShards, infra: inf };
     for (const { p } of Colonies.playerPlanets()) {
       const y = this.planetYield(p, inf.eff);
       out.metal += y.metal; out.rare += y.rare; out.compute += y.compute;

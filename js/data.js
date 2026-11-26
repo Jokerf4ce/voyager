@@ -43,6 +43,11 @@ DATA.starClasses = {
   // Not main sequence: a luminosity class 0 red hypergiant (like VY Canis Majoris). Never rolled randomly;
   // the galaxy places one near the start for show.
   H: { name: 'Red Hypergiant', color: '#ff5a32', size: 4, radius: 1400, weight: 0, planets: [1, 3], temps: { hot: 3, temperate: 0.2, frozen: 1 }, solar: 2.0, habMod: -2, desc: 'A dying star wider than the orbit of Jupiter, shedding its own skin into the dark. Its light is overwhelming; nothing living belongs here.' },
+  // Stellar remnants: rare special systems. kind picks how they are drawn. mult: extra planet bonuses.
+  // shards: Void Shards per Cycle while you hold the system.
+  D: { kind: 'dwarf',    name: 'White Dwarf',       color: '#e8f0ff', size: 1, radius: 0.012, weight: 0.8, planets: [1, 3], temps: { hot: 0.3, temperate: 0.2, frozen: 3 }, solar: 0.4, habMod: -1, mult: { rare: 1.5 }, shards: 0, desc: 'The cooling corpse of a star, no bigger than a world. Its old planets are scorched cinders rich in heavy elements.' },
+  N: { kind: 'pulsar',   name: 'Pulsar',            color: '#a0e0ff', size: 1, radius: 0.00002, weight: 0.5, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.3, habMod: -2, mult: { compute: 2 }, shards: 1, desc: 'A spinning neutron star sweeping beams of hard radiation across its system, faster than a heartbeat. Its ticking is perfect; cogitators sync to it.' },
+  X: { kind: 'blackhole',name: 'Black Hole',        color: '#ff9a40', size: 1, radius: 0.00004, weight: 0.3, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.2, habMod: -2, mult: { compute: 2.5 }, shards: 3, desc: 'A wound in space ringed by burning gas. Time runs slow near the edge. The Void Signals are loudest here.' },
   M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, radius: 0.35, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
 };
 
