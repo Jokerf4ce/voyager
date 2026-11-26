@@ -31,7 +31,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 
 **Proposed.**
 
-- **Explore.** Survey probes reveal systems, anomalies, derelicts and alien ruins. Text events have choices, some of them risky or horrifying.
+- **Explore.** Survey probes reveal systems, their stars, planets and guards. (Until v0.48, charting a system could trigger a text event with choices; those discovery events were removed. The event texts and dialog remain in the code, unused.)
 - **Expand.** Colonise planets and build outposts. Each colony has a menu screen with buildings, population and unrest.
 - **Exploit.** Resources and production chains, research, and colony upgrades. This is where the incremental growth happens.
 - **Exterminate.** Fleets of ship cards and turn-based card battles (see 4c). Planets can be invaded, purged or razed.

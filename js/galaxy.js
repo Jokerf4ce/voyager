@@ -52,7 +52,7 @@ const Galaxy = {
     const used = new Set(G.galaxy.names);
     const s = {
       id: G.systems.length, name: this.makeName(used), x: Math.round(x), y: Math.round(y), star,
-      planets: this.makePlanets(star), lanes: [], owner: null, garrison: 0, explored: false, anomaly: null,
+      planets: this.makePlanets(star), lanes: [], owner: null, garrison: 0, explored: false,
     };
     G.galaxy.names.push(s.name);
     G.systems.push(s);
@@ -95,10 +95,9 @@ const Galaxy = {
     return made;
   },
 
-  // Events and monster lairs, more and nastier the farther out.
+  // Monster lairs, more and nastier the farther out. (Charting a system no longer triggers events: v0.48.)
   populate(s) {
     const d = this.danger(s.x, s.y), g = DATA.galaxy;
-    if (G.homeId != null && Math.random() < 0.5) s.anomaly = U.pick(Object.keys(DATA.events));
     if (G.homeId == null || d < g.lairFrom) return;
     if (Math.random() > Math.min(g.lairMax, g.lairChance * (d - g.lairFrom + 0.3))) return;
     const n = Math.min(DATA.fleetMax, U.randInt(2, 3) + Math.floor(d * 1.5));
@@ -170,7 +169,7 @@ const Galaxy = {
       const [cx, cy] = this.chunkOf(tx, ty);
       for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) this.ensureChunk(cx + dx, cy + dy);
       const h = nearest(tx, ty, (s) => s.id !== home.id && !homes.includes(s));
-      h.guard = null; h.anomaly = null;
+      h.guard = null;
       for (const n of h.lanes) { G.systems[n].guard = null; }
       Colonies.found(h.id, this.bestPlanet(h), id, { bastion: 1 });
       G.ai[id].homeId = h.id;
@@ -183,19 +182,17 @@ const Galaxy = {
     const guard = Ships.newFleet('Home Guard');
     give('scout', guard); give('fighter', guard); give('fighter', guard); give('heavy', guard);
 
-    // Space near home is safe: no lairs next door. Events everywhere but at the homes.
+    // Space near home is safe: no lairs next door.
     const dH = U.distances(home.id);
     for (const s of S) {
       if (dH[s.id] != null && dH[s.id] <= 1) s.guard = null;
-      if (s.anomaly == null && s !== home && !homes.includes(s) && Math.random() < 0.5) s.anomaly = U.pick(Object.keys(DATA.events));
     }
-    home.anomaly = null;
     home.explored = true;
 
     // A red hypergiant close to home, for show: two or three jumps out, not an alien home.
     const pick = U.shuffle(S.filter((s) => (dH[s.id] === 2 || dH[s.id] === 3) && !s.owner));
     const hyper = pick[0];
-    if (hyper) { hyper.star = 'H'; hyper.planets = this.makePlanets('H'); hyper.anomaly = null; }
+    if (hyper) { hyper.star = 'H'; hyper.planets = this.makePlanets('H'); }
     this.grow();
   },
 };

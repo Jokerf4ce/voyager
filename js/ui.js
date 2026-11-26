@@ -352,7 +352,7 @@ const UI = {
     return `<div class="sys-head">${this.starImg(s, 36)}<div><h4>${U.esc(s.name)}</h4><small style="color:${st.color}">${st.name}</small></div></div>
       <div class="small" style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.planets.map((p) => `<div class="hp-row">${this.planetImg(s, p, 20)}<span>${U.esc(Colonies.planetName(s, p))}</span>${p.colony ? '<span class="lvl">⌂</span>' : ''}<span class="hab-pips" style="color:${DATA.habitability[p.hab].color}">${'●'.repeat(p.hab)}${'○'.repeat(5 - p.hab)}</span></div>`).join('')}
-      ${fleetLine}${s.anomaly ? '<div class="small anomaly">Strange signals here.</div>' : ''}`;
+      ${fleetLine}`;
   },
 
   systemPanel() {

@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.48.0 — 2026-11-27
+- **No more random events when a system is charted.** Systems no longer hide anomalies (and the "Strange signals here" hint is gone). The event texts and dialog stay in the code, unused.
+- **Auto scrap in the Hangar.** Filter by rarity (up to Normal, Strong, Epic or Legendary; Omega is never scrapped), hull size, roll quality (below 90 / 100 / 110) and where (hangar only, or also fleets at home).
+  - The panel shows how many ships match and what you get back; **Scrap N ships** asks for confirmation, then breaks them all up with one Chronicle line. Weapons go to the armory.
+  - **⟳ Auto** (off by default) scraps new ships that match as they leave the slipway; the shipyard reveal says so.
+  - The filter is saved with the game.
+- Tutorial updated: the Hangar step mentions Auto scrap.
+
 ## 0.47.0 — 2026-11-27
 - **New resource: Crypto Shards ◈**, an interstellar crypto currency that will be used for trade. It comes in tiny amounts, so it is shown with two decimals: in the top bar, its hover card, the Overview, colony yields and offline progress.
 - **New building: Finance District** (surface). +0.05 Crypto Shards per level per Cycle.

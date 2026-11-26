@@ -145,6 +145,9 @@ const Ships = {
     if (f) f.ships.push(ship.id);
     const rar = DATA.shipRarities[ship.rarity];
     Log.add(`${rar.name} ${DATA.shipTypes[ship.type].name} "${ship.name}" leaves the slipway${f ? ` and joins ${f.name}` : ''}.`, ship.rarity === 'normal' ? '' : ship.rarity === 'strong' ? 'good' : 'mythic');
+    // Auto scrap: a new ship that matches the filter goes straight to the breakers
+    const sf = this.scrapFilter();
+    if (sf.auto && this.scrapMatches(ship, Object.assign({}, sf, { fleets: true }))) { this.scrapMany([ship.id]); ship.scrapped = true; }
     return ship;
   },
 
@@ -236,6 +239,45 @@ const Ships = {
     this.cleanup();
     Log.add(`"${ship.name}" is broken up for parts. Its weapons go to the armory.`);
     return true;
+  },
+
+  // ---------- auto scrap ----------
+  // The filter (saved in G.scrapFilter): rarity = highest rarity to scrap (Omega never), sizes, quality = only
+  // rolls below this (0 = any), fleets = also ships in fleets at home, auto = scrap new matching ships on build.
+  scrapFilter() {
+    if (!G.scrapFilter) G.scrapFilter = { rarity: 'normal', sizes: ['S', 'M', 'L'], quality: 0, fleets: false, auto: false };
+    return G.scrapFilter;
+  },
+  scrapMatches(ship, f = this.scrapFilter()) {
+    const order = Object.keys(DATA.shipRarities), fl = this.fleetOf(ship.id);
+    if (ship.rarity === 'omega' || order.indexOf(ship.rarity) > order.indexOf(f.rarity)) return false;
+    if (!f.sizes.includes(ship.size)) return false;
+    if (f.quality && !(ship.quality < f.quality)) return false;
+    if (fl && (!f.fleets || fl.mission)) return false;
+    return true;
+  },
+  scrapList() { return this.all().filter((s) => this.scrapMatches(s)); },
+  // What scrapping these ships would give back.
+  scrapRefund(ships) {
+    const out = {};
+    for (const s of ships) for (const [k, v] of Object.entries(DATA.sizes[s.size].cost)) out[k] = (out[k] || 0) + Math.floor(v * DATA.scrapRefund);
+    return out;
+  },
+  // Scrap many ships at once, with one line in the Chronicle.
+  scrapMany(ids) {
+    const ships = ids.map((id) => G.ships[id]).filter(Boolean), refund = this.scrapRefund(ships);
+    let n = 0;
+    for (const s of ships) {
+      const f = this.fleetOf(s.id);
+      if (f && f.mission) continue;
+      for (const w of s.weapons) if (w) G.armory.push(w);
+      delete G.ships[s.id];
+      n++;
+    }
+    for (const k in refund) G.res[k] += refund[k];
+    this.cleanup();
+    if (n) Log.add(`${n} ship${n > 1 ? 's are' : ' is'} broken up for parts (+${Object.entries(refund).map(([k, v]) => `${v} ${DATA.resources[k].name}`).join(', ')}). Their weapons go to the armory.`);
+    return n;
   },
 
   // An event or disaster takes one ship of a fleet. Returns true if a ship was lost.

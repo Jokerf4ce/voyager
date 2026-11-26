@@ -27,7 +27,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Crypto Shards ◈: an interstellar currency for trade, mined in tiny amounts (0.05 per Cycle) by Finance Districts
 - Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony; demolish one (✕) to free its slot and salvage 25 % of what it cost
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
-- Explore with scouts; exploration events with grim choices
+- Explore with survey probes (charting a system has no random events since v0.48)
 - Expand with colony expeditions into new systems, then settle more planets in systems you hold
 - Resources: Metals, Rare Minerals and Organics (gathered); Electronics and Chemicals (refined); Power, Compute and Infrastructure (capacities); Research
 - Research made by Research Labs, including endlessly repeatable "Doctrine" techs for the incremental layer
@@ -61,7 +61,7 @@ js/economy.js     colonies, buildings, per-Cycle production
 js/research.js    research
 js/ships.js       ship cards: build gacha, weapons, fleets, hangar, armory, forge
 js/missions.js    fleet attacks, survey probes, colony expeditions and incoming raids
-js/explore.js     exploration, fog of war, events
+js/explore.js     exploration, fog of war (the event dialog is kept but no longer triggered)
 js/battle.js      turn-based card battles
 js/ai.js          alien empire AI: garrisons, expansion, raids
 js/tester.js      tester mode (separate save slot)

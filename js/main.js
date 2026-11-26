@@ -88,6 +88,23 @@ const Game = {
     bswapnav: (a) => { UI.swapNav(+a); },
     brestore: () => { Battle.restoreTurn(); },
     hangarsort: (a) => { UI.hangarSort = a; },
+    scrapf: (a) => {
+      const f = Ships.scrapFilter(), [k, v] = a.split(':');
+      if (k === 'rarity') f.rarity = v;
+      if (k === 'size') f.sizes = f.sizes.includes(v) ? f.sizes.filter((z) => z !== v) : [...f.sizes, v];
+      if (k === 'quality') f.quality = +v;
+      if (k === 'fleets') f.fleets = v === '1';
+      if (k === 'auto') f.auto = v === '1';
+    },
+    autoscrap: () => {
+      const list = Ships.scrapList();
+      if (!list.length) return;
+      const names = list.slice(0, 8).map((s) => `<span style="color:${DATA.shipRarities[s.rarity].color}">${U.esc(s.name)}</span> <small class="muted">${DATA.shipTypes[s.type].name}</small>`).join(', ');
+      UI.modal(`<h2>Scrap ${list.length} ship${list.length > 1 ? 's' : ''}?</h2><p>${names}${list.length > 8 ? ` and ${list.length - 8} more` : ''}.</p>
+        <p>You get back <b>${U.costText(Ships.scrapRefund(list))}</b>, and their weapons go to the armory. This can't be undone.</p>
+        <div class="btnrow">${UI.btn('Scrap them', 'autoscrap-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
+    },
+    'autoscrap-confirm': () => { UI.closeModal(); Ships.scrapMany(Ships.scrapList().map((s) => s.id)); if (UI.selShip && !G.ships[UI.selShip]) UI.selShip = null; },
     bswapconfirm: () => { if (UI.swapPick && UI.swapPick.lane != null) Battle.swapTurn(UI.swapPick.lane); UI.swapPick = null; },
     battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
     bresolve: () => { Battle.resolve(); },
@@ -121,7 +138,7 @@ const Game = {
     tutback: () => { Tutorial.back(); },
     tutskip: () => { Tutorial.finish(); },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
-    buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastWeapon = null; } },
+    buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; } },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
     research: (a) => { Research.select(a); Research.tick(); },
     bopen: (a) => { UI.bOpen = UI.bOpen === a ? null : a; },

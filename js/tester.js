@@ -29,7 +29,6 @@ const Tester = {
     }
 
     for (const { s, p } of out) {
-      s.anomaly = null;
       Colonies.found(s.id, p.idx, 'player', this.randomLayer(p, 'surface'), this.randomLayer(p, 'orbit'));
       p.colony.founded = 1;
     }

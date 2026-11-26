@@ -148,6 +148,7 @@ damage      = a normal-distribution roll around that mean, spread 15 %, rounded,
 ### 2.3 Getting and swapping weapons
 
 - **Scrapping a ship** moves all its weapons to the armory and refunds 30 % of its size's build cost.
+- **Auto scrap** (Hangar, v0.48): scraps every ship that matches a filter at once: rarity up to Normal/Strong/Epic/Legendary (Omega never), hull sizes, roll quality below 90/100/110, and the hangar only or also fleets at home. With **Auto** on, new ships that match are scrapped as they leave the slipway. The filter is saved with the game (`G.scrapFilter`).
 - **Wrecks:** after a victory, each destroyed alien ship has a 30 % chance to leave one of its weapons. Monsters leave nothing.
 - **Weapon Forge** (Shipyard): costs 25 Rare Minerals + 15 Electronics (`DATA.forge`; 15 Void Shards before v0.43) and rolls a random weapon of the chosen size. Its rarity is rolled like a ship's.
 - **Refitting** (Hangar screen, in the ship's panel):

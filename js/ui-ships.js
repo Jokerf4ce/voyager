@@ -64,12 +64,12 @@ Object.assign(UI, {
         ${this.btn('Lay down a hull', 'buildship', size, !!why, 'gold')}
       </div>`;
     };
-    const last = this.lastShip && G.ships[this.lastShip];
+    const last = this.lastShip && (G.ships[this.lastShip] || (this.lastScrapped && this.lastScrapped.id === this.lastShip ? this.lastScrapped : null));
     const reveal = last ? `<div class="reveal r-${last.rarity}">${this.shipCard(last, { cls: 'big' })}
         <div><h3 style="color:${DATA.shipRarities[last.rarity].color}">${DATA.shipRarities[last.rarity].name.toUpperCase()}</h3>
         <p class="small">${DATA.shipTypes[last.type].desc}</p>
-        <p class="small muted">${Ships.fleetOf(last.id) ? 'Joined ' + U.esc(Ships.fleetOf(last.id).name) + '.' : 'Waiting in the hangar.'}</p>
-        <div class="btnrow">${this.btn('Show in Hangar', 'gofleets')}</div></div></div>` : '';
+        <p class="small muted">${last.scrapped ? '<span class="bad">Auto scrap: broken up for parts right away.</span>' : Ships.fleetOf(last.id) ? 'Joined ' + U.esc(Ships.fleetOf(last.id).name) + '.' : 'Waiting in the hangar.'}</p>
+        ${last.scrapped ? '' : `<div class="btnrow">${this.btn('Show in Hangar', 'gofleets')}</div>`}</div></div>` : '';
     const lw = this.lastWeapon && G.armory.find((w) => w.id === this.lastWeapon);
     return this.panel('Shipyard', `<p class="flavor">Every hull is laid down blind. The forge-priests swear the machine-spirit chooses what it becomes.</p>
         <p class="small muted">Choose a size and pay; the type, rarity, stats and weapons are rolled. Every stat is drawn from a normal distribution around the type's average, so no two ships are alike; Q on a card shows how well it rolled (100 = average). Rarity shifts the average up. Rates: ${this.rarityRates()}.</p>
@@ -117,11 +117,28 @@ Object.assign(UI, {
         <div class="cardrow wrap hangar-drop" data-dropship="hangar">${hangar.map((sh) => cardOf(sh)).join('')}
         ${sel && selFleet && !selFleet.mission && !full ? this.emptySlot('assign', `${sel.id}|hangar`, '＋ to hangar') : ''}</div>
         ${hangar.length ? '' : '<p class="muted small">Empty. New ships join a fleet at home with room, or wait here. Drop a ship here to take it out of its fleet.</p>'}`) +
+      this.autoScrapPanel() +
       this.panel(`Armory (${G.armory.length})`, G.armory.length ? ['S', 'M', 'L'].map((z) => {
         const ws = G.armory.filter((w) => w.size === z);
         return ws.length ? `<div class="kv"><span>${DATA.sizes[z].name}</span><span class="wlist">${ws.map((w) => this.weaponChip(w)).join('')}</span></div>` : '';
       }).join('') : '<p class="muted small">No spare weapons. Scrap ships, salvage wrecks or use the Weapon Forge.</p>');
     return `<div class="fleetscreen"><div>${left}</div><aside class="side">${sel ? this.shipDetail(sel) : this.panel('Ship', '<p class="muted">Select a ship to see its stats, refit its weapons or move it.</p>')}</aside></div>`;
+  },
+
+  // Auto scrap: filters, a preview and the button (Ships.scrapFilter).
+  autoScrapPanel() {
+    const f = Ships.scrapFilter(), list = Ships.scrapList(), refund = Ships.scrapRefund(list);
+    const opt = (key, val, label, on) => this.btn(label, 'scrapf', `${key}:${val}`, false, 'small' + (on ? ' on' : ''));
+    const rars = Object.entries(DATA.shipRarities).filter(([k]) => k !== 'omega');
+    return this.panel('Auto scrap', `<p class="small muted">Break up every ship that matches, at once. Weapons go to the armory; ${Math.round(DATA.scrapRefund * 100)} % of each hull's cost comes back. Omega ships are never scrapped.</p>
+      <div class="kv"><span>Rarity up to</span><span class="btnrow">${rars.map(([k, r]) => opt('rarity', k, `<span style="color:${r.color}">${r.name}</span>`, f.rarity === k)).join('')}</span></div>
+      <div class="kv"><span>Hull</span><span class="btnrow">${['S', 'M', 'L'].map((z) => opt('size', z, DATA.sizes[z].name, f.sizes.includes(z))).join('')}</span></div>
+      <div class="kv"><span>Roll quality below</span><span class="btnrow">${[[0, 'Any'], [90, 'Q 90'], [100, 'Q 100'], [110, 'Q 110']].map(([q, l]) => opt('quality', q, l, f.quality === q)).join('')}</span></div>
+      <div class="kv"><span>Where</span><span class="btnrow">${opt('fleets', 0, 'Hangar only', !f.fleets)}${opt('fleets', 1, 'Hangar + fleets at home', f.fleets)}</span></div>
+      <div class="kv"><span>Matching</span><b>${list.length} ship${list.length === 1 ? '' : 's'}${list.length ? ` <small class="muted">· back: ${U.costText(refund)}</small>` : ''}</b></div>
+      <div class="btnrow">${this.btn(`Scrap ${list.length} ship${list.length === 1 ? '' : 's'}`, 'autoscrap', '', !list.length, 'danger')}
+        ${opt('auto', f.auto ? 0 : 1, f.auto ? '⟳ Auto: on' : '⟳ Auto: off', f.auto)}</div>
+      <p class="small muted">${f.auto ? '<b>Auto is on:</b> new ships that match are scrapped as they leave the slipway.' : 'Turn on Auto to scrap new ships that match as soon as they are built.'}</p>`);
   },
 
   // Sort orders for the hangar. Ties fall back to build order.
