@@ -119,7 +119,10 @@ const Game = {
     bauto: (a) => { Colonies.buildAuto(a); },
     bplace: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     selplanet: (a) => { UI.selPlanet = UI.selPlanet === +a ? null : +a; },
-    mapsys: (a) => { UI.selSys = +a; UI.screen = 'map'; },
+    mapsys: (a) => { UI.selSys = +a; UI.screen = 'map'; StarMap.centerOn(G.systems[+a]); },
+    mapzoom: (a) => { StarMap.zoomBy(+a); },
+    maphome: () => { StarMap.centerOn(G.systems[G.homeId]); },
+    mapcenter: () => { if (UI.selSys != null) StarMap.centerOn(G.systems[UI.selSys]); },
     eventchoice: (a) => { Explore.resolveEvent(+a); UI.closeModal(); },
     music: () => { Music.toggle(); },
     musicplay: (a) => { Music.play(a); },
@@ -187,7 +190,13 @@ document.addEventListener('drop', (ev) => {
   if (Battle.swapTurn(+el.dataset.droplane)) { UI.swapPick = null; State.save(); }
   UI.render();
 });
-window.addEventListener('resize', () => { if (typeof UI !== 'undefined' && UI.screen === 'battle') UI.drawBattleArrow(); });
+// The map draws its names with the VT323 web font: redraw once it has arrived.
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (typeof UI !== 'undefined' && G && UI.screen === 'map') { const cv = UI.$('mapcanvas'); if (cv) StarMap.draw(cv); } });
+window.addEventListener('resize', () => {
+  if (typeof UI === 'undefined' || !G) return;
+  if (UI.screen === 'battle') UI.drawBattleArrow();
+  if (UI.screen === 'map') { const cv = UI.$('mapcanvas'); if (cv) StarMap.draw(cv); }
+});
 
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;

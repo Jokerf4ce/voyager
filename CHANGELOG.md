@@ -2,6 +2,15 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.34.0 — 2026-11-26
+- **The galaxy has no edge.** It is generated in chunks as you explore: every system you chart or own grows the map around it, so you can expand in any direction. All systems stay connected by hyperlanes.
+- **The Star Map is a camera.** Drag to pan, scroll or pinch to zoom, and use the buttons for zoom, home (⌂) and the selected system (◎). A **minimap** in the corner shows everything charted and your view; click it to jump there. The map remembers where you were looking.
+- **Readable names.** The map is still pixel art, but system names, `?` markers and raid warnings are drawn on top at full resolution in a larger font with a dark outline. Labels never overlap: your systems, alien systems and the selected one get priority. Zoomed far out, only owned and selected systems are named, and planets are hidden.
+- Endless starfield with seamless dithered nebulae and a little parallax.
+- Monster lairs grow more common the farther from home. The two alien empires start 520–680 units away in different directions, each reachable by hyperlane.
+- Tuned in `DATA.galaxy`.
+- **New save format:** old saves start a new game.
+
 ## 0.33.0 — 2026-11-26
 - **Building costs rise with level.** Each level costs 15 % of the base price more up to level 5 (1×, 1.15×, 1.3×, 1.45×, 1.6×); from level 6 every level doubles (3.2×, 6.4×, 12.8×, …), on top of the colony's habitability multiplier. Expanding wide is now the way to grow; very tall buildings get very expensive.
 - Prices show their level multiplier (×1.45); it turns red past level 5. **Auto** already compares output per cost, so it now spreads buildings across colonies by itself.

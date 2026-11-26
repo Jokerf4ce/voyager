@@ -1,4 +1,4 @@
-// Voyager — galaxy generation: systems, hyperlanes, starting positions.
+// Voyager — galaxy generation: an endless galaxy made in chunks as it is explored; hyperlanes; starting positions.
 
 const Galaxy = {
   makeName(used) {
@@ -38,62 +38,111 @@ const Galaxy = {
     return s.planets.slice().sort((a, b) => score(b) - score(a))[0].idx;
   },
 
-  generate() {
-    const count = DATA.config.systemCount;
-    const pts = [];
-    const asp = StarMap.H / StarMap.W; // keep systems evenly spaced on the wide map
-    let tries = 0;
-    while (pts.length < count && tries < 5000) {
-      tries++;
-      const p = { x: U.rand(0.05, 0.95), y: U.rand(0.08, 0.92) };
-      if (pts.every((q) => Math.hypot(p.x - q.x, (p.y - q.y) * asp) > 0.1)) pts.push(p);
-    }
-    const used = new Set();
-    const starWeights = Object.fromEntries(Object.entries(DATA.starClasses).map(([k, c]) => [k, c.weight]));
-    const systems = pts.map((p, i) => {
-      const star = Planets.weighted(starWeights);
-      return {
-        id: i, name: this.makeName(used), x: p.x, y: p.y, star,
-        planets: this.makePlanets(star), lanes: [], owner: null, garrison: 0,
-        explored: false, anomaly: null,
-      };
-    });
+  // ---------- an endless galaxy, generated in chunks as it is explored ----------
+  // World units: 1 unit = 1 map pixel at zoom 1. G.galaxy.chunks marks generated chunks ("cx,cy").
+  chunkOf(x, y) { const C = DATA.galaxy.chunk; return [Math.floor(x / C), Math.floor(y / C)]; },
+  homeXY() { const h = G.systems[G.homeId]; return h ? h : { x: 0, y: 0 }; },
+  // Danger grows with distance from home (0 at home, about 1 at the alien homes).
+  danger(x, y) { const h = this.homeXY(); return Math.hypot(x - h.x, y - h.y) / DATA.galaxy.alienDistance[0]; },
 
-    // Lanes: minimum spanning tree (always connected) plus some extra non-crossing links.
-    const edges = [];
-    const dist = (a, b) => Math.hypot(a.x - b.x, (a.y - b.y) * StarMap.H / StarMap.W);
-    const inTree = new Set([0]);
-    while (inTree.size < systems.length) {
-      let best = null;
-      for (const i of inTree) for (const s of systems) {
-        if (inTree.has(s.id)) continue;
-        const d = dist(systems[i], s);
-        if (!best || d < best.d) best = { a: i, b: s.id, d };
-      }
-      edges.push([best.a, best.b]);
-      inTree.add(best.b);
+  newSystem(x, y) {
+    const starWeights = Object.fromEntries(Object.entries(DATA.starClasses).map(([k, c]) => [k, c.weight]));
+    const star = Planets.weighted(starWeights);
+    if (!G.galaxy.names) G.galaxy.names = [];
+    const used = new Set(G.galaxy.names);
+    const s = {
+      id: G.systems.length, name: this.makeName(used), x: Math.round(x), y: Math.round(y), star,
+      planets: this.makePlanets(star), lanes: [], owner: null, garrison: 0, explored: false, anomaly: null,
+    };
+    G.galaxy.names.push(s.name);
+    G.systems.push(s);
+    return s;
+  },
+
+  link(a, b) { if (a !== b && !a.lanes.includes(b.id)) { a.lanes.push(b.id); b.lanes.push(a.id); } },
+  crossesAny(a, b) {
+    const near = G.systems.filter((s) => Math.hypot(s.x - a.x, s.y - a.y) < 260);
+    for (const c of near) for (const n of c.lanes) {
+      if (n < c.id) continue;
+      if (this.segmentsCross(a, b, c, G.systems[n])) return true;
     }
-    const crosses = (a, b) => edges.some(([c, d]) => this.segmentsCross(systems[a], systems[b], systems[c], systems[d]));
-    for (const s of systems) {
-      const near = systems.filter((t) => t.id !== s.id).sort((a, b) => dist(s, a) - dist(s, b)).slice(0, 3);
-      for (const t of near) {
-        if (edges.some(([a, b]) => (a === s.id && b === t.id) || (a === t.id && b === s.id))) continue;
-        if (Math.random() < 0.45 && dist(s, t) < 0.28 && !crosses(s.id, t.id)) edges.push([s.id, t.id]);
+    return false;
+  },
+
+  // Generate one chunk: a few systems, spaced apart, each linked to the nearest older system (so the galaxy
+  // always stays connected) and to a neighbour or two more; lairs and events scaled by distance from home.
+  ensureChunk(cx, cy) {
+    const key = cx + ',' + cy;
+    if (G.galaxy.chunks[key]) return [];
+    G.galaxy.chunks[key] = true;
+    const g = DATA.galaxy, C = g.chunk, made = [];
+    const n = U.randInt(g.perChunk[0], g.perChunk[1]);
+    for (let tries = 0; made.length < n && tries < 60; tries++) {
+      const x = (cx + U.rand(0.08, 0.92)) * C, y = (cy + U.rand(0.08, 0.92)) * C;
+      if (G.systems.some((s) => Math.hypot(s.x - x, s.y - y) < g.minDist)) continue;
+      const older = G.systems.slice();
+      const s = this.newSystem(x, y);
+      made.push(s);
+      if (older.length) {
+        const byDist = older.sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y));
+        this.link(s, byDist[0]);
+        for (const t of byDist.slice(1, 4)) {
+          if (Math.hypot(t.x - x, t.y - y) < g.extraLane && Math.random() < 0.45 && !this.crossesAny(s, t)) this.link(s, t);
+        }
       }
+      this.populate(s);
     }
-    for (const [a, b] of edges) { systems[a].lanes.push(b); systems[b].lanes.push(a); }
-    return systems;
+    return made;
+  },
+
+  // Events and monster lairs, more and nastier the farther out.
+  populate(s) {
+    const d = this.danger(s.x, s.y), g = DATA.galaxy;
+    if (G.homeId != null && Math.random() < 0.5) s.anomaly = U.pick(Object.keys(DATA.events));
+    if (G.homeId == null || d < g.lairFrom) return;
+    if (Math.random() > Math.min(g.lairMax, g.lairChance * (d - g.lairFrom + 0.3))) return;
+    const n = Math.min(DATA.fleetMax, U.randInt(2, 3) + Math.floor(d * 1.5));
+    const ships = [];
+    for (let k = 0; k < n; k++) {
+      const r = Math.random() * (0.8 + d * 0.6);
+      ships.push(Ships.make(r > 1.4 ? 'leviathan' : r > 0.8 ? 'maw' : 'lurker', { owner: 'monster', rarity: Ships.rollRarity(d * 0.8) }));
+    }
+    s.guard = { owner: 'monster', name: d > 1.2 ? 'Lurker Brood' : 'Lurkers', ships };
+  },
+
+  // Make sure the space around every charted (or Covenant) system exists, so its neighbours can be found.
+  grow() {
+    if (!G.galaxy) return;
+    const R = DATA.galaxy.growRadius;
+    const seeds = G.systems.filter((s) => s.explored || s.owner === 'player');
+    for (const s of seeds) {
+      const [cx, cy] = this.chunkOf(s.x, s.y);
+      for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) this.ensureChunk(cx + dx, cy + dy);
+    }
+  },
+
+  // Chunks along a straight line, so two far-apart places are joined by generated space.
+  corridor(x0, y0, x1, y1) {
+    const steps = Math.ceil(Math.hypot(x1 - x0, y1 - y0) / (DATA.galaxy.chunk * 0.5));
+    for (let i = 0; i <= steps; i++) {
+      const [cx, cy] = this.chunkOf(x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps);
+      this.ensureChunk(cx, cy);
+    }
+  },
+
+  generate() {
+    G.systems = [];
+    G.galaxy = { chunks: {}, names: [] };
+    const R = DATA.galaxy.growRadius;
+    for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) this.ensureChunk(dx, dy);
+    return G.systems;
   },
 
   // Place the player and the AI empires as far apart as possible, then scatter monsters.
   placeStarts() {
     const S = G.systems;
-    const home = S.reduce((best, s) => (s.x + s.y * 0.5 < best.x + best.y * 0.5 ? s : best), S[0]);
-    const dP = U.distances(home.id);
-    const chorus = S.reduce((b, s) => (dP[s.id] > dP[b.id] ? s : b), S[0]);
-    const dC = U.distances(chorus.id);
-    const remnant = S.filter((s) => s !== home && s !== chorus)
-      .reduce((b, s) => (Math.min(dP[s.id], dC[s.id]) > Math.min(dP[b.id], dC[b.id]) ? s : b));
+    const nearest = (x, y, ok = () => true) => S.filter(ok).reduce((b, s) => (Math.hypot(s.x - x, s.y - y) < Math.hypot(b.x - x, b.y - y) ? s : b));
+    const home = nearest(0, 0);
 
     // The home system always has a decent rocky world and at least three planets.
     // The home star is a yellow dwarf like the lost Sun, with a large Terran capital.
@@ -104,54 +153,49 @@ const Galaxy = {
     home.planets[0] = capital;
     this.orderPlanets(home.planets);
     home.name = 'Covenant Ark-Home';
+    G.galaxy.names.push(home.name);
     G.homeId = home.id;
     G.homePlanet = capital.idx;
     Colonies.found(home.id, capital.idx, 'player', { mine: 1, harvester: 1, refinery: 1, dome: 1, fusion: 2 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
     capital.colony.capital = true;
-    Colonies.found(chorus.id, this.bestPlanet(chorus), 'chorus', { bastion: 1 });
-    Colonies.found(remnant.id, this.bestPlanet(remnant), 'remnant', { bastion: 1 });
-    G.ai.chorus.homeId = chorus.id;
-    G.ai.remnant.homeId = remnant.id;
+
+    // The alien empires lie far out in two different directions, joined to home by generated space.
+    const g = DATA.galaxy, a0 = Math.random() * Math.PI * 2;
+    const homes = [];
+    for (const [i, id] of AI.ids.entries()) {
+      const ang = i === 0 ? a0 : a0 + U.rand(0.65, 1.35) * Math.PI;   // the two empires in clearly different directions
+      const dist = U.rand(g.alienDistance[0], g.alienDistance[1]);
+      const tx = home.x + Math.cos(ang) * dist, ty = home.y + Math.sin(ang) * dist;
+      this.corridor(home.x, home.y, tx, ty);
+      const [cx, cy] = this.chunkOf(tx, ty);
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) this.ensureChunk(cx + dx, cy + dy);
+      const h = nearest(tx, ty, (s) => s.id !== home.id && !homes.includes(s));
+      h.guard = null; h.anomaly = null;
+      for (const n of h.lanes) { G.systems[n].guard = null; }
+      Colonies.found(h.id, this.bestPlanet(h), id, { bastion: 1 });
+      G.ai[id].homeId = h.id;
+      AI.setGuard(h, id, 4);
+      homes.push(h);
+    }
 
     // Starting fleet: a Scout, two Fighters and a Heavy Fighter, all Normal cards.
     const give = (type, fleet) => { const sh = Ships.make(type, { rarity: 'normal' }); G.ships[sh.id] = sh; fleet.ships.push(sh.id); };
     const guard = Ships.newFleet('Home Guard');
     give('scout', guard); give('fighter', guard); give('fighter', guard); give('heavy', guard);
-    AI.setGuard(chorus, 'chorus', 4);
-    AI.setGuard(remnant, 'remnant', 4);
 
-    // Monsters guard random systems away from the homes.
-    const homes = [home.id, chorus.id, remnant.id];
-    const near = new Set(homes.flatMap((h) => [h, ...S[h].lanes]));
-    const candidates = U.shuffle(S.filter((s) => !near.has(s.id)));
-    candidates.slice(0, DATA.config.monsterSystems).forEach((s, i) => {
-      // lairs farther down the list are nastier: more ships, bigger monsters
-      const n = Math.min(DATA.fleetMax, U.randInt(2, 3) + Math.floor(i / 2));
-      const ships = [];
-      for (let k = 0; k < n; k++) {
-        const r = Math.random() * (1 + i * 0.25);
-        ships.push(Ships.make(r > 1.4 ? 'leviathan' : r > 0.8 ? 'maw' : 'lurker', { owner: 'monster', rarity: Ships.rollRarity(i * 0.3) }));
-      }
-      s.guard = { owner: 'monster', name: i > 3 ? 'Lurker Brood' : 'Lurkers', ships };
-    });
-
-    // Some systems hold exploration events.
-    const evKeys = Object.keys(DATA.events);
-    for (const s of S) if (!homes.includes(s.id) && Math.random() < 0.5) s.anomaly = U.pick(evKeys);
-
-    // Systems already charted at the start (by default only home; its neighbours show as '?').
+    // Space near home is safe: no lairs next door. Events everywhere but at the homes.
     const dH = U.distances(home.id);
-    const byDist = S.slice().sort((a, b) => dH[a.id] - dH[b.id]);
-    for (const s of byDist.slice(0, DATA.config.startExplored)) s.explored = true;
-
-    // A red hypergiant close to home, for show: not home, not next door, not an alien home.
-    const nearby = byDist.slice(0, DATA.config.hypergiantWithin);
-    const pick = nearby.filter((s) => !homes.includes(s.id) && dH[s.id] >= 2 && !s.owner);
-    const hyper = pick[pick.length - 1] || nearby.find((s) => s.id !== home.id && !s.owner);
-    if (hyper) {
-      hyper.star = 'H';
-      hyper.planets = this.makePlanets('H');
-      hyper.anomaly = null;
+    for (const s of S) {
+      if (dH[s.id] != null && dH[s.id] <= 1) s.guard = null;
+      if (s.anomaly == null && s !== home && !homes.includes(s) && Math.random() < 0.5) s.anomaly = U.pick(Object.keys(DATA.events));
     }
+    home.anomaly = null;
+    home.explored = true;
+
+    // A red hypergiant close to home, for show: two or three jumps out, not an alien home.
+    const pick = U.shuffle(S.filter((s) => (dH[s.id] === 2 || dH[s.id] === 3) && !s.owner));
+    const hyper = pick[0];
+    if (hyper) { hyper.star = 'H'; hyper.planets = this.makePlanets('H'); hyper.anomaly = null; }
+    this.grow();
   },
 };

@@ -114,6 +114,7 @@ const Missions = {
       G.surveys.splice(G.surveys.indexOf(m), 1);
       Explore.arrive(null, m.target);
     }
+    Galaxy.grow();
     for (const m of G.expeditions.slice()) {
       if (--m.eta > 0) continue;
       G.expeditions.splice(G.expeditions.indexOf(m), 1);

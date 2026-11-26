@@ -5,7 +5,7 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 12,
+      version: 13,
       cycle: 1,
       res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, shards: 25 },
       systems: [],
@@ -33,7 +33,7 @@ const State = {
       over: null,
       stats: { explored: 0, battlesWon: 0, battlesLost: 0, coloniesTaken: 0 },
     };
-    G.systems = Galaxy.generate();
+    Galaxy.generate();
     Galaxy.placeStarts();
     Log.add('The Covenant fleet arrives at the edge of the Shroud. The homeworld is ash behind it, and the void ahead is full of things that hunger.', 'story');
     Log.add('Send your probes into the dark. Find worlds. Survive.', 'story');
@@ -64,7 +64,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 12) return false;
+      if (!data || data.version !== 13) return false;
       G = data;
       return true;
     } catch (e) { return false; }
@@ -77,7 +77,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 12) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 13) throw new Error('Not a Voyager save');
     G = data;
   },
 

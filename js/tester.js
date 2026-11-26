@@ -15,6 +15,7 @@ const Tester = {
     // Chart the nearest systems.
     const byDist = G.systems.slice().sort((a, b) => dH[a.id] - dH[b.id]);
     for (const s of byDist.slice(0, this.explored)) if (!s.explored) { s.explored = true; if (s.id !== G.homeId) G.stats.explored++; }
+    Galaxy.grow();
 
     // Candidate planets: other worlds at home first, then free worlds in charted neighbouring systems.
     const free = (s) => s.planets.filter((p) => !p.colony && (p.slots.surface || p.slots.orbit));

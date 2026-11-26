@@ -60,13 +60,17 @@ Rare special systems (decided to add, effects proposed). These are stellar remna
 | Pulsar (spinning neutron star with radiation beams) | 1–2 | ×0.3 | −2 | Compute ×2, +1 Void Shard per Cycle while held |
 | Black Hole (with accretion disc) | 1–2 | ×0.2 | −2 | Compute ×2.5, +3 Void Shards per Cycle while held |
 
-Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1,400 solar radii), with 1–3 scorched planets, Infrastructure ×2 and habitability −2. It never appears at random. One is placed among the 10 systems nearest to home at the start, for show (to be found by exploring).
+Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1,400 solar radii), with 1–3 scorched planets, Infrastructure ×2 and habitability −2. It never appears at random. One is placed 2–3 jumps from home at the start, for show (to be found by exploring).
 
 **Start** (decided, changed in v0.19): the game begins with only the home system charted and only the capital settled. Neighbours show as "?".
 
-**Tester mode** (decided; called the admin test game before v0.30.1): a separate save slot (`voyager_save_v12_tester`) generated with 3 extra colonies holding random buildings, 10 systems charted, fleets of every rarity and full stores, for testing. Opened from Settings or `#tester` (the old `#admin` still works); it never touches the real save.
+**Tester mode** (decided; called the admin test game before v0.30.1): a separate save slot (`voyager_save_v13_tester`) generated with 3 extra colonies holding random buildings, 10 systems charted, fleets of every rarity and full stores, for testing. Opened from Settings or `#tester` (the old `#admin` still works); it never touches the real save.
 
 **Maps** (decided: a star map plus a solar system map). The **Star Map** shows the galaxy: systems, hyperlanes, guards (pips), your missions (gold) and incoming raids (red). The **Solar System** map shows one system: the star in its class colour, planets on their orbits with their habitability, colony markers and orbital stations, and any hostile guard at the jump point. The Solar System map draws sizes to scale, using real radius ratios between stars and planets, from a 109-Earth-radii Sun down to Mars-sized dwarfs. Only the edge of a big star fits on screen. Two exceptions keep things visible: small worlds are drawn at least 8 px across, and pulsars and black holes are enlarged. Distances are compressed. Planets are numbered outward from the star. Hot worlds orbit closest and frozen ones farthest out.
+
+**Endless galaxy** (decided, v0.34): the galaxy is generated in square chunks (`DATA.galaxy.chunk` world units, 4–6 systems each). Whenever a system is charted or owned, every chunk around it (`growRadius`) is generated, so the map grows in every direction as you explore and there is no edge. Each new system is linked to its nearest older one, so everything stays connected; extra lanes are added where they don't cross. Monster lairs get more common with distance from home. The two alien homes start 520–680 units away in different directions, with a corridor of chunks generated to each.
+
+**Star Map camera** (decided, v0.34): the Star Map is a pan/zoom view of the world (drag, wheel, pinch; buttons for zoom, home and the selected system; a minimap). The pixel art is drawn into a low-resolution buffer and scaled up (3 screen px per art pixel, 2 on phones), keeping the chunky look; names and markers are drawn on top at full resolution for readability, without overlapping.
 
 **Map screen layout** (decided, v0.21): the Star Map fills the screen width; hovering a system shows a summary card (star, owner, planets with habitability, fleets). The selected system's Solar System map and its full panel (planets, settle, fleets) sit below the star map, in place of the Chronicle, which is hidden on this screen.
 

@@ -11,7 +11,7 @@ See [docs/concept.md](docs/concept.md) for the design.
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
-- **Star Map:** fills the screen width. Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and missions appear below (double-click scrolls there). From there, launch a **survey probe** to explore or a **colony expedition** to settle (both cost a flat fee), or send a fleet to **attack**.
+- **Star Map:** an endless galaxy under a pan/zoom camera (drag, scroll or pinch; ⌂ for home; a minimap in the corner). Hover a system for a summary card; click it to select it, and its **Solar System** map, planets and missions appear below (double-click scrolls there). From there, launch a **survey probe** to explore or a **colony expedition** to settle (both cost a flat fee), or send a fleet to **attack**.
 - **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
 - **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
 - **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
@@ -21,7 +21,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 
 ## Proof of concept (v0.1)
 
-- Procedural galaxy of 22 systems with hyperlanes and fog of war; only home is charted at the start; a Red Hypergiant waits among the 10 nearest systems
+- Endless procedural galaxy, generated in chunks as you explore, with hyperlanes and fog of war; only home is charted at the start; a Red Hypergiant waits 2–3 jumps away
 - Each system has a star class (O B A F G K M), or rarely a white dwarf, pulsar or black hole, and 1–5 planets
 - Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs

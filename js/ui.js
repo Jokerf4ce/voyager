@@ -28,6 +28,7 @@ const UI = {
 
   render() {
     if (!G) return;
+    if (this.screen === 'map' && StarMap.dragging) { this.renderPending = true; return; } // don't rebuild the map mid-drag
     this.renderTop();
     this.renderNav();
     const fn = this['screen_' + this.screen];
@@ -48,9 +49,7 @@ const UI = {
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
       StarMap.draw(cv);
-      cv.onclick = (ev) => this.mapClick(cv, ev);
-      cv.onpointermove = (ev) => { if (ev.pointerType === 'mouse') this.mapHover(cv, ev); }; // no hover card on touch
-      cv.onmouseleave = () => { this.hover = null; this.$('maphover').classList.remove('show'); };
+      StarMap.attach(cv); // drag to pan, wheel/pinch to zoom, click to select, hover card on mouse
       if (this.hover) this.showHover(); // keep the hover card through re-renders (e.g. Auto)
       const sc = this.$('syscanvas');
       if (sc) {
@@ -199,7 +198,7 @@ const UI = {
   // Star map across the full width (hover a star for a summary), the selected system's solar system below.
   screen_map() {
     const s = this.selSys != null ? G.systems[this.selSys] : null;
-    const hint = 'Hover a system for a summary, click it to select it. Missions (explore, attack, settle) and its solar system appear below.';
+    const hint = 'Drag to pan, scroll or pinch to zoom. Hover a system for a summary, click to select it; missions and its solar system appear below. The galaxy grows as you explore.';
     let below = '';
     if (s) {
       const sysMap = s.explored
@@ -209,7 +208,13 @@ const UI = {
       below = `<div class="sysrow" id="sysrow">${sysMap}<aside class="side">${this.systemPanel()}</aside></div>`;
     }
     return `<div class="mapscreen">
-      <div class="mapbox"><canvas id="mapcanvas" width="${StarMap.W}" height="${StarMap.H}"></canvas>
+      <div class="mapbox"><canvas id="mapcanvas"></canvas>
+        <div class="mapctl">
+          <button class="btn" data-act="mapzoom" data-a="1.4" title="Zoom in">+</button>
+          <button class="btn" data-act="mapzoom" data-a="0.714" title="Zoom out">−</button>
+          <button class="btn" data-act="maphome" title="Centre on the home system">⌂</button>
+          ${s ? `<button class="btn" data-act="mapcenter" title="Centre on ${U.esc(s.name)}">◎</button>` : ''}
+        </div>
         <div id="maphover" class="maphover"></div>
         <div class="maphint">${hint}</div></div>
       ${below}

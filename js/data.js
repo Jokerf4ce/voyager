@@ -333,14 +333,22 @@ DATA.names = {
 //   cost:   1×    1.15×  1.3×  1.45×  1.6×  3.2×  6.4×   12.8×   (× the colony's habitability multiplier)
 DATA.levelCost = { perLevel: 0.15, softCap: 5, expBase: 2 };
 
+// The galaxy has no edge: it is generated in square chunks as it is explored (js/galaxy.js).
+DATA.galaxy = {
+  chunk: 160,              // chunk size in world units (1 unit = 1 map pixel at zoom 1)
+  perChunk: [4, 6],        // systems per chunk
+  minDist: 44,             // minimum distance between systems
+  extraLane: 95,           // extra hyperlanes only between systems closer than this
+  growRadius: 1,           // chunks generated around every charted system (1 = the 3x3 around it)
+  alienDistance: [520, 680], // how far out the two alien empires lie from home
+  lairFrom: 0.3,           // monster lairs start at this danger (distance from home / alienDistance[0])
+  lairChance: 0.22, lairMax: 0.4,
+};
+
 DATA.config = {
-  systemCount: 22,
-  startExplored: 1,  // systems already charted at the start (1 = only home; neighbours show as '?')
-  hypergiantWithin: 10, // the red hypergiant is placed among this many systems nearest to home
-  monsterSystems: 6,
   autoCycleMs: 3000,
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v12',
+  saveKey: 'voyager_save_v13',
 };
