@@ -153,6 +153,8 @@ DATA.sizeDisadvantage = 0.7; // ... and against the size that beats you
 // lane offsets (right, left, two right, two left, …). Shots at a ship that isn't opposite hit less often.
 DATA.targetOrder = [0, 1, -1, 2, -2, 3, -3, 4, -4, 5, -5];
 DATA.offLaneHit = 0.5;       // hit chance multiplier when the target is not in the opposite lane
+// Big guns can't track small ships: hit chance multiplier when a Large ship fires at a Small one.
+DATA.largeVsSmallHit = 0.6;
 
 // There are no fixed stats: every ship rolls each stat from a normal distribution. The numbers below are the
 // averages (means) of a Normal-rarity ship; DATA.statSpread sets how far a roll usually lands from it.

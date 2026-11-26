@@ -226,10 +226,11 @@ const Battle = {
     if (DATA.sizes[t.size].beats === a.size) return DATA.sizeDisadvantage;
     return 1;
   },
-  // a = attacker (for the lane penalty); without it, the chance as if shooting straight ahead
+  // a = attacker (for the lane and tracking penalties); without it, the chance as if shooting straight ahead
   hitChance(w, t, a) {
     const lane = a && a.lane !== t.lane ? DATA.offLaneHit : 1;
-    return Math.max(0.05, (w.acc / 100) * (1 - t.maneuver / 100) * lane);
+    const track = a && a.size === 'L' && t.size === 'S' ? DATA.largeVsSmallHit : 1; // big guns can't track small ships
+    return Math.max(0.05, (w.acc / 100) * (1 - t.maneuver / 100) * lane * track);
   },
 
   // Damage a weapon would do right now: { shield, hull } taken off the target (before randomness).

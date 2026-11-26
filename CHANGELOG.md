@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.30.0 — 2026-11-26
+- **Big guns can't track small ships.** Weapons on Large ships have −40 % hit chance against Small ships (`DATA.largeVsSmallHit = 0.6`). Together with the size advantage, Small ships are now the answer to capital ships. Applies to every side, Leviathans included. The weapon buttons note "(small target)".
+- `docs/combat.md` updated.
+
 ## 0.29.0 — 2026-11-26
 - **Swap formation in battle.** Instead of firing, a ship can trade lanes with its neighbour on the left or right, or step into an empty lane. It uses the ship's turn. The buttons sit under the weapons and say who it would swap with.
 - Enemies and Auto swap too, when it clearly improves the matchups for both ships (and never back and forth). Planetary Defenses stay put.

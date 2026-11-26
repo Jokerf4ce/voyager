@@ -1,6 +1,6 @@
 # Voyager — Combat Mechanics
 
-How ships, fleets and battles work, as built in v0.29. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
+How ships, fleets and battles work, as built in v0.30. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
 
 ---
 
@@ -15,6 +15,8 @@ Every ship is a **card**. It has a size, a type, a rarity, stats and 1–3 weapo
 | **S** Small | Large | Medium | 5 | 30 Metals, 6 Electronics | — |
 | **M** Medium | Small | Large | 10 | 70 Metals, 20 Electronics, 10 Chemicals | *Medium Hulls* |
 | **L** Large | Medium | Small | 18 | 160 Metals, 40 Rare Minerals, 50 Electronics, 30 Chemicals | *Capital Hulls* |
+
+**Big guns can't track small ships:** when a Large ship fires at a Small one, its hit chance is ×0.6 (−40 %, `DATA.largeVsSmallHit`), on top of the size damage rule below.
 
 When one ship attacks another:
 
@@ -227,13 +229,15 @@ The battle ends when one side has no ships left. If 25 rounds pass without that:
 ### 4.4 Hitting
 
 ```
-hit chance = weapon accuracy × (1 − target evasion) × lane factor, at least 5 %
-lane factor = 1 if the target is directly opposite, 0.5 if not
+hit chance = weapon accuracy × (1 − target evasion) × lane factor × tracking factor, at least 5 %
+lane factor     = 1 if the target is directly opposite, 0.5 if not
+tracking factor = 0.6 if a Large ship fires at a Small one, else 1
 ```
 
 Examples:
 - A Railgun (80 %) against a Scout (30 % evasion) directly opposite hits 0.8 × 0.7 = **56 %** of the time.
 - The same shot one lane over hits **28 %** of the time.
+- A Battleship's Railgun (80 %) against a Fighter (25 % evasion) directly opposite hits 0.8 × 0.75 × 0.6 = **36 %** of the time.
 
 ### 4.5 Damage
 
@@ -373,7 +377,7 @@ Every ship costs its **maintenance** in Metals each Cycle, plus **half as much i
 
 ## 7. Quick tips
 
-- **Size:** bring Medium ships against swarms of Small ones, Small ones against capital ships, and Large ones against Medium lines.
+- **Size:** bring Medium ships against swarms of Small ones, Small ones against capital ships, and Large ones against Medium lines. Small ships are doubly good against Large ones: they do ×1.5 damage, and Large guns hit them less often.
 - **Damage type:**
   - Open with energy weapons on shielded targets, then finish with physical.
   - Against monsters, physical all the way.

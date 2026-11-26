@@ -157,7 +157,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - **Fleets are global**, like the colonies: one Fleets screen lists every fleet, the hangar (ships in no fleet) and the armory (spare weapons). A fleet holds up to **five ships**, the size of one side in battle.
 - **No map positions.** Fleets are sent to **attack** (monster lairs and alien systems) from a system on the Star Map. A mission takes as many Cycles as hyperlane hops from the nearest Covenant system; the fleet then returns. Fleets out on a mission can't be changed.
 - **Exploring and settling cost a flat fee** (changed in v0.24; before, they needed a Scout in the fleet and a Colony Ark): a **survey probe** charts a system, a **colony expedition** settles one. Both travel like a fleet.
-- **Ship sizes** beat each other like rock-paper-scissors: **Small beats Large, Large beats Medium, Medium beats Small** (×1.5 damage; ×0.7 the other way).
+- **Ship sizes** beat each other like rock-paper-scissors: **Small beats Large, Large beats Medium, Medium beats Small** (×1.5 damage; ×0.7 the other way). Also, big guns can't track small ships: Large ships hit Small ones at ×0.6 (v0.30).
   - Small: Scout, Fighter, Heavy Fighter. Medium: Corvette, Frigate, Gunboat. Large: Destroyer, Battleship, Carrier.
   - The types differ only in their average stats so far; type-specific abilities are open.
 - **Ship stats:** shield (first life points), hull (second life points), speed (turn order), maneuverability (evasion chance), weapon slots (1–3) and maintenance (upkeep per Cycle).
