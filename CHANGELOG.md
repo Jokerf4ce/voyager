@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.50.0 — 2026-11-27
+- **Battle: hit effects.** A hit on shields flares a cyan energy shell around the card; a hit on the hull throws an orange burst of pixel sparks (and the card shakes). A shot that breaks through shows both.
+- **Battle: damage numbers.** They float up like MISS: shield damage in blue, hull damage in orange (e.g. −2 −5), readable for about 2 seconds.
+- The old hit flash (which tinted the whole card) is now just the shake, so the new colours read cleanly.
+
 ## 0.49.0 — 2026-11-27
 - **Three new designs for every ship type** (six per type now). New ships roll one of the six; existing ships keep theirs. Like the others, they are grey templates painted in each faction's colours.
   - **Scout:** ring-wing probe, outrigger skiff, lantern drone (a cut gem with a glowing eye).

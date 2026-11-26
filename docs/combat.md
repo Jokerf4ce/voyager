@@ -280,6 +280,7 @@ The base is then applied to the target's shield first, then its hull:
 
 **On screen:**
 - Each side shows its live **fleet power** (living ships, current shields and hull); a bar across the top of the board compares the two.
+- A hit shows its damage as floating numbers, shields in blue and hull in orange (e.g. −2 −5), with a cyan shield shimmer and/or an orange burst of hull sparks on the card (v0.50).
 - A missed shot shows **MISS** over the target card, and a Restore shows **+ RESTORED**; both stay up for about 2 seconds (`DATA.battleFxMs`).
 - Destroyed ships stay on the board as wrecks, stamped ✕ DESTROYED.
 - While you drag a ship (or pick a lane with ◀ ▶), the ships that would make room slide aside, opening a gap where it would go.

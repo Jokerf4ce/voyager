@@ -369,7 +369,7 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
 .bside.enemy .scard.acting { transform: translateY(3px); }
 .scard.target { outline: 2px dashed #e06050; outline-offset: 2px; }
 .scard.hit { animation: hit .5s steps(3); }
-@keyframes hit { 0% { transform: translateX(-4px); filter: brightness(2) sepia(1) hue-rotate(-30deg); } 50% { transform: translateX(4px); } 100% { transform: none; } }
+@keyframes hit { 0% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 100% { transform: none; } }  /* colour comes from .hitfx */
 .preview { font-size: 14px; color: #f0c080; text-align: center; border-top: 1px solid #3a2a20; margin-top: 2px; }
 .preview i { font-style: normal; font-size: 11px; color: var(--ash); margin-left: 1px; }
 .ord { padding: 0 5px; border: 1px solid var(--edge); color: var(--ash); font-size: 15px; }
@@ -496,3 +496,18 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
 .hangar-drop { min-height: 90px; padding: 4px; }
 .sortrow { align-items: center; margin: 4px 0 8px; }
 .sortrow small { margin-right: 4px; }
+
+/* battle: damage numbers and hit effects (shield shimmer, hull sparks) */
+.floater.dmg { color: #f0e0c0; font-size: 17px; letter-spacing: 1px; }
+.floater.dmg .dsh { color: #7fd8ff; } .floater.dmg .dhu { color: #ff9a50; }
+.hitfx { position: absolute; inset: -6px; pointer-events: none; z-index: 4; opacity: 0; }
+.hitfx.shield { border-radius: 45%; border: 2px solid #7fd8ff; background: radial-gradient(ellipse at center, transparent 55%, rgba(110, 200, 255, .35) 75%, rgba(160, 230, 255, .6) 92%, transparent 100%);
+  box-shadow: 0 0 14px #5ac0ff, inset 0 0 14px #5ac0ff; animation: shieldhit .75s ease-out both; }
+@keyframes shieldhit { 0% { opacity: 0; transform: scale(.88); } 15% { opacity: 1; } 100% { opacity: 0; transform: scale(1.08); } }
+.hitfx.hull { inset: 0; background: radial-gradient(circle at 50% 42%, rgba(255, 200, 110, .9) 0 8%, rgba(255, 110, 40, .55) 18%, transparent 45%); animation: hullhit .6s steps(4) both; }
+.hitfx.hull i { position: absolute; left: 50%; top: 42%; width: 3px; height: 3px; background: #ffd070;
+  box-shadow: 14px -10px 0 #ff9a40, -16px -6px 0 #ffd070, 10px 14px 0 #ff7030, -12px 12px 0 #ff9a40, 22px 2px 0 #ffd070, -22px -14px 0 #ff7030, 4px -20px 0 #ffb050, -4px 20px 0 #ff9a40;
+  animation: sparks .6s ease-out both; animation-delay: inherit; }
+@keyframes hullhit { 0% { opacity: 1; } 60% { opacity: .8; } 100% { opacity: 0; } }
+@keyframes sparks { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .hitfx { animation-duration: .01s; } }

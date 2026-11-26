@@ -234,10 +234,11 @@ const Battle = {
   },
 
   // Floating labels over a card (MISS, RESTORED) that stay up for a while: DATA.battleFxMs.
-  fx(unit, kind) {
+  // A hit also records the damage: sh (shields) and hu (hull), shown as numbers and two small animations.
+  fx(unit, kind, data) {
     const b = G.battle, now = Date.now();
     b.fx = (b.fx || []).filter((f) => now - f.t < DATA.battleFxMs && f.unit !== unit);
-    b.fx.push({ unit, kind, t: now });
+    b.fx.push(Object.assign({ unit, kind, t: now }, data));
   },
 
   // ---------- restore ----------
@@ -334,6 +335,7 @@ const Battle = {
     if (t.hull <= 0) { t.dead = true; line += ` ${t.name} is destroyed!`; }
     this.say(line, a.side);
     b.lastHit = { from: b.units.indexOf(a), to: b.units.indexOf(t), t: Date.now() };
+    this.fx(b.units.indexOf(t), 'hit', { sh: Math.round(d.shield), hu: Math.round(d.hull) });
     this.endTurn();
   },
 

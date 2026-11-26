@@ -258,7 +258,17 @@ Object.assign(UI, {
       const cls = [u.dead ? 'dead' : '', acting ? 'acting' : '', struck && !hit.miss && !hit.restore ? 'hit' : '', struck && hit.miss ? 'missed' : '', isT ? 'target' : '', u.side === 'player' && pick === u.lane ? 'swap-dest' : ''].join(' ');
       // floating labels keep their place in the animation across re-renders (negative delay = already running)
       const fx = (b.fx || []).filter((f) => f.unit === i && Date.now() - f.t < DATA.battleFxMs).pop();
-      let extra = fx ? `<div class="floater ${fx.kind}" style="animation-duration:${DATA.battleFxMs}ms;animation-delay:-${Date.now() - fx.t}ms">${fx.kind === 'miss' ? 'MISS' : '+ RESTORED'}</div>` : '';
+      let extra = '';
+      if (fx) {
+        const age = Date.now() - fx.t, timing = `animation-duration:${DATA.battleFxMs}ms;animation-delay:-${age}ms`;
+        if (fx.kind === 'hit') {
+          // a shield shimmer and/or hull sparks (short), and the damage numbers (they stay up a while)
+          if (fx.sh > 0) extra += `<div class="hitfx shield" style="animation-delay:-${age}ms"></div>`;
+          if (fx.hu > 0) extra += `<div class="hitfx hull" style="animation-delay:-${age}ms"><i></i></div>`;
+          const nums = [fx.sh > 0 && `<span class="dsh">−${fx.sh}</span>`, fx.hu > 0 && `<span class="dhu">−${fx.hu}</span>`].filter(Boolean).join(' ');
+          extra += `<div class="floater dmg" style="${timing}">${nums || '<span class="dsh">0</span>'}</div>`;
+        } else extra += `<div class="floater ${fx.kind}" style="${timing}">${fx.kind === 'miss' ? 'MISS' : '+ RESTORED'}</div>`;
+      }
       if (u.dead) extra += '<div class="wreck-stamp">✕ DESTROYED</div>';
       extra += isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
       // the acting ship gets little arrows to pick a lane to swap to
