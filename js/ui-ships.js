@@ -235,7 +235,12 @@ Object.assign(UI, {
         return `<small>≈${Math.round(d.shield)} sh + ${Math.round(d.hull)} hu · ${Math.round(Battle.hitChance(x, tgt, cur) * 100)}% hit${sm > 1 ? ' ★' : sm < 1 ? ' ▽' : ''}</small>`;
       };
       controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b> targets <b>${U.esc(tgt.name)}</b>${cur.lane !== tgt.lane ? ' <span class="bad">(across lanes: half the hit chance)</span>' : ''}. Pick a weapon to fire.</div>
-        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}</div>`;
+        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}</div>
+        <div class="btnrow swaprow">${[-1, 1].map((d) => {
+          if (!Battle.canSwap(cur, d)) return '';
+          const o = Battle.inLane('player', cur.lane + d), who = o && !o.dead ? `swap with ${U.esc(o.name)}` : 'move to the empty lane';
+          return this.btn(d < 0 ? `⇠ ${who}` : `${who} ⇢`, 'bswap', d, false, 'small');
+        }).join('')}<small class="muted">instead of firing (uses this turn)</small></div>`;
     } else if (cur) {
       controls = `<div class="bprompt muted">${cur.side === 'enemy' ? 'Enemy turn' : 'Auto'}: ${U.esc(cur.name)} → ${tgt ? U.esc(tgt.name) : '…'}</div>`;
     }
@@ -247,7 +252,7 @@ Object.assign(UI, {
       <div class="bside player" style="--lanes:${lanes}">${side('player')}</div>
       <div class="bcontrols">${controls}</div>
       <div class="blog">${b.log.slice(-9).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
-      <p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance. Order your fleet on the Fleets screen.</p>
+      <p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance. Order your fleet on the Fleets screen, or swap places in battle instead of firing.</p>
     </div>`;
   },
 

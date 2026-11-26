@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.29.0 — 2026-11-26
+- **Swap formation in battle.** Instead of firing, a ship can trade lanes with its neighbour on the left or right, or step into an empty lane. It uses the ship's turn. The buttons sit under the weapons and say who it would swap with.
+- Enemies and Auto swap too, when it clearly improves the matchups for both ships (and never back and forth). Planetary Defenses stay put.
+- `docs/combat.md` updated.
+
 ## 0.28.0 — 2026-11-26
 - **Colourless ship sprites, coloured in the game.** Each ship type is now one grey template (13 images instead of 66). Every grey level stands for a material and a shade, and the game paints the sprites on the fly from `DATA.shipPalettes` in `js/data.js`: one base colour each for hull, metal, trim, glass, engines and engine glow, with the shades worked out automatically. Changing a faction's look is now a one-line edit.
 - **Fleet colours** in Settings: pick your own hull, metal, trim, glass and engine colours with a live preview; every card repaints at once. Saved in this browser; Reset restores the Covenant's bone and rust.

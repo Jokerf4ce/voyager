@@ -92,6 +92,7 @@ const Game = {
     // battles
     gobattle: () => { UI.screen = 'battle'; },
     bfire: (a) => { Battle.act(+a); },
+    bswap: (a) => { Battle.swapTurn(+a); },
     battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
     bresolve: () => { Battle.resolve(); },
     bretreat: () => { Battle.retreat(); },
