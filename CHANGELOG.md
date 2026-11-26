@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.48.1 — 2026-11-27
+- New icons: Metals ⬡, Crypto Shards ♃, Power ⏻, Infrastructure ⇄, Compute ⋇ (everywhere they appear, including building effects and costs).
+- Top bar: Research now comes after the capacities (after Compute), behind its own divider.
+
 ## 0.48.0 — 2026-11-27
 - **No more random events when a system is charted.** Systems no longer hide anomalies (and the "Strange signals here" hint is gone). The event texts and dialog stay in the code, unused.
 - **Auto scrap in the Hangar.** Filter by rarity (up to Normal, Strong, Epic or Legendary; Omega is never scrapped), hull size, roll quality (below 90 / 100 / 110) and where (hangar only, or also fleets at home).

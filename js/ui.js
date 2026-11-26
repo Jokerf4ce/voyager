@@ -69,8 +69,8 @@ const UI = {
     const c = net.caps;
     const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" data-tip="cap:${k}" tabindex="0">
         <span class="ico">${DATA.capacities[k].icon}</span><b>${U.fmt(c[k].used)}/${U.fmt(c[k].cap)}</b></div>`;
-    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'crypto'].map((k) => r(k, G.res[k], net[k])).join('') +
-      '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
+    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'crypto'].map((k) => r(k, G.res[k], net[k])).join('') +
+      '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') + '<span class="res-sep"></span>' + r('research', G.res.research, net.research) +
       (c.eff < 1 ? `<div class="res over" data-tip="ration" tabindex="0"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     const fighting = !!(G.battle && G.battle.phase !== 'over');
     this.$('btn-end').disabled = fighting || !!G.over;
@@ -140,14 +140,14 @@ const UI = {
     const eats = Object.entries(y.inputs).filter(([, v]) => v > 0).map(([k, v]) => `${U.fmt1(v)}${DATA.resources[k].icon}`).join(' ');
     return (parts.join(' ') || '<span class="muted">no output</span>') + (eats ? ` <small class="muted">(refining eats ${eats})</small>` : '');
   },
-  // Gathering ratings, e.g. "▣●●○ ◇●○○ ❦●●●"
+  // Gathering ratings, e.g. "⬡●●○ ◇●○○ ❦●●●"
   ratingText(p) {
     return ['metal', 'rare', 'organics'].map((k) => {
       const r = Math.min(4, Economy.rating(p, k));
       return `<span class="res-${k}" title="${DATA.resources[k].name} rating ${r}">${DATA.resources[k].icon}${'●'.repeat(r)}${'○'.repeat(Math.max(0, 3 - r))}</span>`;
     }).join(' ');
   },
-  // A building's effect in icons, built from its data: "+2 ▣ × planet rating", "2 ▣ + 0.5 ◇ → 2 ⍯", "+6 ϟ".
+  // A building's effect in icons, built from its data: "+2 ⬡ × planet rating", "2 ⬡ + 0.5 ◇ → 2 ⍯", "+6 ⏻".
   // Buildings without a numeric effect keep their text, with resource names swapped for icons.
   bDesc(k) {
     const d = DATA.buildings[k];
@@ -230,7 +230,7 @@ const UI = {
         <div class="kv"><span>Chemicals <small class="muted">(refined)</small></span><b class="res-chemicals">+${U.fmt1(net.chemicals)}</b></div>
         <div class="kv"><span>Research <small class="muted">(Research Labs)</small></span><b class="res-research">+${U.fmt1(net.research)}</b></div>
         <div class="kv"><span>Crypto Shards <small class="muted">(Finance Districts)</small></span><b class="res-crypto">+${U.rate('crypto', net.crypto)}</b></div>
-        ${net.upkeep ? `<div class="kv"><span>Fleet maintenance <small class="muted">(included above)</small></span><b class="neg">−${U.fmt1(net.upkeep)} ▣ −${U.fmt1(net.upkeep / 2)} ⚗</b></div>` : ''}
+        ${net.upkeep ? `<div class="kv"><span>Fleet maintenance <small class="muted">(included above)</small></span><b class="neg">−${U.fmt1(net.upkeep)} ${DATA.resources.metal.icon} −${U.fmt1(net.upkeep / 2)} ${DATA.resources.chemicals.icon}</b></div>` : ''}
         <h4>Capacities</h4>
         ${Object.entries(DATA.capacities).map(([k, d]) => `<div class="kv"><span class="res-${k}">${d.icon} ${d.name}</span><b>${U.fmt1(c[k].used)} / ${U.fmt1(c[k].cap)}</b></div>
           <div class="small muted">buildings ${U.fmt1(c[k].buildings)}</div>

@@ -130,10 +130,10 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 | **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, warships, surveys, settling |
 | **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, warships, settling |
 | **Research** | points | Research Labs (+2 each), capital +1 | technology |
-| **Crypto Shards** ◈ | currency (v0.47) | Finance Districts: +0.05 per level per Cycle; shown with two decimals | trade (planned) |
-| **Power** ϟ | capacity | colony base 2 × starlight, Fusion Reactors (+6), Solar Arrays in orbit (+4 × starlight); hot worlds ×1.3 | almost every building |
-| **Infrastructure** ⌂ | capacity | colony base 5, Hab Domes (+5), Habitat Rings (+6); ice/water ×1.3, temperate ×1.2 | workers in production buildings and labs; ship crews |
-| **Compute** ☍ | capacity | Cogitator Arrays (+4); frozen ×1.5, pulsar ×2, black hole ×2.5 | Research Labs, Defense Platforms, Frigates and bigger warships |
+| **Crypto Shards** ♃ | currency (v0.47) | Finance Districts: +0.05 per level per Cycle; shown with two decimals | trade (planned) |
+| **Power** ⏻ | capacity | colony base 2 × starlight, Fusion Reactors (+6), Solar Arrays in orbit (+4 × starlight); hot worlds ×1.3 | almost every building |
+| **Infrastructure** ⇄ | capacity | colony base 5, Hab Domes (+5), Habitat Rings (+6); ice/water ×1.3, temperate ×1.2 | workers in production buildings and labs; ship crews |
+| **Compute** ⋇ | capacity | Cogitator Arrays (+4); frozen ×1.5, pulsar ×2, black hole ×2.5 | Research Labs, Defense Platforms, Frigates and bigger warships |
 
 **Planet yields** (decided). Each planet class rates the three gathered resources from 0 to 3:
 
