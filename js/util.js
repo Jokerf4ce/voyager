@@ -16,6 +16,15 @@ const U = {
   costText: (cost) => Object.entries(cost).filter(([, v]) => v > 0)
     .map(([k, v]) => `<span class="res-${k}">${DATA.resources[k].icon}${U.fmt(v)}</span>`).join(' '),
 
+  // Mouse position in canvas pixels. The canvas is scaled with object-fit: contain, so the drawing
+  // can be letterboxed inside the element: account for that, not just the element's box.
+  canvasPoint(canvas, ev, W, H) {
+    const r = canvas.getBoundingClientRect();
+    const scale = Math.min(r.width / W, r.height / H);
+    const ox = (r.width - W * scale) / 2, oy = (r.height - H * scale) / 2;
+    return { x: (ev.clientX - r.left - ox) / scale, y: (ev.clientY - r.top - oy) / scale };
+  },
+
   // Breadth-first path over lanes. allow(sysId) can restrict traversal. Returns [next, ..., dest] or null.
   path(from, to, allow) {
     if (from === to) return [];

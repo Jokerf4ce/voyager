@@ -197,8 +197,7 @@ const SystemMap = {
 
   hit(canvas, ev) {
     const s = G.systems[UI.selSys];
-    const r = canvas.getBoundingClientRect();
-    const x = (ev.clientX - r.left) / r.width * this.W, y = (ev.clientY - r.top) / r.height * this.H;
+    const { x, y } = U.canvasPoint(canvas, ev, this.W, this.H);
     const lay = this.layout(s);
     let best = null, bd = Infinity;
     s.planets.forEach((p, i) => {

@@ -153,8 +153,7 @@ const StarMap = {
   },
 
   hit(canvas, ev) {
-    const r = canvas.getBoundingClientRect();
-    const x = (ev.clientX - r.left) / r.width * this.W, y = (ev.clientY - r.top) / r.height * this.H;
+    const { x, y } = U.canvasPoint(canvas, ev, this.W, this.H);
     let best = null, bd = 14;
     for (const s of G.systems) {
       if (!(s.explored || Explore.isSeen(s.id))) continue;

@@ -124,7 +124,8 @@ small, .small { font-size: 16px; }
 .planet-row { display: flex; gap: 8px; align-items: flex-start; padding: 6px; border: 1px solid #2a2420; margin-bottom: 4px; background: #141210; }
 .planet-row.settled { border-color: var(--edge-hi); }
 .planet-row.sel { border-color: var(--bone); box-shadow: inset 3px 0 0 var(--bone); }
-.maptabs { margin: 0 0 6px; }
+.maptabs { margin: 0 0 6px; flex-wrap: nowrap; }
+.maptabs .btn { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .planet-panel.unsettled { opacity: .75; }
 .layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 12px; margin-top: 10px; }
 .layer { background: var(--soot); border: 1px solid var(--edge); padding: 8px; }
