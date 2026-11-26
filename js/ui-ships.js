@@ -1,8 +1,9 @@
 // Voyager — screens for ships: ship cards, the Shipyard (build gacha, Arks, weapon forge),
-// the Fleets screen (fleets, hangar, armory, refits) and the Battle board. Extends UI (js/ui.js).
+// the Hangar screen (fleets, hangar, armory, refits) and the Battle board. Extends UI (js/ui.js).
 
 Object.assign(UI, {
-  selShip: null,      // ship id selected on the Fleets screen
+  selShip: null,      // ship id selected on the Hangar screen
+  hangarSort: 'built', // how the hangar is sorted (see hangarSorts)
   lastShip: null,     // ship just built (shown big on the Shipyard)
   lastWeapon: null,   // weapon just forged
 
@@ -69,13 +70,13 @@ Object.assign(UI, {
         <div><h3 style="color:${DATA.shipRarities[last.rarity].color}">${DATA.shipRarities[last.rarity].name.toUpperCase()}</h3>
         <p class="small">${DATA.shipTypes[last.type].desc}</p>
         <p class="small muted">${Ships.fleetOf(last.id) ? 'Joined ' + U.esc(Ships.fleetOf(last.id).name) + '.' : 'Waiting in the hangar.'}</p>
-        <div class="btnrow">${this.btn('Show in Fleets', 'gofleets')}</div></div></div>` : '';
+        <div class="btnrow">${this.btn('Show in Hangar', 'gofleets')}</div></div></div>` : '';
     const lw = this.lastWeapon && G.armory.find((w) => w.id === this.lastWeapon);
     return this.panel('Shipyard', `<p class="flavor">Every hull is laid down blind. The forge-priests swear the machine-spirit chooses what it becomes.</p>
         <p class="small muted">Choose a size and pay; the type, rarity, stats and weapons are rolled. Every stat is drawn from a normal distribution around the type's average, so no two ships are alike; Q on a card shows how well it rolled (100 = average). Rarity shifts the average up. Rates: ${this.rarityRates()}. Your best shipyard (Lv ${best}) cuts costs by ${Math.round(Math.min(40, 5 * (best - 1)))}%.</p>
         <div class="buildtiles">${['S', 'M', 'L'].map(tile).join('')}</div>${reveal}`) +
       `<div class="grid2">` +
-      this.panel('Weapon Forge', `<p class="small">${DATA.forge.desc} Fit forged weapons to ships on the Fleets screen.</p>
+      this.panel('Weapon Forge', `<p class="small">${DATA.forge.desc} Fit forged weapons to ships on the Hangar screen.</p>
         <div class="btnrow">${['S', 'M', 'L'].map((z) => this.btn(`${DATA.sizes[z].name} weapon <small>${U.costText(DATA.forge.cost)}</small>`, 'forge', z, !Ships.unlocked(z) || !Colonies.canAfford(DATA.forge.cost))).join('')}</div>
         ${lw ? `<div class="forged">New: ${this.weaponChip(lw)} <small class="muted">(${DATA.sizes[lw.size].name})</small></div>` : ''}`) +
       `</div>`;
@@ -86,33 +87,55 @@ Object.assign(UI, {
     const sel = this.selShip && G.ships[this.selShip] ? G.ships[this.selShip] : null;
     if (!sel) this.selShip = null;
     const selFleet = sel ? Ships.fleetOf(sel.id) : null;
-    const cardOf = (sh, busy) => this.shipCard(sh, { act: 'selship', a: sh.id, cls: (sh.id === this.selShip ? 'sel' : '') + (busy ? ' busy' : '') });
+    // every ship not on a mission can be dragged: onto a fleet slot (its lane) or into the hangar
+    const cardOf = (sh, busy, drop) => this.shipCard(sh, { act: 'selship', a: sh.id, cls: (sh.id === this.selShip ? 'sel' : '') + (busy ? ' busy' : ''),
+      attrs: (busy ? '' : `draggable="true" data-dragship="${sh.id}"`) + (drop ? ` data-dropship="${drop}"` : '') });
     const fleets = G.fleets.map((f) => {
       const ships = Ships.fleetShips(f);
       const canDrop = sel && !f.mission && selFleet !== f && !(selFleet && selFleet.mission);
       const slots = [];
       for (let i = 0; i < DATA.fleetMax; i++) {
-        if (ships[i]) slots.push(`<div class="lanewrap"><span class="lanelbl">Lane ${i + 1}</span>${cardOf(ships[i], !!f.mission)}</div>`);
-        else slots.push(canDrop ? this.emptySlot('assign', `${sel.id}|${f.id}`, '＋ move here') : this.emptySlot());
+        const drop = f.mission ? '' : `${f.id}|${i}`;
+        if (ships[i]) slots.push(`<div class="lanewrap"><span class="lanelbl">Lane ${i + 1}</span>${cardOf(ships[i], !!f.mission, drop)}</div>`);
+        else slots.push(`<div class="lanewrap" ${drop ? `data-dropship="${drop}"` : ''}>${canDrop ? this.emptySlot('assign', `${sel.id}|${f.id}`, '＋ move here') : this.emptySlot(null, null, f.mission ? '' : '＋')}</div>`);
       }
       const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : '<span class="muted">at home · ready</span>';
       return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button>
           <span class="small">${status}</span><span class="small muted">power ${Ships.groupPower(ships)} · ${ships.length}/${DATA.fleetMax}</span></div>
         <div class="cardrow">${slots.join('')}</div></div>`;
     }).join('');
-    const hangar = Ships.hangar();
+    const sorts = this.hangarSorts();
+    const sortFn = (sorts[this.hangarSort] || sorts.built).fn;
+    const hangar = Ships.hangar().sort((a, b) => sortFn(a, b) || a.built - b.built || String(a.id).localeCompare(String(b.id)));
+    const cap = Ships.hangarCap(), full = hangar.length >= cap;
     const up = Ships.upkeep();
-    const left = this.panel('Fleets', `<p class="small muted">Click a ship to select it, then click a free slot to move it. A ship's position is its <b>lane in battle</b>: it shoots the enemy opposite first, so put your heaviest guns where they face the biggest threats. Fleets on a mission can't be changed. Up to ${DATA.fleetMax} ships per fleet. Send fleets out from the Star Map.</p>
+    const left = this.panel('Fleets', `<p class="small muted">Drag a ship onto a fleet slot or into the hangar (or click it, then click a free slot). A ship's position is its <b>lane in battle</b>: it shoots the enemy opposite first, so put your heaviest guns where they face the biggest threats. Fleets on a mission can't be changed. Up to ${DATA.fleetMax} ships per fleet. Send fleets out from the Star Map.</p>
         <div class="small">${Ships.all().length} ships · maintenance <b class="res-metal">${U.fmt1(up)}</b> Metals + <b class="res-chemicals">${U.fmt1(up / 2)}</b> Chemicals per Cycle${G.unpaid ? ' · <span class="bad">unpaid: no repairs</span>' : ''}</div>
         ${fleets || '<p class="muted">No fleets. Build ships at the Shipyard.</p>'}`) +
-      this.panel(`Hangar (${hangar.length})`, `<div class="cardrow wrap">${hangar.map((sh) => cardOf(sh)).join('')}
-        ${sel && selFleet && !selFleet.mission ? this.emptySlot('assign', `${sel.id}|hangar`, '＋ to hangar') : ''}</div>
-        ${hangar.length ? '' : '<p class="muted small">Empty. New ships join a fleet at home with room, or wait here.</p>'}`) +
+      this.panel(`Hangar <span class="${hangar.length > cap ? 'bad' : full ? 'res-power' : 'muted'}">${hangar.length} / ${cap}</span>`, `
+        <p class="small muted">Ships in no fleet wait here. Each Orbital Shipyard holds ${DATA.hangar.base} ships, plus ${DATA.hangar.perLevel} for every level above 1.${cap ? '' : ' <span class="bad">You have no shipyard, so there is no room.</span>'}${full ? ' <span class="res-power">Full: new ships need a fleet with room.</span>' : ''}</p>
+        <div class="btnrow sortrow"><small class="muted">Sort</small>${Object.entries(sorts).map(([k, s]) => this.btn(s.label, 'hangarsort', k, false, 'small' + (this.hangarSort === k ? ' on' : ''))).join('')}</div>
+        <div class="cardrow wrap hangar-drop" data-dropship="hangar">${hangar.map((sh) => cardOf(sh)).join('')}
+        ${sel && selFleet && !selFleet.mission && !full ? this.emptySlot('assign', `${sel.id}|hangar`, '＋ to hangar') : ''}</div>
+        ${hangar.length ? '' : '<p class="muted small">Empty. New ships join a fleet at home with room, or wait here. Drop a ship here to take it out of its fleet.</p>'}`) +
       this.panel(`Armory (${G.armory.length})`, G.armory.length ? ['S', 'M', 'L'].map((z) => {
         const ws = G.armory.filter((w) => w.size === z);
         return ws.length ? `<div class="kv"><span>${DATA.sizes[z].name}</span><span class="wlist">${ws.map((w) => this.weaponChip(w)).join('')}</span></div>` : '';
       }).join('') : '<p class="muted small">No spare weapons. Scrap ships, salvage wrecks or use the Weapon Forge.</p>');
     return `<div class="fleetscreen"><div>${left}</div><aside class="side">${sel ? this.shipDetail(sel) : this.panel('Ship', '<p class="muted">Select a ship to see its stats, refit its weapons or move it.</p>')}</aside></div>`;
+  },
+
+  // Sort orders for the hangar. Ties fall back to build order.
+  hangarSorts() {
+    const size = { S: 0, M: 1, L: 2 }, rar = Object.keys(DATA.shipRarities);
+    return {
+      built:  { label: 'Newest', fn: (a, b) => b.built - a.built },
+      hull:   { label: 'Hull', fn: (a, b) => size[b.size] - size[a.size] || DATA.shipTypes[a.type].name.localeCompare(DATA.shipTypes[b.type].name) },
+      rarity: { label: 'Rarity', fn: (a, b) => rar.indexOf(b.rarity) - rar.indexOf(a.rarity) },
+      power:  { label: 'Power', fn: (a, b) => Ships.groupPower([b]) - Ships.groupPower([a]) },
+      type:   { label: 'Type', fn: (a, b) => DATA.shipTypes[a.type].name.localeCompare(DATA.shipTypes[b.type].name) },
+      name:   { label: 'Name', fn: (a, b) => a.name.localeCompare(b.name) },
+    };
   },
 
   shipDetail(sh) {
@@ -130,7 +153,7 @@ Object.assign(UI, {
     const lane = f && !busy ? `<div class="kv"><span>Lane</span><span class="btnrow">${this.btn('◀', 'shift', `${sh.id}|-1`, pos <= 0, 'small')}<b>${pos + 1} of ${f.ships.length}</b>${this.btn('▶', 'shift', `${sh.id}|1`, pos >= f.ships.length - 1, 'small')}</span></div>` : '';
     const moves = busy ? '<p class="small muted">On a mission: no changes until it returns.</p>' : lane + `<div class="btnrow">
         ${G.fleets.filter((x) => x !== f && !x.mission && x.ships.length < DATA.fleetMax).map((x) => this.btn('→ ' + U.esc(x.name), 'assign', `${sh.id}|${x.id}`, false, 'small')).join('')}
-        ${f ? this.btn('→ Hangar', 'assign', `${sh.id}|hangar`, false, 'small') : ''}
+        ${f ? this.btn('→ Hangar', 'assign', `${sh.id}|hangar`, Ships.hangarFree() <= 0, 'small') : ''}
         ${this.btn('New fleet with it', 'newfleet', sh.id, false, 'small')}
         ${this.btn('Scrap', 'scrap', sh.id, false, 'small danger')}</div>`;
     return this.panel('Ship', `${this.shipCard(sh, { cls: 'big' })}

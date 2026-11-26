@@ -158,7 +158,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 ## 4c. Fleets and combat
 
 **Decided (v0.23).** The full rules and numbers are in `docs/combat.md`.
-- **Fleets are global**, like the colonies: one Fleets screen lists every fleet, the hangar (ships in no fleet) and the armory (spare weapons). A fleet holds up to **five ships**, the size of one side in battle.
+- **Fleets are global**, like the colonies: one screen, **Hangar** (called Fleets before v0.45), lists every fleet, the hangar (ships in no fleet; limited space: 10 per Orbital Shipyard, +2 per level above 1) and the armory (spare weapons). Ships are moved by drag and drop, and the hangar can be sorted by newest, hull, rarity, power, type or name. A fleet holds up to **five ships**, the size of one side in battle.
 - **No map positions.** Fleets are sent to **attack** (monster lairs and alien systems) from a system on the Star Map. A mission takes as many Cycles as hyperlane hops from the nearest Covenant system; the fleet then returns. Fleets out on a mission can't be changed.
 - **Exploring and settling cost a flat fee** (changed in v0.24; before, they needed a Scout in the fleet and a Colony Ark): a **survey probe** charts a system, a **colony expedition** settles one. Both travel like a fleet.
 - **Ship sizes** beat each other like rock-paper-scissors: **Small beats Large, Large beats Medium, Medium beats Small** (×1.5 damage; ×0.7 the other way). Also, big guns can't track small ships: Large ships hit Small ones at ×0.6 (v0.30).
@@ -174,7 +174,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **Decided for now, easy to change:**
 - Maintenance is paid each Cycle in Metals, plus half as much in Chemicals.
-- Research unlocks Medium hulls (*Medium Hulls*) and Large hulls (*Capital Hulls*).
+- All hull sizes are available from the start (v0.45; before, research unlocked Medium and Large hulls).
 - Weapons come from scrapping ships (which also refunds 30 % of a hull's cost), from wrecks after a victory (30 % chance per destroyed alien ship) and from the Weapon Forge (25 Rare Minerals + 15 Electronics, rarity rolled like a ship's).
 - Alien raids (decided v0.40: only after a grace period of 3 colonies founded besides the capital, and rarer, see `docs/combat.md`) appear as threats with a countdown. When one arrives you choose a fleet to defend; the system's Bastions and Defense Platforms fight as one **Planetary Defenses** card (the capital always has one). If the defense loses, the system falls.
 - Monster lairs and alien worlds are guarded by ship cards. The Chorus leans on energy weapons, the Iron Remnant on physical ones. Alien ships get better rarities and bigger hulls as the Cycles pass.

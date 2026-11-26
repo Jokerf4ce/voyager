@@ -20,7 +20,7 @@ const UI = {
     ['colonies', '⌂', 'Colonies'],
     ['research', '☍', 'Research'],
     ['shipyard', '⚒', 'Shipyard'],
-    ['fleets', '➤', 'Fleets'],
+    ['fleets', '➤', 'Hangar'],
     ['log', '☰', 'Chronicle'],
     ['settings', '⚙', 'Settings'],
   ],

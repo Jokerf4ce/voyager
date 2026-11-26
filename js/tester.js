@@ -38,7 +38,6 @@ const Tester = {
     for (const k in G.res) G.res[k] = 1500;
 
     // Ships of every size and rarity: two fleets and a full hangar, plus spare weapons and Arks.
-    G.techs.medium = 1; G.techs.capital = 1;
     const add = (type, rarity, fleet) => { const sh = Ships.make(type, { rarity }); G.ships[sh.id] = sh; if (fleet) fleet.ships.push(sh.id); return sh; };
     const strike = Ships.newFleet('Ash Lance');
     add('destroyer', 'legendary', strike); add('frigate', 'epic', strike); add('corvette', 'strong', strike); add('heavy', 'strong', strike); add('fighter', 'normal', strike);

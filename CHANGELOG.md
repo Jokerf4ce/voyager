@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.45.0 — 2026-11-27
+- **All hull sizes from the start.** The *Medium Hulls* and *Capital Hulls* research is gone. Medium and Large ships (and weapons at the forge) can be built right away.
+- **Limited hangar space.** Each Orbital Shipyard holds 10 ships that are in no fleet, plus 2 for every level above 1; all shipyards add up.
+  - When the hangar is full, a new ship can only be built if a fleet at home has room, and ships can't be moved out of fleets into it.
+  - The hangar shows used / free space.
+- **Fleets screen renamed Hangar.**
+- **Sort the hangar** by newest, hull, rarity, power, type or name.
+- **Drag and drop.** Drag a ship onto a fleet slot to put it in that lane (the others move along; within a fleet this reorders), or into the hangar to take it out of its fleet. Clicking still works, for touch screens.
+- Tutorial updated: the research and shipyard steps no longer mention hull research, and the fleets step became *Hangar and fleets* (drag and drop, hangar space, sorting).
+
 ## 0.44.0 — 2026-11-26
 - **Colony expeditions go to a planet you choose.**
   - In a charted, unclaimed, unguarded system, every planet in the system panel (Star Map and Solar System screens) has a **Send colonists** button. The colony is founded on that planet when the expedition arrives; before, it went to the "best" planet.

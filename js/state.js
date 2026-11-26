@@ -44,7 +44,7 @@ const State = {
   mods() {
     const m = { metal: 1, rare: 1, organics: 1, electronics: 1, chemicals: 1, research: 1, power: 1, infra: 1, compute: 1, atk: 1, hp: 1, bastion: 1, all: 1, aiAggro: 0 };
     const add = (mods, scale) => { for (const k in mods) m[k] = (m[k] || 0) + mods[k] * scale; };
-    for (const [id, lvl] of Object.entries(G.techs)) if (lvl > 0) add(DATA.techs[id].mods, lvl);
+    for (const [id, lvl] of Object.entries(G.techs)) if (lvl > 0 && DATA.techs[id]) add(DATA.techs[id].mods, lvl);
     return m;
   },
 
@@ -65,6 +65,9 @@ const State = {
     try {
       const data = JSON.parse(raw);
       if (!data || data.version !== 14) return false;
+      // technologies that no longer exist (e.g. the old hull techs, removed in v0.45) are dropped
+      if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) delete data.techs[id];
+      if (data.researching && !DATA.techs[data.researching]) { data.researching = null; data.researchProgress = 0; }
       G = data;
       return true;
     } catch (e) { return false; }

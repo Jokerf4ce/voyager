@@ -142,8 +142,8 @@ DATA.settleGrowth = 1.2;
 // Sizes beat each other like rock-paper-scissors: Small beats Large, Large beats Medium, Medium beats Small.
 DATA.sizes = {
   S: { name: 'Small',  beats: 'L', req: null,      cost: { metal: 30, electronics: 6 },                          weaponDmg: 5 },
-  M: { name: 'Medium', beats: 'S', req: 'medium',  cost: { metal: 70, electronics: 20, chemicals: 10 },          weaponDmg: 10 },
-  L: { name: 'Large',  beats: 'M', req: 'capital', cost: { metal: 160, rare: 40, electronics: 50, chemicals: 30 }, weaponDmg: 18 },
+  M: { name: 'Medium', beats: 'S', req: null,      cost: { metal: 70, electronics: 20, chemicals: 10 },          weaponDmg: 10 },
+  L: { name: 'Large',  beats: 'M', req: null,      cost: { metal: 160, rare: 40, electronics: 50, chemicals: 30 }, weaponDmg: 18 },
 };
 DATA.sizeAdvantage = 1.5;    // damage multiplier against the size you beat
 DATA.sizeDisadvantage = 0.7; // ... and against the size that beats you
@@ -220,6 +220,9 @@ DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon
 // per empire, and waits cooldown Cycles after launching one.
 DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
 DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of max shields / hull regained
+// Hangar: ships in no fleet wait at an Orbital Shipyard. Each shipyard holds `base` ships at level 1, plus
+// `perLevel` for every level above 1; all shipyards add up.
+DATA.hangar = { base: 10, perLevel: 2 };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
 DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
@@ -245,8 +248,6 @@ DATA.shipNames = ['Penitent', 'Ashborn', 'Last Rite', 'Mercy\'s End', 'Grave Hym
 // Research, paid in Research points. repeat:true techs can be researched forever with growing cost (incremental layer).
 DATA.techs = {
   deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metals' },
-  medium:     { name: 'Medium Hulls',         cost: 40,  mods: {},                  desc: 'Unlocks building Medium ships (Corvettes, Frigates, Gunboats)' },
-  capital:    { name: 'Capital Hulls',        cost: 110, mods: {},                  desc: 'Unlocks building Large ships (Destroyers, Battleships, Carriers)', req: 'medium' },
   biovats:    { name: 'Bio-Vat Cultures',     cost: 40,  mods: { organics: 0.25 },  desc: '+25% Organics' },
   microfab:   { name: 'Microfabrication',     cost: 45,  mods: { electronics: 0.3 }, desc: '+30% Electronics from the same inputs' },
   catalysis:  { name: 'Reagent Catalysis',    cost: 45,  mods: { chemicals: 0.3 },  desc: '+30% Chemicals from the same inputs' },
@@ -375,11 +376,11 @@ DATA.tutorial = [
   { screen: 'buildings', target: '#main .brow', title: 'Buildings',
     text: 'Every building type in one list. <b>Auto</b> builds where it gives the most for the price; click a row to choose the colony yourself.<br><br>Each level costs more, and from level 6 the price doubles every level, so <b>go wide</b>: found new colonies instead of stacking towers. The red <b>✕</b> demolishes a building and gives back a quarter of what it cost.' },
   { screen: 'research', target: '#main .panel', title: 'Research',
-    text: 'Research Labs produce Research. Spend it here on lasting advantages: richer yields, more Power, stronger ships, and the <b>Medium</b> and <b>Large</b> hulls. Pick one project and it advances every Cycle. Doctrines can be researched again and again, each level costing more.' },
+    text: 'Research Labs produce Research. Spend it here on lasting advantages: richer yields, more Power, stronger ships and better defenses. Pick one project and it advances every Cycle. Doctrines can be researched again and again, each level costing more.' },
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
-    text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, or <b>Medium</b> and <b>Large</b> once researched. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
-  { screen: 'fleets', target: '#main .panel', title: 'Fleets',
-    text: 'Ships fight in fleets of up to five. From here (or from the Star Map) you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>The xenos ignore you at first. Raids only begin once you have founded <b>{grace}</b> colonies besides your capital.' },
+    text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, <b>Medium</b> or <b>Large</b>, all available from the start. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
+  { screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',
+    text: 'Ships fight in fleets of up to five; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>The xenos ignore you at first. Raids only begin once you have founded <b>{grace}</b> colonies besides your capital.' },
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
     text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire, <b>move</b> it to another lane (the ships in between slide over) or <b>Restore</b> some of its shields and hull. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',

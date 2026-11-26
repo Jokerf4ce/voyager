@@ -107,6 +107,9 @@ const Ships = {
   all() { return Object.values(G.ships); },
   fleetOf(id) { return G.fleets.find((f) => f.ships.includes(id)) || null; },
   hangar() { return this.all().filter((s) => !this.fleetOf(s.id)); },
+  // Hangar space: DATA.hangar per Orbital Shipyard (more with each level), summed over all your shipyards.
+  hangarCap() { return Colonies.yards().reduce((a, { p }) => a + DATA.hangar.base + DATA.hangar.perLevel * (p.colony.orbit.shipyard - 1), 0); },
+  hangarFree() { return this.hangarCap() - this.hangar().length; },
   fleet(id) { return G.fleets.find((f) => f.id === id); },
   fleetShips(f) { return f.ships.map((id) => G.ships[id]).filter(Boolean); },
   idleFleets() { return G.fleets.filter((f) => !f.mission && f.ships.length); },
@@ -131,8 +134,11 @@ const Ships = {
     if (!Colonies.yards().length) return 'No Orbital Shipyard';
     if (!this.unlocked(size)) return 'Requires ' + DATA.techs[DATA.sizes[size].req].name;
     if (!Colonies.canAfford(this.buildCost(size))) return 'Not enough resources';
+    if (this.hangarFree() <= 0 && !this.roomyFleet()) return 'Hangar full';
     return null;
   },
+  // A fleet at home that has ships and room for one more (new ships join it instead of the hangar).
+  roomyFleet() { return G.fleets.find((x) => !x.mission && x.ships.length < DATA.fleetMax && x.ships.length) || null; },
   build(size) {
     if (this.blocker(size)) return null;
     Colonies.pay(this.buildCost(size));
@@ -140,7 +146,7 @@ const Ships = {
     const ship = this.make(U.pick(types));
     G.ships[ship.id] = ship;
     // straight into a fleet at home that has room, otherwise the hangar
-    const f = G.fleets.find((x) => !x.mission && x.ships.length < DATA.fleetMax && x.ships.length);
+    const f = this.roomyFleet();
     if (f) f.ships.push(ship.id);
     const rar = DATA.shipRarities[ship.rarity];
     Log.add(`${rar.name} ${DATA.shipTypes[ship.type].name} "${ship.name}" leaves the slipway${f ? ` and joins ${f.name}` : ''}.`, ship.rarity === 'normal' ? '' : ship.rarity === 'strong' ? 'good' : 'mythic');
@@ -173,8 +179,22 @@ const Ships = {
     if (!ship || (from && from.mission)) return false;
     const to = fleetId == null ? null : this.fleet(fleetId);
     if (to && (to.mission || to.ships.length >= DATA.fleetMax)) return false;
+    if (!to && from && this.hangarFree() <= 0) return false; // no room in the hangar
     if (from) from.ships = from.ships.filter((id) => id !== shipId);
     if (to) to.ships.push(shipId);
+    this.cleanup();
+    return true;
+  },
+  // Drag and drop: put a ship at a position in a fleet (its lane), pushing the others along; within its own
+  // fleet this reorders. fleetId null = the hangar.
+  place(shipId, fleetId, pos) {
+    const from = this.fleetOf(shipId);
+    if (fleetId == null) return from ? this.assign(shipId, null) : true; // already in the hangar
+    const to = this.fleet(fleetId);
+    if (!G.ships[shipId] || !to || to.mission || (from && from.mission)) return false;
+    if (from !== to && to.ships.length >= DATA.fleetMax) return false;
+    if (from) from.ships = from.ships.filter((id) => id !== shipId);
+    to.ships.splice(Math.max(0, Math.min(pos, to.ships.length)), 0, shipId);
     this.cleanup();
     return true;
   },

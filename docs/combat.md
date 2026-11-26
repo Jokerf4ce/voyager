@@ -10,11 +10,15 @@ Every ship is a **card**. It has a size, a type, a rarity, stats and 1–3 weapo
 
 ### 1.1 Sizes: rock, paper, scissors
 
-| Size | Beats | Loses to | Base weapon damage | Build cost | Unlocked by |
-|---|---|---|---|---|---|
-| **S** Small | Large | Medium | 5 | 30 Metals, 6 Electronics | — |
-| **M** Medium | Small | Large | 10 | 70 Metals, 20 Electronics, 10 Chemicals | *Medium Hulls* |
-| **L** Large | Medium | Small | 18 | 160 Metals, 40 Rare Minerals, 50 Electronics, 30 Chemicals | *Capital Hulls* |
+| Size | Beats | Loses to | Base weapon damage | Build cost |
+|---|---|---|---|---|
+| **S** Small | Large | Medium | 5 | 30 Metals, 6 Electronics |
+| **M** Medium | Small | Large | 10 | 70 Metals, 20 Electronics, 10 Chemicals |
+| **L** Large | Medium | Small | 18 | 160 Metals, 40 Rare Minerals, 50 Electronics, 30 Chemicals |
+
+All three sizes can be built from the start (since v0.45; before, Medium and Large needed the *Medium Hulls* and *Capital Hulls* research).
+
+**Hangar space** (v0.45): ships in no fleet wait in the hangar. Each Orbital Shipyard holds **10** ships, plus **2** for every level above 1, and all your shipyards add up (`DATA.hangar`). When the hangar is full, a new ship can only be built if a fleet at home has room for it, and no ship can be moved out of a fleet into the hangar.
 
 **Big guns can't track small ships:** when a Large ship fires at a Small one, its hit chance is ×0.6 (−40 %, `DATA.largeVsSmallHit`), on top of the size damage rule below.
 
@@ -146,7 +150,7 @@ damage      = a normal-distribution roll around that mean, spread 15 %, rounded,
 - **Scrapping a ship** moves all its weapons to the armory and refunds 30 % of its size's build cost.
 - **Wrecks:** after a victory, each destroyed alien ship has a 30 % chance to leave one of its weapons. Monsters leave nothing.
 - **Weapon Forge** (Shipyard): costs 25 Rare Minerals + 15 Electronics (`DATA.forge`; 15 Void Shards before v0.43) and rolls a random weapon of the chosen size. Its rarity is rolled like a ship's.
-- **Refitting** (Fleets screen, in the ship's panel):
+- **Refitting** (Hangar screen, in the ship's panel):
   - Swap any slot for an armory weapon of the same size; the old weapon goes back to the armory.
   - Ships on a mission can't be refitted.
 
@@ -192,7 +196,7 @@ While a battle is waiting or being fought, **End Cycle** is greyed out (Space / 
 
 Each side stands in a row of **lanes**, five wide, and lane *n* faces lane *n* on the other side.
 
-- **Your lanes:** your fleet order on the Fleets screen. The first ship takes lane 1, and so on; move ships with ◀ ▶ in the ship's panel. Planetary Defenses take the next free lane.
+- **Your lanes:** your fleet order on the Hangar screen. The first ship takes lane 1, and so on; drag ships onto a slot, or move them with ◀ ▶ in the ship's panel. Planetary Defenses take the next free lane.
 - **Enemy lanes:** their ships take lanes in the order they are listed.
 
 **Targeting is automatic.** A ship always shoots:

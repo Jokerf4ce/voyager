@@ -12,7 +12,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 
 - **End Cycle** (or Space/Enter) advances one turn. Everything that happens is recorded in the **Chronicle** menu.
 - **Star Map:** an endless galaxy under a pan/zoom camera (drag, scroll or pinch; ⌂ for home; a minimap in the corner). Hover a system for a summary card; click it to select it, and its planets and missions appear in the panel beside the map. Double-click (or *Open solar system*) opens the **Solar System** screen with its star and planets. From there, launch a **survey probe** to explore or send a **colony expedition** to a planet you choose (*Send colonists* in its planet list; both cost a flat fee), or send a fleet to **attack**.
-- **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
+- **Hangar:** global fleets of up to 5 ship cards each, the hangar (10 ships per Orbital Shipyard, +2 per level; sort by newest, hull, rarity, power, type or name) and the armory. Drag ships between fleet slots and the hangar (or click a ship, then a free slot); refit weapons in its panel.
 - **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
 - **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
 - **Tutorial:** a 12-step guided tour on the first game in a browser (skippable; Settings → *Replay tutorial*).

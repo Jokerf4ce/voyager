@@ -87,6 +87,7 @@ const Game = {
     bfire: (a) => { Battle.act(+a); },
     bswapnav: (a) => { UI.swapNav(+a); },
     brestore: () => { Battle.restoreTurn(); },
+    hangarsort: (a) => { UI.hangarSort = a; },
     bswapconfirm: () => { if (UI.swapPick && UI.swapPick.lane != null) Battle.swapTurn(UI.swapPick.lane); UI.swapPick = null; },
     battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
     bresolve: () => { Battle.resolve(); },
@@ -196,6 +197,38 @@ document.addEventListener('input', (ev) => {
     const prev = document.getElementById('color-preview');
     if (prev) prev.innerHTML = UI.colorPreview();
   }
+});
+
+// Hangar: drag a ship card onto a fleet slot (its lane; the others move along) or into the hangar.
+document.addEventListener('dragstart', (ev) => {
+  const card = ev.target.closest && ev.target.closest('[data-dragship]');
+  if (!card) return;
+  ev.dataTransfer.setData('text/plain', 'ship:' + card.dataset.dragship);
+  ev.dataTransfer.effectAllowed = 'move';
+  UI.dragShip = card.dataset.dragship;
+  card.classList.add('dragging');
+});
+document.addEventListener('dragend', () => { UI.dragShip = null; document.querySelectorAll('.dragging, .dragover').forEach((x) => x.classList.remove('dragging', 'dragover')); });
+document.addEventListener('dragover', (ev) => {
+  if (!UI.dragShip) return;
+  const el = ev.target.closest && ev.target.closest('[data-dropship]');
+  if (!el) return;
+  ev.preventDefault();
+  document.querySelectorAll('.dragover').forEach((x) => x !== el && x.classList.remove('dragover'));
+  el.classList.add('dragover');
+});
+document.addEventListener('drop', (ev) => {
+  if (!UI.dragShip) return;
+  const el = ev.target.closest && ev.target.closest('[data-dropship]');
+  const id = UI.dragShip;
+  UI.dragShip = null;
+  if (!el || !G) return;
+  ev.preventDefault();
+  const d = el.dataset.dropship;
+  if (d === 'hangar') { if (!Ships.place(id, null)) Log.add('The hangar is full.', 'bad'); }
+  else { const [fid, pos] = d.split('|').map(Number); Ships.place(id, fid, pos); }
+  UI.selShip = id;
+  State.save(); UI.render();
 });
 
 // Battle: drag the acting ship onto another of your lanes to swap places.
