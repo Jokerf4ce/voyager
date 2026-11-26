@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.36.0 — 2026-11-26
+- **Tutorial.** The first game in a browser opens a 12-step guided tour. It covers the goal, resources and capacities, Cycles and Auto, the Star Map, surveys and colony expeditions, colonies, buildings (going wide, demolishing), research, the shipyard and rarities, fleets and raids, and battles.
+- Each step opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath, so you can try things as you go.
+- **Skip tutorial** ends it at any time; **Settings → Replay tutorial** shows it again. It is remembered per browser, not per save, and tester mode never starts it.
+- The steps live in `DATA.tutorial`, and the costs in the text come from the live data.
+
 ## 0.35.1 — 2026-11-26
 - The game moved to https://voyager.playle.io/ (new GitHub Pages custom domain); README and notes updated.
 

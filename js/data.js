@@ -353,3 +353,35 @@ DATA.config = {
   offlineEfficiency: 0.5,
   saveKey: 'voyager_save_v13',
 };
+
+// ---------- Tutorial ----------
+// Shown once, on the first game in a browser (Settings → Replay tutorial shows it again).
+// screen: the screen to open; target: CSS selector of what to outline (all: true outlines every match);
+// prepare: a named setup step in js/tutorial.js. {survey} and {colonize} become the live costs.
+DATA.tutorial = [
+  { screen: 'map', title: 'Wake up, Commander',
+    text: 'The Ark has crossed the dark and found a new galaxy. The frozen faithful sleep in its holds, and all you hold is a single star system.<br><br>Out there are two xeno empires: <b style="color:#7fbf3f">The Chorus</b> and the <b style="color:#d06030">Iron Remnant</b>. Take every world they hold to win. Lose all of yours and the Covenant ends.<br><br>This short tour shows you around. You can skip it at any time.' },
+  { target: '#top-res', title: 'Resources',
+    text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.' },
+  { target: '#btn-end, #btn-auto', all: true, title: 'Cycles',
+    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br><b>Auto</b> ends Cycles for you every few seconds, if you would rather watch your empire grow.' },
+  { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
+    text: 'Your home system has bright brackets around it. Drag to look around; scroll or pinch to zoom. The buttons on the right zoom, jump home (⌂) and centre on the selected system; the minimap in the corner shows all you have charted.<br><br>A <b>?</b> is a system no one has charted. The galaxy has no edge: it grows as you explore.' },
+  { screen: 'map', prepare: 'uncharted', target: '#sysrow .side', title: 'Explore and expand',
+    text: 'Click a system to select it. This panel shows what you can do there.<br><br>A <b>survey probe</b> ({survey}) charts an unknown system next to known space. A <b>colony expedition</b> ({colonize}) founds a colony in a charted, unclaimed system. Systems with coloured flags next to them are guarded: send a fleet to clear them first.' },
+  { screen: 'colonies', target: '#main .csys', title: 'Colonies',
+    text: 'Every colony in every system you hold. Click a colony to open it. Unsettled planets in your own systems can be settled right here, with no travel needed.<br><br>Each planet has a <b>surface</b> and an <b>orbit</b> layer, each with its own building slots. The more habitable a planet, the cheaper it is to build there.' },
+  { screen: 'buildings', target: '#main .brow', title: 'Buildings',
+    text: 'Every building type in one list. <b>Auto</b> builds where it gives the most for the price; click a row to choose the colony yourself.<br><br>Each level costs more, and from level 6 the price doubles every level, so <b>go wide</b>: found new colonies instead of stacking towers. The red <b>✕</b> demolishes a building and gives back a quarter of what it cost.' },
+  { screen: 'research', target: '#main .panel', title: 'Research',
+    text: 'Research Labs produce Research. Spend it here on lasting advantages: richer yields, more Power, stronger ships, and the <b>Medium</b> and <b>Large</b> hulls. Pick one project and it advances every Cycle. Doctrines can be researched again and again, each level costing more.' },
+  { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
+    text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, or <b>Medium</b> and <b>Large</b> once researched. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
+  { screen: 'fleets', target: '#main .panel', title: 'Fleets',
+    text: 'Ships fight in fleets of up to five. From here (or from the Star Map) you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.' },
+  { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
+    text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire or swap it into another lane. <b>Auto</b> fights for you.' },
+  { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
+    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your mines. The Chronicle records everything that happens.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
+];
+

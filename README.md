@@ -15,6 +15,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
 - **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
 - **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
+- **Tutorial:** a 12-step guided tour on the first game in a browser (skippable; Settings → *Replay tutorial*).
 - The side menu collapses on its own 10 seconds after the cursor leaves it; ☰ opens it again.
 - **Tester mode:** Settings → *Open tester mode*, or add `#tester` to the address. A separate save with extra colonies, random buildings, ships of every rarity and full stores, for testing. The real save is not touched.
 - While the game is closed, the empire keeps producing at 50% efficiency (1 Cycle per 60 s, max 120 Cycles).
@@ -73,6 +74,7 @@ js/voicelines.js  voice lines and their triggers
 js/map.js         star map canvas (galaxy)
 js/sysmap.js      solar system map canvas (one system)
 js/ui.js          screens and modals
+js/tutorial.js    first-play guided tour (its steps are DATA.tutorial in data.js)
 js/ui-ships.js    ship cards, Shipyard, Fleets and Battle screens
 js/main.js        turn loop, auto-cycle, input, boot
 ```

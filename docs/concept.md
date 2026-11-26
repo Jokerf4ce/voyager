@@ -205,6 +205,8 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **Decided:** mostly menus, plus a star system map.
 
+**Tutorial** (decided, v0.36): the first game in a browser opens a guided tour of 12 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath. It can be skipped, and Settings → *Replay tutorial* shows it again. It is remembered per browser (localStorage `voyager_tutorial_done`), not in the save, and tester mode never starts it.
+
 **Proposed layout:** a top bar with resources and the Cycle counter, a left menu for screens, the main content in the centre, and a "End Cycle" button that is always visible.
 
 **Proposed screens:**

@@ -57,6 +57,7 @@ const UI = {
       }
     }
     this.renderTicker();
+    Tutorial.refresh();
   },
 
   renderTop() {
@@ -464,6 +465,7 @@ const UI = {
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>
       <div class="btnrow">${this.btn(State.slot === 'tester' ? 'Regenerate the tester game' : 'Abandon and start a new galaxy', 'newgame', '', false, 'danger')}</div>
+      <div class="kv"><span>Tutorial</span><span class="btnrow">${this.btn('Replay tutorial', 'tutorial')}</span></div>
       <div class="kv"><span>Tester mode</span><span class="btnrow">${State.slot === 'tester'
         ? this.btn('Back to the real game', 'slot', 'main', false, 'gold')
         : this.btn('Open tester mode', 'slot', 'tester')}</span></div>

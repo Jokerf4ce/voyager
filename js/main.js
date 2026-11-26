@@ -122,6 +122,10 @@ const Game = {
         <div class="btnrow">${UI.btn('Demolish', 'demolish-confirm', a, false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
     },
     'demolish-confirm': (a) => { UI.closeModal(); const [sid, pi, layer, k] = a.split(':'); Colonies.demolish(sid + ':' + pi, layer, k); },
+    tutorial: () => { Tutorial.start(); },
+    tutnext: () => { Tutorial.next(); },
+    tutback: () => { Tutorial.back(); },
+    tutskip: () => { Tutorial.finish(); },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastWeapon = null; } },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
@@ -259,6 +263,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (G.over) Game.overShown = true;
   } else {
     Game.newGame();
+    Tutorial.maybeStart(); // first game in this browser: show the tour
   }
   setInterval(() => State.save(), 10000);
   // Battles: enemy ships (and yours on Auto) act one at a time so you can follow along.
