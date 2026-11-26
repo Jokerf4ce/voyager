@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.11.1 — 2026-11-26
+- Polymers renamed to Electronics (⌁). The Polymer Refinery is now the Electronics Foundry, and Catalytic Cracking is now Microfabrication.
+- Old saves start a new game.
+
 ## 0.11.0 — 2026-11-26
 - New resource system. Gathered: Metals, Rare Minerals, Organics. Refined: Polymers (Metals + Rare), Chemicals (Organics + Rare).
 - Power, Compute and Infrastructure are capacities. Research is made by Research Labs.

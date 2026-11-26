@@ -59,7 +59,7 @@ const UI = {
     const c = net.caps;
     const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" title="${DATA.capacities[k].name} (capacity, used / available): ${DATA.capacities[k].desc}">
         <span class="ico">${DATA.capacities[k].icon}</span><b>${U.fmt(c[k].used)}/${U.fmt(c[k].cap)}</b></div>`;
-    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'polymers', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
+    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
       (c.eff < 1 ? `<div class="res over" title="Over capacity: all production is rationed"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     this.$('cycle').textContent = 'CYCLE ' + G.cycle;
@@ -82,7 +82,7 @@ const UI = {
   },
   yieldText(p) {
     const y = Economy.planetYield(p, Economy.caps().eff);
-    const parts = ['metal', 'rare', 'organics', 'polymers', 'chemicals', 'research'].filter((k) => y[k] > 0.05)
+    const parts = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research'].filter((k) => y[k] > 0.05)
       .map((k) => `<span class="res-${k}">${DATA.resources[k].icon}${U.fmt1(y[k])}</span>`);
     const eats = Object.entries(y.inputs).filter(([, v]) => v > 0).map(([k, v]) => `${U.fmt1(v)}${DATA.resources[k].icon}`).join(' ');
     return (parts.join(' ') || '<span class="muted">no output</span>') + (eats ? ` <small class="muted">(refining eats ${eats})</small>` : '');
@@ -150,7 +150,7 @@ const UI = {
         </div>`)}
       ${this.panel('Per Cycle', `
         ${['metal', 'rare', 'organics'].map((k) => `<div class="kv"><span>${DATA.resources[k].name} <small class="muted">(gathered ${U.fmt1(inc[k])}${inc.inputs[k] ? `, refining uses ${U.fmt1(inc.inputs[k])}` : ''})</small></span><b class="res-${k}">${net[k] >= 0 ? '+' : ''}${U.fmt1(net[k])}</b></div>`).join('')}
-        <div class="kv"><span>Polymers <small class="muted">(refined)</small></span><b class="res-polymers">+${U.fmt1(net.polymers)}</b></div>
+        <div class="kv"><span>Electronics <small class="muted">(refined)</small></span><b class="res-electronics">+${U.fmt1(net.electronics)}</b></div>
         <div class="kv"><span>Chemicals <small class="muted">(refined)</small></span><b class="res-chemicals">+${U.fmt1(net.chemicals)}</b></div>
         <div class="kv"><span>Research <small class="muted">(Research Labs)</small></span><b class="res-research">+${U.fmt1(net.research)}</b></div>
         <div class="kv"><span>Void Shards</span><b class="res-shards">+${U.fmt1(net.shards)} <small>(+1 every 5 Cycles)</small></b></div>
@@ -374,7 +374,7 @@ const UI = {
     const pct = (v) => `${v >= 1 ? '+' : ''}${Math.round((v - 1) * 100)}%`;
     return this.panel('Empire Modifiers', `<div class="stats">
         <div><small>Metals</small><b>${pct(m.metal)}</b></div><div><small>Rare Minerals</small><b>${pct(m.rare)}</b></div>
-        <div><small>Organics</small><b>${pct(m.organics)}</b></div><div><small>Polymers</small><b>${pct(m.polymers)}</b></div>
+        <div><small>Organics</small><b>${pct(m.organics)}</b></div><div><small>Electronics</small><b>${pct(m.electronics)}</b></div>
         <div><small>Chemicals</small><b>${pct(m.chemicals)}</b></div><div><small>Research</small><b>${pct(m.research)}</b></div>
         <div><small>Power</small><b>${pct(m.power)}</b></div><div><small>Infrastructure</small><b>${pct(m.infra)}</b></div>
         <div><small>Compute</small><b>${pct(m.compute)}</b></div><div><small>All production</small><b>${pct(m.all)}</b></div>

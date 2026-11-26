@@ -177,7 +177,7 @@ const Economy = {
     const L = (k) => Colonies.level(p, k);
     const size = DATA.planetSizes[p.size].yield;
     const k = m.all * eff;
-    const out = { metal: 0, rare: 0, organics: 0, polymers: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 } };
+    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 } };
     // gathered: base colony output plus 2 × rating per gathering building level
     for (const res of ['metal', 'rare', 'organics']) {
       let lv = 0;
@@ -198,11 +198,11 @@ const Economy = {
     const caps = this.caps();
     const m = State.mods();
     const starShards = Colonies.playerSystems().reduce((a, s) => a + (DATA.starClasses[s.star].shards || 0), 0);
-    const out = { metal: 0, rare: 0, organics: 0, polymers: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 },
+    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 },
       shards: Math.floor(m.shardIncome) + starShards, caps };
     for (const { p } of Colonies.playerPlanets()) {
       const y = this.planetYield(p, caps.eff);
-      for (const k of ['metal', 'rare', 'organics', 'polymers', 'chemicals', 'research']) out[k] += y[k];
+      for (const k of ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research']) out[k] += y[k];
       for (const k in y.inputs) out.inputs[k] += y.inputs[k];
     }
     return out;
@@ -212,7 +212,7 @@ const Economy = {
   net() {
     const i = this.income();
     return { metal: i.metal - i.inputs.metal, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
-      polymers: i.polymers, chemicals: i.chemicals, research: i.research, shards: i.shards, caps: i.caps };
+      electronics: i.electronics, chemicals: i.chemicals, research: i.research, shards: i.shards, caps: i.caps };
   },
 
   tick() {
@@ -223,8 +223,8 @@ const Economy = {
     // Refineries and chemical plants run as far as the stockpile allows.
     const need = inc.inputs;
     const ratio = Math.min(1, ...Object.entries(need).filter(([, v]) => v > 0).map(([k, v]) => G.res[k] / v));
-    if (inc.polymers + inc.chemicals > 0) {
-      G.res.polymers += inc.polymers * ratio;
+    if (inc.electronics + inc.chemicals > 0) {
+      G.res.electronics += inc.electronics * ratio;
       G.res.chemicals += inc.chemicals * ratio;
       for (const [k, v] of Object.entries(need)) G.res[k] -= v * ratio;
       if (ratio < 1 && G.cycle % 5 === 0) Log.add('Refineries stall: not enough Metals, Organics or Rare Minerals to feed them.', 'bad');

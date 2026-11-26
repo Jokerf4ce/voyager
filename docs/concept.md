@@ -70,16 +70,16 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
 
 **Proposed** (as built in the POC):
-- A system is owned as a whole. The first colony in a system needs a Colony Ark. Further planets in a system you hold can be settled for Metal and Polymers, with the cost rising as you grow.
+- A system is owned as a whole. The first colony in a system needs a Colony Ark. Further planets in a system you hold can be settled for Metal and Electronics, with the cost rising as you grow.
 - Each layer has a number of **slots**. A slot holds one kind of building, and levels are unlimited.
 - **Planet classes** (decided): every planet is defined by three factors.
   - **Size:** Giant (gas only), Large, Average, Dwarf. Size sets the slots: Giant 0 surface / 5 orbit, Large 5/4, Average 4/3, Dwarf 2/2. Dwarfs are one habitability step worse.
-  - **Composition:** Gas, Ice/Water, Silicate (earth-like). Gas ×2 Polymers, Ice/Water ×1.3 Infrastructure, Silicate ×1.5 Metal and ×1.2 Rare Minerals.
+  - **Composition:** Gas, Ice/Water, Silicate (earth-like). Gas ×2 Electronics, Ice/Water ×1.3 Infrastructure, Silicate ×1.5 Metal and ×1.2 Rare Minerals.
   - **Temperature:** Frozen, Temperate (Silicate and Ice/Water only), Hot. Frozen ×1.5 Compute (free cooling), Temperate ×1.2 Infrastructure, Hot ×1.5 Rare Minerals.
   - That gives eight classes: Cold/Hot Gas Giant (habitability 1), Ice World (2–3), Ocean World (3–4), Steam World (1–2), Frozen Rock (2–3), Terran World (4–5, rare), Scorched Rock (1–2).
 - **Extremely Hazardous planets (habitability 1) have no buildable surface** (decided). Only orbit can be built.
 - The capital is a Large Terran World with Natural Life Support (decided).
-- **Surface only:** Deep Mine, Core Drill, Polymer Refinery, Hab Dome, Bastion.
+- **Surface only:** Deep Mine, Core Drill, Electronics Foundry, Hab Dome, Bastion.
 - **Orbit only:** Orbital Shipyard, Habitat Ring, Gas Skimmer, Defense Platform.
 - **Both layers** (built separately in each): Fusion Core, Cogitator Array.
 - System defense adds up every planet's Bastions and Defense Platforms.
@@ -99,7 +99,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Decided:** three gathered resources, two refined goods and three capacities, plus Research and Void Shards.
 - Gathered: Metals, Rare Minerals, Organics.
-- Refined: Polymers and Chemicals. These are only spent on building.
+- Refined: Electronics and Chemicals. These are only spent on building.
 - Capacities: Power, Compute and Infrastructure.
 - Research is its own points, made by Research Labs. Compute only limits advanced buildings and ships.
 
@@ -108,7 +108,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 | **Metals** | gathered | Deep Mines on rocky worlds | almost everything; Polymer input |
 | **Rare Minerals** | gathered | Core Drills, Atmosphere Skimmers; hot worlds, dwarfs, stellar remnants | advanced buildings and ships; Polymer and Chemical input |
 | **Organics** | gathered | Bio-Harvesters on living and icy worlds; Atmosphere Skimmers on gas giants | Chemical input; feeding survivors |
-| **Polymers** | refined | Polymer Refinery: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, Arks, warships, settling |
+| **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, Arks, warships, settling |
 | **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, Arks, warships, settling |
 | **Research** | points | Research Labs (+2 each), capital +1 | technology |
 | **Void Shards** | points | exploration, battles, events, techs, relics, pulsars and black holes | Void Signals (gacha) |
@@ -135,7 +135,7 @@ A colony gathers rating × size per turn, and each gathering building level adds
 - You cannot build a building or ship that would push any capacity past its cap.
 - If usage ends up over a cap (for example after losing a colony), all production is rationed to the worst cap ÷ usage, down to a minimum of 25%.
 
-The capital starts with the whole chain running: Mine, Bio-Harvester, Polymer Refinery, Hab Dome, Fusion Reactor ×2, Shipyard, Research Lab, Cogitator and Chemical Plant.
+The capital starts with the whole chain running: Mine, Bio-Harvester, Electronics Foundry, Hab Dome, Fusion Reactor ×2, Shipyard, Research Lab, Cogitator and Chemical Plant.
 
 ## 5. Setting and tone
 

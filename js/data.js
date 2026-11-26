@@ -4,13 +4,13 @@ const DATA = {};
 
 // Stockpiled resources.
 //   gathered: Metals, Rare Minerals, Organics (from planets; see DATA.planetClasses yields)
-//   refined:  Polymers (Metals + Rare Minerals), Chemicals (Organics + Rare Minerals). Only spent on building.
+//   refined:  Electronics (Metals + Rare Minerals), Chemicals (Organics + Rare Minerals). Only spent on building.
 //   Research points (made by Research Labs) and Void Shards (the gacha currency).
 DATA.resources = {
   metal:     { name: 'Metals',        icon: '▣', color: '#a8a8b0', kind: 'gathered', desc: 'Mined from rocky worlds. Hulls, walls, everything.' },
   rare:      { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', kind: 'gathered', desc: 'Heavy elements from hot worlds, dwarfs and dead stars.' },
   organics:  { name: 'Organics',      icon: '❦', color: '#9ab050', kind: 'gathered', desc: 'Biomass, hydrocarbons and frozen volatiles from living worlds, ice and gas giants.' },
-  polymers:  { name: 'Polymers',      icon: '⬡', color: '#d08a50', kind: 'refined',  desc: 'Produced from Metals and Rare Minerals. Advanced construction.' },
+  electronics: { name: 'Electronics', icon: '⌁', color: '#d08a50', kind: 'refined',  desc: 'Circuits and components made from Metals and Rare Minerals. Advanced construction.' },
   chemicals: { name: 'Chemicals',     icon: '⚗', color: '#d0c060', kind: 'refined',  desc: 'Converted from Organics and Rare Minerals. Fuel, explosives, reagents.' },
   research:  { name: 'Research',      icon: '✎', color: '#70c0c8', kind: 'points',   desc: 'Made by Research Labs. Spent on technology.' },
   shards:    { name: 'Void Shards',   icon: '◆', color: '#a35ad9', kind: 'points',   desc: 'Currency of the Void Signals.' },
@@ -120,33 +120,33 @@ DATA.buildings = {
   harvester: { name: 'Bio-Harvester',    layers: ['surface'], gathers: 'organics', desc: 'Harvests Organics (+2 × planet rating)',    cost: { metal: 35 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
   skimmer:   { name: 'Atmosphere Skimmer', layers: ['orbit'], gathers: 'organics', also: 'rare', desc: 'Skims Organics and Rare Minerals from the atmosphere below', cost: { metal: 50 }, costGrowth: 1.6, cap: { power: 1, infra: 1 } },
   // refining
-  refinery:  { name: 'Polymer Refinery', layers: ['surface', 'orbit'], desc: 'Turns 2 Metals + 0.5 Rare into 2 Polymers',    cost: { metal: 50, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'polymers', in: { metal: 2, rare: 0.5 }, amount: 2 } },
+  refinery:  { name: 'Electronics Foundry', layers: ['surface', 'orbit'], desc: 'Turns 2 Metals + 0.5 Rare into 2 Electronics',    cost: { metal: 50, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'electronics', in: { metal: 2, rare: 0.5 }, amount: 2 } },
   chemplant: { name: 'Chemical Plant',   layers: ['surface', 'orbit'], desc: 'Turns 2 Organics + 0.5 Rare into 2 Chemicals', cost: { metal: 45, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'chemicals', in: { organics: 2, rare: 0.5 }, amount: 2 } },
   // capacities
   fusion:    { name: 'Fusion Reactor',   layers: ['surface', 'orbit'], desc: '+6 Power',                     cost: { metal: 60, rare: 15, chemicals: 10 }, costGrowth: 1.6,  cap: { power: -6 } },
-  solar:     { name: 'Solar Array',      layers: ['orbit'],   desc: '+4 Power × the star\'s light',              cost: { metal: 40, polymers: 10 },          costGrowth: 1.5,  cap: { power: -4 }, solar: true },
-  dome:      { name: 'Hab Dome',         layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',     cost: { metal: 30, polymers: 10 },          costGrowth: 1.5,  cap: { infra: -5, power: 1 } },
-  ring:      { name: 'Habitat Ring',     layers: ['orbit'],   desc: '+6 Infrastructure',                         cost: { metal: 35, polymers: 15 },          costGrowth: 1.5,  cap: { infra: -6, power: 1 } },
-  cogitator: { name: 'Cogitator Array',  layers: ['surface', 'orbit'], desc: '+4 Compute',                   cost: { metal: 40, polymers: 15, rare: 10 }, costGrowth: 1.65, cap: { compute: -4, power: 2 } },
+  solar:     { name: 'Solar Array',      layers: ['orbit'],   desc: '+4 Power × the star\'s light',              cost: { metal: 40, electronics: 10 },          costGrowth: 1.5,  cap: { power: -4 }, solar: true },
+  dome:      { name: 'Hab Dome',         layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',     cost: { metal: 30, electronics: 10 },          costGrowth: 1.5,  cap: { infra: -5, power: 1 } },
+  ring:      { name: 'Habitat Ring',     layers: ['orbit'],   desc: '+6 Infrastructure',                         cost: { metal: 35, electronics: 15 },          costGrowth: 1.5,  cap: { infra: -6, power: 1 } },
+  cogitator: { name: 'Cogitator Array',  layers: ['surface', 'orbit'], desc: '+4 Compute',                   cost: { metal: 40, electronics: 15, rare: 10 }, costGrowth: 1.65, cap: { compute: -4, power: 2 } },
   // research, ships, defense
-  lab:       { name: 'Research Lab',     layers: ['surface', 'orbit'], desc: '+2 Research',                  cost: { metal: 40, polymers: 10, chemicals: 5 }, costGrowth: 1.6, cap: { power: 1, infra: 1, compute: 2 } },
-  shipyard:  { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, polymers: 10 }, costGrowth: 1.8, cap: { power: 2, infra: 1 } },
+  lab:       { name: 'Research Lab',     layers: ['surface', 'orbit'], desc: '+2 Research',                  cost: { metal: 40, electronics: 10, chemicals: 5 }, costGrowth: 1.6, cap: { power: 1, infra: 1, compute: 2 } },
+  shipyard:  { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, electronics: 10 }, costGrowth: 1.8, cap: { power: 2, infra: 1 } },
   bastion:   { name: 'Bastion',          layers: ['surface'], desc: '+25 garrison, fires on attackers',          cost: { metal: 50, chemicals: 10 },         costGrowth: 1.6,  cap: { power: 1 } },
-  platform:  { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',     cost: { metal: 60, polymers: 10, chemicals: 10 }, costGrowth: 1.6, cap: { power: 2, compute: 1 } },
+  platform:  { name: 'Defense Platform', layers: ['orbit'],   desc: '+15 garrison, heavy fire on attackers',     cost: { metal: 60, electronics: 10, chemicals: 10 }, costGrowth: 1.6, cap: { power: 2, compute: 1 } },
 };
 
 // Settling another planet in a system you already hold (no Ark needed). Grows with planets owned.
-DATA.settleCost = { metal: 60, polymers: 20, chemicals: 10 };
+DATA.settleCost = { metal: 60, electronics: 20, chemicals: 10 };
 DATA.settleGrowth = 1.2;
 
 // Ship types. cap = capacity used while the ship exists (crew life support, cogitators for advanced ships).
 DATA.ships = {
   scout:    { name: 'Scout',        atk: 0,  hp: 5,   cost: { metal: 15 },                                          cap: { infra: 0.5 },          role: 'Explores unknown systems' },
-  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { metal: 60, polymers: 25, chemicals: 15 },             cap: { infra: 2 },            role: 'Founds a colony, consumed on use' },
+  ark:      { name: 'Colony Ark',   atk: 0,  hp: 20,  cost: { metal: 60, electronics: 25, chemicals: 15 },             cap: { infra: 2 },            role: 'Founds a colony, consumed on use' },
   corvette: { name: 'Corvette',     atk: 3,  hp: 10,  cost: { metal: 25, chemicals: 5 },                            cap: { infra: 1 },            role: 'Cheap line ship' },
-  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { metal: 50, polymers: 15, chemicals: 10 },             cap: { infra: 2, compute: 1 }, role: 'Solid warship', req: { tech: 'frigates' } },
-  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { metal: 50, rare: 20, polymers: 15, chemicals: 15 },   cap: { infra: 2, compute: 2 }, role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
-  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { metal: 160, rare: 50, polymers: 60, chemicals: 40 },  cap: { infra: 6, compute: 4 }, role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
+  frigate:  { name: 'Frigate',      atk: 8,  hp: 25,  cost: { metal: 50, electronics: 15, chemicals: 10 },             cap: { infra: 2, compute: 1 }, role: 'Solid warship', req: { tech: 'frigates' } },
+  lancer:   { name: 'Void Lancer',  atk: 16, hp: 18,  cost: { metal: 50, rare: 20, electronics: 15, chemicals: 15 },   cap: { infra: 2, compute: 2 }, role: 'Glass cannon', req: { blueprint: 'bp_lancer' } },
+  dread:    { name: 'Dreadnought',  atk: 32, hp: 110, cost: { metal: 160, rare: 50, electronics: 60, chemicals: 40 },  cap: { infra: 6, compute: 4 }, role: 'Cathedral of war', req: { blueprint: 'bp_dread' } },
   lurker:   { name: 'Lurker',       atk: 4,  hp: 16,  cost: {}, cap: {}, role: 'Something from the dark', monster: true },
 };
 
@@ -155,7 +155,7 @@ DATA.techs = {
   deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metals' },
   frigates:   { name: 'Frigate Hulls',        cost: 40,  mods: {},                  desc: 'Unlocks Frigates' },
   biovats:    { name: 'Bio-Vat Cultures',     cost: 40,  mods: { organics: 0.25 },  desc: '+25% Organics' },
-  cracking:   { name: 'Catalytic Cracking',   cost: 45,  mods: { polymers: 0.3 },   desc: '+30% Polymers from the same inputs' },
+  microfab:   { name: 'Microfabrication',     cost: 45,  mods: { electronics: 0.3 }, desc: '+30% Electronics from the same inputs' },
   catalysis:  { name: 'Reagent Catalysis',    cost: 45,  mods: { chemicals: 0.3 },  desc: '+30% Chemicals from the same inputs' },
   rationing:  { name: 'Ration Protocols',     cost: 50,  mods: { infra: 0.2 },      desc: '+20% Infrastructure' },
   gridreactors:{name: 'Reactor Litanies',     cost: 50,  mods: { power: 0.2 },      desc: '+20% Power' },
@@ -196,7 +196,7 @@ DATA.gachaPool = [
   { id: 'l_moro',   kind: 'leader', rarity: 'common', name: 'Tech-Adept Moro',    mods: { research: 0.1 }, desc: '+10% Research. Half of him is cogitator now.' },
   { id: 'r_icon',   kind: 'relic',  rarity: 'common', name: 'Rusted Icon',        mods: { power: 0.08 },  desc: '+8% Power. The saint\'s face is worn away.' },
   { id: 'r_compass',kind: 'relic',  rarity: 'common', name: 'Bone Compass',       mods: { exploreShards: 1 }, desc: '+1 Shard per system explored.' },
-  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { metal: 60, polymers: 20, chemicals: 10 }, desc: '+60 Metals, +20 Polymers, +10 Chemicals, once.' },
+  { id: 'c_salvage',kind: 'cache',  rarity: 'common', name: 'Salvage Cache',      gives: { metal: 60, electronics: 20, chemicals: 10 }, desc: '+60 Metals, +20 Electronics, +10 Chemicals, once.' },
   { id: 'c_data',   kind: 'cache',  rarity: 'common', name: 'Corrupted Datacore', gives: { research: 40 }, desc: '+40 Research, once.' },
   // Rare
   { id: 'l_kesh',   kind: 'leader', rarity: 'rare', name: 'Admiral Kesh',        mods: { atk: 0.15 }, desc: '+15% ship attack. Never asks how many died.' },
@@ -255,7 +255,7 @@ DATA.events = {
     title: 'Hidden Cache',
     text: 'A sealed vault, marked with the sigil of an empire that no longer exists.',
     choices: [
-      { label: 'Crack it open', effect: (G) => { G.res.rare += 25; G.res.polymers += 20; return 'The vault is cracked open (+25 Rare Minerals, +20 Polymers).'; } },
+      { label: 'Crack it open', effect: (G) => { G.res.rare += 25; G.res.electronics += 20; return 'The vault is cracked open (+25 Rare Minerals, +20 Electronics).'; } },
     ],
   },
 };
@@ -275,5 +275,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v9',
+  saveKey: 'voyager_save_v10',
 };
