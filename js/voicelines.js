@@ -14,9 +14,12 @@
 // Triggers in use:
 //   start   the first click or key press after the game loads
 //   return  coming back after more than 5 minutes away (tab hidden or no activity)
-//   test    the Test button in Settings (Assistant)
+//   test    the Test button in Settings (Assistant): plays any line at random
 //   random  ship announcements at a random moment every 5 to 30 minutes while you play
 //           (never the same line twice in a row if there is a choice; skipped while the tab is hidden)
+//
+// When several lines share a trigger, one of them is picked at random each time.
+// Trigger options below: cooldown (seconds), noRepeat (never the same line twice in a row).
 //
 // Lines with an empty text play without an on-screen transmission.
 // The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
@@ -35,5 +38,5 @@ const VoiceTriggers = {
   start:  { cooldown: 0 },
   return: { cooldown: 60, idleMinutes: 5 },
   test:   { cooldown: 0 },
-  random: { cooldown: 0, minMinutes: 5, maxMinutes: 30 },
+  random: { cooldown: 0, minMinutes: 5, maxMinutes: 30, noRepeat: true },
 };

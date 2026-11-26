@@ -6,9 +6,13 @@ The ship's computer voice plays mp3 files from this folder. Each file is named a
 | File | Line | Triggers |
 |---|---|---|
 | `welcome_back.mp3` | "Welcome back, Commander." | game start; returning after 5+ minutes away |
-| `slipspace.mp3` | "Slipspace rupture detected!" | the Test button in Settings → Assistant |
-| `gagarin.mp3` | "Attention! Colonel Gagarin, please report to Medbay!" | random announcement (every 5–30 min) |
-| `shepard.mp3` | "Attention! Rear admiral Shepard, your keycard was found in engineering!" | random announcement (every 5–30 min) |
+| `still_here.mp3` | "Hey, are you still here?" | returning after 5+ minutes away; random announcement |
+| `slipspace.mp3` | "Slipspace rupture detected!" | random announcement |
+| `gagarin.mp3` | "Attention! Colonel Gagarin, please report to Medbay!" | random announcement |
+| `shepard.mp3` | "Attention! Rear admiral Shepard, your keycard was found in engineering!" | random announcement |
+| `hydrated.mp3` | "Commander, Make sure you stay hydrated" | random announcement |
+
+When several lines share a trigger, one is picked at random. The Test button in Settings → Assistant plays any line.
 
 ## How the voice is made
 

@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.18.1 — 2026-11-26
+- Assistant: lines sharing a trigger (e.g. `return`) are now picked purely at random. Before, the no-repeat rule made two lines strictly alternate; it now applies only to `random` announcements (`noRepeat` option).
+- The Test button plays any voice line at random.
+- New lines: "Hey, are you still here?" and "Commander, Make sure you stay hydrated".
+
 ## 0.18.0 — 2026-11-26
 - New **Buildings** screen: every building type in one empire-wide list, grouped (Gathering, Refining, Power/habitation/compute, Research/ships/defense), with total levels and the number of colonies.
 - **Auto** builds or upgrades where it produces the most for its cost (best planet rating for gatherers, starlight for solar, planet bonuses for capacities; ties prefer upgrading an existing building). The button shows where it will build and the cost.

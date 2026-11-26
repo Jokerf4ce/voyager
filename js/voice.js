@@ -102,10 +102,11 @@ const Voice = {
     const cfg = VoiceTriggers[name] || {};
     const now = Date.now();
     if (!force && cfg.cooldown && this.lastPlayed[name] && now - this.lastPlayed[name] < cfg.cooldown * 1000) return false;
-    let lines = Object.entries(VoiceLines).filter(([, l]) => (l.triggers || []).includes(name) && Math.random() < (l.chance ?? 1));
+    // 'test' (the Test button) can play any line; other triggers play the lines that list them
+    let lines = Object.entries(VoiceLines).filter(([, l]) => (name === 'test' || (l.triggers || []).includes(name)) && Math.random() < (l.chance ?? 1));
     if (!lines.length) return false;
-    // avoid repeating the line this trigger played last, when there is another one
-    if (lines.length > 1) lines = lines.filter(([lid]) => lid !== this.lastLine[name]);
+    // triggers with noRepeat never play the same line twice in a row (when there is another one)
+    if (cfg.noRepeat && lines.length > 1) lines = lines.filter(([lid]) => lid !== this.lastLine[name]);
     const [id] = lines[Math.floor(Math.random() * lines.length)];
     this.lastPlayed[name] = now;
     this.lastLine[name] = id;
