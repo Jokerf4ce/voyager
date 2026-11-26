@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.44.0 — 2026-11-26
+- **Colony expeditions go to a planet you choose.**
+  - In a charted, unclaimed, unguarded system, every planet in the system panel (Star Map and Solar System screens) has a **Send colonists** button. The colony is founded on that planet when the expedition arrives; before, it went to the "best" planet.
+  - The Settle section points you to the planet list, and the targeted planet shows when the colonists arrive.
+  - One expedition per system at a time; the rest of the system is settled from the new colony as before.
+- Tutorial updated: the expand step explains choosing the planet.
+
 ## 0.43.0 — 2026-11-26
 - **Void Shards removed.** The resource is gone from the top bar, the Overview and the save, along with every source:
   - survey bonus, battle victories, captured worlds, destroyed empires;

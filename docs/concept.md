@@ -78,7 +78,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
 
 **Proposed** (as built in the POC):
-- A system is owned as a whole. The first colony in a system needs a colony expedition (a flat fee since v0.24; a Colony Ark ship before). Further planets in a system you hold can be settled for Metal and Electronics, with the cost rising as you grow.
+- A system is owned as a whole. The first colony in a system needs a colony expedition (a flat fee since v0.24; a Colony Ark ship before), sent to a planet you choose (since v0.44; before, it took the best planet). Further planets in a system you hold can be settled for Metal and Electronics, with the cost rising as you grow.
 - Each layer has a number of **slots**. A slot holds one kind of building, and levels are unlimited.
 - **Planet classes** (decided): every planet is defined by three factors.
   - **Size:** Giant (gas only), Large, Average, Dwarf. Size sets the slots: Giant 0 surface / 5 orbit, Large 5/4, Average 4/3, Dwarf 2/2. Dwarfs are one habitability step worse.

@@ -79,7 +79,7 @@ const Game = {
     mission: (a) => { const [fid, kind, sid] = a.split('|'); Missions.launch(+fid, kind, +sid); },
     recall: (a) => { Missions.recall(+a); },
     survey: (a) => { Missions.survey(+a); },
-    colonize: (a) => { Missions.colonize(+a); },
+    colonize: (a) => { const [sid, pi] = a.split(':').map(Number); Missions.colonize(sid, pi); },
     resetcolors: () => { Sprites.resetPlayerColors(); },
     gofleets: (a) => { UI.screen = 'fleets'; if (a) UI.selShip = null; },
     // battles

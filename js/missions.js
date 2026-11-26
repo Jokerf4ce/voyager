@@ -3,7 +3,7 @@
 //
 // fleet.mission = { kind: 'attack', target: sysId, phase: 'out' | 'battle' | 'back', eta, total }
 // G.surveys     = [{ target, eta, total }]         survey probes on their way
-// G.expeditions = [{ target, eta, total }]         colony expeditions on their way
+// G.expeditions = [{ target, planet, eta, total }] colony expeditions on their way (planet = index in the system)
 // G.threats     = [{ id, owner, name, target, eta, total, ships: [ship] }]   alien raids on their way
 
 const Missions = {
@@ -80,9 +80,14 @@ const Missions = {
   },
 
   // ---------- colony expeditions (settling) ----------
-  colonizeBlocker(sysId) {
-    const s = G.systems[sysId];
+  // An expedition goes to one planet you choose. One expedition per system at a time: once the colony
+  // stands, the rest of the system is settled from there (Colonies.settle).
+  colonizeBlocker(sysId, pIdx) {
+    const s = G.systems[sysId], p = s.planets[pIdx];
     if (!s.explored) return 'Uncharted';
+    if (!p) return 'No such planet';
+    if (p.colony) return 'Already settled';
+    if (!(p.slots.surface + p.slots.orbit)) return 'Nothing can be built there';
     if (s.owner) return s.owner === 'player' ? 'Already yours' : 'Claimed by ' + DATA.factions[s.owner].name;
     if (this.guard(s)) return 'Guarded: clear it first';
     if (this.targeted(sysId, 'colonize')) return 'Colonists are on their way';
@@ -90,12 +95,12 @@ const Missions = {
     if (!Colonies.canAfford(DATA.colonize.cost)) return 'Not enough resources';
     return null;
   },
-  colonize(sysId) {
-    if (this.colonizeBlocker(sysId)) return false;
+  colonize(sysId, pIdx) {
+    if (this.colonizeBlocker(sysId, pIdx)) return false;
     Colonies.pay(DATA.colonize.cost);
-    const eta = this.distance(sysId);
-    G.expeditions.push({ target: sysId, eta, total: eta });
-    Log.add(`A colony expedition departs for ${G.systems[sysId].name} (${eta} Cycle${eta > 1 ? 's' : ''}).`);
+    const eta = this.distance(sysId), s = G.systems[sysId];
+    G.expeditions.push({ target: sysId, planet: pIdx, eta, total: eta });
+    Log.add(`A colony expedition departs for ${Colonies.planetName(s, s.planets[pIdx])} (${eta} Cycle${eta > 1 ? 's' : ''}).`);
     return true;
   },
 
@@ -124,7 +129,8 @@ const Missions = {
         Log.add(`The colonists find ${s.name} taken or guarded and turn back. Half of the supplies are recovered.`, 'bad');
         continue;
       }
-      const p = Galaxy.bestPlanet(s);
+      const want = s.planets[m.planet];
+      const p = want && !want.colony ? m.planet : Galaxy.bestPlanet(s); // the chosen planet (older saves: the best one)
       Colonies.found(s.id, p, 'player');
       Explore.reveal(s.id);
       Log.add(`A colony is founded on ${Colonies.planetName(s, s.planets[p])}. The colonists bury their dead first, then start building.`, 'good');

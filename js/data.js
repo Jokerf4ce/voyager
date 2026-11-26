@@ -213,7 +213,7 @@ DATA.weaponModels = {
 
 // Exploring and settling cost a flat fee instead of a ship. Both take one Cycle per hyperlane hop to arrive.
 DATA.survey = { name: 'Survey probe', cost: { metal: 20, electronics: 5 }, desc: 'Charts an uncharted system next to known space.' };
-DATA.colonize = { name: 'Colony expedition', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony on the best planet of a charted, unclaimed, unguarded system.' };
+DATA.colonize = { name: 'Colony expedition', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony on a planet you choose in a charted, unclaimed, unguarded system.' };
 DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
 // Raids on the Covenant (js/ai.js). No raids until the player has founded graceColonies colonies besides the
 // capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
@@ -369,7 +369,7 @@ DATA.tutorial = [
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
     text: 'Your home system has bright brackets around it. Drag to look around; scroll or pinch to zoom. The buttons on the right zoom, jump home (⌂) and centre on the selected system; the minimap in the corner shows all you have charted.<br><br>A <b>?</b> is a system no one has charted. The galaxy has no edge: it grows as you explore.' },
   { screen: 'map', prepare: 'uncharted', target: '.mapscreen .side', title: 'Explore and expand',
-    text: 'Click a system to select it. This panel shows what you can do there; double-click a charted system (or use <b>Open solar system</b>) to see its star and planets on the <b>Solar System</b> screen.<br><br>A <b>survey probe</b> ({survey}) charts an unknown system next to known space. A <b>colony expedition</b> ({colonize}) founds a colony in a charted, unclaimed system. Systems with coloured flags next to them are guarded: send a fleet to clear them first.' },
+    text: 'Click a system to select it. This panel shows what you can do there; double-click a charted system (or use <b>Open solar system</b>) to see its star and planets on the <b>Solar System</b> screen.<br><br>A <b>survey probe</b> ({survey}) charts an unknown system next to known space. A <b>colony expedition</b> ({colonize}) founds a colony on a planet you choose in a charted, unclaimed system: pick it in the panel\'s planet list (<b>Send colonists</b>). Systems with coloured flags next to them are guarded: send a fleet to clear them first.' },
   { screen: 'colonies', target: '#main .csys', title: 'Colonies',
     text: 'Every colony in every system you hold. Click a colony to open it. Unsettled planets in your own systems can be settled right here, with no travel needed.<br><br>Each planet has a <b>surface</b> and an <b>orbit</b> layer, each with its own building slots. The more habitable a planet, the cheaper it is to build there.' },
   { screen: 'buildings', target: '#main .brow', title: 'Buildings',

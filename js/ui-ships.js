@@ -169,8 +169,8 @@ Object.assign(UI, {
       }).join('')}</div>` : '<p class="small muted">No fleet is free.</p>'));
     }
     if (s.explored && !s.owner && !g) {
-      const why = Missions.colonizeBlocker(s.id);
-      opts.push(`<h4>Settle</h4><div class="btnrow">${this.btn(`Send a colony expedition <small>${U.costText(DATA.colonize.cost)}${etaText}</small>`, 'colonize', s.id, !!why, 'gold')}</div>${why && why !== 'Not enough resources' ? `<small class="muted">${why}</small>` : ''}`);
+      const going = G.expeditions.find((m) => m.target === s.id);
+      opts.push(`<h4>Settle</h4><p class="small">${going ? 'Colonists are on their way.' : `Choose a planet below and <b>send colonists</b> there: a colony expedition costs ${U.costText(DATA.colonize.cost)}${etaText}.`}</p>`);
     }
     const coming = G.fleets.filter((f) => f.mission && f.mission.target === s.id);
     const exps = G.expeditions.filter((m) => m.target === s.id), probes = G.surveys.filter((m) => m.target === s.id);
@@ -178,7 +178,7 @@ Object.assign(UI, {
     const notes = [
       ...coming.map((f) => `<div class="small res-power">➤ ${U.esc(f.name)}: ${U.esc(Missions.label(f.mission))}</div>`),
       ...probes.map((m) => `<div class="small res-research">➤ Survey probe arrives in ${m.eta}</div>`),
-      ...exps.map((m) => `<div class="small good">➤ Colony expedition arrives in ${m.eta}</div>`),
+      ...exps.map((m) => `<div class="small good">➤ Colony expedition to ${U.esc(s.planets[m.planet] ? Colonies.planetName(s, s.planets[m.planet]) : s.name)} arrives in ${m.eta}</div>`),
       ...threats.map((t) => `<div class="small bad">⚠ ${U.esc(t.name)} (${t.ships.length} ships, power ${Ships.groupPower(t.ships)}) arrives in ${t.eta}</div>`),
     ];
     return out + opts.join('') + notes.join('');

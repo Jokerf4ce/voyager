@@ -163,7 +163,7 @@ Exploring and settling need no ships; they cost a **flat fee**:
 | Action | Target | Fee |
 |---|---|---|
 | **Survey probe** (explore) | an uncharted system next to known space | 20 Metals, 5 Electronics |
-| **Colony expedition** (settle) | a charted, unclaimed, unguarded system | 60 Metals, 25 Electronics, 15 Chemicals |
+| **Colony expedition** (settle) | a planet you choose in a charted, unclaimed, unguarded system (one expedition per system at a time) | 60 Metals, 25 Electronics, 15 Chemicals |
 
 If the target of a colony expedition has been taken or guarded by the time it arrives, the colonists turn back and half the fee is refunded.
 

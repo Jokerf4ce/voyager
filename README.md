@@ -11,7 +11,7 @@ See [docs/concept.md](docs/concept.md) for the design.
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. Everything that happens is recorded in the **Chronicle** menu.
-- **Star Map:** an endless galaxy under a pan/zoom camera (drag, scroll or pinch; ⌂ for home; a minimap in the corner). Hover a system for a summary card; click it to select it, and its planets and missions appear in the panel beside the map. Double-click (or *Open solar system*) opens the **Solar System** screen with its star and planets. From there, launch a **survey probe** to explore or a **colony expedition** to settle (both cost a flat fee), or send a fleet to **attack**.
+- **Star Map:** an endless galaxy under a pan/zoom camera (drag, scroll or pinch; ⌂ for home; a minimap in the corner). Hover a system for a summary card; click it to select it, and its planets and missions appear in the panel beside the map. Double-click (or *Open solar system*) opens the **Solar System** screen with its star and planets. From there, launch a **survey probe** to explore or send a **colony expedition** to a planet you choose (*Send colonists* in its planet list; both cost a flat fee), or send a fleet to **attack**.
 - **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
 - **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
 - **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
