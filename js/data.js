@@ -5,7 +5,7 @@ const DATA = {};
 // Stockpiled resources.
 //   gathered: Metals, Rare Minerals, Organics (from planets; see DATA.planetClasses yields)
 //   refined:  Electronics (Metals + Rare Minerals), Chemicals (Organics + Rare Minerals). Only spent on building.
-//   Research points (made by Research Labs) and Void Shards (the gacha currency).
+//   Research points (made by Research Labs).
 DATA.resources = {
   metal:     { name: 'Metals',        icon: '▣', color: '#a8a8b0', kind: 'gathered', desc: 'Mined from rocky worlds. Hulls, walls, everything.' },
   rare:      { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', kind: 'gathered', desc: 'Heavy elements from hot worlds, dwarfs and dead stars.' },
@@ -13,7 +13,6 @@ DATA.resources = {
   electronics: { name: 'Electronics', icon: '⍯', color: '#d08a50', kind: 'refined',  desc: 'Circuits and components made from Metals and Rare Minerals. Advanced construction.' },
   chemicals: { name: 'Chemicals',     icon: '⚗', color: '#d0c060', kind: 'refined',  desc: 'Converted from Organics and Rare Minerals. Fuel, explosives, reagents.' },
   research:  { name: 'Research',      icon: '✎', color: '#70c0c8', kind: 'points',   desc: 'Made by Research Labs. Spent on technology.' },
-  shards:    { name: 'Void Shards',   icon: '◆', color: '#a35ad9', kind: 'points',   desc: 'Currency of the Void Signals.' },
 };
 
 // Capacities: not stockpiled. Buildings provide them and buildings/ships use them.
@@ -57,10 +56,9 @@ DATA.starClasses = {
   H: { name: 'Red Hypergiant', color: '#ff5a32', size: 4, radius: 1400, weight: 0, planets: [1, 3], temps: { hot: 3, temperate: 0.2, frozen: 1 }, solar: 2.0, habMod: -2, desc: 'A dying star wider than the orbit of Jupiter, shedding its own skin into the dark. Its light is overwhelming; nothing living belongs here.' },
   // Stellar remnants: rare special systems. kind picks how they are drawn. mult: extra planet bonuses
   // (all remnants are rich in Rare Minerals).
-  // shards: Void Shards per Cycle while you hold the system.
-  D: { kind: 'dwarf',    name: 'White Dwarf',       color: '#e8f0ff', size: 1, radius: 0.012, weight: 0.8, planets: [1, 3], temps: { hot: 0.3, temperate: 0.2, frozen: 3 }, solar: 0.4, habMod: -1, mult: { rare: 1.5 }, shards: 0, desc: 'The cooling corpse of a star, no bigger than a world. Its old planets are scorched cinders rich in heavy elements.' },
-  N: { kind: 'pulsar',   name: 'Pulsar',            color: '#a0e0ff', size: 1, radius: 0.00002, weight: 0.5, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.3, habMod: -2, mult: { rare: 1.5, compute: 2 }, shards: 1, desc: 'A spinning neutron star sweeping beams of hard radiation across its system, faster than a heartbeat. Its ticking is perfect; cogitators sync to it.' },
-  X: { kind: 'blackhole',name: 'Black Hole',        color: '#ff9a40', size: 1, radius: 0.00004, weight: 0.3, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.2, habMod: -2, mult: { rare: 1.5, compute: 2.5 }, shards: 3, desc: 'A wound in space ringed by burning gas. Time runs slow near the edge. The Void Signals are loudest here.' },
+  D: { kind: 'dwarf',    name: 'White Dwarf',       color: '#e8f0ff', size: 1, radius: 0.012, weight: 0.8, planets: [1, 3], temps: { hot: 0.3, temperate: 0.2, frozen: 3 }, solar: 0.4, habMod: -1, mult: { rare: 1.5 }, desc: 'The cooling corpse of a star, no bigger than a world. Its old planets are scorched cinders rich in heavy elements.' },
+  N: { kind: 'pulsar',   name: 'Pulsar',            color: '#a0e0ff', size: 1, radius: 0.00002, weight: 0.5, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.3, habMod: -2, mult: { rare: 1.5, compute: 2 }, desc: 'A spinning neutron star sweeping beams of hard radiation across its system, faster than a heartbeat. Its ticking is perfect; cogitators sync to it.' },
+  X: { kind: 'blackhole',name: 'Black Hole',        color: '#ff9a40', size: 1, radius: 0.00004, weight: 0.3, planets: [1, 2], temps: { hot: 0.2, temperate: 0.1, frozen: 3 }, solar: 0.2, habMod: -2, mult: { rare: 1.5, compute: 2.5 }, desc: 'A wound in space ringed by burning gas. Time runs slow near the edge. The Void Signals are loudest here.' },
   M: { name: 'M-type Red Dwarf',         color: '#ff9a60', size: 1, radius: 0.35, weight: 8, planets: [1, 4], temps: { hot: 0.8, temperate: 0.5, frozen: 2.2 }, solar: 0.75, habMod: 0,  desc: 'The most common star. Dim, flaring and cold. Most of its worlds are frozen.' },
 };
 
@@ -216,7 +214,7 @@ DATA.weaponModels = {
 // Exploring and settling cost a flat fee instead of a ship. Both take one Cycle per hyperlane hop to arrive.
 DATA.survey = { name: 'Survey probe', cost: { metal: 20, electronics: 5 }, desc: 'Charts an uncharted system next to known space.' };
 DATA.colonize = { name: 'Colony expedition', cost: { metal: 60, electronics: 25, chemicals: 15 }, desc: 'Founds a colony on the best planet of a charted, unclaimed, unguarded system.' };
-DATA.forge = { cost: { shards: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
+DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
 // Raids on the Covenant (js/ai.js). No raids until the player has founded graceColonies colonies besides the
 // capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
 // per empire, and waits cooldown Cycles after launching one.
@@ -254,7 +252,6 @@ DATA.techs = {
   catalysis:  { name: 'Reagent Catalysis',    cost: 45,  mods: { chemicals: 0.3 },  desc: '+30% Chemicals from the same inputs' },
   rationing:  { name: 'Ration Protocols',     cost: 50,  mods: { infra: 0.2 },      desc: '+20% Infrastructure' },
   gridreactors:{name: 'Reactor Litanies',     cost: 50,  mods: { power: 0.2 },      desc: '+20% Power' },
-  voidlisten: { name: 'Void Listening',       cost: 60,  mods: { shardIncome: 1 },  desc: '+1 Void Shard per Cycle' },
   prospect:   { name: 'Deep Prospecting',     cost: 65,  mods: { rare: 0.3 },       desc: '+30% Rare Minerals' },
   coldlogic:  { name: 'Cold Logic Engines',   cost: 65,  mods: { compute: 0.25 },   desc: '+25% Compute' },
   ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { research: 0.3 },   desc: '+30% Research' },
@@ -294,9 +291,9 @@ DATA.events = {
     text: 'On every channel, a voice repeats the names of your crew, including some who have not been born yet.',
     choices: [
       { label: 'Listen', effect: (G) => {
-        G.res.shards += 8;
-        if (Math.random() < 0.35) { G.res.research = Math.max(0, G.res.research - 30); return 'You listen (+8 Shards). Three archivists clawed out their eyes. −30 Research.'; }
-        return 'You listen (+8 Shards). It knows you now.';
+        if (Math.random() < 0.35) { G.res.research = Math.max(0, G.res.research - 30); return 'You listen. Three archivists clawed out their eyes. −30 Research.'; }
+        G.res.research += 25;
+        return 'You listen (+25 Research). It knows you now.';
       } },
       { label: 'Burn the receiver', effect: () => 'The receiver is burned. The voice keeps speaking on a frequency you no longer have.' },
     ],
@@ -306,14 +303,14 @@ DATA.events = {
     text: 'Cyclopean structures cover the planet. The geometry hurts to look at.',
     choices: [
       { label: 'Excavate', effect: (G) => { G.res.research += 30; G.res.rare += 20; return 'Excavation complete (+30 Research, +20 Rare Minerals). The dig team will not say what they saw.'; } },
-      { label: 'Seal it away', effect: (G) => { G.res.shards += 3; return 'The ruins are sealed under ferrocrete (+3 Shards). Sometimes the seal is warm.'; } },
+      { label: 'Seal it away', effect: () => 'The ruins are sealed under ferrocrete. Sometimes the seal is warm.' },
     ],
   },
   survivors: {
     title: 'Survivors',
     text: 'A crippled transport carries the last survivors of a fallen colony. They beg for rescue.',
     choices: [
-      { label: 'Take them in', effect: (G) => { G.res.organics = Math.max(0, G.res.organics - 25); G.res.shards += 4; return 'The survivors are taken aboard (−25 Organics to feed them, +4 Shards). Their prayers seem to reach something.'; } },
+      { label: 'Take them in', effect: (G) => { G.res.organics = Math.max(0, G.res.organics - 25); G.res.research += 15; return 'The survivors are taken aboard (−25 Organics to feed them). Their archives come with them (+15 Research). Their prayers seem to reach something.'; } },
       { label: 'Strip their vessel', effect: (G) => { G.res.metal += 50; G.res.chemicals += 15; return 'Their vessel is stripped (+50 Metals, +15 Chemicals). The transport goes dark. Nobody speaks of it.'; } },
     ],
   },
@@ -355,7 +352,7 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v13',
+  saveKey: 'voyager_save_v14',
 };
 
 // ---------- Tutorial ----------

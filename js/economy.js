@@ -298,9 +298,7 @@ const Economy = {
   income() {
     const caps = this.caps();
     const m = State.mods();
-    const starShards = Colonies.playerSystems().reduce((a, s) => a + (DATA.starClasses[s.star].shards || 0), 0);
-    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 },
-      shards: Math.floor(m.shardIncome) + starShards, caps };
+    const out = { metal: 0, rare: 0, organics: 0, electronics: 0, chemicals: 0, research: 0, inputs: { metal: 0, rare: 0, organics: 0 }, caps };
     for (const { p } of Colonies.playerPlanets()) {
       const y = this.planetYield(p, caps.eff);
       for (const k of ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research']) out[k] += y[k];
@@ -314,14 +312,12 @@ const Economy = {
     const i = this.income();
     const up = Ships.upkeep();
     return { metal: i.metal - i.inputs.metal - up, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
-      electronics: i.electronics, chemicals: i.chemicals - up * 0.5, research: i.research, shards: i.shards, caps: i.caps, upkeep: up };
+      electronics: i.electronics, chemicals: i.chemicals - up * 0.5, research: i.research, caps: i.caps, upkeep: up };
   },
 
   tick() {
     const inc = this.income();
     for (const k of ['metal', 'rare', 'organics', 'research']) G.res[k] += inc[k];
-    G.res.shards += inc.shards;
-    if (G.cycle % 5 === 0) G.res.shards += 1;
     // Refineries and chemical plants run as far as the stockpile allows.
     const need = inc.inputs;
     const ratio = Math.min(1, ...Object.entries(need).filter(([, v]) => v > 0).map(([k, v]) => G.res[k] / v));

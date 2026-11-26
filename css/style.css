@@ -45,7 +45,7 @@ small, .small { font-size: 16px; }
 .res small { color: #8aa070; font-size: 14px; }
 .res small.neg { color: #d05050; }
 .res-metal { color: #b8b8c4; } .res-rare { color: #60d0a8; } .res-organics { color: #9ac050; } .res-electronics { color: #d89a60; } .res-chemicals { color: #d8c860; }
-.res-research { color: #80c8e0; } .res-shards { color: #c080f0; }
+.res-research { color: #80c8e0; } .anomaly { color: #c080f0; }
 .res-power { color: #f0d060; } .res-infra { color: #d0a878; } .res-compute { color: #70c0c8; }
 .res.cap { border-style: dashed; }
 .res-sep { width: 1px; align-self: stretch; background: var(--edge); margin: 0 2px; }

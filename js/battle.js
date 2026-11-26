@@ -378,22 +378,19 @@ const Battle = {
     let outcome = '';
     if (won) {
       G.stats.battlesWon++;
-      const shards = 3 + theirLost.length * 2;
-      G.res.shards += shards;
       // wrecks may leave usable weapons behind (monster claws are no use to anyone)
       const drops = [];
       b.units.filter((x) => x.side === 'enemy' && x.dead && x.ref !== 'defense' && !DATA.shipTypes[x.type].monster).forEach((x) => {
         if (Math.random() < 0.3 && x.weapons.length) { const w = Object.assign({}, U.pick(x.weapons)); delete w.cdLeft; w.id = 'w' + (G.nextWeaponId++); G.armory.push(w); drops.push(w.name); }
       });
-      outcome = `Victory. +${shards} Shards${drops.length ? `, salvaged ${drops.join(', ')}` : ''}.`;
+      outcome = `Victory.${drops.length ? ` Salvaged ${drops.join(', ')}.` : ''}`;
       if (b.kind === 'attack') {
         if (s.owner && s.owner !== 'player') {
           const old = Colonies.capture(s.id, 'player');
           s.guard = null;
           G.stats.coloniesTaken++;
-          G.res.shards += 10;
           Explore.reveal(s.id);
-          outcome += ` ${s.name} falls to the Covenant. Survivors of ${DATA.factions[old].name} are put to work. +10 Shards.`;
+          outcome += ` ${s.name} falls to the Covenant. Survivors of ${DATA.factions[old].name} are put to work.`;
         } else {
           s.guard = null;
           outcome += ` ${s.name} is clear.`;
@@ -437,7 +434,6 @@ const Battle = {
       ai.alive = false;
       G.threats = G.threats.filter((t) => t.owner !== id);
       Log.add(`${DATA.factions[id].name} is extinguished. Its last ships drift dark and silent.`, 'good');
-      G.res.shards += 30;
     }
     if (!G.systems.some((s) => s.owner === 'player')) G.over = 'lose';
     else if (!G.ai.chorus.alive && !G.ai.remnant.alive) G.over = 'win';

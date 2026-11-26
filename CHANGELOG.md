@@ -2,6 +2,17 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.43.0 — 2026-11-26
+- **Void Shards removed.** The resource is gone from the top bar, the Overview and the save, along with every source:
+  - survey bonus, battle victories, captured worlds, destroyed empires;
+  - pulsars and black holes;
+  - the +1 every 5 Cycles;
+  - the *Void Listening* technology;
+  - offline progress.
+- **Weapon Forge** now costs **25 Rare Minerals + 15 Electronics** (was 15 Shards).
+- Events that gave Shards now give something else: *A Voice in the Static → Listen* gives +25 Research (unless the archivists go blind); *Survivors → Take them in* gives +15 Research; *Seal it away* gives nothing.
+- **New save format:** old saves start a new game.
+
 ## 0.42.0 — 2026-11-26
 - **First-time greeting.** A new game (first visit, new galaxy, Begin anew) is greeted with "Wake up, Commander, all systems operational." (`wake_up`, new trigger `first`) instead of "Welcome back". Until `assets/voice/wake_up.mp3` exists, only the transmission text shows.
 - **Battle: the fleet-power bar is at the top of the board.**

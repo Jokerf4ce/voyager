@@ -35,7 +35,7 @@ const Tester = {
     }
     this.fixCaps();
 
-    for (const k in G.res) G.res[k] = k === 'shards' ? 500 : 1500;
+    for (const k in G.res) G.res[k] = 1500;
 
     // Ships of every size and rarity: two fleets and a full hangar, plus spare weapons and Arks.
     G.techs.medium = 1; G.techs.capital = 1;

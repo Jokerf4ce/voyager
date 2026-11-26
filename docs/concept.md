@@ -57,8 +57,8 @@ Rare special systems (decided to add, effects proposed). These are stellar remna
 | Star | Planets | Infrastructure | Habitability | Bonus |
 |---|---|---|---|---|
 | White Dwarf (Earth-sized dead star) | 1–3, mostly frozen | ×0.4 | −1 | Rare Minerals ×1.5 |
-| Pulsar (spinning neutron star with radiation beams) | 1–2 | ×0.3 | −2 | Compute ×2, +1 Void Shard per Cycle while held |
-| Black Hole (with accretion disc) | 1–2 | ×0.2 | −2 | Compute ×2.5, +3 Void Shards per Cycle while held |
+| Pulsar (spinning neutron star with radiation beams) | 1–2 | ×0.3 | −2 | Compute ×2 |
+| Black Hole (with accretion disc) | 1–2 | ×0.2 | −2 | Compute ×2.5 |
 
 Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1,400 solar radii), with 1–3 scorched planets, Infrastructure ×2 and habitability −2. It never appears at random. One is placed 2–3 jumps from home at the start, for show (to be found by exploring).
 
@@ -116,7 +116,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 ## 4b. Resources
 
-**Decided:** three gathered resources, two refined goods and three capacities, plus Research and Void Shards.
+**Decided:** three gathered resources, two refined goods and three capacities, plus Research. (Void Shards were removed in v0.43.)
 - Gathered: Metals, Rare Minerals, Organics.
 - Refined: Electronics and Chemicals. These are only spent on building.
 - Capacities: Power, Compute and Infrastructure.
@@ -130,7 +130,6 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 | **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, warships, surveys, settling |
 | **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, warships, settling |
 | **Research** | points | Research Labs (+2 each), capital +1 | technology |
-| **Void Shards** | points | exploration, battles, events, techs, relics, pulsars and black holes | Void Signals (gacha) |
 | **Power** ϟ | capacity | colony base 2 × starlight, Fusion Reactors (+6), Solar Arrays in orbit (+4 × starlight); hot worlds ×1.3 | almost every building |
 | **Infrastructure** ⌂ | capacity | colony base 5, Hab Domes (+5), Habitat Rings (+6); ice/water ×1.3, temperate ×1.2 | workers in production buildings and labs; ship crews |
 | **Compute** ☍ | capacity | Cogitator Arrays (+4); frozen ×1.5, pulsar ×2, black hole ×2.5 | Research Labs, Defense Platforms, Frigates and bigger warships |
@@ -171,12 +170,12 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - **No fixed stats** (v0.24): every stat (and weapon damage) is drawn from a **normal distribution** around the type's average, so every ship differs, Normal ones included. Rarity shifts the average up: **Normal 76.9 % (×1), Strong 20 % (×1.2), Epic 2 % (×1.45, +1 slot), Legendary 1 % (×1.75, +1 slot), Omega 0.1 % (×2.2, +1 slot).**
 - **Battles** are turn-based, like a card game or a Pokémon battle: both sides' cards face each other in **lanes** (fleet order); every round each ship acts once, fastest first, firing one ready weapon. **Targeting is automatic** (v0.26): the ship opposite, else right, left, two right, two left; shots across lanes have half the hit chance. Instead of firing, a ship can **swap formation** with any ship on its side (v0.29; any lane since v0.31), by drag and drop or arrows and a confirm button. You pick the weapon (or the swap) for your ships, or switch on **Auto**; **Resolve instantly** and **Retreat** are always available. A battle ends when one side is destroyed (or after 25 rounds).
 - **Losses are permanent.** Damage to hull carries over and is repaired at home (20 % of max hull per Cycle, only while maintenance is paid). Shields recharge after every battle.
-- **The Void Signals gacha is removed** (no leaders, relics or blueprints). Void Shards now buy random weapons at the **Weapon Forge**.
+- **The Void Signals gacha is removed** (no leaders, relics or blueprints). Random weapons come from the **Weapon Forge** (paid in Shards until v0.43, now in Rare Minerals and Electronics).
 
 **Decided for now, easy to change:**
 - Maintenance is paid each Cycle in Metals, plus half as much in Chemicals.
 - Research unlocks Medium hulls (*Medium Hulls*) and Large hulls (*Capital Hulls*).
-- Weapons come from scrapping ships (which also refunds 30 % of a hull's cost), from wrecks after a victory (30 % chance per destroyed alien ship) and from the Weapon Forge (15 Shards, rarity rolled like a ship's).
+- Weapons come from scrapping ships (which also refunds 30 % of a hull's cost), from wrecks after a victory (30 % chance per destroyed alien ship) and from the Weapon Forge (25 Rare Minerals + 15 Electronics, rarity rolled like a ship's).
 - Alien raids (decided v0.40: only after a grace period of 3 colonies founded besides the capital, and rarer, see `docs/combat.md`) appear as threats with a countdown. When one arrives you choose a fleet to defend; the system's Bastions and Defense Platforms fight as one **Planetary Defenses** card (the capital always has one). If the defense loses, the system falls.
 - Monster lairs and alien worlds are guarded by ship cards. The Chorus leans on energy weapons, the Iron Remnant on physical ones. Alien ships get better rarities and bigger hulls as the Cycles pass.
 

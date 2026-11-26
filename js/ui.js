@@ -69,7 +69,7 @@ const UI = {
     const c = net.caps;
     const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" data-tip="cap:${k}" tabindex="0">
         <span class="ico">${DATA.capacities[k].icon}</span><b>${U.fmt(c[k].used)}/${U.fmt(c[k].cap)}</b></div>`;
-    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
+    this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research'].map((k) => r(k, G.res[k], net[k])).join('') +
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
       (c.eff < 1 ? `<div class="res over" data-tip="ration" tabindex="0"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     const fighting = !!(G.battle && G.battle.phase !== 'over');
@@ -229,7 +229,6 @@ const UI = {
         <div class="kv"><span>Electronics <small class="muted">(refined)</small></span><b class="res-electronics">+${U.fmt1(net.electronics)}</b></div>
         <div class="kv"><span>Chemicals <small class="muted">(refined)</small></span><b class="res-chemicals">+${U.fmt1(net.chemicals)}</b></div>
         <div class="kv"><span>Research <small class="muted">(Research Labs)</small></span><b class="res-research">+${U.fmt1(net.research)}</b></div>
-        <div class="kv"><span>Void Shards</span><b class="res-shards">+${U.fmt1(net.shards)} <small>(+1 every 5 Cycles)</small></b></div>
         ${net.upkeep ? `<div class="kv"><span>Fleet maintenance <small class="muted">(included above)</small></span><b class="neg">−${U.fmt1(net.upkeep)} ▣ −${U.fmt1(net.upkeep / 2)} ⚗</b></div>` : ''}
         <h4>Capacities</h4>
         ${Object.entries(DATA.capacities).map(([k, d]) => `<div class="kv"><span class="res-${k}">${d.icon} ${d.name}</span><b>${U.fmt1(c[k].used)} / ${U.fmt1(c[k].cap)}</b></div>
@@ -352,7 +351,7 @@ const UI = {
     return `<div class="sys-head">${this.starImg(s, 36)}<div><h4>${U.esc(s.name)}</h4><small style="color:${st.color}">${st.name}</small></div></div>
       <div class="small" style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${s.planets.map((p) => `<div class="hp-row">${this.planetImg(s, p, 20)}<span>${U.esc(Colonies.planetName(s, p))}</span>${p.colony ? '<span class="lvl">⌂</span>' : ''}<span class="hab-pips" style="color:${DATA.habitability[p.hab].color}">${'●'.repeat(p.hab)}${'○'.repeat(5 - p.hab)}</span></div>`).join('')}
-      ${fleetLine}${s.anomaly ? '<div class="small res-shards">Strange signals here.</div>' : ''}`;
+      ${fleetLine}${s.anomaly ? '<div class="small anomaly">Strange signals here.</div>' : ''}`;
   },
 
   systemPanel() {
@@ -365,7 +364,7 @@ const UI = {
     const hostile = !!Missions.guard(s);
     const st = DATA.starClasses[s.star];
     let body = `<div class="sys-head">${this.starImg(s, 64)}<div><h3>${U.esc(s.name)}</h3><b style="color:${st.color}">${st.name}</b></div></div>
-      <div class="small muted">${st.desc} Starlight ×${st.solar} Power${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => (DATA.capacities[k] || DATA.resources[k]).name + ' ×' + v).join(', ') : ''}${st.shards ? `, +${st.shards} Void Shard${st.shards > 1 ? 's' : ''} per Cycle while held` : ''}.</div>
+      <div class="small muted">${st.desc} Starlight ×${st.solar} Power${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => (DATA.capacities[k] || DATA.resources[k]).name + ' ×' + v).join(', ') : ''}.</div>
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${this.missionPanel(s)}
       <h4>Planets</h4>`;

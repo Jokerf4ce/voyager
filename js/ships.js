@@ -148,8 +148,8 @@ const Ships = {
   },
 
   forge(size) {
-    if (!this.unlocked(size) || G.res.shards < DATA.forge.cost.shards) return null;
-    G.res.shards -= DATA.forge.cost.shards;
+    if (!this.unlocked(size) || !Colonies.canAfford(DATA.forge.cost)) return null;
+    Colonies.pay(DATA.forge.cost);
     const w = this.makeWeapon(size, this.rollRarity());
     G.armory.push(w);
     Log.add(`The forge spits out a ${DATA.shipRarities[w.rarity].name} ${w.name} (${DATA.sizes[size].name}).`, w.rarity === 'normal' ? '' : 'good');

@@ -76,7 +76,7 @@ Object.assign(UI, {
         <div class="buildtiles">${['S', 'M', 'L'].map(tile).join('')}</div>${reveal}`) +
       `<div class="grid2">` +
       this.panel('Weapon Forge', `<p class="small">${DATA.forge.desc} Fit forged weapons to ships on the Fleets screen.</p>
-        <div class="btnrow">${['S', 'M', 'L'].map((z) => this.btn(`${DATA.sizes[z].name} weapon <small class="res-shards">◆${DATA.forge.cost.shards}</small>`, 'forge', z, !Ships.unlocked(z) || G.res.shards < DATA.forge.cost.shards)).join('')}</div>
+        <div class="btnrow">${['S', 'M', 'L'].map((z) => this.btn(`${DATA.sizes[z].name} weapon <small>${U.costText(DATA.forge.cost)}</small>`, 'forge', z, !Ships.unlocked(z) || !Colonies.canAfford(DATA.forge.cost))).join('')}</div>
         ${lw ? `<div class="forged">New: ${this.weaponChip(lw)} <small class="muted">(${DATA.sizes[lw.size].name})</small></div>` : ''}`) +
       `</div>`;
   },

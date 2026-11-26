@@ -32,7 +32,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Research made by Research Labs, including endlessly repeatable "Doctrine" techs for the incremental layer
 - Ship cards in 3 sizes (rock-paper-scissors) and 9 types, rolled at 5 rarities; global fleets of up to 5; missions instead of map movement
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
-- Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge for Shards
+- Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge (Rare Minerals + Electronics)
 - Offline progress, save export/import
 - Generative soundtrack synthesised in the browser: six tracks in a playlist (mute with ♪, tracks and volume in Settings)
 - Ship sprites in a 3/4 view, rendered from small 3D models (`tools/shipart/render.py`): three designs per ship type as grey templates, painted on the fly in each faction's colours (`DATA.shipPalettes`); pick your own fleet colours in Settings

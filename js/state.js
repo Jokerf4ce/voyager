@@ -5,9 +5,9 @@ let G = null;
 const State = {
   newGame() {
     G = {
-      version: 13,
+      version: 14,
       cycle: 1,
-      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, shards: 25 },
+      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0 },
       systems: [],
       ships: {},          // every Covenant ship card, by id (js/ships.js)
       fleets: [],         // [{ id, name, ships: [shipId], mission }]
@@ -42,7 +42,7 @@ const State = {
 
   // Sum of every bonus source (research).
   mods() {
-    const m = { metal: 1, rare: 1, organics: 1, electronics: 1, chemicals: 1, research: 1, power: 1, infra: 1, compute: 1, atk: 1, hp: 1, bastion: 1, all: 1, shardIncome: 0, exploreShards: 0, aiAggro: 0 };
+    const m = { metal: 1, rare: 1, organics: 1, electronics: 1, chemicals: 1, research: 1, power: 1, infra: 1, compute: 1, atk: 1, hp: 1, bastion: 1, all: 1, aiAggro: 0 };
     const add = (mods, scale) => { for (const k in mods) m[k] = (m[k] || 0) + mods[k] * scale; };
     for (const [id, lvl] of Object.entries(G.techs)) if (lvl > 0) add(DATA.techs[id].mods, lvl);
     return m;
@@ -64,7 +64,7 @@ const State = {
     if (!raw) return false;
     try {
       const data = JSON.parse(raw);
-      if (!data || data.version !== 13) return false;
+      if (!data || data.version !== 14) return false;
       G = data;
       return true;
     } catch (e) { return false; }
@@ -77,7 +77,7 @@ const State = {
   exportSave() { return btoa(unescape(encodeURIComponent(JSON.stringify(G)))); },
   importSave(str) {
     const data = JSON.parse(decodeURIComponent(escape(atob(str.trim()))));
-    if (!data || data.version !== 13) throw new Error('Not a Voyager save');
+    if (!data || data.version !== 14) throw new Error('Not a Voyager save');
     G = data;
   },
 
@@ -96,7 +96,6 @@ const State = {
       electronics: inc.electronics * cycles * eff,
       chemicals: inc.chemicals * cycles * eff,
       research: inc.research * cycles * eff,
-      shards: Math.floor((inc.shards * cycles + cycles / 10) * eff),
     };
     for (const k in gained) G.res[k] += gained[k];
     const completed = Research.tick();

@@ -145,7 +145,7 @@ damage      = a normal-distribution roll around that mean, spread 15 %, rounded,
 
 - **Scrapping a ship** moves all its weapons to the armory and refunds 30 % of its size's build cost.
 - **Wrecks:** after a victory, each destroyed alien ship has a 30 % chance to leave one of its weapons. Monsters leave nothing.
-- **Weapon Forge** (Shipyard): costs 15 Void Shards and rolls a random weapon of the chosen size. Its rarity is rolled like a ship's.
+- **Weapon Forge** (Shipyard): costs 25 Rare Minerals + 15 Electronics (`DATA.forge`; 15 Void Shards before v0.43) and rolls a random weapon of the chosen size. Its rarity is rolled like a ship's.
 - **Refitting** (Fleets screen, in the ship's panel):
   - Swap any slot for an armory weapon of the same size; the old weapon goes back to the armory.
   - Ships on a mission can't be refitted.
@@ -323,11 +323,9 @@ A system's Bastions (surface) and Defense Platforms (orbit) fight together as **
 - At home, hulls repair **20 % of max hull per Cycle**, but only while maintenance is fully paid.
 
 **A victory:**
-- **Void Shards:** +3, plus +2 per enemy destroyed.
 - **Salvage:** weapons may drop (see 2.3).
 - **Attack on an alien world:** the system is **captured**:
   - Each building there loses one level.
-  - +10 Shards.
 - **Attack on a monster lair:** the system is cleared and can be settled.
 - **Defense:** the system holds.
 
@@ -337,7 +335,7 @@ A system's Bastions (surface) and Defense Platforms (orbit) fight together as **
 
 Every battle goes into the Battle Reports on the Overview.
 
-Once an alien faction has no systems left, it is extinguished (+30 Shards). Destroying both factions wins the game; losing all your systems ends it.
+Once an alien faction has no systems left, it is extinguished. Destroying both factions wins the game; losing all your systems ends it.
 
 ---
 
