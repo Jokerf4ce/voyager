@@ -9,7 +9,7 @@ See [docs/concept.md](docs/concept.md) for the design.
 Open `index.html` in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
 - **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
-- **Star Map:** click a system to inspect it. Select one of your fleets, then click a system to send it there.
+- **Star Map:** click a system to inspect it, double-click to open its **Solar System** map. Select one of your fleets, then click a system to send it there.
 - While the game is closed, the empire keeps producing at 50% efficiency (1 Cycle per 60 s, max 120 Cycles).
 
 ## Proof of concept (v0.1)
@@ -44,7 +44,8 @@ js/combat.js      battles and sieges
 js/ai.js          alien empire AI
 js/gacha.js       Void Signals
 js/sprites.js     procedural placeholder pixel art
-js/map.js         star map canvas
+js/map.js         star map canvas (galaxy)
+js/sysmap.js      solar system map canvas (one system)
 js/ui.js          screens and modals
 js/main.js        turn loop, auto-cycle, input, boot
 ```

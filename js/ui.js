@@ -3,6 +3,8 @@
 const UI = {
   screen: 'map',
   selSys: null,
+  selPlanet: null,
+  mapMode: 'galaxy', // 'galaxy' or 'system'
   selFleet: null,
   yard: null,
   colSys: null,
@@ -38,8 +40,13 @@ const UI = {
     this.lastScreen = this.screen;
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
-      StarMap.draw(cv);
-      cv.onclick = (ev) => this.mapClick(cv, ev);
+      if (this.mapMode === 'system') {
+        SystemMap.draw(cv);
+        cv.onclick = (ev) => { const p = SystemMap.hit(cv, ev); this.selPlanet = p ? p.idx : null; this.render(); };
+      } else {
+        StarMap.draw(cv);
+        cv.onclick = (ev) => this.mapClick(cv, ev);
+      }
     }
     this.renderTicker();
   },
@@ -141,10 +148,23 @@ const UI = {
     </div>`;
   },
 
+  openSystem() {
+    this.mapMode = 'system';
+    this.selPlanet = null;
+    this.render();
+  },
+
   screen_map() {
+    const s = this.selSys != null ? G.systems[this.selSys] : null;
+    if (this.mapMode === 'system' && !(s && s.explored)) this.mapMode = 'galaxy';
+    const sysMode = this.mapMode === 'system';
+    const tabs = `<div class="btnrow maptabs">${this.btn('✦ Star Map', 'mapmode', 'galaxy', false, sysMode ? '' : 'on')}${this.btn('◉ Solar System' + (s && s.explored ? ': ' + U.esc(s.name) : ''), 'mapmode', 'system', !(s && s.explored), sysMode ? 'on' : '')}</div>`;
+    const hint = sysMode
+      ? 'Click a planet to inspect it. Hot worlds orbit close to the star, frozen ones far out.'
+      : this.selFleet ? `<b>${U.esc((Fleets.get(this.selFleet) || {}).name || '')}</b> selected. Click a system to send it there.` : 'Click a system to inspect it, double-click to open its solar system. Select one of your fleets to give it orders.';
     return `<div class="mapwrap">
-      <div class="mapbox"><canvas id="mapcanvas" width="${StarMap.W}" height="${StarMap.H}"></canvas>
-        <div class="maphint">${this.selFleet ? `<b>${U.esc((Fleets.get(this.selFleet) || {}).name || '')}</b> selected. Click a system to send it there.` : 'Click a system to inspect it. Select one of your fleets to give it orders.'}</div></div>
+      <div class="mapbox">${tabs}<canvas id="mapcanvas" width="${StarMap.W}" height="${StarMap.H}"></canvas>
+        <div class="maphint">${hint}</div></div>
       <aside class="side">${this.systemPanel()}</aside>
     </div>`;
   },
@@ -171,7 +191,7 @@ const UI = {
         if (ark && (!s.owner || s.owner === 'player') && p.slots.surface + p.slots.orbit > 0) act = this.btn('Settle with Ark', 'colonize', ark.id + ':' + p.idx, false, 'gold small');
         else if (s.owner === 'player') { const sc = Colonies.settleCost(p); act = this.btn(`Settle ${U.costText(sc)}`, 'settle', s.id + ':' + p.idx, !Colonies.canAfford(sc), 'small'); }
       }
-      return `<div class="planet-row ${p.colony ? 'settled' : ''}">${this.planetImg(s, p, 40)}
+      return `<div class="planet-row ${p.colony ? 'settled' : ''} ${this.mapMode === 'system' && this.selPlanet === p.idx ? 'sel' : ''}" data-act="selplanet" data-a="${p.idx}">${this.planetImg(s, p, 40)}
         <div><b>${U.esc(Colonies.planetName(s, p))}</b> <span class="muted small">${Planets.label(p)}</span>
         <div class="small">${this.habText(p, true)}</div>
         <div class="small muted">${this.planetMods(p)} · surface ${p.slots.surface} · orbit ${p.slots.orbit}</div>
@@ -208,6 +228,10 @@ const UI = {
 
   mapClick(cv, ev) {
     const s = StarMap.hit(cv, ev);
+    // The canvas is redrawn on every click, so double-clicks are detected by hand.
+    const now = Date.now(), dbl = s && this.lastClick && this.lastClick.id === s.id && now - this.lastClick.t < 450;
+    this.lastClick = s ? { id: s.id, t: now } : null;
+    if (dbl && s.explored && !this.selFleet) { this.selSys = s.id; this.openSystem(); return; }
     if (!s) { this.selFleet = null; this.render(); return; }
     if (this.selFleet && s.id !== (Fleets.get(this.selFleet) || {}).sys) {
       if (Fleets.order(this.selFleet, s.id)) {

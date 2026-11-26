@@ -70,6 +70,8 @@ const Game = {
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     buildship: (a) => { Fleets.build(a, UI.yard); },
     research: (a) => { Research.select(a); Research.tick(); },
+    mapmode: (a) => { UI.mapMode = a; UI.selPlanet = null; },
+    selplanet: (a) => { UI.mapMode = 'system'; UI.selPlanet = +a; },
     mapfleet: (a) => { const f = Fleets.get(+a); UI.selFleet = f.id; UI.selSys = f.sys; UI.screen = 'map'; },
     pull: (a) => { const r = Gacha.pull(+a); if (r) UI.lastPull = r; },
     eventchoice: (a) => { Explore.resolveEvent(+a); UI.closeModal(); },
@@ -102,7 +104,7 @@ document.addEventListener('click', (ev) => {
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
-  if (ev.code === 'Escape') { UI.selFleet = null; UI.render(); }
+  if (ev.code === 'Escape') { if (UI.mapMode === 'system') UI.mapMode = 'galaxy'; else UI.selFleet = null; UI.render(); }
 });
 
 window.addEventListener('DOMContentLoaded', () => {

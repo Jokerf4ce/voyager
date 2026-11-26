@@ -58,6 +58,11 @@ const Sprites = {
     return (this.cache[key] = c.toDataURL());
   },
 
+  planetCanvas(p, seedKey) {
+    this.planet(p, seedKey);
+    return this.cache[`cv:p:${Planets.classKey(p)}:${DATA.planetSizes[p.size].sprite}:${seedKey}`];
+  },
+
   // Symmetric masked faces: leaders and relics.
   portrait(id, rarity, kind) {
     const key = `f:${id}`;

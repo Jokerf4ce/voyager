@@ -233,5 +233,5 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
-  saveKey: 'voyager_save_v6',
+  saveKey: 'voyager_save_v7',
 };

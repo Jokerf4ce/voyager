@@ -21,7 +21,15 @@ const Galaxy = {
     const n = U.randInt(lo, hi);
     const out = [];
     for (let i = 0; i < n; i++) out.push(Planets.random(i, star));
-    return out;
+    return this.orderPlanets(out);
+  },
+
+  // Hot worlds orbit closest to the star, frozen ones farthest out; numbering follows the orbits.
+  orderPlanets(planets) {
+    const rank = { hot: 0, temperate: 1, frozen: 2 };
+    planets.sort((a, b) => rank[a.temp] - rank[b.temp] || (a.comp === 'gas') - (b.comp === 'gas'));
+    planets.forEach((p, i) => { p.idx = i; });
+    return planets;
   },
 
   // Best planet in a system for a first colony: most surface slots, never a gas giant if avoidable.
@@ -91,11 +99,13 @@ const Galaxy = {
     home.star = 'G';
     home.planets = this.makePlanets('G');
     while (home.planets.length < 3) home.planets.push(Planets.random(home.planets.length, 'G'));
-    home.planets[0] = Planets.make(0, 'silicate', 'large', 'temperate', 5, 'G');
+    const capital = Planets.make(0, 'silicate', 'large', 'temperate', 5, 'G');
+    home.planets[0] = capital;
+    this.orderPlanets(home.planets);
     home.name = 'Covenant Ark-Home';
     G.homeId = home.id;
-    G.homePlanet = 0;
-    Colonies.found(home.id, 0, 'player', { mine: 1, drill: 1, dome: 1, bastion: 1 }, { shipyard: 1, ring: 1, cogitator: 1 });
+    G.homePlanet = capital.idx;
+    Colonies.found(home.id, capital.idx, 'player', { mine: 1, drill: 1, dome: 1, bastion: 1 }, { shipyard: 1, ring: 1, cogitator: 1 });
     Colonies.found(chorus.id, this.bestPlanet(chorus), 'chorus', { bastion: 1 });
     Colonies.found(remnant.id, this.bestPlanet(remnant), 'remnant', { bastion: 1 });
     G.ai.chorus.homeId = chorus.id;
