@@ -23,7 +23,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 
 - Endless procedural galaxy, generated in chunks as you explore, with hyperlanes and fog of war; only home is charted at the start; a Red Hypergiant waits 2–3 jumps away
 - Each system has a star class (O B A F G K M), or rarely a white dwarf, pulsar or black hole, and 1–5 planets
-- Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony
+- Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony; demolish one (✕) to free its slot and salvage 25 % of what it cost
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
 - Explore with scouts; exploration events with grim choices
 - Expand with colony expeditions into new systems, then settle more planets in systems you hold

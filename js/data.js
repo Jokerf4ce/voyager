@@ -219,6 +219,7 @@ DATA.colonize = { name: 'Colony expedition', cost: { metal: 60, electronics: 25,
 DATA.forge = { cost: { shards: 15 }, desc: 'Forge a random weapon of the chosen size. Its rarity is rolled like a ship\'s.' };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
+DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
 DATA.scrapRefund = 0.3;      // part of the build cost returned when a ship is scrapped
 
 // Ship colours. Ship sprites are grey templates (js/shipsprites.js) painted with these on the fly.

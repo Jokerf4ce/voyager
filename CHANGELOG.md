@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.35.0 — 2026-11-26
+- **Demolish buildings.** A red ✕ next to *Upgrade* on a colony, and next to each colony in a building's list on the Buildings screen, tears the building down. That covers all levels and frees the slot.
+- **Refund:** you get back **25 % of everything invested**, which is the price of every level paid at that colony, rounded down. The confirm dialog shows the refund and the total invested.
+- **Shortage warning:** demolishing a Power Plant, Solar Array, Habitat or Datacenter is allowed even if it leaves a capacity short (useful for swapping buildings in a full layer). The dialog warns which capacity runs short and how far production drops.
+- Garrisons shrink to the new maximum when a Bastion or Defense Platform goes.
+
 ## 0.34.1 — 2026-11-26
 - **Phones: Star Map / Solar System tabs are back.** On screens up to 820 px wide, two tabs at the top of the map screen switch between the star map and the selected system's solar system; the system panel (missions, planets) stays below both. Double-tapping a charted system opens its Solar System tab. The tab is greyed out for uncharted systems. Desktop is unchanged.
 - On phones the star map is shorter (about 60 % of the screen), so the page can still be scrolled past it, and the hint text talks about taps instead of hovering.

@@ -359,7 +359,7 @@ const UI = {
           const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k);
           const inf = this.capText(b.cap);
           return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
-            <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}</div></div>`;
+            <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}${lvl ? ' ' + this.demolishBtn(`${s.id}:${p.idx}:${L}:${k}`) : ''}</div></div>`;
         };
         return `<div class="layer"><h4>${DATA.layers[L]} <span class="${used >= max ? 'bad' : 'muted'}">${used}/${max} slots</span></h4>
           ${built.map(row).join('')}
@@ -371,6 +371,11 @@ const UI = {
         <div class="small">${this.habText(p)}</div>
         <div class="small">${Object.entries(Economy.planetCaps(p)).map(([k, v]) => `<span class="res-${k}">${DATA.capacities[k].icon} ${U.fmt1(v.use)}/${U.fmt1(v.give)}</span>`).join(' · ')} <span class="muted">(used/provided here)</span></div></div></div>
         <div class="layers">${layer('surface')}${layer('orbit')}</div></div>`;
+  },
+
+  // Small button that asks before tearing a building down (a = "sysId:planetIdx:layer:key").
+  demolishBtn(a) {
+    return `<button class="btn small danger demolish" data-act="demolish" data-a="${a}" title="Demolish: get back ${Math.round(DATA.demolishRefund * 100)} % of everything invested">✕</button>`;
   },
 
   // Overview: every building type you own, with its total level; click to see where they are.
@@ -398,7 +403,7 @@ const UI = {
         const spots = Colonies.placements(k);
         detail = `<div class="bdetail">
           <h4>On ${h.list.length} ${h.list.length === 1 ? 'colony' : 'colonies'}</h4>
-          ${h.list.length ? h.list.map((x) => `<div class="kv"><span>${where(x)}</span><span><b class="lvl">Lv ${x.lvl}</b> ${this.btn('Open', 'gocolony', x.ref, false, 'small')}</span></div>`).join('') : '<p class="muted small">None yet.</p>'}
+          ${h.list.length ? h.list.map((x) => `<div class="kv"><span>${where(x)}</span><span><b class="lvl">Lv ${x.lvl}</b> ${this.btn('Open', 'gocolony', x.ref, false, 'small')} ${this.demolishBtn(`${x.ref}:${x.layer}:${k}`)}</span></div>`).join('') : '<p class="muted small">None yet.</p>'}
           <h4>Build at</h4>
           ${spots.length ? spots.map((x, i) => `<div class="kv spot ${x === best ? 'best' : ''}"><span>${where(x)} ${x.lvl ? `<span class="muted">Lv ${x.lvl} → ${x.lvl + 1}</span>` : '<span class="muted">new slot</span>'}
               ${d.gathers || Object.values(d.cap || {}).some((v) => v < 0) ? `<span class="muted">· output ×${U.fmt1(x.value)}</span>` : ''} ${x === best ? '<span class="res-power">★ Auto pick</span>' : ''}</span>

@@ -110,6 +110,18 @@ const Game = {
     colsys: (a) => { UI.colSys = +a; },
     colopen: (a) => { UI.colOpen[a] = !UI.colOpen[a]; },
     goyard: () => { UI.screen = 'shipyard'; },
+    demolish: (a) => {
+      const [sid, pi, layer, k] = a.split(':'), { s, p } = Colonies.get(sid + ':' + pi);
+      if (!p || !p.colony || !(p.colony[layer][k] > 0)) return;
+      const d = DATA.buildings[k], refund = Colonies.demolishRefund(p, layer, k), fx = Colonies.demolishEffect(p, layer, k);
+      const warn = fx.short.length
+        ? `<p class="bad">This leaves ${fx.short.map((c) => DATA.capacities[c].name).join(' and ')} short: production drops to ${Math.round(fx.eff * 100)} %${fx.effBefore < 1 ? ` (now ${Math.round(fx.effBefore * 100)} %)` : ''}.</p>` : '';
+      UI.modal(`<h2>Demolish ${U.esc(d.name)} Lv ${p.colony[layer][k]}?</h2>
+        <p>On ${U.esc(Colonies.planetName(s, p))} (${DATA.layers[layer].toLowerCase()}). The slot is freed and you salvage ${Math.round(DATA.demolishRefund * 100)} % of everything invested in it:</p>
+        <p><b>${U.costText(refund) || 'nothing'}</b> <span class="muted small">of ${U.costText(Colonies.invested(p, layer, k))} invested</span></p>${warn}
+        <div class="btnrow">${UI.btn('Demolish', 'demolish-confirm', a, false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
+    },
+    'demolish-confirm': (a) => { UI.closeModal(); const [sid, pi, layer, k] = a.split(':'); Colonies.demolish(sid + ':' + pi, layer, k); },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastWeapon = null; } },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },

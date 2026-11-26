@@ -100,6 +100,40 @@ const Colonies = {
     return true;
   },
 
+  // ---- demolishing ----
+  // Everything paid for a building so far: the price of each level from 1 up to its current level.
+  invested(p, layer, key) {
+    const def = DATA.buildings[key], lvl = (p.colony && p.colony[layer][key]) || 0, h = this.habMult(p, layer), out = {};
+    for (let i = 1; i <= lvl; i++) for (const k in def.cost) out[k] = (out[k] || 0) + Math.ceil(def.cost[k] * h * this.levelMult(i));
+    return out;
+  },
+  // What demolishing gives back: DATA.demolishRefund of everything invested, rounded down.
+  demolishRefund(p, layer, key) {
+    const out = {}, inv = this.invested(p, layer, key);
+    for (const k in inv) { const v = Math.floor(inv[k] * DATA.demolishRefund); if (v > 0) out[k] = v; }
+    return out;
+  },
+  // What the empire would look like without this building: capacities it would leave short, and the
+  // production rate afterwards (power plants and habitats can be torn down, at the price of rationing).
+  demolishEffect(p, layer, key) {
+    const before = Economy.caps(), lvl = p.colony[layer][key];
+    p.colony[layer][key] = 0;
+    const after = Economy.caps();
+    p.colony[layer][key] = lvl;
+    const short = Object.keys(DATA.capacities).filter((k) => after[k].used > after[k].cap + 1e-9 && after[k].free < before[k].free - 1e-9);
+    return { short, eff: after.eff, effBefore: before.eff };
+  },
+  demolish(ref, layer, key) {
+    const { s, p } = this.get(ref);
+    if (!p || !p.colony || s.owner !== 'player' || !(p.colony[layer][key] > 0)) return false;
+    const refund = this.demolishRefund(p, layer, key), lvl = p.colony[layer][key];
+    for (const k in refund) G.res[k] = (G.res[k] || 0) + refund[k];
+    delete p.colony[layer][key];
+    if (key === 'bastion' || key === 'platform') s.garrison = Math.min(s.garrison, this.maxGarrison(s));
+    Log.add(`${DATA.buildings[key].name} Lv ${lvl} (${DATA.layers[layer]}) demolished on ${this.planetName(s, p)}. Salvaged ${Object.entries(refund).map(([k, v]) => `${v} ${DATA.resources[k].name}`).join(', ') || 'nothing'}.`);
+    return true;
+  },
+
   // ---- empire-wide building list ----
   // Group a building type for the Buildings screen.
   group(key) {

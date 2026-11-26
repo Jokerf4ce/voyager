@@ -110,6 +110,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 - **Building screen:** each building type shows its total level and its colonies. You build either at a colony you pick, or with **Auto**, which picks the spot with the best output per cost.
 - **Overview:** lists the building types you own. Clicking one shows which colonies it is on.
 - **Costs** (decided v0.33): base cost × the colony layer's habitability multiplier × a **level multiplier**. Up to level 5 each level costs 15 % of the base more (1×, 1.15×, 1.3×, 1.45×, 1.6×); from level 6 every level doubles (3.2×, 6.4×, 12.8×, …). This rewards expanding wide (more colonies) over building tall. Tuned in `DATA.levelCost`.
+- **Demolishing** (decided v0.35): any building can be torn down, all levels at once. It frees the slot and returns 25 % of everything invested in it (the price of every level, at the colony's habitability), rounded down (`DATA.demolishRefund`). Power plants and habitats may be demolished even if that leaves a capacity short; the confirm dialog warns how far production would drop.
 
 **Balance (v0.33):** flat costs let the economy run away (in bot tests, buildings reached level 27 and 266 Metals per Cycle by Cycle 150). With the level curve the same bot stays around level 3–6 and 90 Metals per Cycle, and grows by founding colonies instead.
 
