@@ -365,7 +365,7 @@ DATA.tutorial = [
   { target: '#top-res', title: 'Resources',
     text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.<br><br>Point at any of them (or tap it) for details.' },
   { target: '#btn-end', title: 'Cycles',
-    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time. While the game is closed, your colonies keep producing at half speed.' },
+    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time.' },
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
     text: 'Your home system has bright brackets around it. Drag to look around; scroll or pinch to zoom. The buttons on the right zoom, jump home (⌂) and centre on the selected system; the minimap in the corner shows all you have charted.<br><br>A <b>?</b> is a system no one has charted. The galaxy has no edge: it grows as you explore.' },
   { screen: 'map', prepare: 'uncharted', target: '.mapscreen .side', title: 'Explore and expand',
@@ -383,6 +383,6 @@ DATA.tutorial = [
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
     text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire, <b>move</b> it to another lane (the ships in between slide over) or <b>Restore</b> some of its shields and hull. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
-    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your mines. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
+    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your empire. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
 ];
 
