@@ -205,7 +205,11 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **Decided:** mostly menus, plus a star system map.
 
-**Tutorial** (decided, v0.36): the first game in a browser opens a guided tour of 12 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath. It can be skipped, and Settings → *Replay tutorial* shows it again. It is remembered per browser (localStorage `voyager_tutorial_done`), not in the save, and tester mode never starts it.
+**Tutorial** (decided, v0.36): the first game in a browser opens a guided tour of 12 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath. It can be skipped, and Settings → *Replay tutorial* shows it again. Since v0.41 it opens with every new real game (a fresh browser, *Abandon and start a new galaxy*, or *Begin anew* after a loss); tester mode never starts it.
+
+**Game over** (decided, v0.41): when the last colony falls, a full **game over screen** replaces the game. It shows the stats of the run and offers *Begin anew* (a new galaxy, with the tutorial). *Look at the ruins* lets you browse the other screens; a ☠ *Fallen* entry in the menu leads back, and End Cycle stays locked.
+
+**Top-bar hover cards** (decided, v0.41): pointing at (or tapping) a resource or capacity opens a card with its icon, name, kind, description, stock and change per Cycle (capacities: used / available with a bar).
 
 **Chronicle** (decided, v0.38): the event log appears only on its own *Chronicle* screen, not as a strip at the bottom of every screen.
 

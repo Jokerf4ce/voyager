@@ -2,6 +2,19 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.41.0 — 2026-11-26
+- **The tutorial opens with every new game:** a fresh browser, *Abandon and start a new galaxy* in Settings, or *Begin anew* after a loss. Tester mode never starts it.
+- **The battle screen fits the 95 % screen height.**
+  - The battle log and the rules (folded away) moved into a column beside the board. The two rows of ships share the rest of the height.
+  - On shorter screens the ship cards get more compact: smaller pictures, and the weapon list and type line hidden. The acting ship's weapons are always in the controls.
+  - Checked at 1920×1080 and 1366×768 with no scrolling.
+- **Game over screen.**
+  - When the last colony falls, the game shows *The Covenant Ends* with the stats of the run and a **Begin anew** button.
+  - *Look at the ruins* lets you browse; a ☠ *Fallen* menu entry leads back, and End Cycle stays locked.
+  - The screen survives a reload.
+- **Hover cards on the top bar.** Pointing at (or tapping) a resource or capacity shows a card with its icon, name, kind and description, plus the stock and change per Cycle, or used / available with a bar for capacities. This replaces the plain browser tooltip.
+- Tutorial updated: the resources step mentions the hover cards.
+
 ## 0.40.0 — 2026-11-26
 - **Grace period before raids.** The xenos leave you alone until you have founded 3 colonies besides your capital. The Overview's *Threats & Missions* panel shows your progress (for example 1/3). When the grace period ends, the Chronicle and the Assistant warn you.
 - **Raids are rarer.** Half the chance per Cycle (2.5 % × aggression) and a 12-Cycle wait for each empire after it launches a raid. In tests that is about one raid every 50 Cycles instead of every 20. Tuned in `DATA.raids`.

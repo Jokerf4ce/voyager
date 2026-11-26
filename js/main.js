@@ -23,6 +23,7 @@ const Game = {
   afterModal() {
     if (UI.modalOpen) return;
     if (G.pendingEvents.length) { UI.showEvent(); return; }
+    if (G.over === 'lose' && !this.overShown) { this.overShown = true; UI.screen = 'gameover'; UI.render(); return; }
     if (G.over && !this.overShown) {
       this.overShown = true;
       const win = G.over === 'win';
@@ -43,6 +44,7 @@ const Game = {
     UI.screen = 'map';
     State.save();
     UI.render();
+    if (State.slot !== 'tester') Tutorial.start(); // every new real game opens with the tour
   },
 
   // Switch between the real game and tester mode (separate save slots).
@@ -162,6 +164,25 @@ document.addEventListener('click', (ev) => {
   if (G) { State.save(); UI.render(); }
 });
 
+// Hover cards on the top bar (resources and capacities). Touch: tap to show, tap elsewhere to hide.
+document.addEventListener('pointerover', (ev) => {
+  if (ev.pointerType !== 'mouse') return;
+  const el = ev.target.closest && ev.target.closest('#top-res [data-tip]');
+  if (el) UI.showTip(el);
+});
+document.addEventListener('pointerout', (ev) => {
+  if (ev.pointerType !== 'mouse') return;
+  const el = ev.target.closest && ev.target.closest('#top-res [data-tip]');
+  if (el && !(ev.relatedTarget && el.contains(ev.relatedTarget))) UI.hideTip();
+});
+document.addEventListener('pointerdown', (ev) => {
+  if (ev.pointerType === 'mouse') return;
+  const el = ev.target.closest && ev.target.closest('#top-res [data-tip]');
+  if (el && UI.tipKey !== el.dataset.tip) UI.showTip(el); else UI.hideTip();
+});
+document.addEventListener('focusin', (ev) => { const el = ev.target.closest && ev.target.closest('#top-res [data-tip]'); if (el) UI.showTip(el); });
+document.addEventListener('focusout', (ev) => { if (ev.target.closest && ev.target.closest('#top-res [data-tip]')) UI.hideTip(); });
+
 // Sliders and other inputs use data-input instead of data-act.
 document.addEventListener('input', (ev) => {
   const el = ev.target.closest('[data-input]');
@@ -247,9 +268,9 @@ window.addEventListener('DOMContentLoaded', () => {
         <div class="btnrow">${UI.btn('Continue', 'close', '', false, 'gold')}</div>`);
     }
     if (G.over) Game.overShown = true;
+    if (G.over === 'lose') { UI.screen = 'gameover'; UI.render(); }
   } else {
-    Game.newGame();
-    Tutorial.maybeStart(); // first game in this browser: show the tour
+    Game.newGame(); // starts the tutorial
   }
   setInterval(() => State.save(), 10000);
   // Battles: enemy ships (and yours on Auto) act one at a time so you can follow along.

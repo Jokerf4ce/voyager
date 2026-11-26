@@ -63,18 +63,19 @@ const UI = {
 
   renderTop() {
     const net = Economy.net();
-    const r = (k, val, perCycle) => `<div class="res res-${k}" title="${DATA.resources[k].name}: ${DATA.resources[k].desc}">
+    const r = (k, val, perCycle) => `<div class="res res-${k}" data-tip="res:${k}" tabindex="0">
       <span class="ico">${DATA.resources[k].icon}</span><b>${U.fmt(val)}</b>
       ${perCycle != null ? `<small class="${perCycle < 0 ? 'neg' : ''}">${perCycle >= 0 ? '+' : ''}${U.fmt1(perCycle)}</small>` : ''}</div>`;
     const c = net.caps;
-    const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" title="${DATA.capacities[k].name} (capacity, used / available): ${DATA.capacities[k].desc}">
+    const cap = (k) => `<div class="res cap res-${k} ${c[k].used > c[k].cap ? 'over' : ''}" data-tip="cap:${k}" tabindex="0">
         <span class="ico">${DATA.capacities[k].icon}</span><b>${U.fmt(c[k].used)}/${U.fmt(c[k].cap)}</b></div>`;
     this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
-      (c.eff < 1 ? `<div class="res over" title="Over capacity: all production is rationed"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
+      (c.eff < 1 ? `<div class="res over" data-tip="ration" tabindex="0"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     const fighting = !!(G.battle && G.battle.phase !== 'over');
-    this.$('btn-end').disabled = fighting;
-    this.$('btn-end').title = fighting ? 'Finish the battle first' : 'Space / Enter';
+    this.$('btn-end').disabled = fighting || !!G.over;
+    this.$('btn-end').title = G.over ? 'The game is over' : fighting ? 'Finish the battle first' : 'Space / Enter';
+    if (this.tipKey) { const el = this.$('top-res').querySelector(`[data-tip="${this.tipKey}"]`); if (el) this.showTip(el); else this.hideTip(); }
     this.$('cycle').textContent = (State.slot === 'tester' ? 'TESTER · ' : '') + 'CYCLE ' + G.cycle;
     this.$('cycle').classList.toggle('tester', State.slot === 'tester');
     const playing = !!Music.timer;
@@ -83,9 +84,48 @@ const UI = {
     this.$('btn-music').title = playing ? `Now playing: ${Music.find(Music.trackId).name} (click to mute)` : Music.enabled ? 'Music starts after your first click' : 'Music off (click to play)';
   },
 
+  // ---------- top-bar hover cards ----------
+  // The card for a resource, a capacity or the rationing warning (data-tip on the element).
+  tipHtml(key) {
+    const net = Economy.net(), c = net.caps;
+    const [kind, k] = key.split(':');
+    if (kind === 'res') {
+      const d = DATA.resources[k], per = net[k];
+      const kindName = { gathered: 'Gathered resource', refined: 'Refined good', points: 'Points' }[d.kind] || '';
+      return `<div class="tip-head res-${k}"><span class="tip-ico">${d.icon}</span><div><b>${d.name}</b><small>${kindName}</small></div></div>
+        <p>${d.desc}</p>
+        <div class="tip-row"><span>In store</span><b>${U.fmt(G.res[k])}</b></div>
+        <div class="tip-row"><span>Per Cycle</span><b class="${per < 0 ? 'neg' : 'pos'}">${per >= 0 ? '+' : ''}${U.fmt1(per)}</b></div>`;
+    }
+    if (kind === 'cap') {
+      const d = DATA.capacities[k], x = c[k], over = x.used > x.cap;
+      const pct = x.cap ? Math.min(100, x.used / x.cap * 100) : 100;
+      return `<div class="tip-head res-${k}"><span class="tip-ico">${d.icon}</span><div><b>${d.name}</b><small>Capacity · not stored</small></div></div>
+        <p>${d.desc}</p>
+        <div class="tip-row"><span>Used / available</span><b class="${over ? 'neg' : ''}">${U.fmt(x.used)} / ${U.fmt(x.cap)}</b></div>
+        <div class="tip-bar ${over ? 'over' : ''}" style="color:${d.color}"><i style="width:${pct}%"></i></div>
+        ${x.ships ? `<div class="tip-row small"><span>Buildings ${U.fmt(x.buildings)} · ships ${U.fmt(x.ships)}</span></div>` : ''}
+        ${over ? '<p class="neg small">Over capacity: all production is rationed.</p>' : ''}`;
+    }
+    return `<div class="tip-head"><span class="tip-ico neg">⚠</span><div><b class="neg">Rationing ${Math.round(c.eff * 100)}%</b><small>Over capacity</small></div></div>
+      <p>A capacity is overdrawn, so every colony produces only ${Math.round(c.eff * 100)}% of its output. Build Power Plants, Habitats or Datacenters, or demolish something.</p>`;
+  },
+  showTip(el) {
+    const tip = this.$('tip');
+    if (!tip || !el || !G) return;
+    this.tipKey = el.dataset.tip;
+    tip.innerHTML = this.tipHtml(this.tipKey);
+    tip.classList.add('show');
+    const r = el.getBoundingClientRect(), w = tip.offsetWidth;
+    tip.style.left = Math.max(6, Math.min(window.innerWidth - w - 6, r.left + r.width / 2 - w / 2)) + 'px';
+    tip.style.top = (r.bottom + 8) + 'px';
+  },
+  hideTip() { this.tipKey = null; const tip = this.$('tip'); if (tip) tip.classList.remove('show'); },
+
   renderNav() {
-    const alert = { battle: G.battle ? 'alert' : '', fleets: '' };
-    this.$('nav').innerHTML = this.screens.map(([id, ico, label]) =>
+    const alert = { battle: G.battle ? 'alert' : '', fleets: '', gameover: 'alert' };
+    const screens = G.over === 'lose' ? [['gameover', '☠', 'Fallen'], ...this.screens] : this.screens;
+    this.$('nav').innerHTML = screens.map(([id, ico, label]) =>
       `<button class="nav-btn ${this.screen === id ? 'active' : ''} ${alert[id] || ''}" data-act="screen" data-a="${id}"><span>${ico}</span><em>${label}${id === 'battle' && G.battle ? ' !' : ''}</em></button>`).join('');
   },
 
@@ -201,6 +241,28 @@ const UI = {
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
       ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${DATA.raids.graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), DATA.raids.graceColonies)}/${DATA.raids.graceColonies}).</p>`)) + (away || '<p class="muted small">All fleets are home.</p>'))}
       ${this.panel('Battle Reports', this.reportList(5))}
+    </div>`;
+  },
+
+  // The end: every colony is lost. Shows what the Covenant achieved and offers a new start.
+  screen_gameover() {
+    const st = G.stats, n = (v) => `<b>${U.fmt(v)}</b>`;
+    const best = G.reports.filter((r) => r.won).length;
+    return `<div class="gameover">
+      <div class="go-skull">☠</div>
+      <h1>The Covenant Ends</h1>
+      <p class="flavor">The last colony falls. The frozen souls in the Ark-holds will never wake.<br>Something in the dark sings over the ruins.</p>
+      <div class="stats go-stats">
+        <div><small>Cycles endured</small>${n(G.cycle)}</div>
+        <div><small>Systems charted</small>${n(st.explored)}</div>
+        <div><small>Worlds taken</small>${n(st.coloniesTaken)}</div>
+        <div><small>Battles won</small>${n(st.battlesWon)}</div>
+        <div><small>Battles lost</small>${n(st.battlesLost)}</div>
+        <div><small>Ships still flying</small>${n(Ships.all().length)}</div>
+      </div>
+      <p>The void is wide, and there are other galaxies. Wake a new Ark and try again.</p>
+      <div class="btnrow go-btns">${this.btn('☩ Begin anew', 'newgame-confirm', '', false, 'gold big')}${this.btn('Look at the ruins', 'screen', 'map')}</div>
+      <p class="small muted">Starting anew replaces this save. The tutorial opens again; you can skip it.</p>
     </div>`;
   },
 

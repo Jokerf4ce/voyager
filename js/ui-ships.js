@@ -262,7 +262,7 @@ Object.assign(UI, {
     const f = b.fleetId != null ? Ships.fleet(b.fleetId) : null;
     const myName = f ? f.name : 'Planetary Defenses';
     const powerBar = `<div class="pbar" title="Fleet power: yours ${pP}, theirs ${pE}"><i style="width:${share}%"></i></div>`;
-    return `<div class="board" id="board">
+    return `<div class="battlescreen fitscreen"><div class="board" id="board">
       <div class="bhead2"><h3>⚔ ${U.esc(s.name)}</h3><span class="muted small">${b.kind === 'attack' ? 'Attack' : 'Defense'} · Round ${b.round}${G.battleQueue.length ? ` · ${G.battleQueue.length} more battle${G.battleQueue.length > 1 ? 's' : ''} waiting` : ''}</span>${tools}</div>
       <div class="bpower enemy" style="--fc:${this.factionColor(enemyOwner)}"><b>${U.esc(enemyName)}</b><span>fleet power <b>${pE}</b></span></div>
       <div class="bside enemy" style="--lanes:${lanes}">${side('enemy')}</div>
@@ -272,10 +272,12 @@ Object.assign(UI, {
       <svg class="barrow" id="barrow"></svg>
       <div class="bcontrols">${controls}</div>
       ${order}
-      <br>
-      <p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance, and Large ships hit Small ones at ×${DATA.largeVsSmallHit}. Instead of firing, a ship can swap places with any of yours.</p>
-      <div class="blog">${b.log.slice(-9).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
-    </div>`;
+    </div>
+    <aside class="side bside-col">
+      <h4>Battle log</h4>
+      <div class="blog">${b.log.slice(-30).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
+      <details data-key="battle-rules"><summary class="small">Rules of engagement</summary><p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance, and Large ships hit Small ones at ×${DATA.largeVsSmallHit}. Instead of firing, a ship can swap places with any of yours.</p></details>
+    </aside></div>`;
   },
 
   // Move the planned swap one lane left/right (skipping lanes it can't go to); 0 cancels.
