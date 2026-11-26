@@ -10,7 +10,7 @@ DATA.resources = {
   metal:     { name: 'Metals',        icon: '▣', color: '#a8a8b0', kind: 'gathered', desc: 'Mined from rocky worlds. Hulls, walls, everything.' },
   rare:      { name: 'Rare Minerals', icon: '◇', color: '#60c0a0', kind: 'gathered', desc: 'Heavy elements from hot worlds, dwarfs and dead stars.' },
   organics:  { name: 'Organics',      icon: '❦', color: '#9ab050', kind: 'gathered', desc: 'Biomass, hydrocarbons and frozen volatiles from living worlds, ice and gas giants.' },
-  electronics: { name: 'Electronics', icon: '⌁', color: '#d08a50', kind: 'refined',  desc: 'Circuits and components made from Metals and Rare Minerals. Advanced construction.' },
+  electronics: { name: 'Electronics', icon: '⍯', color: '#d08a50', kind: 'refined',  desc: 'Circuits and components made from Metals and Rare Minerals. Advanced construction.' },
   chemicals: { name: 'Chemicals',     icon: '⚗', color: '#d0c060', kind: 'refined',  desc: 'Converted from Organics and Rare Minerals. Fuel, explosives, reagents.' },
   research:  { name: 'Research',      icon: '✎', color: '#70c0c8', kind: 'points',   desc: 'Made by Research Labs. Spent on technology.' },
   shards:    { name: 'Void Shards',   icon: '◆', color: '#a35ad9', kind: 'points',   desc: 'Currency of the Void Signals.' },
@@ -379,7 +379,7 @@ DATA.tutorial = [
   { screen: 'fleets', target: '#main .panel', title: 'Fleets',
     text: 'Ships fight in fleets of up to five. From here (or from the Star Map) you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.' },
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
-    text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire or swap it into another lane. <b>Auto</b> fights for you.' },
+    text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire or swap it into another lane. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
     text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your mines. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
 ];

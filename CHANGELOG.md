@@ -2,6 +2,15 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.39.0 — 2026-11-26
+- **End Cycle is locked during combat.** The button is greyed out while a battle waits for your choice or is being fought (Space / Enter takes you to the battle).
+- **No Continue button after a battle.**
+  - The result stays on the battle screen. Ending the Cycle or opening another screen puts the battle away.
+  - If more battles are queued, the next one starts on its own a few seconds after the result.
+- **Electronics icon is now ⍯.**
+- **Building descriptions in icons.** On the Buildings screen and in each colony's panel, effects are built from the game data, for example `+2 ▣ × planet rating`, `2 ▣ + 0.5 ◇ → 2 ⍯`, `+6 ϟ`. Hovering a colony's building shows the full text. Shipyards, Bastions and Defense Platforms keep a short text.
+- Tutorial updated: the battle step explains that End Cycle is locked during a fight.
+
 ## 0.38.0 — 2026-11-26
 - **Auto-cycle removed.** The ▶ AUTO button and the auto-cycle speed setting are gone; Cycles only advance when you press *End Cycle* (or Space / Enter). Offline progress while the game is closed is unchanged. Battle *Auto* and building *Auto* stay.
 - **The log strip at the bottom of every screen is gone.** Events are listed only in the **Chronicle** menu, which gives every screen more room.

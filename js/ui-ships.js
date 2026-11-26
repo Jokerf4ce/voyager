@@ -239,7 +239,7 @@ Object.assign(UI, {
     let controls = '';
     if (b.phase === 'over') {
       const res = { win: ['VICTORY', 'good'], lose: ['DEFEAT', 'bad'], retreat: ['WITHDRAWN', ''], draw: ['STALEMATE', ''] }[b.result];
-      controls = `<div class="bresult ${res[1]}"><h2>${res[0]}</h2><p>${U.esc(b.log[b.log.length - 1].t)}</p>${this.btn(G.battleQueue.length ? 'Next battle ▸' : 'Continue', 'bclose', '', false, 'gold')}</div>`;
+      controls = `<div class="bresult ${res[1]}"><h2>${res[0]}</h2><p>${U.esc(b.log[b.log.length - 1].t)}</p><p class="small muted">${G.battleQueue.length ? 'The next battle begins in a moment…' : 'End the Cycle or open another screen to move on.'}</p></div>`;
     } else if (myTurn) {
       const pv = (x) => {
         if (x.cdLeft > 0 || !tgt) return `<small>recharging ${x.cdLeft}</small>`;

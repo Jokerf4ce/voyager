@@ -72,6 +72,9 @@ const UI = {
     this.$('top-res').innerHTML = ['metal', 'rare', 'organics', 'electronics', 'chemicals', 'research', 'shards'].map((k) => r(k, G.res[k], net[k])).join('') +
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') +
       (c.eff < 1 ? `<div class="res over" title="Over capacity: all production is rationed"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
+    const fighting = !!(G.battle && G.battle.phase !== 'over');
+    this.$('btn-end').disabled = fighting;
+    this.$('btn-end').title = fighting ? 'Finish the battle first' : 'Space / Enter';
     this.$('cycle').textContent = (State.slot === 'tester' ? 'TESTER · ' : '') + 'CYCLE ' + G.cycle;
     this.$('cycle').classList.toggle('tester', State.slot === 'tester');
     const playing = !!Music.timer;
@@ -103,6 +106,25 @@ const UI = {
       const r = Math.min(4, Economy.rating(p, k));
       return `<span class="res-${k}" title="${DATA.resources[k].name} rating ${r}">${DATA.resources[k].icon}${'●'.repeat(r)}${'○'.repeat(Math.max(0, 3 - r))}</span>`;
     }).join(' ');
+  },
+  // A building's effect in icons, built from its data: "+2 ▣ × planet rating", "2 ▣ + 0.5 ◇ → 2 ⍯", "+6 ϟ".
+  // Buildings without a numeric effect keep their text, with resource names swapped for icons.
+  bDesc(k) {
+    const d = DATA.buildings[k];
+    const ico = (r) => { const x = DATA.resources[r] || DATA.capacities[r]; return `<span class="res-${r}" title="${x.name}">${x.icon}</span>`; };
+    const num = (v) => U.fmt1 ? U.fmt1(v) : v;
+    if (d.gathers) return [d.gathers, d.also].filter(Boolean).map((r) => `+2 ${ico(r)}`).join(' / ') + ' <span class="muted">× planet rating</span>';
+    if (d.refines) return Object.entries(d.refines.in).map(([r, v]) => `${num(v)} ${ico(r)}`).join(' + ') + ` → ${num(d.refines.amount)} ${ico(d.refines.out)}`;
+    const gives = Object.entries(d.cap || {}).filter(([, v]) => v < 0);
+    if (gives.length) return gives.map(([r, v]) => `+${-v} ${ico(r)}`).join(' ') + (d.solar ? ' <span class="muted">× starlight</span>' : '');
+    let t = U.esc(d.desc);
+    for (const [r, x] of [...Object.entries(DATA.resources), ...Object.entries(DATA.capacities)]) t = t.split(x.name).join(ico(r));
+    return t;
+  },
+  // What a building draws per level (its "gives" are already in bDesc).
+  capUses(cap) {
+    const uses = Object.entries(cap || {}).filter(([, v]) => v > 0).map(([k, v]) => `<span class="res-${k}" title="${DATA.capacities[k].name}">${v}${DATA.capacities[k].icon}</span>`).join(' ');
+    return uses ? `<span class="muted">uses</span> ${uses}` : '';
   },
   capText(cap, verb = true) {
     const part = (sign) => Object.entries(cap || {}).filter(([, v]) => v * sign > 0)
@@ -362,8 +384,7 @@ const UI = {
         const row = (k) => {
           const b = DATA.buildings[k], lvl = p.colony[L][k] || 0;
           const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k);
-          const inf = this.capText(b.cap);
-          return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small class="muted">${b.desc}</small> <small>${inf}</small></div>
+          return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small title="${U.esc(b.desc)}">${this.bDesc(k)}</small>${this.capUses(b.cap) ? ` <small>· ${this.capUses(b.cap)}</small>` : ''}</div>
             <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}${lvl ? ' ' + this.demolishBtn(`${s.id}:${p.idx}:${L}:${k}`) : ''}</div></div>`;
         };
         return `<div class="layer"><h4>${DATA.layers[L]} <span class="${used >= max ? 'bad' : 'muted'}">${used}/${max} slots</span></h4>
@@ -420,7 +441,7 @@ const UI = {
         <div class="bhead" data-act="bopen" data-a="${k}" title="${U.esc(d.desc)}">
           ${this.bIcon(k, 24)}
           <div class="grow"><b>${U.esc(d.name)}</b> ${h.levels ? `<span class="lvl">Lv ${h.levels}</span><small class="muted"> on ${h.list.length}</small>` : '<small class="muted">none</small>'}
-            <div class="bsub"><small class="muted">${U.esc(d.desc)} · ${d.layers.map((l) => DATA.layers[l]).join('/')}</small> <small>${this.capText(d.cap)}</small></div></div>
+            <div class="bsub"><small>${this.bDesc(k)}</small> <small class="muted">· ${d.layers.map((l) => DATA.layers[l]).join('/')}</small>${this.capUses(d.cap) ? ` <small>· ${this.capUses(d.cap)}</small>` : ''}</div></div>
           ${autoBtn}
           <span class="muted">${open ? '▾' : '▸'}</span>
         </div>

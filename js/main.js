@@ -4,6 +4,7 @@ const Game = {
 
   endCycle() {
     if (G.over || UI.modalOpen) return;
+    if (G.battle && G.battle.phase === 'over') Battle.close(); // a finished battle is put away (the next queued one may start)
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
     Missions.tick();
     Economy.tick();
@@ -54,7 +55,7 @@ const Game = {
   },
 
   actions: {
-    screen: (a) => { UI.screen = a; },
+    screen: (a) => { if (UI.screen === 'battle' && a !== 'battle' && G.battle && G.battle.phase === 'over') Battle.close(); UI.screen = a; },
     slot: (a) => { Game.switchSlot(a); },
     close: () => { UI.closeModal(); },
     // fleets and ships
@@ -86,7 +87,6 @@ const Game = {
     bresolve: () => { Battle.resolve(); },
     bretreat: () => { Battle.retreat(); },
     bdefend: (a) => { Battle.defendWith(a ? +a : null); },
-    bclose: () => { Battle.close(); if (!G.battle) UI.screen = UI.afterBattle || 'map'; },
     settle: (a) => { const [sid, pi] = a.split(':'); Colonies.settle(+sid, +pi); },
     // a = "sysId" (open that system's colonies) or "sysId:planetIdx" (open one colony).
     gocolony: (a) => {
@@ -254,6 +254,11 @@ window.addEventListener('DOMContentLoaded', () => {
   setInterval(() => State.save(), 10000);
   // Battles: enemy ships (and yours on Auto) act one at a time so you can follow along.
   setInterval(() => {
+    if (G && G.battle && G.battle.phase === 'over' && G.battleQueue.length && !UI.modalOpen) {
+      G.battle.overTicks = (G.battle.overTicks || 0) + 1;
+      if (G.battle.overTicks >= 5) { Battle.close(); State.save(); UI.render(); } // the next battle starts on its own (about 3 s)
+      return;
+    }
     if (!G || !G.battle || G.battle.phase !== 'fight' || UI.screen !== 'battle' || UI.modalOpen) return;
     if (Battle.step()) { State.save(); UI.render(); }
   }, 650);

@@ -186,7 +186,7 @@ If the target of a colony expedition has been taken or guarded by the time it ar
   - **Choosing defenders:** you pick an idle fleet to defend, or no fleet. The system's Planetary Defenses always join.
   - **The capital:** it always has defenses (see 4.8).
 
-While a battle is waiting, the Cycle can't advance; **End Cycle** takes you to the battle. Several battles in one Cycle queue up and are fought one after another.
+While a battle is waiting or being fought, **End Cycle** is greyed out (Space / Enter takes you to the battle). When it ends, the result stays on the battle screen with no button. Ending the Cycle or opening another screen puts it away. Several battles in one Cycle queue up: a few seconds after a result, the next one begins on its own.
 
 ### 4.2 Lanes and targets
 
