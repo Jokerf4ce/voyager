@@ -375,7 +375,7 @@ const UI = {
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>
       <div class="btnrow">${this.btn('Abandon and start a new galaxy', 'newgame', '', false, 'danger')}</div>
-      <p class="muted small">Voyager POC v0.1 · saves stay in this browser (localStorage).</p>`);
+      <p class="muted small">Voyager v${VERSION.number} (${VERSION.date}) · saves stay in this browser (localStorage).</p>`);
   },
 
   // ---------- modal ----------

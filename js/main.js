@@ -108,6 +108,8 @@ document.addEventListener('keydown', (ev) => {
 });
 
 window.addEventListener('DOMContentLoaded', () => {
+  UI.$('version').textContent = `v${VERSION.number}`;
+  UI.$('version').title = `Voyager v${VERSION.number} · ${VERSION.date}`;
   UI.$('btn-end').onclick = () => Game.endCycle();
   UI.$('btn-auto').onclick = () => Game.toggleAuto();
   UI.$('btn-menu').onclick = () => document.body.classList.toggle('nav-collapsed');

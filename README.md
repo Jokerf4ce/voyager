@@ -27,10 +27,15 @@ Open `index.html` in a browser. No server or build step is needed. Saves are kep
 - Auto-cycle, offline progress, save export/import
 - Placeholder pixel art generated in code (planets, portraits, ships), to be replaced with real sprites
 
+## Versions
+
+The build version is shown in the bottom-right corner of the game. It is set in `js/version.js`, and every change is listed in [CHANGELOG.md](CHANGELOG.md).
+
 ## Code layout
 
 ```
 index.html        page shell, loads the scripts in order
+js/version.js     build version shown in the corner
 css/style.css     UI styling
 js/data.js        all game content: buildings, ships, techs, gacha pool, events, factions
 js/util.js        helpers (random, formatting, pathfinding)
