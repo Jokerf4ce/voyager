@@ -115,19 +115,19 @@ DATA.layers = { surface: 'Surface', orbit: 'Orbit' };
 // positive = uses, negative = provides. gathers: which gathered resource the building extracts.
 DATA.buildings = {
   // gathering
-  mine:      { name: 'Deep Mine',        layers: ['surface'], gathers: 'metal',    desc: 'Mines Metals (+2 × planet rating)',        cost: { metal: 30 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
-  drill:     { name: 'Core Drill',       layers: ['surface'], gathers: 'rare',     desc: 'Drills Rare Minerals (+2 × planet rating)', cost: { metal: 45 },                          costGrowth: 1.6,  cap: { power: 1, infra: 1 } },
-  harvester: { name: 'Bio-Harvester',    layers: ['surface'], gathers: 'organics', desc: 'Harvests Organics (+2 × planet rating)',    cost: { metal: 35 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
-  skimmer:   { name: 'Atmosphere Skimmer', layers: ['orbit'], gathers: 'organics', also: 'rare', desc: 'Skims Organics and Rare Minerals from the atmosphere below', cost: { metal: 50 }, costGrowth: 1.6, cap: { power: 1, infra: 1 } },
+  mine:      { name: 'Planetary mining rig',        layers: ['surface'], gathers: 'metal',    desc: 'Mines Metals (+2 × planet rating)',        cost: { metal: 30 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
+  drill:     { name: 'Core Drill',                  layers: ['surface'], gathers: 'rare',     desc: 'Drills Rare Minerals (+2 × planet rating)', cost: { metal: 45 },                          costGrowth: 1.6,  cap: { power: 1, infra: 1 } },
+  harvester: { name: 'Bio-Harvester',               layers: ['surface'], gathers: 'organics', desc: 'Harvests Organics (+2 × planet rating)',    cost: { metal: 35 },                          costGrowth: 1.55, cap: { power: 1, infra: 1 } },
+  skimmer:   { name: 'Atmosphere Skimmer',          layers: ['orbit'], gathers: 'organics', also: 'rare', desc: 'Skims Organics and Rare Minerals from the atmosphere below', cost: { metal: 50 }, costGrowth: 1.6, cap: { power: 1, infra: 1 } },
   // refining
-  refinery:  { name: 'Electronics Foundry', layers: ['surface', 'orbit'], desc: 'Turns 2 Metals + 0.5 Rare into 2 Electronics',    cost: { metal: 50, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'electronics', in: { metal: 2, rare: 0.5 }, amount: 2 } },
-  chemplant: { name: 'Chemical Plant',   layers: ['surface', 'orbit'], desc: 'Turns 2 Organics + 0.5 Rare into 2 Chemicals', cost: { metal: 45, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'chemicals', in: { organics: 2, rare: 0.5 }, amount: 2 } },
+  refinery:  { name: 'Fabrication Center',          layers: ['surface', 'orbit'], desc: 'Turns 2 Metals + 0.5 Rare into 2 Electronics',    cost: { metal: 50, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'electronics', in: { metal: 2, rare: 0.5 }, amount: 2 } },
+  chemplant: { name: 'Chemical Plant',              layers: ['surface', 'orbit'], desc: 'Turns 2 Organics + 0.5 Rare into 2 Chemicals', cost: { metal: 45, rare: 10 },             costGrowth: 1.6,  cap: { power: 2, infra: 1 }, refines: { out: 'chemicals', in: { organics: 2, rare: 0.5 }, amount: 2 } },
   // capacities
-  fusion:    { name: 'Fusion Reactor',   layers: ['surface', 'orbit'], desc: '+6 Power',                     cost: { metal: 60, rare: 15, chemicals: 10 }, costGrowth: 1.6,  cap: { power: -6 } },
+  fusion:    { name: 'Power Plant',      layers: ['surface', 'orbit'], desc: '+6 Power',                     cost: { metal: 60, rare: 15, chemicals: 10 }, costGrowth: 1.6,  cap: { power: -6 } },
   solar:     { name: 'Solar Array',      layers: ['orbit'],   desc: '+4 Power × the star\'s light',              cost: { metal: 40, electronics: 10 },          costGrowth: 1.5,  cap: { power: -4 }, solar: true },
-  dome:      { name: 'Hab Dome',         layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',     cost: { metal: 30, electronics: 10 },          costGrowth: 1.5,  cap: { infra: -5, power: 1 } },
+  dome:      { name: 'Habitat',          layers: ['surface'], desc: '+5 Infrastructure (meals, air, bunks)',     cost: { metal: 30, electronics: 10 },          costGrowth: 1.5,  cap: { infra: -5, power: 1 } },
   ring:      { name: 'Habitat Ring',     layers: ['orbit'],   desc: '+6 Infrastructure',                         cost: { metal: 35, electronics: 15 },          costGrowth: 1.5,  cap: { infra: -6, power: 1 } },
-  cogitator: { name: 'Cogitator Array',  layers: ['surface', 'orbit'], desc: '+4 Compute',                   cost: { metal: 40, electronics: 15, rare: 10 }, costGrowth: 1.65, cap: { compute: -4, power: 2 } },
+  cogitator: { name: 'Datacenter',       layers: ['surface', 'orbit'], desc: '+4 Compute',                   cost: { metal: 40, electronics: 15, rare: 10 }, costGrowth: 1.65, cap: { compute: -4, power: 2 } },
   // research, ships, defense
   lab:       { name: 'Research Lab',     layers: ['surface', 'orbit'], desc: '+2 Research',                  cost: { metal: 40, electronics: 10, chemicals: 5 }, costGrowth: 1.6, cap: { power: 1, infra: 1, compute: 2 } },
   shipyard:  { name: 'Orbital Shipyard', layers: ['orbit'],   desc: 'Builds ships. Each level after 1 makes ships 5% cheaper', cost: { metal: 60, electronics: 10 }, costGrowth: 1.8, cap: { power: 2, infra: 1 } },
