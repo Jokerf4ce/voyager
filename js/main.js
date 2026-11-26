@@ -92,7 +92,8 @@ const Game = {
     // battles
     gobattle: () => { UI.screen = 'battle'; },
     bfire: (a) => { Battle.act(+a); },
-    bswap: (a) => { Battle.swapTurn(+a); },
+    bswapnav: (a) => { UI.swapNav(+a); },
+    bswapconfirm: () => { if (UI.swapPick && UI.swapPick.lane != null) Battle.swapTurn(UI.swapPick.lane); UI.swapPick = null; },
     battleauto: () => { if (G.battle) G.battle.auto = !G.battle.auto; },
     bresolve: () => { Battle.resolve(); },
     bretreat: () => { Battle.retreat(); },
@@ -165,6 +166,28 @@ document.addEventListener('input', (ev) => {
     if (prev) prev.innerHTML = UI.colorPreview();
   }
 });
+
+// Battle: drag the acting ship onto another of your lanes to swap places.
+document.addEventListener('dragstart', (ev) => {
+  if (ev.target.closest && ev.target.closest('[data-drag]')) { ev.dataTransfer.setData('text/plain', 'swap'); ev.dataTransfer.effectAllowed = 'move'; }
+});
+document.addEventListener('dragover', (ev) => {
+  const el = ev.target.closest && ev.target.closest('[data-droplane]');
+  const cur = G && G.battle && Battle.current();
+  if (!el || !cur || !Battle.waiting() || !Battle.canSwapTo(cur, +el.dataset.droplane)) return;
+  ev.preventDefault();
+  document.querySelectorAll('.dragover').forEach((x) => x !== el && x.classList.remove('dragover'));
+  el.classList.add('dragover');
+});
+document.addEventListener('dragleave', (ev) => { const el = ev.target.closest && ev.target.closest('[data-droplane]'); if (el) el.classList.remove('dragover'); });
+document.addEventListener('drop', (ev) => {
+  const el = ev.target.closest && ev.target.closest('[data-droplane]');
+  if (!el || !G || !G.battle) return;
+  ev.preventDefault();
+  if (Battle.swapTurn(+el.dataset.droplane)) { UI.swapPick = null; State.save(); }
+  UI.render();
+});
+window.addEventListener('resize', () => { if (typeof UI !== 'undefined' && UI.screen === 'battle') UI.drawBattleArrow(); });
 
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;

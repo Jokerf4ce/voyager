@@ -1,6 +1,6 @@
 # Voyager — Combat Mechanics
 
-How ships, fleets and battles work, as built in v0.30. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
+How ships, fleets and battles work, as built in v0.31. All numbers come from `js/data.js`; the battle rules are in `js/battle.js`. The design decisions behind them are in `docs/concept.md`, section 4c.
 
 ---
 
@@ -214,7 +214,7 @@ So formation matters: put the ships that can best take on each enemy across from
 2. At the start of a ship's turn, each of its weapons recharges one step.
 3. If no weapon is ready, the ship skips its turn ("recharges its weapons").
 4. Otherwise it either **fires one ready weapon** at its target (see 4.2), or **swaps formation** instead:
-   - **Swapping:** the ship trades lanes with the ship next to it, left or right, or moves into an empty lane next to it. This uses its turn, so it doesn't fire.
+   - **Swapping:** the ship trades lanes with **any** ship on its side, or moves into any empty lane. This uses its turn, so it doesn't fire.
    - Wrecks count as empty space.
    - Planetary Defenses never move, and nobody can swap with them.
    - The new lanes hold for the rest of the battle, and targets follow them (4.2).
@@ -266,15 +266,21 @@ The base is then applied to the target's shield first, then its hull:
 | Button | What it does |
 |---|---|
 | A weapon | fire it at the ship's target (your turn only) |
-| ⇠ swap / swap ⇢ | trade lanes with the neighbour on that side (or move into an empty lane) instead of firing |
+| Drag the acting ship onto another lane | swap places with that ship (or move into that empty lane) instead of firing |
+| ◀ ▶ on the acting ship's card, then **Confirm** | the same, by picking the lane with the arrows (works on touch screens too) |
 | **Auto** | the computer plays your side too, one step at a time; press again to take back control |
 | **Resolve instantly** | plays the rest of the battle at once on Auto |
 | **Retreat** | ends the battle now; in an attack your ships withdraw, in a defense the system falls |
 
+**On screen:**
+- Each side shows its live **fleet power** (living ships, current shields and hull), with a bar comparing the two.
+- An **arrow** floats from the acting ship to its target.
+- The **turn order** for the round is pinned to the bottom of the screen.
+
 ### 4.7 How the computer plays
 
 **Swapping.** First the computer checks whether a swap is clearly worth it:
-- It compares the best expected shot of this ship and its neighbour before the swap with after it.
+- For every lane on its side, it compares the best expected shot of this ship and the ship it would trade places with, before and after.
 - It swaps if the two would do at least 40 % more together, and the gain still beats 60 % of the shot it gives up by moving.
 - A ship that swapped in this round or the last one doesn't swap again, so lines don't shuffle back and forth.
 

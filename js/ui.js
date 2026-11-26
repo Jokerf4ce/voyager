@@ -44,6 +44,7 @@ const UI = {
     }
     this.lastScreen = this.screen;
     document.body.classList.toggle('map-screen', this.screen === 'map' || this.screen === 'battle'); // these screens hide the Chronicle
+    if (this.screen === 'battle') this.drawBattleArrow();
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
       StarMap.draw(cv);

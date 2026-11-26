@@ -137,7 +137,7 @@ const Battle = {
     if (!u) return false;
     if (u.side === 'player' && !b.auto) return false;
     const sw = this.swapWorth(u);
-    if (sw) { this.swap(u, sw); return true; }
+    if (sw >= 0) { this.swap(u, sw); return true; }
     const pick = this.choose(u);
     if (pick) this.fire(u, pick.w, pick.t); else { this.say(`${u.name} holds.`); this.endTurn(); }
     return true;
@@ -146,27 +146,29 @@ const Battle = {
   // ---------- swapping formation ----------
   // The ship (or wreck) in a lane on a side, or null if the lane is empty.
   inLane(side, lane) { return G.battle.units.find((x) => x.side === side && x.lane === lane) || null; },
-  canSwap(u, dir) {
-    const to = u.lane + dir, other = this.inLane(u.side, to);
+  // Can this ship move to that lane (trading places with whoever is there)? Any lane on its side.
+  canSwapTo(u, lane) {
+    if (lane === u.lane || lane < 0 || lane >= this.laneCount()) return false;
+    const other = this.inLane(u.side, lane);
     const fixed = (x) => x && DATA.shipTypes[x.type].structure; // Planetary Defenses stay where they are
-    return to >= 0 && to < this.laneCount() && !fixed(u) && !fixed(other);
+    return !fixed(u) && !fixed(other);
   },
-  // Instead of firing, trade lanes with the neighbour on that side (or move into an empty lane). Uses the turn.
-  swap(u, dir) {
-    if (!this.canSwap(u, dir)) return false;
-    const to = u.lane + dir, other = this.inLane(u.side, to);
-    if (other) other.lane = u.lane;
-    u.lane = to;
+  // Instead of firing, trade lanes with any ship on its side (or move into an empty lane). Uses the turn.
+  swap(u, lane) {
+    if (!this.canSwapTo(u, lane)) return false;
+    const other = this.inLane(u.side, lane), from = u.lane;
+    if (other) other.lane = from;
+    u.lane = lane;
     u.swapped = G.battle.round;
-    this.say(other && !other.dead ? `${u.name} swaps places with ${other.name}.` : `${u.name} moves ${dir < 0 ? 'left' : 'right'}.`, u.side);
+    this.say(other && !other.dead ? `${u.name} swaps places with ${other.name}.` : `${u.name} moves to lane ${lane + 1}.`, u.side);
     this.endTurn();
     return true;
   },
-  // The player's swap: dir -1 (left) or +1 (right).
-  swapTurn(dir) {
+  // The player's swap to a lane (0-based).
+  swapTurn(lane) {
     const u = this.current();
     if (!u || u.side !== 'player') return false;
-    return this.swap(u, dir);
+    return this.swap(u, lane);
   },
   // Best expected shot a ship could take right now (ready weapons only).
   bestShot(u) {
@@ -174,25 +176,34 @@ const Battle = {
     if (!t) return 0;
     return Math.max(0, ...u.weapons.filter((w) => w.cdLeft === 0).map((w) => this.expected(u, w, t)));
   },
-  // Computer side: is a swap clearly better than shooting? Compares this ship and its partner before and after.
+  // Computer side: is a swap clearly better than shooting? Tries every lane, comparing this ship and the
+  // ship it would trade places with, before and after. Returns the lane, or -1.
   swapWorth(u) {
-    if (u.swapped != null && u.swapped >= G.battle.round - 1) return 0; // no shuffling back and forth
-    if (!u.weapons.some((w) => w.cdLeft === 0)) return 0;
+    if (u.swapped != null && u.swapped >= G.battle.round - 1) return -1; // no shuffling back and forth
+    if (!u.weapons.some((w) => w.cdLeft === 0)) return -1;
     const now = this.bestShot(u);
-    let best = 0, bestGain = 0;
-    for (const dir of [-1, 1]) {
-      if (!this.canSwap(u, dir)) continue;
-      const other = this.inLane(u.side, u.lane + dir), mate = other && !other.dead ? other : null;
+    let best = -1, bestGain = 0;
+    for (let lane = 0; lane < this.laneCount(); lane++) {
+      if (!this.canSwapTo(u, lane)) continue;
+      const other = this.inLane(u.side, lane), mate = other && !other.dead ? other : null;
       const before = now + (mate ? this.bestShot(mate) : 0);
-      const l0 = u.lane; u.lane += dir; if (other) other.lane = l0;
+      const l0 = u.lane; u.lane = lane; if (other) other.lane = l0;
       const after = this.bestShot(u) + (mate ? this.bestShot(mate) : 0);
-      u.lane = l0; if (other) other.lane = l0 + dir;
+      u.lane = l0; if (other) other.lane = lane;
       // moving costs this turn's shot, so the new formation must pay for it soon
       const gain = after - before - now * 0.6;
-      if (gain > bestGain && after > before * 1.4) { bestGain = gain; best = dir; }
+      if (gain > bestGain && after > before * 1.4) { bestGain = gain; best = lane; }
     }
     return best;
   },
+
+  // Fleet power of a side right now (living ships, current shields and hull): like Ships.power.
+  unitPower(u) {
+    if (u.dead) return 0;
+    const dmg = u.weapons.reduce((a, w) => a + w.dmg * u.dmgMult / (1 + w.cd * 0.6), 0);
+    return (u.shield + u.hull) * 0.25 + dmg * 2 + u.speed;
+  },
+  sidePower(side) { return Math.round(G.battle.units.filter((u) => u.side === side).reduce((a, u) => a + this.unitPower(u), 0)); },
 
   // The player's action: which weapon to fire. The target is automatic.
   act(wIdx) {

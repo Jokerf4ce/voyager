@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.31.0 — 2026-11-26
+Battle screen:
+- **Fleet power** of each side, live (living ships, current shields and hull), with a bar comparing the two.
+- **Target arrow**: an animated arrow floats between the rows from the acting ship to its target (gold on your turn, red on the enemy's).
+- **Turn order** is now a bar pinned to the bottom of the screen, with the acting ship marked ▶ and ships that already acted dimmed.
+- **Swap with any ship**, not just a neighbour: drag the acting ship onto another of your lanes, or use the little ◀ ▶ arrows on its card to pick a lane and press Confirm. The enemy and Auto also consider every lane.
+
 ## 0.30.1 — 2026-11-26
 - The admin test game is now called **tester mode**: open it with `#tester` (the old `#admin` link still works and switches to `#tester`) or Settings → *Open tester mode*. The top bar shows "TESTER". The file is `js/tester.js`.
 - The tester game now saves under its own new name, so an earlier admin test game is not picked up; a fresh one is generated.
