@@ -103,6 +103,7 @@ const State = {
     };
     for (const k in gained) G.res[k] += gained[k];
     const completed = Research.tick();
+    for (let i = 0; i < Math.min(cycles, DATA.construction.cycles); i++) Colonies.tickBuild(); // construction finishes while you are away
     const mins = Math.floor(secs / 60);
     Log.add(`While you were away (${mins} min), the Covenant endured: ` + Object.entries(gained).map(([k, v]) => `+${U.amount(k, v)} ${DATA.resources[k].name}`).join(', ') + '.', 'good');
     return { mins, cycles, gained, completed };

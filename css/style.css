@@ -511,3 +511,16 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
 @keyframes hullhit { 0% { opacity: 1; } 60% { opacity: .8; } 100% { opacity: 0; } }
 @keyframes sparks { 0% { transform: scale(.4); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .hitfx { animation-duration: .01s; } }
+
+/* construction sites */
+.bld.building { border-color: #5a4a2a; background: repeating-linear-gradient(135deg, #16130e 0 8px, #1b1710 8px 16px); }
+.build-bar { width: 110px; height: 8px; margin: 3px 0 3px auto; }
+.build-bar i { background: repeating-linear-gradient(90deg, #d0a020 0 6px, #a07818 6px 8px); }
+
+#tip { width: 300px; }
+#tip .tip-list { margin-top: 8px; border-top: 1px solid var(--edge); padding-top: 4px; }
+#tip .tip-list h5 { margin: 2px 0 2px; font-family: var(--font-head); font-weight: normal; font-size: 9px; letter-spacing: 1px; color: var(--ash); text-transform: uppercase; }
+#tip .tip-list .tip-row { font-size: 16px; padding: 0; }
+#tip .tip-list .tip-row span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tip .tip-list .tip-row b { font-size: 16px; }
+#tip .tip-row.more { color: #6a6050; font-style: italic; }

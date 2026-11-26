@@ -10,7 +10,27 @@ const Colonies = {
   planetName(s, p) { return `${s.name} ${ROMAN[p.idx]}`; },
 
   slots(p, layer) { return p.slots[layer]; },
-  slotsUsed(p, layer) { return Object.values(p.colony[layer]).filter((l) => l > 0).length; },
+  // A slot is taken by a standing building or by one under construction.
+  slotsUsed(p, layer) {
+    const keys = new Set(Object.keys(p.colony[layer]).filter((k) => p.colony[layer][k] > 0));
+    for (const c of p.colony.build || []) if (c.layer === layer) keys.add(c.key);
+    return keys.size;
+  },
+  // ---- construction: every build or upgrade takes DATA.construction.cycles; meanwhile the site draws DATA.construction.cap ----
+  constructing(p, layer, key) { return (p.colony && p.colony.build || []).find((c) => c.layer === layer && c.key === key) || null; },
+  // Count down every construction site; finished ones raise the building's level.
+  tickBuild() {
+    for (const { s, p } of this.playerPlanets()) {
+      if (!p.colony.build || !p.colony.build.length) continue;
+      for (const c of p.colony.build.slice()) {
+        if (--c.eta > 0) continue;
+        p.colony.build.splice(p.colony.build.indexOf(c), 1);
+        p.colony[c.layer][c.key] = (p.colony[c.layer][c.key] || 0) + 1;
+        if (c.key === 'bastion' || c.key === 'platform') s.garrison = this.maxGarrison(s);
+        Log.add(`${DATA.buildings[c.key].name} (${DATA.layers[c.layer]}) ${p.colony[c.layer][c.key] > 1 ? `upgraded to level ${p.colony[c.layer][c.key]}` : 'completed'} on ${this.planetName(s, p)}.`, 'good');
+      }
+    }
+  },
   level(p, key) { return p.colony ? (p.colony.surface[key] || 0) + (p.colony.orbit[key] || 0) : 0; },
   sysLevel(s, key) { return s.planets.reduce((a, p) => a + this.level(p, key), 0); },
 
@@ -82,6 +102,7 @@ const Colonies = {
   blocker(p, layer, key) {
     const def = DATA.buildings[key];
     if (!def.layers.includes(layer)) return 'Wrong layer';
+    if (this.constructing(p, layer, key)) return 'Under construction';
     if (!(p.colony[layer][key] > 0) && this.slotsUsed(p, layer) >= this.slots(p, layer)) return `No free ${layer} slots`;
     if (def.gathers && !(Economy.rating(p, def.gathers) > 0 || (def.also && Economy.rating(p, def.also) > 0))) return `Nothing to gather here`;
     const short = Economy.capShortfall(def.cap);
@@ -94,9 +115,9 @@ const Colonies = {
     const { s, p } = this.get(ref);
     if (!p || !p.colony || s.owner !== 'player' || this.blocker(p, layer, key)) return false;
     this.pay(this.buildCost(p, layer, key));
-    p.colony[layer][key] = (p.colony[layer][key] || 0) + 1;
-    if (key === 'bastion' || key === 'platform') s.garrison = this.maxGarrison(s);
-    Log.add(`${DATA.buildings[key].name} (${DATA.layers[layer]}) raised to level ${p.colony[layer][key]} on ${this.planetName(s, p)}.`);
+    const n = DATA.construction.cycles, lvl = (p.colony[layer][key] || 0) + 1;
+    (p.colony.build = p.colony.build || []).push({ layer, key, eta: n, total: n });
+    Log.add(`Construction begins: ${DATA.buildings[key].name} ${lvl > 1 ? `level ${lvl}` : ''} (${DATA.layers[layer]}) on ${this.planetName(s, p)}, ready in ${n} Cycles.`);
     return true;
   },
 
@@ -125,7 +146,7 @@ const Colonies = {
   },
   demolish(ref, layer, key) {
     const { s, p } = this.get(ref);
-    if (!p || !p.colony || s.owner !== 'player' || !(p.colony[layer][key] > 0)) return false;
+    if (!p || !p.colony || s.owner !== 'player' || !(p.colony[layer][key] > 0) || this.constructing(p, layer, key)) return false;
     const refund = this.demolishRefund(p, layer, key), lvl = p.colony[layer][key];
     for (const k in refund) G.res[k] = (G.res[k] || 0) + refund[k];
     delete p.colony[layer][key];
@@ -201,8 +222,9 @@ const Colonies = {
   capture(sysId, newOwner) {
     const s = G.systems[sysId];
     const old = s.owner;
-    for (const p of s.planets) if (p.colony) for (const layer of ['surface', 'orbit']) {
-      for (const k in p.colony[layer]) p.colony[layer][k] = Math.max(0, p.colony[layer][k] - 1);
+    for (const p of s.planets) if (p.colony) {
+      for (const layer of ['surface', 'orbit']) for (const k in p.colony[layer]) p.colony[layer][k] = Math.max(0, p.colony[layer][k] - 1);
+      p.colony.build = []; // construction sites are lost with the system
     }
     s.owner = newOwner;
     s.garrison = Math.round(this.maxGarrison(s) * 0.3);
@@ -242,6 +264,8 @@ const Economy = {
       }
     }
     for (const k in out) out[k].give *= (t[k] || 1) * (m[k] || 1);
+    // construction sites draw their own capacity until they are done
+    for (const c of p.colony.build || []) for (const [k, v] of Object.entries(DATA.construction.cap)) { out[k].use += v; out[k].building = (out[k].building || 0) + v; }
     return out;
   },
 
@@ -262,6 +286,41 @@ const Economy = {
     }
     out.eff = Math.max(DATA.minEfficiency, eff);
     return out;
+  },
+
+  // Who makes and who uses a resource ('res:metal') or a capacity ('cap:power'), per Cycle, for the hover cards.
+  // Resources: producers and refining inputs per colony, fleet maintenance, the research project.
+  // Capacities: what each colony provides, and what uses it by building type (plus construction sites).
+  breakdown(key) {
+    const [kind, k] = key.split(':'), plus = [], minus = [];
+    if (kind === 'res') {
+      const eff = this.caps().eff;
+      for (const { s, p } of Colonies.playerPlanets()) {
+        const y = this.planetYield(p, eff), name = Colonies.planetName(s, p);
+        if (y[k] > 0.004) plus.push([name, y[k]]);
+        if (y.inputs[k] > 0.004) minus.push([`${name} · refining`, y.inputs[k]]);
+      }
+      const up = Ships.upkeep();
+      if (k === 'metal' && up) minus.push(['Fleet maintenance', up]);
+      if (k === 'chemicals' && up) minus.push(['Fleet maintenance', up / 2]);
+      if (k === 'research' && G.researching && DATA.techs[G.researching]) {
+        const left = Research.cost(G.researching) - G.researchProgress;
+        minus.push([`Project: ${DATA.techs[G.researching].name}`, Math.min(left, this.net().research + G.res.research)]);
+      }
+    } else if (kind === 'cap') {
+      const byType = {};
+      for (const { s, p } of Colonies.playerPlanets()) {
+        plus.push([Colonies.planetName(s, p), this.planetCaps(p)[k].give]);
+        for (const layer of ['surface', 'orbit']) for (const [b, lvl] of Object.entries(p.colony[layer])) {
+          const v = (DATA.buildings[b].cap || {})[k];
+          if (v > 0 && lvl) byType[DATA.buildings[b].name] = (byType[DATA.buildings[b].name] || 0) + v * lvl;
+        }
+        for (const c of p.colony.build || []) if (DATA.construction.cap[k]) byType['Construction sites'] = (byType['Construction sites'] || 0) + DATA.construction.cap[k];
+      }
+      for (const [n, v] of Object.entries(byType)) minus.push([n, v]);
+    }
+    const sort = (a) => a.filter(([, v]) => v > 0.004).sort((a, b) => b[1] - a[1]);
+    return { plus: sort(plus), minus: sort(minus) };
   },
 
   // First capacity that a new need would push over its cap, or null.
@@ -318,6 +377,7 @@ const Economy = {
   },
 
   tick() {
+    Colonies.tickBuild();
     const inc = this.income();
     for (const k of ['metal', 'rare', 'organics', 'research', 'crypto']) G.res[k] += inc[k];
     // Refineries and chemical plants run as far as the stockpile allows.

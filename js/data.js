@@ -229,6 +229,7 @@ DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of ma
 DATA.hangar = { base: 10, perLevel: 2 };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
+DATA.construction = { cycles: 3, cap: { power: 3, infra: 3 } }; // every build or upgrade: Cycles to finish, capacity drawn meanwhile
 DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
 DATA.scrapRefund = 0.3;      // part of the build cost returned when a ship is scrapped
 
@@ -368,7 +369,7 @@ DATA.tutorial = [
   { screen: 'map', title: 'Wake up, Commander',
     text: 'The Ark has crossed the dark and found a new galaxy. The frozen faithful sleep in its holds, and all you hold is a single star system.<br><br>Out there are two xeno empires: <b style="color:#7fbf3f">The Chorus</b> and the <b style="color:#d06030">Iron Remnant</b>. Take every world they hold to win. Lose all of yours and the Covenant ends.<br><br>This short tour shows you around. You can skip it at any time.' },
   { target: '#top-res', title: 'Resources',
-    text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology. <b>Crypto Shards</b> ♃, mined in tiny amounts by Finance Districts, are an interstellar currency for trade.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.<br><br>Point at any of them (or tap it) for details.' },
+    text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology. <b>Crypto Shards</b> ♃, mined in tiny amounts by Finance Districts, are an interstellar currency for trade.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.<br><br>Point at any of them (or tap it) for details: what it is, and which colonies and buildings produce and use it.' },
   { target: '#btn-end', title: 'Cycles',
     text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time.' },
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
@@ -378,7 +379,7 @@ DATA.tutorial = [
   { screen: 'colonies', target: '#main .csys', title: 'Colonies',
     text: 'Every colony in every system you hold. Click a colony to open it. Unsettled planets in your own systems can be settled right here, with no travel needed.<br><br>Each planet has a <b>surface</b> and an <b>orbit</b> layer, each with its own building slots. The more habitable a planet, the cheaper it is to build there.' },
   { screen: 'buildings', target: '#main .brow', title: 'Buildings',
-    text: 'Every building type in one list. <b>Auto</b> builds where it gives the most for the price; click a row to choose the colony yourself.<br><br>Each level costs more, and from level 6 the price doubles every level, so <b>go wide</b>: found new colonies instead of stacking towers. The red <b>✕</b> demolishes a building and gives back a quarter of what it cost.' },
+    text: 'Every building type in one list. <b>Auto</b> builds where it gives the most for the price; click a row to choose the colony yourself.<br><br>Each level costs more, and from level 6 the price doubles every level, so <b>go wide</b>: found new colonies instead of stacking towers. Every build or upgrade takes <b>{build} Cycles</b>, and the construction site draws 3 Power and 3 Infrastructure until it is done. The red <b>✕</b> demolishes a building and gives back a quarter of what it cost.' },
   { screen: 'research', target: '#main .panel', title: 'Research',
     text: 'Research Labs produce Research. Spend it here on lasting advantages: richer yields, more Power, stronger ships and better defenses. Pick one project and it advances every Cycle. Doctrines can be researched again and again, each level costing more.' },
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',

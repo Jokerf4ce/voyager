@@ -25,6 +25,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Endless procedural galaxy, generated in chunks as you explore, with hyperlanes and fog of war; only home is charted at the start; a Red Hypergiant waits 2–3 jumps away
 - Each system has a star class (O B A F G K M), or rarely a white dwarf, pulsar or black hole, and 1–5 planets
 - Crypto Shards ♃: an interstellar currency for trade, mined in tiny amounts (0.05 per Cycle) by Finance Districts
+- Every build or upgrade takes 3 Cycles; the site draws 3 Power and 3 Infrastructure meanwhile
 - Buildings managed in one empire-wide list: build where you choose or let Auto pick the best colony; demolish one (✕) to free its slot and salvage 25 % of what it cost
 - Planets are classified by size, composition and temperature; each has a surface and an orbit layer with their own building slots, and a habitability of 1–5 that changes building costs
 - Explore with survey probes (charting a system has no random events since v0.48)

@@ -110,11 +110,22 @@ const UI = {
     return `<div class="tip-head"><span class="tip-ico neg">⚠</span><div><b class="neg">Rationing ${Math.round(c.eff * 100)}%</b><small>Over capacity</small></div></div>
       <p>A capacity is overdrawn, so every colony produces only ${Math.round(c.eff * 100)}% of its output. Build Power Plants, Habitats or Datacenters, or demolish something.</p>`;
   },
+  // The producers / consumers lists under a hover card.
+  tipLists(key) {
+    const { plus, minus } = Economy.breakdown(key), k = key.split(':')[1];
+    const isCap = key.startsWith('cap:'), num = (v) => isCap ? U.fmt1(v) : U.rate(k, v);
+    const list = (rows, sign, title, empty) => `<div class="tip-list"><h5>${title}</h5>${rows.length
+      ? rows.slice(0, 6).map(([n, v]) => `<div class="tip-row"><span>${U.esc(n)}</span><b class="${sign > 0 ? 'pos' : 'neg'}">${sign > 0 ? '+' : '−'}${num(v)}</b></div>`).join('')
+        + (rows.length > 6 ? `<div class="tip-row more"><span>and ${rows.length - 6} more</span></div>` : '')
+      : `<div class="tip-row more"><span>${empty}</span></div>`}</div>`;
+    return list(plus, 1, isCap ? 'Provided by' : 'Produced by', 'nothing yet')
+      + list(minus, -1, isCap ? 'Used by' : 'Consumed by', isCap ? 'nothing' : 'nothing per Cycle (spent on building)');
+  },
   showTip(el) {
     const tip = this.$('tip');
     if (!tip || !el || !G) return;
     this.tipKey = el.dataset.tip;
-    tip.innerHTML = this.tipHtml(this.tipKey);
+    tip.innerHTML = this.tipHtml(this.tipKey) + (this.tipKey === 'ration' ? '' : this.tipLists(this.tipKey));
     tip.classList.add('show');
     const r = el.getBoundingClientRect(), w = tip.offsetWidth;
     tip.style.left = Math.max(6, Math.min(window.innerWidth - w - 6, r.left + r.width / 2 - w / 2)) + 'px';
@@ -237,6 +248,7 @@ const UI = {
           <div class="bar cap-${k} ${c[k].used > c[k].cap ? 'over' : ''}"><i style="width:${Math.min(100, c[k].used / Math.max(1, c[k].cap) * 100)}%"></i></div>`).join('')}
         ${c.eff < 1 ? `<p class="bad small">Over capacity. Rationing has cut all production to ${Math.round(c.eff * 100)}%.</p>` : `<p class="muted small">You cannot build past a capacity.</p>`}
         <p class="muted small">While the game is closed, your empire keeps producing at ${DATA.config.offlineEfficiency * 100}% efficiency (1 Cycle per ${DATA.config.offlineSecondsPerCycle}s, max ${DATA.config.offlineMaxCycles}).</p>`)}
+      ${this.panel('Construction', this.constructionList())}
       ${this.panel('Buildings', this.buildingSummary())}
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
       ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${DATA.raids.graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), DATA.raids.graceColonies)}/${DATA.raids.graceColonies}).</p>`)) + (away || '<p class="muted small">All fleets are home.</p>'))}
@@ -448,10 +460,13 @@ const UI = {
         const used = Colonies.slotsUsed(p, L), max = Colonies.slots(p, L);
         if (!max) return `<div class="layer"><h4>${DATA.layers[L]} <span class="muted">no ${L}</span></h4><p class="muted small">${p.comp === 'gas' ? 'Nothing stands on a gas giant. Build in orbit.' : 'Extremely hazardous. Nothing can be built on the surface. Build in orbit.'}</p></div>`;
         const keys = Object.keys(DATA.buildings).filter((k) => DATA.buildings[k].layers.includes(L));
-        const built = keys.filter((k) => p.colony[L][k] > 0), avail = keys.filter((k) => !(p.colony[L][k] > 0));
+        const site = (k) => Colonies.constructing(p, L, k);
+        const built = keys.filter((k) => p.colony[L][k] > 0 || site(k)), avail = keys.filter((k) => !(p.colony[L][k] > 0) && !site(k));
         const row = (k) => {
           const b = DATA.buildings[k], lvl = p.colony[L][k] || 0;
-          const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k);
+          const cost = Colonies.buildCost(p, L, k), why = Colonies.blocker(p, L, k), c = site(k);
+          if (c) return `<div class="bld building">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''} <span class="res-power">⚒ ${lvl ? `→ Lv ${lvl + 1}` : 'under construction'}</span><br><small title="${U.esc(b.desc)}">${this.bDesc(k)}</small></div>
+            <div class="right"><small>${c.eta} Cycle${c.eta > 1 ? 's' : ''} left</small><div class="bar build-bar"><i style="width:${(c.total - c.eta) / c.total * 100}%"></i></div><small class="muted">site draws ${this.capText(DATA.construction.cap, false)}</small></div></div>`;
           return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small title="${U.esc(b.desc)}">${this.bDesc(k)}</small>${this.capUses(b.cap) ? ` <small>· ${this.capUses(b.cap)}</small>` : ''}</div>
             <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}${lvl ? ' ' + this.demolishBtn(`${s.id}:${p.idx}:${L}:${k}`) : ''}</div></div>`;
         };
@@ -470,6 +485,15 @@ const UI = {
   // Small button that asks before tearing a building down (a = "sysId:planetIdx:layer:key").
   demolishBtn(a) {
     return `<button class="btn small danger demolish" data-act="demolish" data-a="${a}" title="Demolish: get back ${Math.round(DATA.demolishRefund * 100)} % of everything invested">✕</button>`;
+  },
+
+  // Every construction site in the empire, soonest first.
+  constructionList() {
+    const sites = [];
+    for (const { s, p } of Colonies.playerPlanets()) for (const c of p.colony.build || []) sites.push({ s, p, c });
+    if (!sites.length) return `<p class="muted small">Nothing under construction. Every build or upgrade takes ${DATA.construction.cycles} Cycles, and each site draws ${this.capText(DATA.construction.cap, false)} meanwhile.</p>`;
+    return sites.sort((a, b) => a.c.eta - b.c.eta).map(({ s, p, c }) => `<div class="kv"><span>${this.bIcon(c.key, 20)} ${U.esc(DATA.buildings[c.key].name)} <small class="muted">${U.esc(Colonies.planetName(s, p))} · ${DATA.layers[c.layer].toLowerCase()}</small></span><b class="res-power">⚒ ${c.eta}</b></div>`).join('')
+      + `<p class="muted small">Each site draws ${this.capText(DATA.construction.cap, false)} until it is done.</p>`;
   },
 
   // Overview: every building type you own, with its total level; click to see where they are.
@@ -497,7 +521,7 @@ const UI = {
         const spots = Colonies.placements(k);
         detail = `<div class="bdetail">
           <h4>On ${h.list.length} ${h.list.length === 1 ? 'colony' : 'colonies'}</h4>
-          ${h.list.length ? h.list.map((x) => `<div class="kv"><span>${where(x)}</span><span><b class="lvl">Lv ${x.lvl}</b> ${this.btn('Open', 'gocolony', x.ref, false, 'small')} ${this.demolishBtn(`${x.ref}:${x.layer}:${k}`)}</span></div>`).join('') : '<p class="muted small">None yet.</p>'}
+          ${h.list.length ? h.list.map((x) => `<div class="kv"><span>${where(x)}</span><span><b class="lvl">Lv ${x.lvl}</b> ${this.btn('Open', 'gocolony', x.ref, false, 'small')} ${Colonies.constructing(x.p, x.layer, k) ? '<small class="res-power">⚒ upgrading</small>' : this.demolishBtn(`${x.ref}:${x.layer}:${k}`)}</span></div>`).join('') : '<p class="muted small">None yet.</p>'}
           <h4>Build at</h4>
           ${spots.length ? spots.map((x, i) => `<div class="kv spot ${x === best ? 'best' : ''}"><span>${where(x)} ${x.lvl ? `<span class="muted">Lv ${x.lvl} → ${x.lvl + 1}</span>` : '<span class="muted">new slot</span>'}
               ${d.gathers || Object.values(d.cap || {}).some((v) => v < 0) ? `<span class="muted">· output ×${U.fmt1(x.value)}</span>` : ''} ${x === best ? '<span class="res-power">★ Auto pick</span>' : ''}</span>

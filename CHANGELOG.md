@@ -2,6 +2,17 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.51.0 — 2026-11-27
+- **Construction takes time.** Every build or upgrade is paid up front and takes **3 Cycles**.
+  - Meanwhile the construction site draws **3 Power and 3 Infrastructure**, and the building can't be upgraded again or demolished. An upgrade keeps working at its old level until it is done.
+  - Sites show in the colony (with a progress bar and the Cycles left), on the Buildings screen and in a new **Construction** panel on the Overview.
+  - They finish while you are away and are lost if the system falls.
+  - Tuned in `DATA.construction`.
+- **Producers and consumers in the hover cards.**
+  - Each resource's card lists what produces it per colony and what consumes it: refining inputs, fleet maintenance, the research project.
+  - Each capacity's card lists what each colony provides and what uses it, by building type plus construction sites.
+- Tutorial updated: the Buildings step explains the construction time, and the resources step mentions the new lists.
+
 ## 0.50.0 — 2026-11-27
 - **Battle: hit effects.** A hit on shields flares a cyan energy shell around the card; a hit on the hull throws an orange burst of pixel sparks (and the card shakes). A shot that breaks through shows both.
 - **Battle: damage numbers.** They float up like MISS: shield damage in blue, hull damage in orange (e.g. −2 −5), readable for about 2 seconds.
