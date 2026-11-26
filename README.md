@@ -10,7 +10,7 @@ See [docs/concept.md](docs/concept.md) for the design.
 
 Or open `index.html` locally in a browser. No server or build step is needed. Saves are kept in the browser's localStorage.
 
-- **End Cycle** (or Space/Enter) advances one turn. **Auto** advances Cycles on a timer.
+- **End Cycle** (or Space/Enter) advances one turn. Everything that happens is recorded in the **Chronicle** menu.
 - **Star Map:** an endless galaxy under a pan/zoom camera (drag, scroll or pinch; ⌂ for home; a minimap in the corner). Hover a system for a summary card; click it to select it, and its planets and missions appear in the panel beside the map. Double-click (or *Open solar system*) opens the **Solar System** screen with its star and planets. From there, launch a **survey probe** to explore or a **colony expedition** to settle (both cost a flat fee), or send a fleet to **attack**.
 - **Fleets:** global, up to 5 ship cards each, plus a hangar and an armory. Click a ship, then a free slot to move it; refit weapons in its panel.
 - **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
@@ -33,7 +33,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Ship cards in 3 sizes (rock-paper-scissors) and 9 types, rolled at 5 rarities; global fleets of up to 5; missions instead of map movement
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
 - Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge for Shards
-- Auto-cycle, offline progress, save export/import
+- Offline progress, save export/import
 - Generative soundtrack synthesised in the browser: six tracks in a playlist (mute with ♪, tracks and volume in Settings)
 - Ship sprites in a 3/4 view, rendered from small 3D models (`tools/shipart/render.py`): three designs per ship type as grey templates, painted on the fly in each faction's colours (`DATA.shipPalettes`); pick your own fleet colours in Settings
 - The Assistant, the ship's computer voice ("Welcome back, Commander."): mp3 lines in `assets/voice/`, listed with their triggers in `js/voicelines.js`
@@ -76,5 +76,5 @@ js/sysmap.js      solar system map canvas (one system)
 js/ui.js          screens and modals
 js/tutorial.js    first-play guided tour (its steps are DATA.tutorial in data.js)
 js/ui-ships.js    ship cards, Shipyard, Fleets and Battle screens
-js/main.js        turn loop, auto-cycle, input, boot
+js/main.js        turn loop, input, boot
 ```

@@ -1,8 +1,6 @@
-// Voyager — turn loop, auto-cycle (idle), input handling and boot.
+// Voyager — turn loop, input handling and boot.
 
 const Game = {
-  autoTimer: null,
-  autoMs: DATA.config.autoCycleMs,
 
   endCycle() {
     if (G.over || UI.modalOpen) return;
@@ -26,7 +24,6 @@ const Game = {
     if (G.pendingEvents.length) { UI.showEvent(); return; }
     if (G.over && !this.overShown) {
       this.overShown = true;
-      this.stopAuto();
       const win = G.over === 'win';
       UI.modal(`<h2>${win ? 'The Shroud is Silent' : 'The Covenant Ends'}</h2>
         <p class="flavor">${win
@@ -37,15 +34,7 @@ const Game = {
     }
   },
 
-  toggleAuto() { this.autoTimer ? this.stopAuto() : this.startAuto(); UI.render(); },
-  startAuto() {
-    this.stopAuto();
-    this.autoTimer = setInterval(() => { if (!UI.modalOpen && !G.over) this.endCycle(); }, this.autoMs);
-  },
-  stopAuto() { clearInterval(this.autoTimer); this.autoTimer = null; },
-
   newGame() {
-    this.stopAuto();
     this.overShown = false;
     UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null;
     if (State.slot === 'tester') Tester.newTestGame(); else State.newGame();
@@ -58,7 +47,6 @@ const Game = {
   // Switch between the real game and tester mode (separate save slots).
   switchSlot(slot) {
     State.save();
-    this.stopAuto();
     State.slot = slot;
     history.replaceState(null, '', slot === 'tester' ? '#tester' : location.pathname + location.search);
     if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); }
@@ -148,7 +136,6 @@ const Game = {
     voice: () => { Voice.toggle(); },
     voicetest: () => { Voice.enabled = true; Voice.savePrefs(); Voice.failedAt = {}; Voice.trigger('test', true); },
     subtitles: () => { Voice.subtitles = !Voice.subtitles; Voice.savePrefs(); },
-    autospeed: (a) => { Game.autoMs = +a; if (Game.autoTimer) Game.startAuto(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },
     export: () => { UI.$('savebox').value = State.exportSave(); },
     import: () => {
@@ -229,7 +216,6 @@ window.addEventListener('DOMContentLoaded', () => {
   UI.$('version').textContent = `v${VERSION.number}`;
   UI.$('version').title = `Voyager v${VERSION.number} · ${VERSION.date}`;
   UI.$('btn-end').onclick = () => Game.endCycle();
-  UI.$('btn-auto').onclick = () => Game.toggleAuto();
   // Music: browsers only allow sound after the first click or key press.
   Music.loadPrefs();
   UI.$('btn-music').onclick = (ev) => { ev.stopPropagation(); if (!Music.timer && Music.enabled) Music.start(); else Music.toggle(); UI.renderTop(); if (UI.screen === 'settings') UI.render(); };

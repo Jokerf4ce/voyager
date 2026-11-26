@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.38.0 — 2026-11-26
+- **Auto-cycle removed.** The ▶ AUTO button and the auto-cycle speed setting are gone; Cycles only advance when you press *End Cycle* (or Space / Enter). Offline progress while the game is closed is unchanged. Battle *Auto* and building *Auto* stay.
+- **The log strip at the bottom of every screen is gone.** Events are listed only in the **Chronicle** menu, which gives every screen more room.
+- Tutorial updated: the Cycles step no longer mentions Auto and explains that time only moves when you end the Cycle; the last step points to the Chronicle in the menu.
+
 ## 0.37.1 — 2026-11-26
 - Removed three test screenshots that were committed by mistake.
 

@@ -347,7 +347,6 @@ DATA.galaxy = {
 };
 
 DATA.config = {
-  autoCycleMs: 3000,
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
@@ -363,8 +362,8 @@ DATA.tutorial = [
     text: 'The Ark has crossed the dark and found a new galaxy. The frozen faithful sleep in its holds, and all you hold is a single star system.<br><br>Out there are two xeno empires: <b style="color:#7fbf3f">The Chorus</b> and the <b style="color:#d06030">Iron Remnant</b>. Take every world they hold to win. Lose all of yours and the Covenant ends.<br><br>This short tour shows you around. You can skip it at any time.' },
   { target: '#top-res', title: 'Resources',
     text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.' },
-  { target: '#btn-end, #btn-auto', all: true, title: 'Cycles',
-    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br><b>Auto</b> ends Cycles for you every few seconds, if you would rather watch your empire grow.' },
+  { target: '#btn-end', title: 'Cycles',
+    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time. While the game is closed, your colonies keep producing at half speed.' },
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
     text: 'Your home system has bright brackets around it. Drag to look around; scroll or pinch to zoom. The buttons on the right zoom, jump home (⌂) and centre on the selected system; the minimap in the corner shows all you have charted.<br><br>A <b>?</b> is a system no one has charted. The galaxy has no edge: it grows as you explore.' },
   { screen: 'map', prepare: 'uncharted', target: '.mapscreen .side', title: 'Explore and expand',
@@ -382,6 +381,6 @@ DATA.tutorial = [
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
     text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire or swap it into another lane. <b>Auto</b> fights for you.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
-    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your mines. The Chronicle records everything that happens.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
+    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your mines. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
 ];
 

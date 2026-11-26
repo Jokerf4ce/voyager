@@ -23,7 +23,7 @@ A grimdark, pixel-art 4X space game for the browser. You lead a desperate factio
 **Proposed.** How turn-based, idle and gacha can fit together:
 
 1. **Turn (a "Cycle").** You give orders: build, research, move fleets, colonise, negotiate, fight. Then you end the turn and the AI empires act.
-2. **Idle layer.** Every Cycle, the empire's resources build up. Optional **auto-cycle** mode ends turns on a timer while you watch. When you come back after closing the game, it can simulate the missed Cycles up to a cap and show a report ("While you were gone…").
+2. **Idle layer.** Every Cycle, the empire's resources build up. There is no auto-cycle mode (removed v0.38): Cycles only advance when you end them. When you come back after closing the game, it can simulate the missed Cycles up to a cap and show a report ("While you were gone…").
 3. **Incremental layer.** Production grows on multipliers: upgrades, research and leaders stack. Later tiers unlock new resources and systems. A **prestige/reset** loop (see §8) lets you restart the galaxy with permanent bonuses.
 4. **Gacha layer.** You pull from **Void Signals** using an in-game currency earned by playing, never real money. Pulls give leaders, ship blueprints and relics, which feed back into the 4X game.
 
@@ -72,7 +72,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Star Map camera** (decided, v0.34): the Star Map is a pan/zoom view of the world (drag, wheel, pinch; buttons for zoom, home and the selected system; a minimap). The pixel art is drawn into a low-resolution buffer and scaled up (3 screen px per art pixel, 2 on phones), keeping the chunky look; names and markers are drawn on top at full resolution for readability, without overlapping.
 
-**Map screens** (decided, v0.37; replaces the v0.21 layout with both maps on one page): **Star Map** and **Solar System** are two separate screens in the menu. Each fills the screen height, with the selected system's panel (missions, planets, settle) on the right; neither shows the Chronicle. Hovering a system on the Star Map shows a summary card. Double-clicking a charted system, or *Open solar system* in its panel, opens the Solar System screen, and *✦ Star Map* goes back. On phones the panel moves below the map and the page scrolls.
+**Map screens** (decided, v0.37; replaces the v0.21 layout with both maps on one page): **Star Map** and **Solar System** are two separate screens in the menu. Each fills the screen height, with the selected system's panel (missions, planets, settle) on the right. Hovering a system on the Star Map shows a summary card. Double-clicking a charted system, or *Open solar system* in its panel, opens the Solar System screen, and *✦ Star Map* goes back. On phones the panel moves below the map and the page scrolls.
 
 
 **Decided:** each star system has several planets (1–5 depending on the star), and each planet has two building layers, **surface** and **orbit**.
@@ -206,6 +206,10 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 **Decided:** mostly menus, plus a star system map.
 
 **Tutorial** (decided, v0.36): the first game in a browser opens a guided tour of 12 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath. It can be skipped, and Settings → *Replay tutorial* shows it again. It is remembered per browser (localStorage `voyager_tutorial_done`), not in the save, and tester mode never starts it.
+
+**Chronicle** (decided, v0.38): the event log appears only on its own *Chronicle* screen, not as a strip at the bottom of every screen.
+
+**Tutorial upkeep** (decided, v0.38): whenever a game system changes, update the tutorial (`DATA.tutorial`) in the same change.
 
 **Screen height** (decided, v0.37): the whole game uses at most **95 % of the screen height** (`body` is 95vh). Anything pinned to the bottom (version label, tutorial panel, Assistant subtitles) sits above the unused 5 %. New screens must fit within that.
 

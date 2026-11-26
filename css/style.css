@@ -88,7 +88,6 @@ small, .small { font-size: 16px; }
 .nav-btn.active { color: var(--bone); border-color: var(--edge-hi); background: #241e18; box-shadow: inset 3px 0 0 var(--rust); }
 #center { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 #main { flex: 1; overflow: auto; padding: 12px; }
-#ticker { height: 116px; overflow: hidden; border-top: 2px solid var(--edge); background: var(--coal); padding: 4px 12px; }
 .log { padding: 1px 0; color: #a89a80; }
 .log i { font-style: normal; color: #5a5048; margin-right: 6px; }
 .log.good { color: #9ac070; } .log.bad { color: #e06060; } .log.story { color: #c8b890; font-style: italic; } .log.mythic { color: var(--gold); }
@@ -113,7 +112,6 @@ small, .small { font-size: 16px; }
 .right { text-align: right; white-space: nowrap; }
 
 /* map */
-.map-screen #ticker { display: none; }
 .mapbox { position: relative; }
 /* Star Map and Solar System: fill the screen height, the system panel beside the map */
 .fitscreen { display: flex; gap: 12px; height: 100%; min-height: 0; }
@@ -397,7 +395,6 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
   #cycle { font-size: 10px; }
   #top > .btn { padding: 4px 7px; font-size: 10px; }
   #main { padding: 8px; }
-  #ticker { height: 84px; font-size: 16px; }
   .bld, .tech { flex-wrap: wrap; } .bld .right, .tech .right { text-align: left; }
   .bhead .grow > b { font-size: 16px; }
 }

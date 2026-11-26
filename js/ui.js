@@ -45,7 +45,6 @@ const UI = {
       this.colSys = null;
     }
     this.lastScreen = this.screen;
-    document.body.classList.toggle('map-screen', ['map', 'system', 'battle'].includes(this.screen)); // these screens hide the Chronicle
     if (this.screen === 'battle') this.drawBattleArrow();
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
@@ -59,7 +58,6 @@ const UI = {
         sc.onclick = (ev) => { const p = SystemMap.hit(sc, ev); this.selPlanet = p ? p.idx : null; this.render(); };
       }
     }
-    this.renderTicker();
     Tutorial.refresh();
   },
 
@@ -76,8 +74,6 @@ const UI = {
       (c.eff < 1 ? `<div class="res over" title="Over capacity: all production is rationed"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     this.$('cycle').textContent = (State.slot === 'tester' ? 'TESTER · ' : '') + 'CYCLE ' + G.cycle;
     this.$('cycle').classList.toggle('tester', State.slot === 'tester');
-    this.$('btn-auto').classList.toggle('on', !!Game.autoTimer);
-    this.$('btn-auto').textContent = Game.autoTimer ? '❚❚ AUTO' : '▶ AUTO';
     const playing = !!Music.timer;
     this.$('btn-music').classList.toggle('on', playing);
     this.$('btn-music').classList.toggle('off', !playing);
@@ -88,10 +84,6 @@ const UI = {
     const alert = { battle: G.battle ? 'alert' : '', fleets: '' };
     this.$('nav').innerHTML = this.screens.map(([id, ico, label]) =>
       `<button class="nav-btn ${this.screen === id ? 'active' : ''} ${alert[id] || ''}" data-act="screen" data-a="${id}"><span>${ico}</span><em>${label}${id === 'battle' && G.battle ? ' !' : ''}</em></button>`).join('');
-  },
-
-  renderTicker() {
-    this.$('ticker').innerHTML = G.log.slice(0, 6).map((l) => `<div class="log ${l.cls}"><i>C${l.c}</i> ${U.esc(l.t)}</div>`).join('');
   },
 
   panel(title, body, cls = '') { return `<section class="panel ${cls}"><h2>${title}</h2>${body}</section>`; },
@@ -473,7 +465,6 @@ const UI = {
         `<label class="colorpick"><input type="color" value="${DATA.shipPalettes.player[m]}" data-input="shipcolor" data-mat="${m}"><span>${l}</span></label>`).join('')}
         ${this.btn('Reset', 'resetcolors', '', false, 'small')}</div>
       <div id="color-preview" class="color-preview">${this.colorPreview()}</div>
-      <div class="kv"><span>Auto-cycle speed</span><span class="btnrow">${[5000, 3000, 1500, 700].map((ms) => this.btn(ms / 1000 + 's', 'autospeed', ms, false, Game.autoMs === ms ? 'on' : '')).join('')}</span></div>
       <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
       <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>
       <div class="btnrow">${this.btn(State.slot === 'tester' ? 'Regenerate the tester game' : 'Abandon and start a new galaxy', 'newgame', '', false, 'danger')}</div>
