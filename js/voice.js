@@ -92,7 +92,7 @@ const Voice = {
     if (this.ctx && !(window.OfflineAudioContext && this.ctx instanceof OfflineAudioContext)) return this.ctx;
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return null;
-    try { this.ctx = new AC(); } catch (e) { return null; }
+    try { this.ctx = Music.newContext(AC); } catch (e) { return null; } // large buffers, like the music
     return this.ctx;
   },
 

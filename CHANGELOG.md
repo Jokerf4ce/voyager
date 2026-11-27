@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.52.5 — 2026-11-27
+- Audio: music and the Assistant now ask the browser for large audio buffers (`latencyHint: 'playback'`). Audio starts a fraction of a second later, but phones get more slack, which should stop the crunchy, crackling sound there.
+
 ## 0.52.4 — 2026-11-27
 - Battle: the target arrow carries the size multiplier on a small tag: **×1.5 ★** in green when the attacker's size beats the target's, **×0.7 ▽** in red when it's the other way round, a grey ×1 otherwise.
 

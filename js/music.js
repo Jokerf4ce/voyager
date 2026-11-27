@@ -349,6 +349,13 @@ const Music = {
     }
   },
 
+  // A new audio context with large buffers ('playback'): music needs no instant reaction, and on phones the
+  // larger buffers stop the crackle you get when the audio thread falls behind. Old browsers that don't take
+  // options get the default.
+  newContext(AC) {
+    try { return new AC({ latencyHint: 'playback' }); } catch (e) { return new AC(); }
+  },
+
   // ---- playback ----
   // Browsers only allow audio after a user gesture, so this is called from the first click.
   start() {
@@ -356,7 +363,7 @@ const Music = {
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     try {
-      if (!this.ctx || !(this.ctx instanceof AC)) this.build(new AC());
+      if (!this.ctx || !(this.ctx instanceof AC)) this.build(this.newContext(AC));
       this.ctx.resume();
     } catch (e) { return; }
     this.out.gain.cancelScheduledValues(this.ctx.currentTime);
