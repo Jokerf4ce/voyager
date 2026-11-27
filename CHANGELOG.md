@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.56.1 — 2026-11-27
+- Difficulty picker: Commander comes first, then Adaptive, then Learning.
+- Commander's description now says "all prices are 50% higher" (it read as if things cost half as much).
+
 ## 0.56.0 — 2026-11-27
 - **Difficulty selection** when a new game starts (`DATA.difficulty`). It can't be changed later; Settings and the game over screen show it.
   - **Learning:** the game as it was: a grace period until 3 colonies besides the capital, rare small raids, normal prices, no achievements.

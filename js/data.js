@@ -238,18 +238,18 @@ DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
 //   achievements  later achievements can only be unlocked on difficulties that allow them
 //   locked     shown but can't be picked yet
 DATA.difficulty = {
-  learning: { name: 'Learning', tag: 'A relaxed start',
-    desc: 'Learn the game. The xenos leave you alone until you have founded {grace} colonies besides your capital, and raids stay rare.',
-    points: ['Grace period before raids', 'Rare, small raids', 'Normal prices', 'No achievements'],
-    costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false },
+  commander: { name: 'Commander', tag: 'The way the game is meant to be played',
+    desc: 'No grace period. The xenos know where you are, raid early and often, grow faster and field better ships, and all prices are 50% higher.',
+    points: ['Raids from Cycle {from}, no grace period', 'Frequent, larger raids', 'Stronger, richer xenos', 'All prices ×{mult}', 'Achievements can be earned'],
+    costMult: 1.5, raids: { graceColonies: 0, fromCycle: 12, chance: 0.06, cooldown: 6, extraShips: 1 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
   adaptive: { name: 'Adaptive', tag: 'Coming later', locked: true,
     desc: 'Starts gently and hardens toward Commander as your empire grows.',
     points: ['Scales with your empire'],
     costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false },
-  commander: { name: 'Commander', tag: 'The way the game is meant to be played',
-    desc: 'No grace period. The xenos know where you are, raid early and often, grow faster and field better ships, and everything costs half again as much.',
-    points: ['Raids from Cycle {from}, no grace period', 'Frequent, larger raids', 'Stronger, richer xenos', 'All prices ×{mult}', 'Achievements can be earned'],
-    costMult: 1.5, raids: { graceColonies: 0, fromCycle: 12, chance: 0.06, cooldown: 6, extraShips: 1 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
+  learning: { name: 'Learning', tag: 'A relaxed start',
+    desc: 'Learn the game. The xenos leave you alone until you have founded {grace} colonies besides your capital, and raids stay rare.',
+    points: ['Grace period before raids', 'Rare, small raids', 'Normal prices', 'No achievements'],
+    costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false },
 };
 DATA.battleFxMs = 2000;                    // how long MISS / RESTORED float over a card
 DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of max shields / hull regained
