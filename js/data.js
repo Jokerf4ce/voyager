@@ -266,6 +266,16 @@ DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of ma
 DATA.hangar = { base: 10, perLevel: 2 };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
+// System projects (v0.62): megastructures built for a whole star system, not on a planet. Each system you hold has
+// DATA.systemSlots project slots; a project is built once per system and stays dormant while xenos hold it.
+//   cost      paid once (× difficulty price), cycles: construction time (draws DATA.construction.cap meanwhile)
+//   power     Power capacity it provides, × the star's starlight (DATA.starClasses solar)
+DATA.systemSlots = 1;
+DATA.systemProjects = {
+  dyson: { name: 'Dyson Sphere', cycles: 12, power: 80,
+    cost: { metal: 2500, rare: 600, electronics: 900, chemicals: 400, crypto: 2 },
+    desc: 'A shell of collectors around the star, drinking its light. Enormous Power for the whole empire, scaled by the star\'s starlight; a dim remnant gives little, a blue giant or the hypergiant a flood.' },
+};
 DATA.construction = { cycles: 3, cap: { power: 3, infra: 3 } }; // every build or upgrade: Cycles to finish, capacity drawn meanwhile
 DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
 DATA.scrapRefund = 0.3;      // part of the build cost returned when a ship is scrapped
@@ -418,7 +428,7 @@ DATA.tutorial = [
   { screen: 'map', prepare: 'uncharted', target: '.mapscreen .side', title: 'Explore and expand',
     text: 'Click a system to select it. This panel shows what you can do there; double-click a charted system (or use <b>Open solar system</b>) to see its star and planets on the <b>Solar System</b> screen.<br><br>A <b>survey probe</b> ({survey}) charts an unknown system next to known space. A <b>colony expedition</b> ({colonize}) founds a colony on a planet you choose in a charted, unclaimed system: pick it in the panel\'s planet list (<b>Send colonists</b>). Systems with coloured flags next to them are guarded: send a fleet to clear them first.' },
   { screen: 'colonies', target: '#main .csys', title: 'Colonies',
-    text: 'Every colony in every system you hold. Click a colony to open it. Unsettled planets in your own systems can be settled right here, with no travel needed.<br><br>Each planet has a <b>surface</b> and an <b>orbit</b> layer, each with its own building slots. The more habitable a planet, the cheaper it is to build there.' },
+    text: 'Every colony in every system you hold. Click a colony to open it. Unsettled planets in your own systems can be settled right here, with no travel needed.<br><br>Each planet has a <b>surface</b> and an <b>orbit</b> layer, each with its own building slots. The more habitable a planet, the cheaper it is to build there.<br><br>Each system also has a <b>System project</b> slot for a megastructure built around its star, such as the <b>Dyson Sphere</b>: hugely expensive, but it powers your whole empire.' },
   { screen: 'buildings', target: '#main .brow', title: 'Buildings',
     text: 'Every building type in one list. <b>Auto</b> builds where it gives the most for the price; click a row to choose the colony yourself.<br><br>Each level costs more, and from level 6 the price doubles every level, so <b>go wide</b>: found new colonies instead of stacking towers. Every build or upgrade takes <b>{build} Cycles</b>, and the construction site draws 3 Power and 3 Infrastructure until it is done. The red <b>✕</b> demolishes a building and gives back a quarter of what it cost.' },
   { screen: 'research', target: '#main .panel', title: 'Research',

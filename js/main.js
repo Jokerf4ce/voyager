@@ -171,6 +171,7 @@ const Game = {
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; UI.splashShip(s); } },
     splashclose: () => { UI.closeSplash(); },
     rules: () => { UI.rulesModal(); },
+    project: (a) => { const [sid, key] = a.split(':'); Colonies.buildProject(+sid, key); },
     splashhangar: () => { const id = UI.splash; UI.closeSplash(); UI.screen = 'fleets'; if (id && G.ships[id]) UI.selShip = id; },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
     research: (a) => { Research.select(a); Research.tick(); },

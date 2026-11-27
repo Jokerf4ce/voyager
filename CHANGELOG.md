@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.62.0 — 2026-11-27
+- **System projects:** a new building slot at star-system level. Every system you hold has one project slot, shown on the Colonies screen under the system's star (`DATA.systemProjects`, `DATA.systemSlots`).
+  - **Dyson Sphere:** +80 Power × the star's starlight for the whole empire (a G-type star gives 80, a blue giant 128, the hypergiant 160, a black hole 16). Costs 2,500 Metals, 600 Rare Minerals, 900 Electronics, 400 Chemicals and 2 Crypto Shards (× difficulty prices) and takes 12 Cycles; the site draws 3 Power and 3 Infrastructure like any other.
+  - It shows in the Power hover card, the construction list and the Chronicle. If xenos take the system, a half-built project is lost and a finished one goes dark until you retake it.
+- Tutorial: the Colonies step mentions system projects.
+
 ## 0.61.0 — 2026-11-27
 - **New research tree.** All old projects (big one-off bonuses and the endless Doctrines) are gone. 15 new projects each give a small bonus and can be researched up to 10 times; level n costs base × 1.35^(n−1) (Advanced Mineral Scanning: 20 → 298 Research).
   - Economy: Advanced Mineral Scanning (+5 % Metals), Deep Lattice Drilling (+5 % Rare Minerals), Bio-Vat Cultures (+5 % Organics), Microfabrication (+5 % Electronics), Reagent Catalysis (+5 % Chemicals), Reactor Litanies (+4 % Power), Ration Protocols (+4 % Infrastructure), Cold Logic Engines (+4 % Compute), Ossuary Indexing (+5 % Research), Austerity Rites (−3 % ship maintenance).

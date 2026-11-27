@@ -756,3 +756,7 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .pips { display: inline-flex; gap: 2px; vertical-align: middle; margin: 0 4px; }
 .pips i { width: 7px; height: 9px; background: #2a2420; border: 1px solid #3a3028; }
 .pips i.on { background: #5ac0c8; border-color: #8ae0e8; }
+/* system projects (UI.projectSection) */
+.csys .projects { margin: 6px 0 8px; padding: 6px 8px; border: 1px dashed #5a4a30; background: #15110c; }
+.csys .projects h4 { margin: 0 0 4px; color: var(--gold); }
+.bld.proj.done-proj { border-color: #8a7030; box-shadow: inset 3px 0 0 var(--gold); }

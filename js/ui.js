@@ -455,8 +455,27 @@ const UI = {
     const st = DATA.starClasses[s.star];
     return `<div class="panel csys" id="csys-${s.id}"><div class="star-line">${this.starImg(s, 32)}<h3>${U.esc(s.name)}</h3>
         <span class="small" style="color:${st.color}">${st.name}</span> <span class="muted small">· starlight ×${st.solar} Power</span></div>
+      ${this.projectSection(s)}
       ${s.planets.filter((p) => p.colony).map(colRow).join('')}
       ${free.length ? `<details data-key="free-${s.id}"><summary class="small">Unsettled planets here (${free.length})</summary>${free.map(freeRow).join('')}</details>` : ''}</div>`;
+  },
+
+  // System projects of one system (DATA.systemProjects): built for the whole system, one slot per system.
+  projectSection(s) {
+    const used = Colonies.projectSlotsUsed(s), st = DATA.starClasses[s.star];
+    const row = (key) => {
+      const d = DATA.systemProjects[key], built = (s.projects || {})[key], c = (s.projectBuild || []).find((x) => x.key === key);
+      const pw = Colonies.projectPower(s, key), why = Colonies.projectBlocker(s, key);
+      const head = `${this.bIcon(key, 28)}<div class="grow"><b>${d.name}</b> <span class="res-power">${DATA.capacities.power.icon} +${U.fmt1(pw)} Power</span>
+        <br><small class="muted">${d.desc}</small><br><small class="muted">Here: ${st.name}, starlight ×${st.solar}.</small></div>`;
+      if (built) return `<div class="bld proj done-proj">${head}<div class="right"><span class="lvl">Online</span></div></div>`;
+      if (c) return `<div class="bld proj building">${head}<div class="right"><small>${c.eta} Cycle${c.eta > 1 ? 's' : ''} left</small><div class="bar build-bar"><i style="width:${(c.total - c.eta) / c.total * 100}%"></i></div><small class="muted">site draws ${this.capText(DATA.construction.cap, false)}</small></div></div>`;
+      if (used >= DATA.systemSlots) return '';
+      return `<div class="bld proj new">${head}<div class="right">${U.costText(Colonies.projectCost(key))}<br><small class="muted">${d.cycles} Cycles</small><br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn('Build', 'project', `${s.id}:${key}`, !!why)}</div></div>`;
+    };
+    const rows = Object.keys(DATA.systemProjects).map(row).join('');
+    return `<div class="projects"><h4>System projects <span class="muted">${used}/${DATA.systemSlots} slot${DATA.systemSlots > 1 ? 's' : ''}</span></h4>
+      ${used ? rows : `<details data-key="proj-${s.id}"><summary class="small">Megastructures for the whole system (${Object.keys(DATA.systemProjects).length})</summary>${rows}</details>`}</div>`;
   },
 
   // The full build panel of one colony (both layers).
@@ -496,8 +515,12 @@ const UI = {
   constructionList() {
     const sites = [];
     for (const { s, p } of Colonies.playerPlanets()) for (const c of p.colony.build || []) sites.push({ s, p, c });
+    const proj = [];
+    for (const s of Colonies.playerSystems()) for (const c of s.projectBuild || []) proj.push({ s, c });
+    const projHtml = proj.map(({ s, c }) => `<div class="kv"><span>${this.bIcon(c.key, 20)} ${U.esc(DATA.systemProjects[c.key].name)} <small class="muted">${U.esc(s.name)} · system project</small></span><span>${c.eta} Cycle${c.eta > 1 ? 's' : ''}</span></div>`).join('');
+    if (!sites.length && proj.length) return projHtml + `<p class="muted small">Each site draws ${this.capText(DATA.construction.cap, false)} until it is done.</p>`;
     if (!sites.length) return `<p class="muted small">Nothing under construction. Every build or upgrade takes ${DATA.construction.cycles} Cycles, and each site draws ${this.capText(DATA.construction.cap, false)} meanwhile.</p>`;
-    return sites.sort((a, b) => a.c.eta - b.c.eta).map(({ s, p, c }) => `<div class="kv"><span>${this.bIcon(c.key, 20)} ${U.esc(DATA.buildings[c.key].name)} <small class="muted">${U.esc(Colonies.planetName(s, p))} · ${DATA.layers[c.layer].toLowerCase()}</small></span><b class="res-power">⚒ ${c.eta}</b></div>`).join('')
+    return projHtml + sites.sort((a, b) => a.c.eta - b.c.eta).map(({ s, p, c }) => `<div class="kv"><span>${this.bIcon(c.key, 20)} ${U.esc(DATA.buildings[c.key].name)} <small class="muted">${U.esc(Colonies.planetName(s, p))} · ${DATA.layers[c.layer].toLowerCase()}</small></span><b class="res-power">⚒ ${c.eta}</b></div>`).join('')
       + `<p class="muted small">Each site draws ${this.capText(DATA.construction.cap, false)} until it is done.</p>`;
   },
 

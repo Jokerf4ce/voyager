@@ -32,6 +32,13 @@ const Colonies = {
         done++;
       }
     }
+    for (const s of this.playerSystems()) for (const c of (s.projectBuild || []).slice()) {
+      if (--c.eta > 0) continue;
+      s.projectBuild.splice(s.projectBuild.indexOf(c), 1);
+      (s.projects = s.projects || {})[c.key] = 1;
+      Log.add(`${DATA.systemProjects[c.key].name} completed around ${s.name}: +${U.fmt1(this.projectPower(s, c.key))} Power for the empire.`, 'good');
+      done++;
+    }
     if (done && !silent && typeof Voice !== 'undefined') Voice.trigger('construction'); // once per Cycle, however many finished
     return done;
   },
@@ -231,12 +238,37 @@ const Colonies = {
       for (const layer of ['surface', 'orbit']) for (const k in p.colony[layer]) p.colony[layer][k] = Math.max(0, p.colony[layer][k] - 1);
       p.colony.build = []; // construction sites are lost with the system
     }
+    s.projectBuild = []; // half-built system projects are lost; finished ones go dark until the system is retaken
     s.owner = newOwner;
     s.garrison = Math.round(this.maxGarrison(s) * 0.3);
     return old;
   },
 
   playerSystems() { return G.systems.filter((s) => s.owner === 'player'); },
+
+  // ---- system projects (DATA.systemProjects): one per system, built at star-system level ----
+  projectPower(s, key) { const d = DATA.systemProjects[key]; return (d.power || 0) * DATA.starClasses[s.star].solar * (State.mods().power || 1); },
+  projectCost(key) { return State.cost(DATA.systemProjects[key].cost); },
+  projectSlotsUsed(s) { return Object.values(s.projects || {}).filter(Boolean).length + (s.projectBuild || []).length; },
+  projectBlocker(s, key) {
+    if (s.owner !== 'player') return 'Not your system';
+    if ((s.projects || {})[key]) return 'Already built';
+    if ((s.projectBuild || []).some((c) => c.key === key)) return 'Under construction';
+    if (this.projectSlotsUsed(s) >= DATA.systemSlots) return 'No free project slot';
+    const short = Economy.capShortfall(DATA.construction.cap);
+    if (short) return `Needs ${DATA.construction.cap[short]} free ${DATA.capacities[short].name}`;
+    if (!this.canAfford(this.projectCost(key))) return 'Not enough resources';
+    return null;
+  },
+  buildProject(sysId, key) {
+    const s = G.systems[sysId];
+    if (!s || this.projectBlocker(s, key)) return false;
+    this.pay(this.projectCost(key));
+    const n = DATA.systemProjects[key].cycles;
+    (s.projectBuild = s.projectBuild || []).push({ key, eta: n, total: n });
+    Log.add(`Construction begins: ${DATA.systemProjects[key].name} around ${s.name}, ready in ${n} Cycles.`);
+    return true;
+  },
   playerPlanets() {
     const out = [];
     for (const s of this.playerSystems()) for (const p of s.planets) if (p.colony) out.push({ s, p });
@@ -283,6 +315,11 @@ const Economy = {
       const c = this.planetCaps(p);
       for (const k in c) { out[k].cap += c[k].give; out[k].buildings += c[k].use; }
     }
+    // system projects give Power; their construction sites draw like any other
+    for (const s of Colonies.playerSystems()) {
+      for (const key in s.projects || {}) if (s.projects[key]) out.power.cap += Colonies.projectPower(s, key);
+      for (const c of s.projectBuild || []) for (const [k, v] of Object.entries(DATA.construction.cap)) out[k].buildings += v;
+    }
     let eff = 1;
     for (const k in out) {
       out[k].used = out[k].buildings + out[k].ships;
@@ -321,6 +358,10 @@ const Economy = {
           if (v > 0 && lvl) byType[DATA.buildings[b].name] = (byType[DATA.buildings[b].name] || 0) + v * lvl;
         }
         for (const c of p.colony.build || []) if (DATA.construction.cap[k]) byType['Construction sites'] = (byType['Construction sites'] || 0) + DATA.construction.cap[k];
+      }
+      for (const s of Colonies.playerSystems()) {
+        for (const key in s.projects || {}) if (s.projects[key] && k === 'power') plus.push([`${DATA.systemProjects[key].name} · ${s.name}`, Colonies.projectPower(s, key)]);
+        for (const c of s.projectBuild || []) if (DATA.construction.cap[k]) byType['Construction sites'] = (byType['Construction sites'] || 0) + DATA.construction.cap[k];
       }
       for (const [n, v] of Object.entries(byType)) minus.push([n, v]);
     }

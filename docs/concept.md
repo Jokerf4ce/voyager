@@ -137,6 +137,15 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 
 **Tutorial practice battle** (decided v0.58): the tutorial explains raids and battles with a staged raid and a live practice fight. Those steps (`demo:` in `DATA.tutorial`) run in a sandbox copy of `G` that is never saved; the real game is restored when a step without `demo` is shown or the tutorial ends.
 
+## 4a-5. System projects
+
+**Decided (v0.62):** besides the surface and orbit slots of each planet, every system you hold has **one system project slot** (`DATA.systemSlots`) for a megastructure built at star-system level (`DATA.systemProjects`, stored as `s.projects` and `s.projectBuild`). Projects are found on the Colonies screen under each system's star.
+
+- **Dyson Sphere:** +80 Power × the star's starlight (G-type 80, blue giant 128, hypergiant 160, white dwarf 32, black hole 16), for the whole empire. Costs 2,500 Metals, 600 Rare Minerals, 900 Electronics, 400 Chemicals and 2 Crypto Shards (× difficulty prices) and takes 12 Cycles; the site draws the usual 3 Power and 3 Infrastructure meanwhile.
+- If xenos take the system, a half-built project is lost; a finished one goes dark and comes back when you retake the system.
+
+**Open:** more projects (for example a stellar forge, a listening array, a shipyard ring), more slots for special stars, and drawing the sphere on the Solar System screen.
+
 ## 4a-4. Research
 
 **Decided (v0.61):** research is a set of small, stackable bonuses. Each project gives a few percent (for example *Advanced Mineral Scanning*: +5 % Metals) and can be researched up to 10 times; level n costs base × 1.35^(n−1), so the tenth level costs about 15× the first. A project keeps going level after level until it is complete; then the cheapest unfinished one is picked. 15 projects: 10 economy (each gathered and refined resource, Power, Infrastructure, Compute, Research, −3 % ship maintenance) and 5 war (+3 % weapon damage, +3 % shields and hull, +2 % hit chance, +6 % Planetary Defenses, +10 % repair speed). Tuned in `DATA.techs` / `DATA.techMax`. The old tree (big one-off bonuses plus endless Doctrines) was removed; saves from before v0.61 start the new tree from nothing.

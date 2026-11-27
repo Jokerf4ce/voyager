@@ -260,6 +260,7 @@ const Sprites = {
     shipyard: ['k..........k', 'k=kkkkkkkk=k', 'k=........=k', 'k=..kkk...=k', 'k=.k=o=kk.=k', 'k=k=====wk=k', 'k=.k===kk.=k', 'k=..kkk...=k', 'k=........=k', 'k=kkkkkkkk=k', 'k..........k', '............'],
     finance: ['.yyy....kk..', 'yywyy..k==k.', '.yyy...k=yk.', '..kk...k==k.', '.k==k..k=yk.', '.k=yk.kk==k.', '.k==kk=k=yk.', '.k=yk=yk==k.', '.k==k==k=yk.', 'kk=yk=yk==kk', '############', '............'],
     bastion: ['.k.k.k.k.k..', '.kkkkkkkkk..', '.k=======k..', '.k=kk=kk=k..', '.k=======k..', '.k==rrr==k..', '.k=r###r=k..', '.k=r###r=k..', 'kk=======kk.', 'k#########k.', 'kkkkkkkkkkk.', '............'],
+    dyson: ['...k=#=#k...', '..#k.kk.k#..', '.=.kyyyyk.=.', 'k.kyywwyyk.k', '=kyywwwwyyk=', '#kywwwwwwyk#', '#kywwwwwwyk#', '=kyywwwwyyk=', 'k.kyywwyyk.k', '.=.kyyyyk.=.', '..#k.kk.k#..', '...k=#=#k...'],
     platform: ['............', '........kk..', '.......kwk..', '......k=k...', '...kkk=k....', '..k===kk....', '.k=rr===k...', '.k=rr====kkk', '..k========k', '...kkkkkkkk.', '....k....k..', '............'],
   },
   buildingPal: { k: '#14100c', '=': '#9a8c78', '#': '#4e443a', o: '#e07030', y: '#f0d060', w: '#f4ecd8', b: '#4f8fb8', g: '#6f9a3c', p: '#9a6cc8', r: '#b03030' },
