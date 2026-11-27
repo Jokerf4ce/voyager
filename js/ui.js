@@ -157,7 +157,7 @@ const UI = {
   // Gathering ratings, e.g. "⬡●●○ ◇●○○ ❦●●●"
   ratingText(p) {
     return ['metal', 'rare', 'organics'].map((k) => {
-      const r = Math.min(4, Economy.rating(p, k));
+      const r = Math.min(5, Economy.rating(p, k));
       return `<span class="res-${k}" title="${DATA.resources[k].name} rating ${r}">${DATA.resources[k].icon}${'●'.repeat(r)}${'○'.repeat(Math.max(0, 3 - r))}</span>`;
     }).join(' ');
   },

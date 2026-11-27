@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.65.0 — 2026-11-27
+- **A Rare deposit next to home.** Every new game puts one fixed Rare deposit in a system adjacent to the starting system: an average Scorched Rock labelled "Rare deposit", Rare rating 5 (the best in the game), with a stable crust (Barren, habitability 3) so Core Drills can be built on its surface. Electronics no longer starve for lack of Rare Minerals when the home system is poor in them.
+  - Deposits are a general mechanism (`p.deposit`, `DATA.deposits`): +2 to that resource's rating. Rating dots now show up to 5.
+  - Playtest (5 games each, 200 Cycles): no game stuck any more (the weakest Commander game reached 12 colonies by Cycle 200; before, one stayed at 1). Learning colonies at Cycle 200: 13–49 → 28–93.
+  - Tutorial: the Star Map step points to the deposit as a good early colony.
+  - Existing saves keep their galaxy; the deposit appears in new games.
+
 ## 0.64.1 — 2026-11-27
 - **Chemicals at the start fixed.** Fleet maintenance now costs a quarter as much in Chemicals as in Metals (was half; `DATA.upkeep.chemShare`), and a new game starts with 35 Chemicals (was 20). At the start Chemicals now run at about +1 per Cycle instead of about 0 (measured over 12 new games), so the first colony expeditions no longer stall.
   - Playtest (5 games each, 200 Cycles), colonies at Cycle 50 / 100: Learning 5–7 / 8–19 → 5–9 / 10–24; Commander 2–4 / 2–9 → 6–8 / 10–17 (one game an outlier, stuck on Rare Minerals after losing its fleet).

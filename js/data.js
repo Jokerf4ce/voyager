@@ -276,6 +276,10 @@ DATA.systemProjects = {
     cost: { metal: 2500, rare: 600, electronics: 900, chemicals: 400, crypto: 2 },
     desc: 'A shell of collectors around the star, drinking its light. Enormous Power for the whole empire, scaled by the star\'s starlight; a dim remnant gives little, a blue giant or the hypergiant a flood.' },
 };
+// Fixed deposits (v0.65): a planet with p.deposit = key gets +bonus to that resource's rating. Every new game puts one
+// Rare deposit on a Scorched Rock in a system next to home (Galaxy.placeStarts), so Electronics never starve for lack
+// of Rare Minerals. Its crust is stable enough (habitability 3) for Core Drills on the surface.
+DATA.deposits = { rare: { name: 'Rare deposit', bonus: 2 } };
 DATA.construction = { cycles: 3, cap: { power: 3, infra: 3 } }; // every build or upgrade: Cycles to finish, capacity drawn meanwhile
 DATA.demolishRefund = 0.25;  // part of everything invested in a building (all levels) returned when it is demolished
 DATA.scrapRefund = 0.3;      // part of the build cost returned when a ship is scrapped
@@ -426,7 +430,7 @@ DATA.tutorial = [
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
     text: 'Your home system has bright brackets around it. Drag to look around; scroll or pinch to zoom. The buttons on the right zoom, jump home (⌂) and centre on the selected system; the minimap in the corner shows all you have charted.<br><br>A <b>?</b> is a system no one has charted. The galaxy has no edge: it grows as you explore.' },
   { screen: 'map', prepare: 'uncharted', target: '.mapscreen .side', title: 'Explore and expand',
-    text: 'Click a system to select it. This panel shows what you can do there; double-click a charted system (or use <b>Open solar system</b>) to see its star and planets on the <b>Solar System</b> screen.<br><br>A <b>survey probe</b> ({survey}) charts an unknown system next to known space. A <b>colony expedition</b> ({colonize}) founds a colony on a planet you choose in a charted, unclaimed system: pick it in the panel\'s planet list (<b>Send colonists</b>). Systems with coloured flags next to them are guarded: send a fleet to clear them first.' },
+    text: 'Click a system to select it. This panel shows what you can do there; double-click a charted system (or use <b>Open solar system</b>) to see its star and planets on the <b>Solar System</b> screen.<br><br>A <b>survey probe</b> ({survey}) charts an unknown system next to known space. A <b>colony expedition</b> ({colonize}) founds a colony on a planet you choose in a charted, unclaimed system: pick it in the panel\'s planet list (<b>Send colonists</b>). Systems with coloured flags next to them are guarded: send a fleet to clear them first.<br><br>One system next to home holds a <b>Rare deposit</b>: a Scorched Rock rich in Rare Minerals, which Electronics are made from. It makes a good early colony.' },
   { screen: 'colonies', target: '#main .csys', title: 'Colonies',
     text: 'Every colony in every system you hold. Click a colony to open it. Unsettled planets in your own systems can be settled right here, with no travel needed.<br><br>Each planet has a <b>surface</b> and an <b>orbit</b> layer, each with its own building slots. The more habitable a planet, the cheaper it is to build there.<br><br>Each system also has a <b>System project</b> slot for a megastructure built around its star, such as the <b>Dyson Sphere</b>: hugely expensive, but it powers your whole empire.' },
   { screen: 'buildings', target: '#main .brow', title: 'Buildings',

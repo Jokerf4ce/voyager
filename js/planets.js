@@ -5,7 +5,7 @@ const Planets = {
   cls(p) { return DATA.planetClasses[this.classKey(p)]; },
 
   // e.g. "Large Ocean World", "Hot Gas Giant" (giants don't repeat their size)
-  label(p) { return (p.size === 'giant' ? '' : DATA.planetSizes[p.size].name + ' ') + this.cls(p).name; },
+  label(p) { return (p.size === 'giant' ? '' : DATA.planetSizes[p.size].name + ' ') + this.cls(p).name + (p.deposit ? ` · ${DATA.deposits[p.deposit].name}` : ''); },
   // e.g. "Silicate · Average · Temperate"
   factors(p) { return `${DATA.compositions[p.comp].name} · ${DATA.planetSizes[p.size].name} · ${DATA.temperatures[p.temp].name}`; },
 

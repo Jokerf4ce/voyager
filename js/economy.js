@@ -284,7 +284,8 @@ const Economy = {
   // Rating 0–3 of a planet for a gathered resource (dwarfs get +1 Rare Minerals).
   rating(p, res) {
     const r = Planets.cls(p).yields[res] || 0;
-    return r + (res === 'rare' ? (DATA.planetSizes[p.size].rareBonus || 0) : 0);
+    const dep = p.deposit === res ? DATA.deposits[res].bonus : 0; // a fixed deposit (DATA.deposits)
+    return r + dep + (res === 'rare' ? (DATA.planetSizes[p.size].rareBonus || 0) : 0);
   },
 
   // --- Capacities (Power, Infrastructure, Compute) ---

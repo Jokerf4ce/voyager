@@ -158,6 +158,17 @@ const Galaxy = {
     Colonies.found(home.id, capital.idx, 'player', { mine: 1, harvester: 1, refinery: 1, dome: 1, fusion: 2 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
     capital.colony.capital = true;
 
+    // One system next door always holds a rich Rare deposit: a Scorched Rock with a stable crust (DATA.deposits).
+    const next = U.shuffle(home.lanes.map((id) => S[id]).filter((s) => !s.owner));
+    const depSys = next[0] || nearest(home.x, home.y, (s) => s.id !== home.id);
+    if (depSys) {
+      const rock = Planets.make(depSys.planets.length, 'silicate', 'average', 'hot', 3, depSys.star);
+      rock.deposit = 'rare';
+      if (depSys.planets.length >= 5) depSys.planets[U.randInt(0, depSys.planets.length - 1)] = rock; else depSys.planets.push(rock);
+      this.orderPlanets(depSys.planets);
+      G.depositSys = depSys.id;
+    }
+
     // The alien empires lie far out in two different directions, joined to home by generated space.
     const g = DATA.galaxy, a0 = Math.random() * Math.PI * 2;
     const homes = [];

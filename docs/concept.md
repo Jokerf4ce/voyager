@@ -137,6 +137,10 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 
 **Tutorial practice battle** (decided v0.58): the tutorial explains raids and battles with a staged raid and a live practice fight. Those steps (`demo:` in `DATA.tutorial`) run in a sandbox copy of `G` that is never saved; the real game is restored when a step without `demo` is shown or the tutorial ends.
 
+## 4a-6. Fixed deposits
+
+**Decided (v0.65):** a planet can carry a fixed deposit (`p.deposit`, `DATA.deposits`) that adds to one resource's rating. Every new game places one **Rare deposit** in a system next to home: an average Scorched Rock (Rare rating 3, +2 from the deposit = 5) with a stable crust (habitability 3, Barren) so Core Drills can go on its surface. Reason: a playtest game whose start had poor Rare Minerals could never afford Electronics to rebuild its fleet. Playtest after (5 games each, 200 Cycles): no game stuck, the weakest Commander game at 12 colonies by Cycle 200 (before: 1).
+
 ## 4a-5. System projects
 
 **Decided (v0.62):** besides the surface and orbit slots of each planet, every system you hold has **one system project slot** (`DATA.systemSlots`) for a megastructure built at star-system level (`DATA.systemProjects`, stored as `s.projects` and `s.projectBuild`). Projects are found on the Colonies screen under each system's star.
