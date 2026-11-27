@@ -3,7 +3,7 @@
 const Game = {
 
   endCycle() {
-    if (G.over || UI.modalOpen) return;
+    if (G.over || UI.modalOpen || Tutorial.sandboxed) return;
     if (UI.splash) UI.closeSplash();
     if (G.battle && G.battle.phase === 'over') Battle.close(); // a finished battle is put away (the next queued one may start)
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
@@ -150,6 +150,7 @@ const Game = {
     tutnext: () => { Tutorial.next(); },
     tutback: () => { Tutorial.back(); },
     tutskip: () => { Tutorial.finish(); },
+    tutmin: () => { Tutorial.min = !Tutorial.min; },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; UI.splashShip(s); } },
     splashclose: () => { UI.closeSplash(); },

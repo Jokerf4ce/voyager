@@ -135,6 +135,8 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 
 **Open:** how Adaptive measures empire growth and how fast it ramps.
 
+**Tutorial practice battle** (decided v0.58): the tutorial explains raids and battles with a staged raid and a live practice fight. Those steps (`demo:` in `DATA.tutorial`) run in a sandbox copy of `G` that is never saved; the real game is restored when a step without `demo` is shown or the tutorial ends.
+
 ## 4b. Resources
 
 **Decided:** three gathered resources, two refined goods and three capacities, plus Research and Crypto Shards (v0.47, an interstellar currency for trade, deliberately scarce). (Void Shards were removed in v0.43.)

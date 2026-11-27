@@ -2,6 +2,15 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.58.0 — 2026-11-27
+- **Tutorial: raids and a practice battle.** The single Battle step is replaced by six steps (17 in all):
+  - **Raids** (Overview, with a staged raid in Threats & Missions): when raids start on this difficulty, how they are spotted, and that they hit outlying colonies first.
+  - **A raid arrives**: the defense setup screen (pick a fleet, Planetary Defenses, what losing costs).
+  - **The battlefield**, **Damage**, **Your turn**, **Auto, and after the fight**: a live practice battle against three Chorus raiders, explaining lanes, targeting, turn order, shields and hull, physical and energy weapons, the size triangle, Fire / Restore / Move, Auto / Resolve / Retreat, and repairs and losses afterwards. You can play it.
+  - The practice runs in a throwaway copy of the game: it is never saved, End Cycle does nothing, and the real game comes back unchanged on the next step, Back to an earlier step, Skip or Begin. The panel is tagged "Practice · nothing here counts".
+- Tutorial panel: it can be folded to its header (click the header), sits beside what it explains on these steps, and keeps its scroll position while a battle animates (it no longer rebuilds on every redraw). On phones the text scrolls and the buttons stay in view.
+- The Hangar step no longer repeats the raid rule (the Raids step has it).
+
 ## 0.57.0 — 2026-11-27
 - **Commander retuned after a playtest** (the bot lost all 5 games by Cycle 50–78 and never got past the capital):
   - Raids from Cycle 25 (was 12).

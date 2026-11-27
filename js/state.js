@@ -75,7 +75,7 @@ const State = {
   key() { return DATA.config.saveKey + (this.slot === 'tester' ? '_tester' : ''); },
 
   save() {
-    if (!G) return;
+    if (!G || (typeof Tutorial !== 'undefined' && Tutorial.sandboxed)) return; // the tutorial's practice battle is never saved
     G.lastSeen = Date.now();
     try { localStorage.setItem(this.key(), JSON.stringify(G)); } catch (e) { /* storage unavailable */ }
   },

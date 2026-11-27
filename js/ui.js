@@ -253,7 +253,7 @@ const UI = {
       ${this.panel('Construction', this.constructionList())}
       ${this.panel('Buildings', this.buildingSummary())}
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
-      ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : (AI.raids().graceColonies ? `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${AI.raids().graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), AI.raids().graceColonies)}/${AI.raids().graceColonies}).</p>` : `<p class="muted small bad">No grace period on ${State.diff().name}: raids can come from Cycle ${AI.raids().fromCycle || 1}.</p>`))) + (away || '<p class="muted small">All fleets are home.</p>'))}
+      ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : (AI.raids().graceColonies ? `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${AI.raids().graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), AI.raids().graceColonies)}/${AI.raids().graceColonies}).</p>` : `<p class="muted small bad">No grace period on ${State.diff().name}: raids can come from Cycle ${AI.raids().fromCycle || 1}.</p>`))) + (away || '<p class="muted small">All fleets are home.</p>'), 'threats')}
       ${this.panel('Battle Reports', this.reportList(5))}
     </div>`;
   },
