@@ -46,6 +46,7 @@ const VoiceLines = {
   signatures:     { text: 'Warning! Unknown signatures detected!', triggers: ['combat'], glitch: 0.35 },
   hell:           { text: 'Commander! Give them hell!', triggers: ['combat'], glitch: 0.35 },
   construction:   { text: 'Construction completed!', triggers: ['construction'], glitch: 0.35 },
+  new_colony:   { text: 'New colony established, congratulations!', triggers: ['colony'], glitch: 0.35 },
 };
 
 // Per-trigger settings: cooldown (seconds) stops the same trigger from repeating too often.
