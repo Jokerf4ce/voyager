@@ -59,6 +59,8 @@ const UI = {
       }
     }
     Tutorial.refresh();
+    // phones: the ship panel sits below the lists, so bring it into view when a ship is picked
+    if (this.scrollToShip) { this.scrollToShip = false; const side = document.querySelector('.fleetscreen .side'); if (side) side.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   },
 
   renderTop() {

@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.52.3 — 2026-11-27
+- **Hangar screen fixed on phones and small tablets.** It no longer runs wider than the screen.
+  - Each fleet's five lanes fit the width as a grid, and the hangar is a tight grid.
+  - On phones the cards are compact: size, picture, short name, shield and hull bars.
+  - Sort and Auto-scrap buttons wrap, and tapping a ship scrolls to its panel below.
+  - Desktop is unchanged.
+
 ## 0.52.2 — 2026-11-27
 - **Battle screen fixed on phones and small tablets.** The two rows of ships no longer collapse on top of each other and the Auto / Resolve / Retreat buttons.
   - Cards are compact on phones: size badge, picture, shield and hull bars. The prompt names the acting ship and its target.

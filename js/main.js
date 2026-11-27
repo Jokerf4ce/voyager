@@ -63,7 +63,7 @@ const Game = {
     slot: (a) => { Game.switchSlot(a); },
     close: () => { UI.closeModal(); },
     // fleets and ships
-    selship: (a) => { UI.selShip = UI.selShip === a ? null : a; },
+    selship: (a) => { UI.selShip = UI.selShip === a ? null : a; if (UI.selShip && UI.narrow()) UI.scrollToShip = true; },
     shift: (a) => { const [sid, d] = a.split('|'); Ships.shift(sid, +d); },
     assign: (a) => { const [sid, fid] = a.split('|'); Ships.assign(sid, fid === 'hangar' ? null : +fid); },
     newfleet: (a) => { const f = Ships.newFleet(); f.keep = true; if (a) Ships.assign(a, f.id); delete f.keep; Ships.cleanup(); },

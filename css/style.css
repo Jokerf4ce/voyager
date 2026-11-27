@@ -555,3 +555,27 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
   .board .bpower b { font-size: 14px; } .board .bpower span { font-size: 13px; } .board .bpower span b { font-size: 15px; }
   .wbtn .wchip { font-size: 14px; } .wbtn small { font-size: 12px; }
 }
+
+/* ---------- hangar on phones and small tablets ---------- */
+@media (max-width: 820px) {
+  .fleetscreen > div, .fleetscreen .side { min-width: 0; }     /* the lists may no longer push the page wider than the screen */
+  .fleetrow .cardrow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; overflow: visible; }
+  .fleetrow .lanewrap { min-width: 0; }
+  .fleetrow .scard, .hangar-drop .scard { width: auto; flex-basis: auto; min-width: 0; }
+  .hangar-drop { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 4px; }
+  .sortrow { flex-wrap: wrap; }
+}
+@media (max-width: 560px) {
+  /* compact cards: picture, bars and a short name; tap one for everything else */
+  .fleetrow .cardrow { gap: 3px; }
+  .hangar-drop { grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 3px; }
+  .fleetscreen .cardrow .scard { padding: 2px; gap: 1px; }
+  .fleetscreen .cardrow .sc-type, .fleetscreen .cardrow .sc-stats, .fleetscreen .cardrow .sc-weps, .fleetscreen .cardrow .sc-rar { display: none; }
+  .fleetscreen .cardrow .sc-img { height: 38px; }
+  .fleetscreen .cardrow .sc-name { font-size: 11px; }
+  .fleetscreen .cardrow .sc-size { font-size: 8px; padding: 0 2px; }
+  .fleetscreen .cardrow .sbar { height: 7px; } .fleetscreen .cardrow .sbar span { font-size: 10px; top: -3px; right: 1px; }
+  .fleetscreen .cardrow .scard.empty { min-height: 70px; font-size: 12px; text-align: center; }
+  .fleetrow .lanelbl { font-size: 7px; letter-spacing: 0; }
+  .fleethead b { font-size: 16px; }
+}
