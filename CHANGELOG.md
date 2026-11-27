@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.60.2 — 2026-11-27
+- **Battle: weapons as one list.** Each weapon is a full-width row: the weapon on the left, expected shield and hull damage, hit chance and ★/▽ on the right. Restore and the move hint share one line below the list.
+  - The turn prompt is shorter and names hit penalties once ("across lanes ×0.5 hit, small target ×0.6 hit") instead of on every weapon.
+- Battle layout: the two ship rows no longer overlap on short windows (they could before, even with one weapon); the controls never shrink under the turn order; if space runs out, the board scrolls. With three weapons on screens up to 860 px high, ship art and spacing get a little tighter.
+- Fixed: Restore could show unrounded numbers ("+8.700000000000003 sh").
+- The sample button in Rules of engagement matches the new rows.
+
 ## 0.60.1 — 2026-11-27
 - Tutorial on phones: when a step points at something in the lower half of the screen (like the weapon buttons in "Your turn"), the panel moves to the top so you can still use it.
 

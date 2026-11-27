@@ -70,7 +70,7 @@ Object.assign(UI, {
       <text x="${x0}" y="${10}" class="rl left">enemy lanes</text></svg>`;
     // a weapon button, numbered
     const k = (n) => `<sup class="rkey">${n}</sup>`;
-    const sample = `<div class="rsample"><span class="btn wbtn"><span class="wchip" style="--wc:${P.color};--rc:${DATA.shipRarities.epic.color}">${k(1)}<i>${P.icon}</i>${k(2)}<em>Mass Driver</em>${k(3)}<b>12</b>${k(4)}<small>⟳2</small></span><small>${k(5)}≈4 sh + 13 hu · ${k(6)}62% hit ${k(7)}★</small></span></div>`;
+    const sample = `<div class="rsample bweps"><span class="btn wbtn"><span class="wchip" style="--wc:${P.color};--rc:${DATA.shipRarities.epic.color}">${k(1)}<i>${P.icon}</i>${k(2)}<em>Mass Driver</em>${k(3)}<b>12</b>${k(4)}<small>⟳2</small></span><small>${k(5)}≈4 sh + 13 hu · ${k(6)}62% hit ${k(7)}★</small></span></div>`;
     const card = `<div class="rsample"><span class="rcard"><b>Cinder Saint</b><span class="rbar sh"></span><span class="rbar hu"></span><small>${k(8)}»9 &nbsp;${k(9)}○23%</small></span></div>`;
     this.modal(`<div class="rules"><h2>Rules of engagement</h2>
       <div class="rgrid">
@@ -91,7 +91,7 @@ Object.assign(UI, {
             <li value="3">Base damage per hit, before shields, hull and size.</li>
             <li value="4">Recharge: after firing it waits this many turns. A weapon still recharging shows <i>recharging 1</i>.</li>
             <li value="5">Expected damage on <b>this</b> target: to its shields (sh) and its hull (hu), with type and size included. Hits vary a little.</li>
-            <li value="6">Chance to hit: accuracy, reduced by the target's evasion, and by firing across lanes or Large at Small.</li>
+            <li value="6">Chance to hit: accuracy, reduced by the target's evasion, and by firing across lanes or Large at Small (the turn prompt names these).</li>
             <li value="7">★ size advantage (×${adv}) or ▽ disadvantage (×${dis}).</li>
           </ol>
           ${card}
@@ -405,16 +405,16 @@ Object.assign(UI, {
       const pv = (x) => {
         if (x.cdLeft > 0 || !tgt) return `<small>recharging ${x.cdLeft}</small>`;
         const d = Battle.preview(cur, x, tgt), sm = Battle.sizeMult(cur, tgt);
-        return `<small>≈${Math.round(d.shield)} sh + ${Math.round(d.hull)} hu · ${Math.round(Battle.hitChance(x, tgt, cur) * 100)}% hit${sm > 1 ? ' ★' : sm < 1 ? ' ▽' : ''}${cur.size === 'L' && tgt.size === 'S' ? ' (small target)' : ''}</small>`;
+        return `<small>≈${Math.round(d.shield)} sh + ${Math.round(d.hull)} hu · ${Math.round(Battle.hitChance(x, tgt, cur) * 100)}% hit${sm > 1 ? ' ★' : sm < 1 ? ' ▽' : ''}</small>`;
       };
       const pushedN = pick != null ? Battle.pushed(cur, pick).filter(([x]) => !x.dead).length : 0;
       const rg = Battle.restoreGain(cur);
-      controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b> targets <b>${U.esc(tgt.name)}</b>${cur.lane !== tgt.lane ? ' <span class="bad">(across lanes: half the hit chance)</span>' : ''}. Fire a weapon, restore, or move.</div>
-        <div class="btnrow">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}
-          <button class="btn wbtn restore" data-act="brestore" ${Battle.canRestore(cur) ? '' : 'disabled'} title="Hold position: regain ${Math.round(DATA.restore.shield * 100)} % of max shields and ${Math.round(DATA.restore.hull * 100)} % of max hull. Uses this turn."><span class="wchip">⟲ Restore</span><small>${rg.shield || rg.hull ? `+${rg.shield} sh + ${rg.hull} hu` : 'undamaged'}</small></button></div>
+      const notes = [cur.lane !== tgt.lane ? `across lanes ×${DATA.offLaneHit} hit` : '', cur.size === 'L' && tgt.size === 'S' ? `small target ×${DATA.largeVsSmallHit} hit` : ''].filter(Boolean);
+      controls = `<div class="bprompt">Your turn: <b>${U.esc(cur.name)}</b> targets <b>${U.esc(tgt.name)}</b>${notes.length ? ` <span class="bad">(${notes.join(', ')})</span>` : ''}.</div>
+        <div class="bweps">${cur.weapons.map((x, i) => `<button class="btn wbtn" data-act="bfire" data-a="${i}" ${x.cdLeft > 0 ? 'disabled' : ''}>${this.weaponChip(x)}${pv(x)}</button>`).join('')}</div>
         <div class="btnrow swaprow">${pick != null
           ? `${this.btn(`⇄ Confirm: move to lane ${pick + 1}${pushedN ? ` (pushes ${pushedN} aside)` : ''}`, 'bswapconfirm', '', false, 'gold')}${this.btn('Cancel', 'bswapnav', 0, false, 'small')}`
-          : '<small class="muted">Or move instead of firing: drag this ship to another lane, or use ◀ ▶ on its card and confirm. Ships in between slide over. Uses this turn.</small>'}</div>`;
+          : `<button class="btn small brestore" data-act="brestore" ${Battle.canRestore(cur) ? '' : 'disabled'} title="Hold position: regain ${Math.round(DATA.restore.shield * 100)} % of max shields and ${Math.round(DATA.restore.hull * 100)} % of max hull. Uses this turn."><span class="wchip">⟲ Restore</span><small>${rg.shield || rg.hull ? `+${Math.round(rg.shield)} sh + ${Math.round(rg.hull)} hu` : 'undamaged'}</small></button><small class="muted">or move: drag the ship, or ◀ ▶ on its card</small>`}</div>`;
     } else if (cur) {
       controls = `<div class="bprompt muted">${cur.side === 'enemy' ? 'Enemy turn' : 'Auto'}: ${U.esc(cur.name)} → ${tgt ? U.esc(tgt.name) : '…'}</div>`;
     }
@@ -425,7 +425,7 @@ Object.assign(UI, {
     const f = b.fleetId != null ? Ships.fleet(b.fleetId) : null;
     const myName = f ? f.name : 'Planetary Defenses';
     const powerBar = `<div class="pbar" title="Fleet power: yours ${pP}, theirs ${pE}"><i style="width:${share}%"></i></div>`;
-    return `<div class="battlescreen fitscreen"><div class="board" id="board">
+    return `<div class="battlescreen fitscreen"><div class="board ${myTurn && cur.weapons.length >= 3 ? 'tight' : ''}" id="board">
       ${powerBar}
       <div class="bhead2"><h3>⚔ ${U.esc(s.name)}</h3><span class="muted small">${b.kind === 'attack' ? 'Attack' : 'Defense'} · Round ${b.round}${G.battleQueue.length ? ` · ${G.battleQueue.length} more battle${G.battleQueue.length > 1 ? 's' : ''} waiting` : ''}</span>${tools}</div>
       <div class="bpower enemy" style="--fc:${this.factionColor(enemyOwner)}"><b>${U.esc(enemyName)}</b><span>fleet power <b>${pE}</b></span></div>
