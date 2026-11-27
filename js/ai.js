@@ -32,6 +32,10 @@ const AI = {
   raids() { return State.diff().raids; },
   // One sentence on when raids start in this game (tutorial and Overview).
   raidRule() {
+    if (G.difficulty == null && State.slot === 'main') { // the tour runs before the difficulty is picked
+      const L = DATA.difficulty.learning.raids, C = DATA.difficulty.commander.raids;
+      return `On <b>Learning</b> the xenos ignore you until you have founded <b>${L.graceColonies}</b> colonies besides your capital; on <b>Commander</b> raids can come from Cycle <b>${C.fromCycle}</b>. You choose the difficulty when this tour ends.`;
+    }
     const R = this.raids();
     if (R.graceColonies) return `The xenos ignore you at first. Raids only begin once you have founded <b>${R.graceColonies}</b> colonies besides your capital.`;
     return `On <b>${State.diff().name}</b> there is no grace period: the xenos know where you are, and raids can come from Cycle <b>${R.fromCycle || 1}</b>.`;

@@ -672,3 +672,8 @@ body.splashing #comms { bottom: auto; top: 8px; } /* Assistant subtitles move up
 #tutorial p { overflow: auto; min-height: 0; flex: 1 1 auto; }
 #tutorial .tut-head, #tutorial .tut-dots, #tutorial .btnrow { flex: none; }
 #tutorial .tut-step { white-space: nowrap; }
+/* the tour locks the game (Game.lockedByTour) */
+#tutorial .tut-lock { flex: none; margin: 0 0 8px; padding: 4px 8px; border: 1px solid var(--blood); color: #ff8a7a; background: rgba(60, 10, 10, .5); font-size: 16px; }
+#tutorial.nudge { animation: tut-nudge .4s steps(6); }
+@keyframes tut-nudge { 0%, 100% { translate: 0; } 20% { translate: -6px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 4px 0; } }
+body.touring [data-dragship] { cursor: not-allowed; }

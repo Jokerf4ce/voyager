@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.59.0 — 2026-11-27
+- **The tour comes first, then the difficulty.** A new game opens with the tutorial; the difficulty picker appears when it ends (Begin) or is skipped. Replaying the tour from Settings doesn't ask again. Closing the page before the difficulty is picked restarts the tour on the next visit.
+  - The Raids step explains both rules (Learning: after 3 colonies; Commander: from Cycle 25), since the difficulty isn't chosen yet.
+- **The game is locked during the tour.** You can look around (every screen, the map, selecting things), change audio settings and use the tutorial; building, buying ships, research, missions, scrapping, fleet changes, hangar drag and drop and End Cycle (button and Space) are blocked. Trying one shakes the tutorial panel with "The game is paused during the tutorial. Finish or skip it to start playing." The practice battle stays playable on its steps.
+- Tutorial texts mention the lock and that the difficulty is chosen afterwards.
+
 ## 0.58.0 — 2026-11-27
 - **Tutorial: raids and a practice battle.** The single Battle step is replaced by six steps (17 in all):
   - **Raids** (Overview, with a staged raid in Threats & Missions): when raids start on this difficulty, how they are spotted, and that they hit outlying colonies first.

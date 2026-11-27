@@ -117,7 +117,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 ## 4a-3. Difficulty
 
-**Decided (v0.56):** a difficulty is picked when a new game starts and can't be changed later (`DATA.difficulty`, stored as `G.difficulty`).
+**Decided (v0.56, order changed v0.59):** a difficulty is picked when a new game starts and can't be changed later (`DATA.difficulty`, stored as `G.difficulty`). A new game opens with the tutorial (the game is locked while it runs); the picker follows when the tour ends or is skipped.
 
 | Difficulty | Raids | Xenos | Prices | Achievements |
 |---|---|---|---|---|

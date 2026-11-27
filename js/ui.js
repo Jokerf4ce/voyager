@@ -75,8 +75,9 @@ const UI = {
       '<span class="res-sep"></span>' + Object.keys(DATA.capacities).map(cap).join('') + '<span class="res-sep"></span>' + r('research', G.res.research, net.research) +
       (c.eff < 1 ? `<div class="res over" data-tip="ration" tabindex="0"><small class="neg">RATIONING ${Math.round(c.eff * 100)}%</small></div>` : '');
     const fighting = !!(G.battle && G.battle.phase !== 'over');
-    this.$('btn-end').disabled = fighting || !!G.over;
-    this.$('btn-end').title = G.over ? 'The game is over' : fighting ? 'Finish the battle first' : 'Space / Enter';
+    const touring = typeof Tutorial !== 'undefined' && Tutorial.active;
+    this.$('btn-end').disabled = fighting || !!G.over || touring;
+    this.$('btn-end').title = G.over ? 'The game is over' : touring ? 'Finish or skip the tutorial first' : fighting ? 'Finish the battle first' : 'Space / Enter';
     if (this.tipKey) { const el = this.$('top-res').querySelector(`[data-tip="${this.tipKey}"]`); if (el) this.showTip(el); else this.hideTip(); }
     this.$('cycle').textContent = (State.slot === 'tester' ? 'TESTER · ' : '') + 'CYCLE ' + G.cycle;
     this.$('cycle').classList.toggle('tester', State.slot === 'tester');

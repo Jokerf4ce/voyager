@@ -10,14 +10,28 @@ const Tutorial = {
 
   done() { try { return localStorage.getItem(this.key) === '1'; } catch (e) { return true; } },
   maybeStart() { if (State.slot !== 'tester' && !this.done()) this.start(); },
-  start() { this.i = 0; this.go(); },
+  start() { this.i = 0; document.body.classList.add('touring'); this.go(); },
   finish() {
     this.i = -1;
     this.leaveSandbox();
+    document.body.classList.remove('touring');
     try { localStorage.setItem(this.key, '1'); } catch (e) { /* private mode: it shows again next time */ }
     this.clear();
     const box = document.getElementById('tutorial');
     if (box) box.remove();
+    UI.render();
+    // a new game is set up once the tour ends or is skipped: now pick the difficulty
+    if (G && G.difficulty === null && State.slot === 'main') UI.difficultyPicker();
+  },
+  // Something was clicked that the tour doesn't allow: shake the panel and say why.
+  nudge() {
+    const box = document.getElementById('tutorial');
+    if (!box) return;
+    let m = box.querySelector('.tut-lock');
+    if (!m) { m = document.createElement('div'); m.className = 'tut-lock'; box.insertBefore(m, box.querySelector('.btnrow')); }
+    m.textContent = 'The game is paused during the tutorial. Finish or skip it to start playing.';
+    box.classList.remove('nudge'); void box.offsetWidth; box.classList.add('nudge');
+    clearTimeout(this.nudgeT); this.nudgeT = setTimeout(() => { m.remove(); box.classList.remove('nudge'); }, 2600);
   },
   next() { if (this.i < DATA.tutorial.length - 1) { this.i++; this.go(); } else this.finish(); },
   back() { if (this.i > 0) { this.i--; this.go(); } },

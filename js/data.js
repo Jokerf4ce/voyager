@@ -397,11 +397,11 @@ DATA.config = {
 // prepare: a named setup step in js/tutorial.js. {survey} and {colonize} become the live costs.
 DATA.tutorial = [
   { screen: 'map', title: 'Wake up, Commander',
-    text: 'The Ark has crossed the dark and found a new galaxy. The frozen faithful sleep in its holds, and all you hold is a single star system.<br><br>Out there are two xeno empires: <b style="color:#7fbf3f">The Chorus</b> and the <b style="color:#d06030">Iron Remnant</b>. Take every world they hold to win. Lose all of yours and the Covenant ends.<br><br>This short tour shows you around. You can skip it at any time.' },
+    text: 'The Ark has crossed the dark and found a new galaxy. The frozen faithful sleep in its holds, and all you hold is a single star system.<br><br>Out there are two xeno empires: <b style="color:#7fbf3f">The Chorus</b> and the <b style="color:#d06030">Iron Remnant</b>. Take every world they hold to win. Lose all of yours and the Covenant ends.<br><br>This short tour shows you around; the game waits until it is over. You can skip it at any time, and then choose your difficulty.' },
   { target: '#top-res', title: 'Resources',
     text: 'Your stores, with the change per Cycle next to them. <b>Metals</b>, <b>Rare Minerals</b> and <b>Organics</b> are gathered; <b>Electronics</b> and <b>Chemicals</b> are refined from them. <b>Research</b> unlocks technology. <b>Crypto Shards</b> ♃, mined in tiny amounts by Finance Districts, are an interstellar currency for trade.<br><br>On the right are your capacities, shown as used / available: <b>Power</b>, <b>Infrastructure</b> and <b>Compute</b>. Every building uses some. If you use more than you have, all production is rationed.<br><br>Point at any of them (or tap it) for details: what it is, and which colonies and buildings produce and use it.' },
   { target: '#btn-end', title: 'Cycles',
-    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time.' },
+    text: 'Time moves in Cycles. <b>End Cycle</b> (or Space / Enter) advances one: colonies produce, missions travel, research progresses and the xenos make their moves.<br><br>Nothing happens until you end the Cycle, so take your time. (It unlocks when this tour is over.)' },
   { screen: 'map', target: '#mapcanvas', title: 'The Star Map',
     text: 'Your home system has bright brackets around it. Drag to look around; scroll or pinch to zoom. The buttons on the right zoom, jump home (⌂) and centre on the selected system; the minimap in the corner shows all you have charted.<br><br>A <b>?</b> is a system no one has charted. The galaxy has no edge: it grows as you explore.' },
   { screen: 'map', prepare: 'uncharted', target: '.mapscreen .side', title: 'Explore and expand',
@@ -429,6 +429,6 @@ DATA.tutorial = [
   { screen: 'battle', demo: 'fight', pos: 'side', target: '#board .bhead2 .btnrow', title: 'Auto, and after the fight',
     text: '<b>Auto</b> fights for you, <b>Resolve instantly</b> skips to the end, <b>Retreat</b> pulls out (in a defense, that loses the system). <b>End Cycle</b> is locked while a fight is on.<br><br>Afterwards, damage stays: fleets at home repair {repair} % of their hull per Cycle, and destroyed ships are gone for good. Victories can salvage weapons for the armory.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
-    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your empire. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Good luck, Commander.' },
+    text: 'That is all you need to begin. Survey the systems around you, found a second colony and build up your empire. Everything that happens is written in the <b>Chronicle</b>, in the menu.<br><br>You can replay this tour in <b>Settings</b>. Next, choose your difficulty. Good luck, Commander.' },
 ];
 

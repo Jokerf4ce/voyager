@@ -4,6 +4,7 @@ const Game = {
 
   endCycle() {
     if (G.over || UI.modalOpen || Tutorial.sandboxed) return;
+    if (Tutorial.active) { Tutorial.nudge(); return; }
     if (UI.splash) UI.closeSplash();
     if (G.battle && G.battle.phase === 'over') Battle.close(); // a finished battle is put away (the next queued one may start)
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
@@ -47,19 +48,34 @@ const Game = {
     State.save();
     UI.render();
     if (State.slot === 'tester') return;
-    UI.difficultyPicker(); // a real game asks for the difficulty first, then opens the tour
+    this.welcome();
   },
 
-  // The difficulty is picked: apply it, then the tour starts and the Assistant wakes you
-  // (before the first click the browser blocks sound, so the first click plays it).
+  // A new real game opens with the tour, then asks for the difficulty when the tour ends or is skipped
+  // (Tutorial.finish). The Assistant wakes you; before the first click the browser blocks sound, so the first click plays it.
+  welcome() {
+    Tutorial.start();
+    if (this.gestured) Voice.trigger('first', true); else this.fresh = true;
+  },
+
+  // The difficulty is picked: apply it and the game begins.
   startWith(id) {
     if (!State.setDifficulty(id)) return;
     UI.pickingDifficulty = false;
     UI.modalOpen = false; UI.$('modal').classList.remove('show'); UI.$('modal').innerHTML = '';
     State.save();
     UI.render();
-    Tutorial.start(); // every new real game opens with the tour
-    if (this.gestured) Voice.trigger('first', true); else this.fresh = true;
+  },
+
+  // While the tutorial runs the game is locked: you can look around, change audio settings and use the tutorial,
+  // and on its practice steps fight the practice battle. Anything else nudges the tutorial panel instead.
+  tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort',
+    'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
+    'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
+  tourPractice: new Set(['bfire', 'bswapnav', 'brestore', 'bswapconfirm', 'battleauto', 'bresolve', 'bretreat', 'bdefend']),
+  lockedByTour(act) {
+    if (!Tutorial.active || this.tourSafe.has(act)) return false;
+    return !(Tutorial.sandboxed && this.tourPractice.has(act));
   },
 
   // Switch between the real game and tester mode (separate save slots).
@@ -67,7 +83,7 @@ const Game = {
     State.save();
     State.slot = slot;
     history.replaceState(null, '', slot === 'tester' ? '#tester' : location.pathname + location.search);
-    if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); if (G.difficulty === null && slot === 'main') UI.difficultyPicker(); }
+    if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); if (G.difficulty === null && slot === 'main') Game.welcome(); }
     else this.newGame();
   },
 
@@ -201,6 +217,7 @@ document.addEventListener('click', (ev) => {
   if (!b || b.disabled) return;
   const fn = Game.actions[b.dataset.act];
   if (!fn) return;
+  if (Game.lockedByTour(b.dataset.act)) { Tutorial.nudge(); return; }
   fn(b.dataset.a);
   if (G) { State.save(); UI.render(); }
 });
@@ -241,6 +258,7 @@ document.addEventListener('input', (ev) => {
 document.addEventListener('dragstart', (ev) => {
   const card = ev.target.closest && ev.target.closest('[data-dragship]');
   if (!card) return;
+  if (Tutorial.active) { ev.preventDefault(); Tutorial.nudge(); return; }
   ev.dataTransfer.setData('text/plain', 'ship:' + card.dataset.dragship);
   ev.dataTransfer.effectAllowed = 'move';
   UI.dragShip = card.dataset.dragship;
@@ -272,6 +290,7 @@ document.addEventListener('drop', (ev) => {
 // Battle: drag the acting ship onto another of your lanes to swap places.
 document.addEventListener('dragstart', (ev) => {
   const card = ev.target.closest && ev.target.closest('[data-drag]');
+  if (card && Tutorial.active && !Tutorial.sandboxed) { ev.preventDefault(); Tutorial.nudge(); return; }
   if (card) { ev.dataTransfer.setData('text/plain', 'swap'); ev.dataTransfer.effectAllowed = 'move'; setTimeout(() => card.classList.add('dragging'), 0); }
 });
 document.addEventListener('dragover', (ev) => {
@@ -350,7 +369,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     if (G.over) Game.overShown = true;
     if (G.over === 'lose') { UI.screen = 'gameover'; UI.render(); }
-    if (G.difficulty === null && State.slot === 'main') UI.difficultyPicker(); // closed before picking one
+    if (G.difficulty === null && State.slot === 'main') Game.welcome(); // closed before the game was set up: tour, then difficulty
   } else {
     Game.newGame(); // starts the tutorial
   }
