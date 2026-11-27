@@ -4,7 +4,7 @@
 // first time it is needed and then played from that buffer, so playing a sound costs almost nothing (and phones
 // don't crackle). Playback shares the Assistant's audio context, which in turn shares the music's.
 //
-//   Sfx.play('lever')  — End Cycle: a heavy power-plant lever (ratchet, slam, a surge of mains hum)
+//   Sfx.play('lever')  — End Cycle: one heavy industrial lever thrown home ("ka-CHUNK")
 //   Sfx.play('blip')   — a star is picked on the Star Map: a short digital chirp
 
 const Sfx = {
@@ -112,76 +112,49 @@ const Sfx = {
   },
 
   recipes: {
-    // A heavy lever in a power plant: the catch lets go, the ratchet clatters faster as the arm swings down,
-    // it slams into its stop (a deep thud and ringing steel), and the mains hum surges as the circuit closes.
+    // A heavy industrial lever thrown home: one "ka-CHUNK". A brief low grind as the arm swings runs straight into
+    // the impact: a deep thud, a dull knock of thick steel, the latch biting a moment later, and a short ring of
+    // heavy, damped metal in a concrete hall. Driven slightly into saturation for weight.
     lever: {
-      seconds: 2.2,
+      seconds: 1.0,
       peak: 0.85,
       draw(ctx) {
-        const master = ctx.createGain(); master.gain.value = 0.9;
-        const comp = ctx.createDynamicsCompressor();
-        comp.threshold.value = -10; comp.ratio.value = 6; comp.attack.value = 0.002; comp.release.value = 0.15;
-        master.connect(comp); comp.connect(ctx.destination);
-        const room = this.hall(ctx, 1.1, 0.35);
-        room.output.connect(master);
-        const dry = ctx.createGain(); dry.gain.value = 1;
+        const master = ctx.createGain(); master.gain.value = 1;
+        const shaper = ctx.createWaveShaper(); // soft saturation: a heavier, denser impact
+        const curve = new Float32Array(1024);
+        for (let i = 0; i < curve.length; i++) { const x = i / 511.5 - 1; curve[i] = Math.tanh(x * 2.2) / Math.tanh(2.2); }
+        shaper.curve = curve;
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 5000; // keep it dull, not tinny
+        master.connect(shaper); shaper.connect(lp); lp.connect(ctx.destination);
+        const room = this.hall(ctx, 0.6, 0.22);
+        room.output.connect(lp);
+        const dry = ctx.createGain();
         dry.connect(master); dry.connect(room.input);
 
-        // the catch releases
-        this.burst(ctx, dry, 0.0, { type: 'highpass', freq: 2500, gain: 0.7, decay: 0.005 });
-        this.ring(ctx, dry, 0.0, { freq: 2300, gain: 0.05, decay: 0.02 });
-
-        // the ratchet: teeth come faster as the arm gains speed
-        const slam = 0.42;
-        let t = 0.05, gap = 0.075;
-        while (t < slam - 0.02) {
-          this.burst(ctx, dry, t, { freq: 2600 + Math.random() * 500, q: 6, gain: 0.75, decay: 0.006 });
-          this.ring(ctx, dry, t, { freq: 1700 + Math.random() * 200, gain: 0.08, decay: 0.014 });
-          t += gap; gap *= 0.8;
-        }
-        // metal grinding along the guide
+        // the swing: a short low grind of the arm in its guide, swelling into the hit
+        const hit = 0.1;
         {
-          const src = ctx.createBufferSource(); src.buffer = this.noise(ctx, slam);
-          const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 4;
-          f.frequency.setValueAtTime(500, 0.04); f.frequency.exponentialRampToValueAtTime(1500, slam);
+          const src = ctx.createBufferSource(); src.buffer = this.noise(ctx, hit + 0.02);
+          const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.5;
+          f.frequency.setValueAtTime(250, 0); f.frequency.exponentialRampToValueAtTime(600, hit);
           const g = ctx.createGain();
-          g.gain.setValueAtTime(0, 0.04); g.gain.linearRampToValueAtTime(0.2, slam - 0.03); g.gain.linearRampToValueAtTime(0, slam);
+          g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.12, hit - 0.005); g.gain.linearRampToValueAtTime(0, hit + 0.01);
           src.connect(f); f.connect(g); g.connect(dry);
-          src.start(0.04);
+          src.start(0);
         }
 
-        // the slam: a deep thud, the crack of steel on steel, and the frame ringing
-        this.ring(ctx, dry, slam, { freq: 95, freq2: 38, gain: 1.0, decay: 0.09 });
-        this.ring(ctx, dry, slam, { freq: 170, freq2: 70, gain: 0.35, decay: 0.05, type: 'triangle' });
-        this.burst(ctx, dry, slam, { type: 'lowpass', freq: 1100, gain: 0.8, decay: 0.018 });
-        this.burst(ctx, dry, slam, { freq: 3200, q: 2, gain: 0.3, decay: 0.006 });
-        for (const [f, g, d] of [[347, 0.07, 0.12], [829, 0.05, 0.1], [1263, 0.035, 0.08], [1957, 0.02, 0.06], [2741, 0.012, 0.05]]) {
-          this.ring(ctx, dry, slam + 0.002, { freq: f, gain: g, decay: d });
+        // the impact
+        this.ring(ctx, dry, hit, { freq: 75, freq2: 42, gain: 1.0, decay: 0.07 });                     // deep thud
+        this.ring(ctx, dry, hit, { freq: 150, freq2: 95, gain: 0.5, decay: 0.04, type: 'triangle' });  // body
+        this.burst(ctx, dry, hit, { type: 'lowpass', freq: 700, gain: 1.0, decay: 0.016 });           // the knock
+        this.burst(ctx, dry, hit, { freq: 1600, q: 1.2, gain: 0.35, decay: 0.005 });                 // steel on steel
+        for (const [f, g, d] of [[212, 0.12, 0.06], [389, 0.08, 0.045], [611, 0.05, 0.035], [947, 0.03, 0.025]]) {
+          this.ring(ctx, dry, hit + 0.001, { freq: f, gain: g, decay: d });                            // thick, damped metal
         }
-        // a small rattle as it settles
-        this.burst(ctx, dry, slam + 0.09, { freq: 2200, q: 5, gain: 0.08, decay: 0.004 });
-        this.burst(ctx, dry, slam + 0.15, { freq: 2000, q: 5, gain: 0.04, decay: 0.004 });
-
-        // the circuit closes: a contactor snap and a surge of 50 Hz mains hum
-        const on = slam + 0.06;
-        this.burst(ctx, dry, on, { type: 'highpass', freq: 4000, gain: 0.12, decay: 0.003 });
-        {
-          const hum = ctx.createGain();
-          hum.gain.setValueAtTime(0, on);
-          hum.gain.linearRampToValueAtTime(0.16, on + 0.18);
-          hum.gain.setValueAtTime(0.16, on + 0.4);
-          hum.gain.exponentialRampToValueAtTime(0.0001, 2.15);
-          const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = 2;
-          lp.frequency.setValueAtTime(150, on); lp.frequency.exponentialRampToValueAtTime(700, on + 0.25); lp.frequency.exponentialRampToValueAtTime(250, 2.1);
-          lp.connect(hum); hum.connect(dry);
-          for (const [f, type, g] of [[50, 'sawtooth', 0.6], [100, 'square', 0.25], [150, 'sine', 0.2]]) {
-            const o = ctx.createOscillator(); o.type = type;
-            o.frequency.setValueAtTime(f * 0.92, on); o.frequency.exponentialRampToValueAtTime(f, on + 0.3); // spins up to speed
-            const og = ctx.createGain(); og.gain.value = g;
-            o.connect(og); og.connect(lp);
-            o.start(on); o.stop(2.2);
-          }
-        }
+        // the latch bites, close enough to be part of the same hit
+        const latch = hit + 0.028;
+        this.burst(ctx, dry, latch, { type: 'lowpass', freq: 1200, gain: 0.45, decay: 0.008 });
+        this.ring(ctx, dry, latch, { freq: 520, gain: 0.06, decay: 0.03 });
       },
     },
 
