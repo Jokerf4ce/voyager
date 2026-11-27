@@ -284,7 +284,7 @@ The base is then applied to the target's shield first, then its hull:
 - A missed shot shows **MISS** over the target card, and a Restore shows **+ RESTORED**; both stay up for about 2 seconds (`DATA.battleFxMs`).
 - Destroyed ships stay on the board as wrecks, stamped ✕ DESTROYED.
 - While you drag a ship (or pick a lane with ◀ ▶), the ships that would make room slide aside, opening a gap where it would go.
-- An **arrow** floats from the acting ship to its target.
+- An **arrow** floats from the acting ship to its target, with the size multiplier on a tag (×1.5 ★ green, ×0.7 ▽ red, ×1 grey).
 - The **turn order** for the round is pinned to the bottom of the screen.
 
 ### 4.7 How the computer plays

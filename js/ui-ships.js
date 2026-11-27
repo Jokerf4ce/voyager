@@ -383,9 +383,18 @@ Object.assign(UI, {
     const mx = (x1 + x2) / 2 + (x1 === x2 ? 0 : 0), my = (y1 + y2) / 2, bend = Math.max(30, Math.abs(x2 - x1) * 0.25);
     const cx = mx + (x2 >= x1 ? -1 : 1) * (x1 === x2 ? 0 : bend * 0.6), cy = my;
     const col = cur.side === 'player' ? '#f0d060' : '#ff5a4a';
+    // the size multiplier, on a little tag at the middle of the curve (Small > Large > Medium > Small)
+    const sm = Battle.sizeMult(cur, tgt);
+    const label = sm > 1 ? `×${sm} ★` : sm < 1 ? `×${sm} ▽` : '×1';
+    const tcol = sm > 1 ? '#9ae070' : sm < 1 ? '#ff7060' : '#b0a490';
+    const tx = 0.25 * x1 + 0.5 * cx + 0.25 * x2, ty = 0.25 * y1 + 0.5 * cy + 0.25 * y2;
+    const tw = label.length * 8 + 12;
+    const tag = `<g class="arrow-tag"><title>Size ${cur.size} vs ${tgt.size}: damage ×${sm}</title>
+        <rect x="${tx - tw / 2}" y="${ty - 10}" width="${tw}" height="20" fill="#0c0b0a" stroke="${tcol}" stroke-width="1.5"/>
+        <text x="${tx}" y="${ty + 5}" text-anchor="middle" fill="${tcol}" font-family="VT323, monospace" font-size="17">${label}</text></g>`;
     svg.innerHTML = `<defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker></defs>
       <g class="arrow-bob"><path d="M${x1},${y1} Q${cx},${cy} ${x2},${y2}" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round" opacity=".55"/>
-      <path class="arrow-flow" d="M${x1},${y1} Q${cx},${cy} ${x2},${y2}" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 7" marker-end="url(#ah)"/></g>`;
+      <path class="arrow-flow" d="M${x1},${y1} Q${cx},${cy} ${x2},${y2}" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 7" marker-end="url(#ah)"/>${tag}</g>`;
   },
   reportList(n = 5) {
     return G.reports.slice(0, n).map((r) => `<div class="report ${r.won ? 'good' : 'bad'}">
