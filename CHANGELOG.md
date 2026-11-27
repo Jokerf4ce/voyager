@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.60.0 — 2026-11-27
+- **Rules of engagement is now a pop-up** (the ⚖ button under the battle log; Esc or Close shuts it, and the battle pauses while it is open). It has four parts:
+  - **Size triangle:** a diagram of Small → Large → Medium → Small with the ×1.5 advantage on each arrow, plus the ×0.7 penalty and same-size ×1.
+  - **Who shoots whom:** a diagram of five enemy lanes numbered in targeting order (opposite, right, left, two right, two left) with arrows from your ship; the across-lane and Large-vs-Small hit penalties.
+  - **Shields, hull and damage types:** physical and energy multipliers as a table, how shields and hull work, and the three actions (fire, Restore, move).
+  - **Reading a weapon button:** a sample button and ship card with numbered markers explaining damage type, rarity edge, name, base damage, recharge, expected shield and hull damage, hit chance, ★/▽, speed and evasion.
+- Tutorial: the last battle step points to the new button.
+
 ## 0.59.0 — 2026-11-27
 - **The tour comes first, then the difficulty.** A new game opens with the tutorial; the difficulty picker appears when it ends (Begin) or is skipped. Replaying the tour from Settings doesn't ask again. Closing the page before the difficulty is picked restarts the tour on the next visit.
   - The Raids step explains both rules (Learning: after 3 colonies; Commander: from Cycle 25), since the difficulty isn't chosen yet.

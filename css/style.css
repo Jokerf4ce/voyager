@@ -677,3 +677,45 @@ body.splashing #comms { bottom: auto; top: 8px; } /* Assistant subtitles move up
 #tutorial.nudge { animation: tut-nudge .4s steps(6); }
 @keyframes tut-nudge { 0%, 100% { translate: 0; } 20% { translate: -6px 0; } 40% { translate: 6px 0; } 60% { translate: -4px 0; } 80% { translate: 4px 0; } }
 body.touring [data-dragship] { cursor: not-allowed; }
+
+/* ---------- rules of engagement pop-up (UI.rulesModal) ---------- */
+.rulesbtn { margin-top: 8px; width: 100%; }
+.rules h2 { margin-top: 0; }
+.rules .rgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rules section { background: #120f0c; border: 1px solid var(--edge); padding: 8px 10px; }
+.rules section h4 { margin: 0 0 6px; }
+.rules section p { margin: 6px 0; font-size: 16px; line-height: 1.2; }
+.rsvg { display: block; width: 100%; max-height: 190px; margin: 0 auto; font-family: var(--font-body); }
+.rsvg .rn rect { fill: #1c1713; stroke: var(--gold); stroke-width: 2; }
+.rsvg .rn.me rect { stroke: #9ac070; }
+.rsvg .rs { fill: var(--bone); font-size: 22px; text-anchor: middle; dominant-baseline: middle; font-family: var(--font-head); }
+.rsvg .rl { fill: var(--ash); font-size: 15px; text-anchor: middle; }
+.rsvg .rl.left { text-anchor: start; }
+.rsvg .ra { stroke: #9ac070; stroke-width: 3; }
+.rsvg .ra.off { stroke: #c0a060; stroke-width: 2; stroke-dasharray: 5 4; opacity: .75; }
+.rsvg .rhd { fill: #9ac070; }
+.rsvg .rx { fill: #9ac070; font-size: 16px; text-anchor: middle; font-family: var(--font-head); font-size: 11px; }
+.rsvg .rt rect { fill: #2a1210; stroke: #7a3028; stroke-width: 2; }
+.rsvg .rt.first rect { stroke: #ff5a4a; }
+.rsvg .rt text { fill: var(--bone); font-size: 20px; text-anchor: middle; font-family: var(--font-head); }
+.rtab { border-collapse: collapse; font-size: 17px; margin: 4px 0; }
+.rtab th { font-weight: normal; color: var(--ash); padding: 2px 10px 2px 0; text-align: left; }
+.rtab td { padding: 2px 10px 2px 0; }
+.rtab i { font-style: normal; }
+.rsample { display: flex; justify-content: center; margin: 6px 0 2px; pointer-events: none; }
+.rsample .wbtn { cursor: default; }
+.rkey { display: inline-block; min-width: 15px; height: 15px; line-height: 15px; margin: 0 2px; border-radius: 50%; background: var(--gold); color: #000;
+  font-family: var(--font-head); font-size: 8px; text-align: center; vertical-align: super; font-style: normal; }
+.rlist { margin: 4px 0; padding-left: 26px; font-size: 16px; line-height: 1.2; }
+.rlist li { margin: 2px 0; }
+.rlist li::marker { color: var(--gold); font-family: var(--font-head); font-size: 10px; }
+.rcard { display: inline-flex; flex-direction: column; gap: 3px; width: 150px; padding: 6px 8px; background: #1c1713; border: 2px solid var(--edge-hi); }
+.rcard b { font-weight: normal; }
+.rcard .rbar { height: 5px; } .rcard .rbar.sh { background: #4a90c8; width: 80%; } .rcard .rbar.hu { background: #c87838; width: 65%; }
+@media (max-width: 760px) {
+  .rules .rgrid { grid-template-columns: 1fr; }
+  .rsvg { max-height: 160px; }
+}
+.rules section { text-align: left; }
+.rules section h4 { text-align: center; }
+.rsvg .rx { font-size: 13px; }

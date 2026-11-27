@@ -48,6 +48,63 @@ Object.assign(UI, {
     return Object.values(DATA.shipRarities).map((r) => `<span style="color:${r.color}">${r.name} ${+(r.rate * 100).toFixed(1)}%</span>`).join(' · ');
   },
 
+  // ---------- rules of engagement (pop-up from the battle screen) ----------
+  rulesModal() {
+    const P = DATA.damageTypes.physical, E = DATA.damageTypes.energy, adv = DATA.sizeAdvantage, dis = DATA.sizeDisadvantage;
+    // size triangle: S beats L, L beats M, M beats S
+    const node = (x, y, s, name, above) => `<g class="rn"><rect x="${x - 26}" y="${y - 18}" width="52" height="36"/><text x="${x}" y="${y + 1}" class="rs">${s}</text><text x="${x}" y="${above ? y - 26 : y + 34}" class="rl">${name}</text></g>`;
+    const arrow = (x1, y1, x2, y2, lx, ly) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="ra" marker-end="url(#rh)"/><text x="${lx}" y="${ly}" class="rx">×${adv}</text>`;
+    const tri = `<svg class="rsvg" viewBox="0 0 240 200" role="img" aria-label="Small beats Large, Large beats Medium, Medium beats Small">
+      <defs><marker id="rh" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="rhd"/></marker></defs>
+      ${arrow(148, 60, 190, 126, 192, 86)}${arrow(170, 152, 72, 152, 121, 142)}${arrow(50, 126, 92, 60, 48, 86)}
+      ${node(120, 50, 'S', 'Small', true)}${node(200, 152, 'L', 'Large')}${node(40, 152, 'M', 'Medium')}</svg>`;
+    // targeting: the shooter in lane 3 and the order it picks targets in
+    const lanes = 5, me = 2, w = 44, gap = 6, x0 = 10, prio = {};
+    DATA.targetOrder.forEach((d, k) => { const l = me + d; if (l >= 0 && l < lanes && prio[l] == null) prio[l] = Object.keys(prio).length + 1; });
+    const lx = (l) => x0 + l * (w + gap) + w / 2;
+    const tgt = `<svg class="rsvg" viewBox="0 0 260 190" role="img" aria-label="Target priority: opposite lane, then right, left, two right, two left">
+      ${[...Array(lanes).keys()].map((l) => `<g class="rt ${l === me ? 'first' : ''}"><rect x="${lx(l) - w / 2}" y="14" width="${w}" height="40"/><text x="${lx(l)}" y="40">${prio[l]}</text></g>`).join('')}
+      ${[...Array(lanes).keys()].map((l) => `<line x1="${lx(me)}" y1="132" x2="${lx(l)}" y2="58" class="ra ${l === me ? '' : 'off'}" marker-end="url(#rh)"/>`).join('')}
+      <g class="rn me"><rect x="${lx(me) - w / 2}" y="134" width="${w}" height="40"/><text x="${lx(me)}" y="160" class="rs">▲</text></g>
+      <text x="${lx(me) + w / 2 + 8}" y="${158}" class="rl left">your ship</text>
+      <text x="${x0}" y="${10}" class="rl left">enemy lanes</text></svg>`;
+    // a weapon button, numbered
+    const k = (n) => `<sup class="rkey">${n}</sup>`;
+    const sample = `<div class="rsample"><span class="btn wbtn"><span class="wchip" style="--wc:${P.color};--rc:${DATA.shipRarities.epic.color}">${k(1)}<i>${P.icon}</i>${k(2)}<em>Mass Driver</em>${k(3)}<b>12</b>${k(4)}<small>⟳2</small></span><small>${k(5)}≈4 sh + 13 hu · ${k(6)}62% hit ${k(7)}★</small></span></div>`;
+    const card = `<div class="rsample"><span class="rcard"><b>Cinder Saint</b><span class="rbar sh"></span><span class="rbar hu"></span><small>${k(8)}»9 &nbsp;${k(9)}○23%</small></span></div>`;
+    this.modal(`<div class="rules"><h2>Rules of engagement</h2>
+      <div class="rgrid">
+        <section><h4>Size triangle</h4>${tri}
+          <p>The arrow points at the size it beats: <b>Small beats Large, Large beats Medium, Medium beats Small</b>. Firing along an arrow does <b class="good">×${adv}</b> damage (★), against it <b class="bad">×${dis}</b> (▽); the same size ×1. The tag on the target arrow shows it in battle.</p></section>
+        <section><h4>Who shoots whom</h4>${tgt}
+          <p>Each ship fires at the ship <b>opposite</b> (1). If that lane is empty or wrecked, it takes the next in this order: right, left, two right, two left. Shots across lanes have <b class="bad">×${DATA.offLaneHit}</b> hit chance, and Large guns track Small ships at only ×${DATA.largeVsSmallHit}.</p></section>
+        <section><h4>Shields, hull and damage types</h4>
+          <table class="rtab"><tr><th></th><th>vs shields</th><th>vs hull</th></tr>
+            <tr><td><i style="color:${P.color}">${P.icon}</i> ${P.name}</td><td class="${P.shield < 1 ? 'bad' : 'good'}">×${P.shield}</td><td class="${P.hull < 1 ? 'bad' : 'good'}">×${P.hull}</td></tr>
+            <tr><td><i style="color:${E.color}">${E.icon}</i> ${E.name}</td><td class="${E.shield < 1 ? 'bad' : 'good'}">×${E.shield}</td><td class="${E.hull < 1 ? 'bad' : 'good'}">×${E.hull}</td></tr></table>
+          <p>Damage hits <b>shields</b> first; only what gets through reaches the <b>hull</b>. At 0 hull the ship is destroyed. Strip shields with energy, then finish the hull with physical weapons.</p>
+          <p><b>On your turn</b>, a ship does one thing: <b>fire</b> a weapon, <b>Restore</b> (regain ${Math.round(DATA.restore.shield * 100)} % of max shields and ${Math.round(DATA.restore.hull * 100)} % of max hull), or <b>move</b> to another lane (ships in between slide over).</p></section>
+        <section><h4>Reading a weapon button</h4>${sample}
+          <ol class="rlist">
+            <li value="1">Damage type: ${P.icon} physical or ${E.icon} energy. The left edge shows the weapon's rarity.</li>
+            <li value="2">Weapon name.</li>
+            <li value="3">Base damage per hit, before shields, hull and size.</li>
+            <li value="4">Recharge: after firing it waits this many turns. A weapon still recharging shows <i>recharging 1</i>.</li>
+            <li value="5">Expected damage on <b>this</b> target: to its shields (sh) and its hull (hu), with type and size included. Hits vary a little.</li>
+            <li value="6">Chance to hit: accuracy, reduced by the target's evasion, and by firing across lanes or Large at Small.</li>
+            <li value="7">★ size advantage (×${adv}) or ▽ disadvantage (×${dis}).</li>
+          </ol>
+          ${card}
+          <ol class="rlist">
+            <li value="8">Speed: faster ships act earlier in the round (the turn order at the bottom).</li>
+            <li value="9">Evasion: the share of shots this ship dodges.</li>
+          </ol>
+          <p class="small muted">Blue bar: shields. Orange bar: hull. <b>Restore</b> shows what it would give back.</p></section>
+      </div>
+      <div class="btnrow">${this.btn('Close', 'close', '', false, 'gold')}</div></div>`);
+    this.$('modal').querySelector('.modal-box').classList.add('wide');
+  },
+
   // ---------- new-ship splash ----------
   // A full-screen reveal when a ship leaves the slipway: the hull is "printed" from the bottom up in a flash of its
   // rarity colour, then its name, rolls and weapons come in. Epic and better get turning light rays.
@@ -383,7 +440,7 @@ Object.assign(UI, {
     <aside class="side bside-col">
       <h4>Battle log</h4>
       <div class="blog">${b.log.slice(-30).reverse().map((l) => `<div class="${l.s}">${U.esc(l.t)}</div>`).join('')}</div>
-      <details data-key="battle-rules"><summary class="small">Rules of engagement</summary><p class="small muted">Shields absorb damage first. ${DATA.damageTypes.physical.icon} Physical: ×${DATA.damageTypes.physical.shield} vs shields, ×${DATA.damageTypes.physical.hull} vs hull. ${DATA.damageTypes.energy.icon} Energy: ×${DATA.damageTypes.energy.shield} vs shields, ×${DATA.damageTypes.energy.hull} vs hull. Small beats Large, Large beats Medium, Medium beats Small (★ ×${DATA.sizeAdvantage}, ▽ ×${DATA.sizeDisadvantage}). Each ship shoots the ship opposite; if that one is gone, the nearest to its right, then left, then two right, two left. Shots across lanes have ×${DATA.offLaneHit} hit chance, and Large ships hit Small ones at ×${DATA.largeVsSmallHit}. Instead of firing, a ship can <b>move</b> to any lane on its side (the ships in between slide over), or <b>Restore</b>: regain ${Math.round(DATA.restore.shield * 100)} % of its max shields and ${Math.round(DATA.restore.hull * 100)} % of its max hull.</p></details>
+      ${this.btn('⚖ Rules of engagement', 'rules', '', false, 'small rulesbtn')}
     </aside></div>`;
   },
 

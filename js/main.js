@@ -71,7 +71,7 @@ const Game = {
   // and on its practice steps fight the practice battle. Anything else nudges the tutorial panel instead.
   tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort',
     'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
-    'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
+    'rules', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
   tourPractice: new Set(['bfire', 'bswapnav', 'brestore', 'bswapconfirm', 'battleauto', 'bresolve', 'bretreat', 'bdefend']),
   lockedByTour(act) {
     if (!Tutorial.active || this.tourSafe.has(act)) return false;
@@ -170,6 +170,7 @@ const Game = {
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; UI.splashShip(s); } },
     splashclose: () => { UI.closeSplash(); },
+    rules: () => { UI.rulesModal(); },
     splashhangar: () => { const id = UI.splash; UI.closeSplash(); UI.screen = 'fleets'; if (id && G.ships[id]) UI.selShip = id; },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
     research: (a) => { Research.select(a); Research.tick(); },
@@ -328,6 +329,7 @@ document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
   if (UI.splash && ['Space', 'Enter', 'Escape'].includes(ev.code)) { ev.preventDefault(); if (Date.now() - UI.splashAt > 400) UI.closeSplash(); return; }
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
+  if (ev.code === 'Escape' && UI.modalOpen && !UI.pickingDifficulty && UI.$('modal').querySelector('.rules')) { UI.closeModal(); return; }
   if (ev.code === 'Escape') { if (UI.selShip) UI.selShip = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
 });
 
