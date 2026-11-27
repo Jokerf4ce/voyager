@@ -21,7 +21,7 @@ const State = {
       nextFleetId: 1, nextShipId: 1, nextWeaponId: 1, nextThreatId: 1,
       homeId: 0,
       techs: {},
-      researching: 'deepcore',
+      researching: 'scanning',
       researchProgress: 0,
       ai: {
         chorus: { ore: 40, homeId: null, alive: true, aggro: 1.0 },
@@ -64,7 +64,7 @@ const State = {
 
   // Sum of every bonus source (research).
   mods() {
-    const m = { metal: 1, rare: 1, organics: 1, electronics: 1, chemicals: 1, research: 1, power: 1, infra: 1, compute: 1, atk: 1, hp: 1, bastion: 1, all: 1, aiAggro: 0 };
+    const m = { metal: 1, rare: 1, organics: 1, electronics: 1, chemicals: 1, research: 1, power: 1, infra: 1, compute: 1, atk: 1, hp: 1, bastion: 1, all: 1, aiAggro: 0, upkeep: 1, repair: 1, acc: 1 };
     const add = (mods, scale) => { for (const k in mods) m[k] = (m[k] || 0) + mods[k] * scale; };
     for (const [id, lvl] of Object.entries(G.techs)) if (lvl > 0 && DATA.techs[id]) add(DATA.techs[id].mods, lvl);
     return m;
@@ -88,9 +88,13 @@ const State = {
       const data = JSON.parse(raw);
       if (!data || data.version !== 15) return false;
       // technologies that no longer exist (e.g. the old hull techs, removed in v0.45) are dropped
-      if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) delete data.techs[id];
+      let dropped = 0;
+      if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) { delete data.techs[id]; dropped++; }
+      if (data.techs) for (const id in data.techs) data.techs[id] = Math.min(DATA.techMax, data.techs[id] | 0);
+      if (dropped) { data.techs = {}; data.researching = 'scanning'; data.researchProgress = 0; } // a save from before v0.61: start the new tree clean
+      if (dropped && data.log) data.log.unshift({ c: data.cycle, t: 'The Archives were reordered (v0.61): earlier research is lost, and the new, smaller projects start from nothing.', cls: 'story' });
       if (data.ships) for (const sh of Object.values(data.ships)) if (sh.upkeepRoll == null && DATA.shipTypes[sh.type]) sh.upkeep = Ships.rollUpkeep(sh); // v0.53 maintenance
-      if (data.researching && !DATA.techs[data.researching]) { data.researching = null; data.researchProgress = 0; }
+      if (data.researching && !DATA.techs[data.researching]) { data.researching = 'scanning'; data.researchProgress = 0; }
       G = data;
       return true;
     } catch (e) { return false; }

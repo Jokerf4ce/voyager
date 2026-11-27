@@ -551,15 +551,21 @@ const UI = {
 
   screen_research() {
     const cur = G.researching;
-    const curHtml = cur ? `<div class="kv"><span><b>${DATA.techs[cur].name}</b>${DATA.techs[cur].repeat ? ' ' + (Research.level(cur) + 1) : ''}</span><span>${U.fmt(G.researchProgress)} / ${U.fmt(Research.cost(cur))}</span></div>
-      <div class="bar"><i style="width:${Math.min(100, G.researchProgress / Research.cost(cur) * 100)}%"></i></div>` : '<p class="muted">Nothing selected. Compute is piling up.</p>';
-    const list = Object.entries(DATA.techs).map(([id, t]) => {
-      const lvl = Research.level(id), avail = Research.available(id);
-      return `<div class="tech ${cur === id ? 'cur' : ''} ${!avail ? 'done' : ''}">
-        <div><b>${t.name}</b>${t.repeat ? ` <span class="lvl">Lv ${lvl}</span>` : lvl ? ' <span class="lvl">✓</span>' : ''}<br><small class="muted">${t.desc}</small></div>
-        <div class="right"><span class="res-research">${DATA.resources.research.icon}${U.fmt(Research.cost(id))}</span><br>${avail ? this.btn(cur === id ? 'Researching' : 'Research', 'research', id, cur === id) : ''}</div></div>`;
-    }).join('');
-    return this.panel('Current Project', curHtml) + this.panel('Archives of the Covenant', `<p class="muted small">Research is paid in Compute. Doctrines can be researched forever, each level costing more and growing your empire further.</p>${list}`);
+    const pips = (id) => `<span class="pips">${Array.from({ length: Research.max(id) }, (_, i) => `<i class="${i < Research.level(id) ? 'on' : ''}"></i>`).join('')}</span>`;
+    const curHtml = cur ? `<div class="kv"><span><b>${DATA.techs[cur].name}</b> ${Research.level(cur) + 1}/${Research.max(cur)} <small class="muted">${DATA.techs[cur].desc}</small></span><span>${U.fmt(G.researchProgress)} / ${U.fmt(Research.cost(cur))}</span></div>
+      <div class="bar"><i style="width:${Math.min(100, G.researchProgress / Research.cost(cur) * 100)}%"></i></div>
+      <p class="small muted">When a level is done, the next level follows on its own until it reaches ${Research.max(cur)}.</p>` : '<p class="muted">Nothing selected. Research is piling up.</p>';
+    const row = (id) => {
+      const t = DATA.techs[id], lvl = Research.level(id), max = Research.maxed(id);
+      return `<div class="tech ${cur === id ? 'cur' : ''} ${max ? 'done' : ''}">
+        <div><b>${t.name}</b> ${pips(id)} <span class="lvl">${lvl}/${Research.max(id)}</span><br>
+          <small class="muted">${t.desc} per level${lvl ? ` · now <b class="good">${Research.total(id)}</b>` : ''}</small></div>
+        <div class="right">${max ? '<span class="lvl">Complete</span>' : `<span class="res-research">${DATA.resources.research.icon}${U.fmt(Research.cost(id))}</span><br>${this.btn(cur === id ? 'Researching' : 'Research', 'research', id, cur === id)}`}</div></div>`;
+    };
+    const group = (g) => Object.keys(DATA.techs).filter((id) => DATA.techs[id].group === g).map(row).join('');
+    return this.panel('Current Project', curHtml)
+      + this.panel('Archives of the Covenant · Economy', `<p class="muted small">Research is made by Research Labs. Each project gives a small bonus and can be researched up to ${DATA.techMax} times; every level costs more than the last.</p>${group('economy')}`)
+      + this.panel('Archives of the Covenant · War', group('military'));
   },
 
   screen_log() {

@@ -53,6 +53,7 @@ const AI = {
 
   tick() {
     const aggro = State.mods().aiAggro;
+    this.updateThreat();
     for (const id of this.ids) {
       const ai = G.ai[id];
       if (!ai.alive) continue;
@@ -100,18 +101,57 @@ const AI = {
       const R = this.raids();
       if (this.raidsOpen() && !G.threats.some((t) => t.owner === id) && G.cycle - (ai.lastRaid || -999) >= R.cooldown
           && Math.random() < R.chance * (ai.aggro + aggro)) {
-        const n = Math.min(DATA.fleetMax, 2 + (R.extraShips || 0) + Math.floor(Math.max(0, G.cycle - 20) / 30));
-        const cost = n * 16;
+        const ships = this.composeRaid(id, this.raidPower()), n = ships.length;
+        const cost = Math.round(Ships.groupPower(ships) / 5);
         const target = this.pickTarget(id);
         if (target && ai.ore >= cost) {
           ai.ore -= cost;
           ai.lastRaid = G.cycle;
           const eta = Math.max(2, target.d);
-          G.threats.push({ id: 't' + (G.nextThreatId++), owner: id, name: `${DATA.factions[id].short} Raid`, target: target.s.id, eta, total: eta, ships: this.team(id, n) });
+          G.threats.push({ id: 't' + (G.nextThreatId++), owner: id, name: `${DATA.factions[id].short} Raid`, target: target.s.id, eta, total: eta, ships });
           Log.add(`⚠ Long-range augurs detect a ${DATA.factions[id].short} raid of ${n} ships moving toward ${target.s.name}. Arrival in ${eta} Cycles.`, 'bad');
         }
       }
     }
+  },
+
+  // ---- raid strength follows the player (DATA.raidScale) ----
+  // Your strength: the power of your 5 strongest ships, the best fleet you could put together.
+  playerStrength() { return Ships.groupPower(Ships.all().map((s) => [s, Ships.power(s)]).sort((a, b) => b[1] - a[1]).slice(0, DATA.fleetMax).map(([s]) => s)); },
+  // Once per Cycle: the threat level moves toward your strength (fast up, slow down) and creeps up a little.
+  updateThreat() {
+    const S = DATA.raidScale, P = this.playerStrength();
+    if (G.threatLevel == null) G.threatLevel = Math.max(S.floor, P);
+    const L = G.threatLevel;
+    G.threatLevel = P > L ? L + (P - L) * S.rise : L - (L - P) * S.fall;
+    if (G.raidsOpen) G.threatLevel *= 1 + S.creep;
+    G.threatLevel = Math.max(S.floor, G.threatLevel);
+  },
+  // The power the next raid is built to.
+  raidPower() {
+    const S = DATA.raidScale;
+    return Math.max(S.floor, (G.threatLevel || S.floor) * (this.raids().strength || 1) * (1 + (Math.random() * 2 - 1) * S.spread));
+  },
+  // Ships for a raid of about this power: as few as possible (at least 2, at most a full fleet), each sized and
+  // given a rarity to fit its share of what is still missing.
+  composeRaid(id, power) {
+    const base = { S: 32, M: 70, L: 170 }, rar = Object.entries(DATA.shipRarities).sort((a, b) => a[1].mult - b[1].mult);
+    let n = 2;
+    while (n < DATA.fleetMax && power / n > base.L * 1.2) n++;
+    const ships = [];
+    let left = power;
+    for (let i = 0; i < n; i++) {
+      const per = left / (n - i);
+      const size = per >= 120 ? 'L' : per >= 50 ? 'M' : 'S';
+      const want = per / base[size];
+      const rarity = (rar.find(([, r]) => r.mult >= want * 0.95) || rar[rar.length - 1])[0];
+      const types = Object.keys(DATA.shipTypes).filter((k) => DATA.shipTypes[k].size === size && !DATA.shipTypes[k].monster && !DATA.shipTypes[k].structure && k !== 'scout');
+      const type = U.pick(types);
+      const s = Ships.make(type, { owner: id, kindBias: this.weapons[id], rarity, name: `${DATA.factions[id].short} ${DATA.shipTypes[type].name}` });
+      ships.push(s);
+      left -= Ships.power(s);
+    }
+    return ships;
   },
 
   // The Covenant system nearest to this faction's worlds. Raids go for the outlying colonies first: the capital

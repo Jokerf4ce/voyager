@@ -298,7 +298,8 @@ const Battle = {
   hitChance(w, t, a) {
     const lane = a && a.lane !== t.lane ? DATA.offLaneHit : 1;
     const track = a && a.size === 'L' && t.size === 'S' ? DATA.largeVsSmallHit : 1; // big guns can't track small ships
-    return Math.max(0.05, (w.acc / 100) * (1 - t.maneuver / 100) * lane * track);
+    const aug = a && a.side === 'player' ? State.mods().acc : 1; // Targeting Augurs
+    return Math.max(0.05, Math.min(1, (w.acc / 100) * (1 - t.maneuver / 100) * lane * track * aug));
   },
 
   // Damage a weapon would do right now: { shield, hull } taken off the target (before randomness).

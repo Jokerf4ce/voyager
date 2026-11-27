@@ -226,14 +226,21 @@ DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon
 // Raids on the Covenant (js/ai.js). No raids until the player has founded graceColonies colonies besides the
 // capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
 // per empire, and waits cooldown Cycles after launching one.
-DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
+DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12, strength: 0.9 };
+
+// Raid strength follows the player (AI.updateThreat). The threat level tracks the power of your 5 strongest ships
+// (the best fleet you could field): it catches up when you grow (rise per Cycle, as a share of the gap) and eases
+// back slowly when you lose ships (fall). On top of that it creeps up a little every Cycle once raids are possible,
+// so a player who stops growing faces only slowly stronger raids. Each raid is built to threat × the difficulty's
+// raids.strength (±spread), never below floor.
+DATA.raidScale = { rise: 0.15, fall: 0.02, creep: 0.002, floor: 55, spread: 0.15 };
 
 // Difficulty, chosen when a new game starts (G.difficulty; old saves count as 'learning'). It can't be changed later.
 //   costMult   every resource price (buildings, settling, probes, hulls, forge) is multiplied by this; refunds
 //              (demolish, scrap) scale with it, since they return part of what was paid
 //   exempt     prices the multiplier leaves alone (colony expeditions: expanding early has to stay possible)
 //   raids      replaces DATA.raids. graceColonies: no raids until that many colonies besides the capital;
-//              fromCycle: no raids before that Cycle; extraShips: added to every raid
+//              fromCycle: no raids before that Cycle; strength: raid power as a share of the threat level (DATA.raidScale)
 //   ai         income: multiplies the xeno empires' ore income; bias: added to their ship rolls (better rarities);
 //              startOre: their ore at the start
 //   achievements  later achievements can only be unlocked on difficulties that allow them
@@ -241,8 +248,8 @@ DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
 DATA.difficulty = {
   commander: { name: 'Commander', tag: 'The way the game is meant to be played',
     desc: 'No grace period. The xenos know where you are, raid early and often, grow faster and field better ships, and prices are 25% higher.',
-    points: ['Raids from Cycle {from}, no grace period', 'Frequent, larger raids', 'Stronger, richer xenos', 'Prices ×{mult} (colony expeditions excepted)', 'Achievements can be earned'],
-    costMult: 1.25, exempt: ['colonize'], raids: { graceColonies: 0, fromCycle: 25, chance: 0.06, cooldown: 6, extraShips: 1 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
+    points: ['Raids from Cycle {from}, no grace period', 'Frequent raids, stronger than your best fleet', 'Stronger, richer xenos', 'Prices ×{mult} (colony expeditions excepted)', 'Achievements can be earned'],
+    costMult: 1.25, exempt: ['colonize'], raids: { graceColonies: 0, fromCycle: 25, chance: 0.06, cooldown: 6, strength: 1.15 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
   adaptive: { name: 'Adaptive', tag: 'Coming later', locked: true,
     desc: 'Starts gently and hardens toward Commander as your empire grows.',
     points: ['Scales with your empire'],
@@ -281,24 +288,28 @@ DATA.shipNames = ['Penitent', 'Ashborn', 'Last Rite', 'Mercy\'s End', 'Grave Hym
   'Lament', 'Sorrowblade', 'Grim Tithe', 'Final Oath', 'Cold Sermon', 'Kneeler', 'Starveling', 'Heretic\'s Debt', 'Reliquary', 'Gravewake', 'Nightwarden', 'Salt and Ash'];
 
 // Research, paid in Research points. repeat:true techs can be researched forever with growing cost (incremental layer).
+// Research (v0.61): small bonuses, each researchable up to max times (10). Level n costs cost × growth^(n−1).
+// mods are added once per level (see State.mods): +0.05 metal = +5 % Metals per level.
+//   group  where it is listed: 'economy' or 'military'
+DATA.techMax = 10;
 DATA.techs = {
-  deepcore:   { name: 'Deep Core Extraction', cost: 30,  mods: { metal: 0.25 },     desc: '+25% Metals' },
-  biovats:    { name: 'Bio-Vat Cultures',     cost: 40,  mods: { organics: 0.25 },  desc: '+25% Organics' },
-  microfab:   { name: 'Microfabrication',     cost: 45,  mods: { electronics: 0.3 }, desc: '+30% Electronics from the same inputs' },
-  catalysis:  { name: 'Reagent Catalysis',    cost: 45,  mods: { chemicals: 0.3 },  desc: '+30% Chemicals from the same inputs' },
-  rationing:  { name: 'Ration Protocols',     cost: 50,  mods: { infra: 0.2 },      desc: '+20% Infrastructure' },
-  gridreactors:{name: 'Reactor Litanies',     cost: 50,  mods: { power: 0.2 },      desc: '+20% Power' },
-  prospect:   { name: 'Deep Prospecting',     cost: 65,  mods: { rare: 0.3 },       desc: '+30% Rare Minerals' },
-  coldlogic:  { name: 'Cold Logic Engines',   cost: 65,  mods: { compute: 0.25 },   desc: '+25% Compute' },
-  ossuary:    { name: 'Ossuary Indexing',     cost: 70,  mods: { research: 0.3 },   desc: '+30% Research' },
-  bastionwalls:{name: 'Martyr Walls',         cost: 75,  mods: { bastion: 0.5 },    desc: '+50% Planetary Defenses strength' },
-  plasmaweave:{ name: 'Plasma Weave',         cost: 80,  mods: { atk: 0.2 },        desc: '+20% weapon damage' },
-  bonehulls:  { name: 'Bone-grown Hulls',     cost: 90,  mods: { hp: 0.25 },        desc: '+25% ship shields and hull' },
-  forge:      { name: 'Forge Doctrine',       cost: 50,  mods: { metal: 0.1 },      desc: '+10% Metals per level', repeat: true, growth: 1.45 },
-  harvest:    { name: 'Harvest Doctrine',     cost: 50,  mods: { organics: 0.1 },   desc: '+10% Organics per level', repeat: true, growth: 1.45 },
-  arcology:   { name: 'Arcology Doctrine',    cost: 60,  mods: { infra: 0.08 },     desc: '+8% Infrastructure per level', repeat: true, growth: 1.5 },
-  archives:   { name: 'Archive Doctrine',     cost: 60,  mods: { research: 0.1 },   desc: '+10% Research per level', repeat: true, growth: 1.5 },
+  scanning:   { group: 'economy',  name: 'Advanced Mineral Scanning', cost: 20, growth: 1.35, mods: { metal: 0.05 },       desc: '+5 % Metals' },
+  lattice:    { group: 'economy',  name: 'Deep Lattice Drilling',     cost: 30, growth: 1.35, mods: { rare: 0.05 },        desc: '+5 % Rare Minerals' },
+  biovats:    { group: 'economy',  name: 'Bio-Vat Cultures',          cost: 20, growth: 1.35, mods: { organics: 0.05 },    desc: '+5 % Organics' },
+  microfab:   { group: 'economy',  name: 'Microfabrication',          cost: 30, growth: 1.35, mods: { electronics: 0.05 }, desc: '+5 % Electronics' },
+  catalysis:  { group: 'economy',  name: 'Reagent Catalysis',         cost: 30, growth: 1.35, mods: { chemicals: 0.05 },   desc: '+5 % Chemicals' },
+  reactor:    { group: 'economy',  name: 'Reactor Litanies',          cost: 35, growth: 1.35, mods: { power: 0.04 },       desc: '+4 % Power' },
+  rationing:  { group: 'economy',  name: 'Ration Protocols',          cost: 35, growth: 1.35, mods: { infra: 0.04 },       desc: '+4 % Infrastructure' },
+  coldlogic:  { group: 'economy',  name: 'Cold Logic Engines',        cost: 35, growth: 1.35, mods: { compute: 0.04 },     desc: '+4 % Compute' },
+  ossuary:    { group: 'economy',  name: 'Ossuary Indexing',          cost: 25, growth: 1.35, mods: { research: 0.05 },    desc: '+5 % Research' },
+  austerity:  { group: 'economy',  name: 'Austerity Rites',           cost: 40, growth: 1.35, mods: { upkeep: -0.03 },     desc: '−3 % ship maintenance' },
+  plasmaweave:{ group: 'military', name: 'Plasma Weave',              cost: 40, growth: 1.35, mods: { atk: 0.03 },         desc: '+3 % weapon damage' },
+  bonehulls:  { group: 'military', name: 'Bone-grown Hulls',          cost: 40, growth: 1.35, mods: { hp: 0.03 },          desc: '+3 % ship shields and hull' },
+  augurs:     { group: 'military', name: 'Targeting Augurs',          cost: 45, growth: 1.35, mods: { acc: 0.02 },         desc: '+2 % hit chance' },
+  martyr:     { group: 'military', name: 'Martyr Walls',              cost: 35, growth: 1.35, mods: { bastion: 0.06 },     desc: '+6 % Planetary Defenses strength' },
+  reliquary:  { group: 'military', name: 'Field Reliquaries',         cost: 30, growth: 1.35, mods: { repair: 0.1 },       desc: '+10 % repair speed at home' },
 };
+
 
 // Factions. 'player' is you; others are AI. 'monster' are neutral horrors guarding systems.
 DATA.factions = {
@@ -411,7 +422,7 @@ DATA.tutorial = [
   { screen: 'buildings', target: '#main .brow', title: 'Buildings',
     text: 'Every building type in one list. <b>Auto</b> builds where it gives the most for the price; click a row to choose the colony yourself.<br><br>Each level costs more, and from level 6 the price doubles every level, so <b>go wide</b>: found new colonies instead of stacking towers. Every build or upgrade takes <b>{build} Cycles</b>, and the construction site draws 3 Power and 3 Infrastructure until it is done. The red <b>✕</b> demolishes a building and gives back a quarter of what it cost.' },
   { screen: 'research', target: '#main .panel', title: 'Research',
-    text: 'Research Labs produce Research. Spend it here on lasting advantages: richer yields, more Power, stronger ships and better defenses. Pick one project and it advances every Cycle. Doctrines can be researched again and again, each level costing more.' },
+    text: 'Research Labs produce Research. Spend it here on small, lasting advantages: richer yields, cheaper maintenance, stronger ships and defenses. Every project can be researched up to <b>{techmax}</b> times; each level adds its bonus again and costs more. Pick one and it advances every Cycle, level after level.' },
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
     text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, <b>Medium</b> or <b>Large</b>, all available from the start. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>, and every new ship is unveiled on screen as it leaves the slipway.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
   { screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',

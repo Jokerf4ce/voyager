@@ -752,3 +752,7 @@ body.touring [data-dragship] { cursor: not-allowed; }
 @media (max-height: 860px) { .board.tight { gap: 3px; } .board.tight .bside { padding: 4px 8px; } .board.tight .bcontrols .bprompt { margin: 0; } }
 @media (max-height: 860px) { .board.tight .bgap { height: 4px; } .board.tight .border { padding: 3px 8px; } }
 .rsample.bweps { width: 100%; margin: 6px 0 2px; }
+/* research levels */
+.pips { display: inline-flex; gap: 2px; vertical-align: middle; margin: 0 4px; }
+.pips i { width: 7px; height: 9px; background: #2a2420; border: 1px solid #3a3028; }
+.pips i.on { background: #5ac0c8; border-color: #8ae0e8; }

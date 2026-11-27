@@ -123,7 +123,7 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 |---|---|---|---|---|
 | Learning | grace period until 3 colonies besides the capital, then rare (2.5 % × aggression, 12-Cycle cooldown) | normal | ×1 | no |
 | Adaptive | *locked, coming later:* starts like Learning and hardens toward Commander as the empire grows | | | |
-| Commander | from Cycle 25, no grace period, 6 % × aggression, 6-Cycle cooldown, +1 ship per raid | ore income ×1.4, +1 to ship rolls, 100 starting ore | ×1.25 (colony expeditions excepted) | yes |
+| Commander | from Cycle 25, no grace period, 6 % × aggression, 6-Cycle cooldown, raids at ×1.15 of your strength (Learning ×0.9) | ore income ×1.4, +1 to ship rolls, 100 starting ore | ×1.25 (colony expeditions excepted) | yes |
 
 Commander is "the way the game is meant to be played"; achievements (not built yet) can only be earned there.
 
@@ -136,6 +136,10 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 **Open:** how Adaptive measures empire growth and how fast it ramps.
 
 **Tutorial practice battle** (decided v0.58): the tutorial explains raids and battles with a staged raid and a live practice fight. Those steps (`demo:` in `DATA.tutorial`) run in a sandbox copy of `G` that is never saved; the real game is restored when a step without `demo` is shown or the tutorial ends.
+
+## 4a-4. Research
+
+**Decided (v0.61):** research is a set of small, stackable bonuses. Each project gives a few percent (for example *Advanced Mineral Scanning*: +5 % Metals) and can be researched up to 10 times; level n costs base × 1.35^(n−1), so the tenth level costs about 15× the first. A project keeps going level after level until it is complete; then the cheapest unfinished one is picked. 15 projects: 10 economy (each gathered and refined resource, Power, Infrastructure, Compute, Research, −3 % ship maintenance) and 5 war (+3 % weapon damage, +3 % shields and hull, +2 % hit chance, +6 % Planetary Defenses, +10 % repair speed). Tuned in `DATA.techs` / `DATA.techMax`. The old tree (big one-off bonuses plus endless Doctrines) was removed; saves from before v0.61 start the new tree from nothing.
 
 ## 4b. Resources
 
@@ -152,7 +156,7 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 | **Organics** | gathered | Bio-Harvesters on living and icy worlds; Atmosphere Skimmers on gas giants | Chemical input; feeding survivors |
 | **Electronics** | refined | Electronics Foundry: 2 Metals + 0.5 Rare → 2 | advanced buildings, habitats, warships, surveys, settling |
 | **Chemicals** | refined | Chemical Plant: 2 Organics + 0.5 Rare → 2 | reactors, labs, defenses, warships, settling |
-| **Research** | points | Research Labs (+2 each), capital +1 | technology |
+| **Research** | points | Research Labs (+2 each), capital +1 | research projects (see below) |
 | **Crypto Shards** ♃ | currency (v0.47) | Finance Districts: +0.05 per level per Cycle; shown with two decimals | trade (planned) |
 | **Power** ⏻ | capacity | colony base 2 × starlight, Fusion Reactors (+6), Solar Arrays in orbit (+4 × starlight); hot worlds ×1.3 | almost every building |
 | **Infrastructure** ⇄ | capacity | colony base 5, Hab Domes (+5), Habitat Rings (+6); ice/water ×1.3, temperate ×1.2 | workers in production buildings and labs; ship crews |
@@ -228,7 +232,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **Decided:** mostly menus, plus a star system map.
 
-**Tutorial** (decided, v0.36): the first game in a browser opens a guided tour of 12 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. The game stays playable underneath. It can be skipped, and Settings → *Replay tutorial* shows it again. Since v0.41 it opens with every new real game (a fresh browser, *Abandon and start a new galaxy*, or *Begin anew* after a loss); tester mode never starts it.
+**Tutorial** (decided, v0.36): the first game in a browser opens a guided tour, now 17 steps (`DATA.tutorial`). A panel in a corner explains one thing at a time, opens the screen it talks about and outlines the element with a pulsing gold border. Since v0.58 it also covers raids and a playable practice battle (in a sandbox, never saved); since v0.59 the game is locked while it runs (you can look around but not build, buy or end the Cycle), and the difficulty is picked when it ends. It can be skipped, and Settings → *Replay tutorial* shows it again. Since v0.41 it opens with every new real game (a fresh browser, *Abandon and start a new galaxy*, or *Begin anew* after a loss); tester mode never starts it.
 
 **Game over** (decided, v0.41): when the last colony falls, a full **game over screen** replaces the game. It shows the stats of the run and offers *Begin anew* (a new galaxy, with the tutorial). *Look at the ruins* lets you browse the other screens; a ☠ *Fallen* entry in the menu leads back, and End Cycle stays locked.
 

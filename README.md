@@ -32,7 +32,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - Explore with survey probes (charting a system has no random events since v0.48)
 - Expand with colony expeditions into new systems, then settle more planets in systems you hold
 - Resources: Metals, Rare Minerals and Organics (gathered); Electronics and Chemicals (refined); Power, Compute and Infrastructure (capacities); Research
-- Research made by Research Labs, including endlessly repeatable "Doctrine" techs for the incremental layer
+- Research made by Research Labs: 15 projects with small bonuses (a few % each), each researchable up to 10 times
 - Ship cards in 3 sizes (rock-paper-scissors) and 9 types, rolled at 5 rarities; global fleets of up to 5; missions instead of map movement
 - Two AI alien empires (The Chorus, Iron Remnant) that expand, build and attack, plus neutral Lurker monsters
 - Turn-based card battles: shields and hull, physical vs energy weapons, speed order, evasion, cooldowns; alien raids to defend against; Weapon Forge (Rare Minerals + Electronics)

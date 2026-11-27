@@ -120,7 +120,7 @@ const Ships = {
     return Math.round((s.shield + s.hull) * 0.25 + dmg * 2 + s.speed);
   },
   groupPower(list) { return list.reduce((a, s) => a + this.power(s), 0); },
-  upkeep() { return this.all().reduce((a, s) => a + s.upkeep, 0); },
+  upkeep() { return this.all().reduce((a, s) => a + s.upkeep, 0) * Math.max(0, State.mods().upkeep); }, // research can lower it
   // Maintenance of one ship from its type, rarity, roll quality and personal random factor (DATA.upkeep).
   rollUpkeep(ship) {
     const t = DATA.shipTypes[ship.type], u = DATA.upkeep, mult = DATA.shipRarities[ship.rarity].mult;
@@ -303,7 +303,7 @@ const Ships = {
     for (const s of this.all()) {
       const f = this.fleetOf(s.id);
       if (f && f.mission) continue;
-      s.hullNow = Math.min(s.hull, s.hullNow + Math.ceil(s.hull * DATA.repairPerCycle));
+      s.hullNow = Math.min(s.hull, s.hullNow + Math.ceil(s.hull * DATA.repairPerCycle * State.mods().repair));
     }
   },
 };

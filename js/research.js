@@ -3,16 +3,11 @@
 const Research = {
   level(id) { return G.techs[id] || 0; },
 
-  cost(id) {
-    const t = DATA.techs[id];
-    return Math.ceil(t.repeat ? t.cost * Math.pow(t.growth, this.level(id)) : t.cost);
-  },
-
-  available(id) {
-    const t = DATA.techs[id];
-    if (t.req && !this.level(t.req)) return false;
-    return t.repeat || this.level(id) === 0;
-  },
+  max(id) { return DATA.techs[id].max || DATA.techMax; },
+  maxed(id) { return this.level(id) >= this.max(id); },
+  // Cost of the next level: cost × growth^(level).
+  cost(id) { const t = DATA.techs[id]; return Math.ceil(t.cost * Math.pow(t.growth, this.level(id))); },
+  available(id) { return !this.maxed(id); },
 
   select(id) {
     if (!this.available(id)) return;
@@ -35,11 +30,18 @@ const Research = {
         G.researchProgress = 0;
         const t = DATA.techs[id];
         done.push(t.name);
-        Log.add(`Research complete: ${t.name}${t.repeat ? ' ' + G.techs[id] : ''}. ${t.desc}.`, 'good');
-        if (!t.repeat) G.researching = this.nextSuggestion();
+        Log.add(`Research complete: ${t.name} ${G.techs[id]}/${this.max(id)}. ${t.desc} (now ${this.total(id)}).`, 'good');
+        if (this.maxed(id)) G.researching = this.nextSuggestion(); // otherwise the next level follows
       }
     }
     return done;
+  },
+
+  // The bonus all levels of a tech give together, as text ("+15 % Metals").
+  total(id, lvl = this.level(id)) {
+    const t = DATA.techs[id], [k, v] = Object.entries(t.mods)[0];
+    const pct = Math.round(Math.abs(v) * lvl * 100);
+    return t.desc.replace(/\d+ %/, `${pct} %`).replace(/^[+−]/, v < 0 ? '−' : '+').replace(/ from the same inputs$/, '');
   },
 
   nextSuggestion() {

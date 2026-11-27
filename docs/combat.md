@@ -262,9 +262,12 @@ The base is then applied to the target's shield first, then its hull:
 - 6 of those 10 were needed, so 40 % of the base (8) carries over.
 - The hull takes 8 × 1.5 = **12**.
 
-**Research bonuses** apply to your ships only:
-- *Plasma Weave*: +20 % weapon damage.
-- *Bone-grown Hulls*: +25 % shield and hull.
+**Research bonuses** apply to your ships only (each up to 10 levels, see `DATA.techs`):
+- *Plasma Weave*: +3 % weapon damage per level.
+- *Bone-grown Hulls*: +3 % shield and hull per level.
+- *Targeting Augurs*: +2 % hit chance per level (multiplies the final hit chance, capped at 100 %).
+- *Field Reliquaries*: +10 % repair speed at home per level.
+- *Austerity Rites*: −3 % maintenance per level.
 
 ### 4.6 Your controls
 
@@ -318,7 +321,7 @@ A system's Bastions (surface) and Defense Platforms (orbit) fight together as **
 | Hull | (20 + 30 × Bastion levels) × strength |
 | Weapons | Bastion Battery (if any Bastions) and Orbital Lance (if any Platforms), damage ×(0.8 + 0.25 × levels) × strength |
 
-- **Strength:** for you, 1 + the *Martyr Walls* research bonus (+50 %). For aliens, 1 + Cycle / 100.
+- **Strength:** for you, 1 + the *Martyr Walls* research bonus (+6 % per level, up to +60 %). For aliens, 1 + Cycle / 100.
 - **Your capital:** it always counts one extra Bastion level and one extra Platform level, even with none built.
 
 ---
@@ -381,7 +384,8 @@ Monsters have almost no shields, so physical weapons are the answer.
 **Raids:**
 - **Grace period:** no raids at all until you have founded **3 colonies besides your capital**. The Overview shows your progress; when it ends, the Chronicle and the Assistant warn you.
 - **When:** after that, each faction has a 2.5 % × aggression chance per Cycle to launch a raid. A faction has at most one raid on its way at a time, and waits 12 Cycles after launching one. In tests that comes to about one raid every 50 Cycles (before v0.40: about one every 20). Tuned in `DATA.raids`.
-- **Size:** 2 ships, plus 1 for every 30 Cycles after Cycle 20, up to 5.
+- **Strength (v0.61):** raids follow you, not the clock. A **threat level** tracks the power of your 5 strongest ships (the best fleet you could field): when you grow it catches up by 15 % of the gap per Cycle; when you lose ships it eases back by 2 % of the gap per Cycle. Once raids are possible it also creeps up 0.2 % per Cycle, so a player who stops growing faces only slowly stronger raids. Each raid is built to threat × the difficulty's strength (Learning 0.9, Commander 1.15) ±15 %, never below 55: as few ships as possible (2–5), each sized and given a rarity to fit. Tuned in `DATA.raidScale`.
+- Playtest (5 games each, 200 Cycles), before → after: raid defences won on Learning 4/30 → 9/28, on Commander 1/63 → 29/73; Commander survival 4/5 → 5/5.
 - **Warning:** the raid targets your system nearest to that faction and arrives in at least 2 Cycles. It shows on the Star Map (red !) and on the Overview.
 
 ### 6.3 Maintenance

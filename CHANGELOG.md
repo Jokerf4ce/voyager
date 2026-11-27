@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.61.0 — 2026-11-27
+- **New research tree.** All old projects (big one-off bonuses and the endless Doctrines) are gone. 15 new projects each give a small bonus and can be researched up to 10 times; level n costs base × 1.35^(n−1) (Advanced Mineral Scanning: 20 → 298 Research).
+  - Economy: Advanced Mineral Scanning (+5 % Metals), Deep Lattice Drilling (+5 % Rare Minerals), Bio-Vat Cultures (+5 % Organics), Microfabrication (+5 % Electronics), Reagent Catalysis (+5 % Chemicals), Reactor Litanies (+4 % Power), Ration Protocols (+4 % Infrastructure), Cold Logic Engines (+4 % Compute), Ossuary Indexing (+5 % Research), Austerity Rites (−3 % ship maintenance).
+  - War: Plasma Weave (+3 % weapon damage), Bone-grown Hulls (+3 % shields and hull), Targeting Augurs (+2 % hit chance), Martyr Walls (+6 % Planetary Defenses), Field Reliquaries (+10 % repair speed at home).
+  - A project continues level after level until it reaches 10, then the cheapest unfinished one is picked. The Research screen shows level pips, the bonus per level and the total so far, grouped into Economy and War.
+  - Saves from before this version start the new tree from nothing (a Chronicle entry says so). Tutorial text updated.
+- **Raid strength follows the player** (`DATA.raidScale`). A threat level tracks the power of your 5 strongest ships: it catches up quickly when you grow, eases back slowly when you lose ships, and creeps up only 0.2 % per Cycle on its own. Raids are built to that level × 0.9 (Learning) or × 1.15 (Commander), ±15 %. The old growth by Cycle number and Commander's extra raid ship are gone.
+  - Playtest, 5 games each, 200 Cycles: raid defences won on Learning 4/30 → 16/38, on Commander 1/63 → 36/74; Commander survival 4/5 → 5/5. With the smaller research bonuses the bot expands more slowly (Learning colonies at Cycle 100: 14–26 → 8–19).
+- Cleanups: the tutorial description in `docs/concept.md` is up to date (17 steps, practice battle, lock, difficulty afterwards); combat and concept docs describe the new raids and research.
+
 ## 0.60.2 — 2026-11-27
 - **Battle: weapons as one list.** Each weapon is a full-width row: the weapon on the left, expected shield and hull damage, hit chance and ★/▽ on the right. Restore and the move hint share one line below the list.
   - The turn prompt is shorter and names hit penalties once ("across lanes ×0.5 hit, small target ×0.6 hit") instead of on every weapon.

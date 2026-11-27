@@ -27,7 +27,7 @@ window.T = { raids: [], captured: [], lostShips: 0, built: 0, defended: { win: 0
 (() => {
   const push = G.threats.push;
   const origTick = AI.tick.bind(AI);
-  AI.tick = () => { const before = G.threats.length; origTick(); for (const t of G.threats.slice(before)) T.raids.push({ c: G.cycle, n: t.ships.length, owner: t.owner }); };
+  AI.tick = () => { const before = G.threats.length; origTick(); for (const t of G.threats.slice(before)) T.raids.push({ c: G.cycle, n: t.ships.length, owner: t.owner, power: Math.round(Ships.groupPower(t.ships)), mine: AI.playerStrength ? Math.round(AI.playerStrength()) : null }); };
   const cap = Colonies.capture.bind(Colonies);
   Colonies.capture = (sid, owner) => { const s = G.systems[sid]; if (s.owner === 'player' && owner !== 'player') T.captured.push({ c: G.cycle, sys: s.name, planets: s.planets.filter(p => p.colony).length }); return cap(sid, owner); };
   const fin = Battle.finish.bind(Battle);

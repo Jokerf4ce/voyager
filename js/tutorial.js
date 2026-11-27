@@ -106,7 +106,7 @@ const Tutorial = {
   clear() { document.querySelectorAll('.tut-focus').forEach((el) => el.classList.remove('tut-focus')); },
 
   text(st) {
-    return st.text.replace('{survey}', U.costText(State.cost(DATA.survey.cost))).replace('{colonize}', U.costText(State.cost(DATA.colonize.cost, 'colonize'))).replace('{raids}', AI.raidRule()).replace('{hangar}', DATA.hangar.base).replace('{build}', DATA.construction.cycles).replace('{offlane}', DATA.offLaneHit).replace('{adv}', DATA.sizeAdvantage).replace('{disadv}', DATA.sizeDisadvantage).replace('{restore}', `${Math.round(DATA.restore.shield * 100)} % of its shields and ${Math.round(DATA.restore.hull * 100)} % of its hull`).replace('{repair}', Math.round(DATA.repairPerCycle * 100));
+    return st.text.replace('{survey}', U.costText(State.cost(DATA.survey.cost))).replace('{colonize}', U.costText(State.cost(DATA.colonize.cost, 'colonize'))).replace('{raids}', AI.raidRule()).replace('{hangar}', DATA.hangar.base).replace('{build}', DATA.construction.cycles).replace('{techmax}', DATA.techMax).replace('{offlane}', DATA.offLaneHit).replace('{adv}', DATA.sizeAdvantage).replace('{disadv}', DATA.sizeDisadvantage).replace('{restore}', `${Math.round(DATA.restore.shield * 100)} % of its shields and ${Math.round(DATA.restore.hull * 100)} % of its hull`).replace('{repair}', Math.round(DATA.repairPerCycle * 100));
   },
 
   // Called after every UI.render (the screens are rebuilt, so the outline has to be put back).
