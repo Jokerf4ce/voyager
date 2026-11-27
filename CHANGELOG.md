@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.52.1 — 2026-11-27
+- Phones: the resource bar stacks into a compact grid (about 4 per row) under the buttons instead of one long row you had to scroll sideways, so everything is visible at once.
+
 ## 0.52.0 — 2026-11-27
 - **Assistant: two new triggers wired up**, for the new lines `construction` ("Construction completed!") and `new_colony` ("New colony established, congratulations!").
   - **construction** plays when a building is finished or upgraded: once per Cycle however many finish, and not for work that finished while the game was closed.
