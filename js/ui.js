@@ -244,7 +244,7 @@ const UI = {
         <div class="kv"><span>Chemicals <small class="muted">(refined)</small></span><b class="res-chemicals">+${U.fmt1(net.chemicals)}</b></div>
         <div class="kv"><span>Research <small class="muted">(Research Labs)</small></span><b class="res-research">+${U.fmt1(net.research)}</b></div>
         <div class="kv"><span>Crypto Shards <small class="muted">(Finance Districts)</small></span><b class="res-crypto">+${U.rate('crypto', net.crypto)}</b></div>
-        ${net.upkeep ? `<div class="kv"><span>Fleet maintenance <small class="muted">(included above)</small></span><b class="neg">−${U.fmt1(net.upkeep)} ${DATA.resources.metal.icon} −${U.fmt1(net.upkeep / 2)} ${DATA.resources.chemicals.icon}</b></div>` : ''}
+        ${net.upkeep ? `<div class="kv"><span>Fleet maintenance <small class="muted">(included above)</small></span><b class="neg">−${U.fmt1(net.upkeep)} ${DATA.resources.metal.icon} −${U.fmt1(net.upkeep * DATA.upkeep.chemShare)} ${DATA.resources.chemicals.icon}</b></div>` : ''}
         <h4>Capacities</h4>
         ${Object.entries(DATA.capacities).map(([k, d]) => `<div class="kv"><span class="res-${k}">${d.icon} ${d.name}</span><b>${U.fmt1(c[k].used)} / ${U.fmt1(c[k].cap)}</b></div>
           <div class="small muted">buildings ${U.fmt1(c[k].buildings)}</div>

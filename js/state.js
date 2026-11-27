@@ -8,7 +8,7 @@ const State = {
       version: 15,
       cycle: 1,
       difficulty: null,   // chosen right after the galaxy is made (State.setDifficulty); null = not picked yet
-      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, crypto: 0 },
+      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 35, research: 0, crypto: 0 },
       systems: [],
       ships: {},          // every Covenant ship card, by id (js/ships.js)
       fleets: [],         // [{ id, name, ships: [shipId], mission }]

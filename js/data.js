@@ -160,7 +160,7 @@ DATA.largeVsSmallHit = 0.6;
 // There are no fixed stats: every ship rolls each stat from a normal distribution. The numbers below are the
 // averages (means) of a Normal-rarity ship; DATA.statSpread sets how far a roll usually lands from it.
 // shield and hull are life points (shield first); speed sets turn order; maneuver is the chance to evade (%);
-// slots = weapon slots (1–3, fixed per type); upkeep = base Metals per Cycle (plus half that in Chemicals), before
+// slots = weapon slots (1–3, fixed per type); upkeep = base Metals per Cycle (plus a quarter of that in Chemicals, DATA.upkeep.chemShare), before
 // DATA.upkeep (scale, rarity, roll quality, randomness).
 DATA.shipTypes = {
   scout:      { name: 'Scout',         size: 'S', shield: 8,  hull: 10,  speed: 9, maneuver: 30, slots: 1, upkeep: 0.2, desc: 'Fast and fragile: acts first, dodges often.' },
@@ -185,10 +185,10 @@ DATA.shipTypes = {
 DATA.statSpread = { shield: 0.15, hull: 0.15, speed: 0.15, maneuver: 0.2, dmg: 0.15 };
 
 // Rarity of a ship (and of a forged weapon). mult shifts the mean of every stat roll and of weapon damage.
-// Ship maintenance (Metals per Cycle, plus half that in Chemicals): the type's upkeep × scale, × the rarity's
+// Ship maintenance (Metals per Cycle, plus chemShare × that in Chemicals): the type's upkeep × scale, × the rarity's
 // stat multiplier ^ rarityExp, × the ship's quality (its roll, 1 = average) ^ qualityExp, × a personal random
 // factor (normal, sd `spread`, kept within ±30 %). Better ships cost much more to keep flying.
-DATA.upkeep = { scale: 3, rarityExp: 1.5, qualityExp: 2, spread: 0.12 };
+DATA.upkeep = { scale: 3, rarityExp: 1.5, qualityExp: 2, spread: 0.12, chemShare: 0.25 }; // chemShare: Chemicals per Metal of maintenance (v0.65; was 0.5)
 DATA.shipRarities = {
   normal:    { name: 'Normal',    rate: 0.769, mult: 1.0,  color: '#a3a3a3' },
   strong:    { name: 'Strong',    rate: 0.20,  mult: 1.2,  color: '#4059ac' },
@@ -436,7 +436,7 @@ DATA.tutorial = [
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
     text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, <b>Medium</b> or <b>Large</b>, all available from the start. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>, and every new ship is unveiled on screen as it leaves the slipway.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
   { screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',
-    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and half as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.' },
+    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and a quarter as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.' },
   { screen: 'overview', demo: 'raid', pos: 'left', target: '#main .panel.threats', title: 'Raids',
     text: 'Sooner or later the xenos come for your worlds. {raids}<br><br>A raid is spotted a few Cycles before it arrives: it shows here with its size and arrival time, and as <b style="color:#ff5a4a">! RAID</b> on the Star Map. Raids hit your <b>outlying colonies</b> first; the capital only when nothing else is in reach.<br><br>This raid is staged for practice. Let\'s play it out.' },
   { screen: 'battle', demo: 'setup', pos: 'side', target: '#main .panel', title: 'A raid arrives',

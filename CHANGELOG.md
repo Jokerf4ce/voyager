@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.64.1 — 2026-11-27
+- **Chemicals at the start fixed.** Fleet maintenance now costs a quarter as much in Chemicals as in Metals (was half; `DATA.upkeep.chemShare`), and a new game starts with 35 Chemicals (was 20). At the start Chemicals now run at about +1 per Cycle instead of about 0 (measured over 12 new games), so the first colony expeditions no longer stall.
+  - Playtest (5 games each, 200 Cycles), colonies at Cycle 50 / 100: Learning 5–7 / 8–19 → 5–9 / 10–24; Commander 2–4 / 2–9 → 6–8 / 10–17 (one game an outlier, stuck on Rare Minerals after losing its fleet).
+  - Ship details, the Hangar summary, the Overview and the tutorial show the new share.
+
 ## 0.64.0 — 2026-11-27
 - **More sound effects**, synthesised like the others (`js/sfx.js`), all under the Sound effects switch and volume in Settings:
   - Battle: hits on shields (an electric crackle) and on hull (a metallic knock), misses (a whistle), ships destroyed (a boom with crackling debris), Restore (a rising hum), and a brass chord for victory or a sinking one for defeat. Pitch varies a little per shot. "Resolve instantly" skips the shot-by-shot sounds and plays only the result.

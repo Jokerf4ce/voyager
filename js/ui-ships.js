@@ -131,7 +131,7 @@ Object.assign(UI, {
         <div class="sp-info">
           <div class="sp-name">"${U.esc(ship.name)}"</div>
           <div class="sp-type">${U.esc(t.name)} · ${DATA.sizes[ship.size].name} hull · <span class="q ${qc}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${ship.quality}</span></div>
-          <div class="sp-stats">${stat('◈', ship.shieldMax ?? ship.shield, 'Shield')}${stat('▦', ship.hullMax ?? ship.hull, 'Hull')}${stat('»', ship.speed, 'Speed (turn order)')}${stat('◌', ship.maneuver + '%', 'Maneuverability (evasion chance)')}${stat('⚙', ship.upkeep, 'Maintenance per Cycle (Metals, plus half as much Chemicals)')}</div>
+          <div class="sp-stats">${stat('◈', ship.shieldMax ?? ship.shield, 'Shield')}${stat('▦', ship.hullMax ?? ship.hull, 'Hull')}${stat('»', ship.speed, 'Speed (turn order)')}${stat('◌', ship.maneuver + '%', 'Maneuverability (evasion chance)')}${stat('⚙', ship.upkeep, 'Maintenance per Cycle (Metals, plus a quarter as much Chemicals)')}</div>
           <div class="sp-weps">${ship.weapons.map((w) => this.weaponChip(w)).join('')}</div>
           <div class="sp-where small">${where}</div>
           <div class="btnrow">${ship.scrapped ? '' : this.btn('Show in Hangar', 'splashhangar')}${this.btn(`Build another ${DATA.sizes[ship.size].name} <small>${U.costText(Ships.buildCost(ship.size))}</small>`, 'buildship', ship.size, !!why)}${this.btn('Close', 'splashclose', '', false, 'gold')}</div>
@@ -213,7 +213,7 @@ Object.assign(UI, {
     const cap = Ships.hangarCap(), full = hangar.length >= cap;
     const up = Ships.upkeep();
     const left = this.panel('Fleets', `<p class="small muted">Drag a ship onto a fleet slot or into the hangar (or click it, then click a free slot). A ship's position is its <b>lane in battle</b>: it shoots the enemy opposite first, so put your heaviest guns where they face the biggest threats. Fleets on a mission can't be changed. Up to ${DATA.fleetMax} ships per fleet. Send fleets out from the Star Map.</p>
-        <div class="small">${Ships.all().length} ships · maintenance <b class="res-metal">${U.fmt1(up)}</b> Metals + <b class="res-chemicals">${U.fmt1(up / 2)}</b> Chemicals per Cycle${G.unpaid ? ' · <span class="bad">unpaid: no repairs</span>' : ''}</div>
+        <div class="small">${Ships.all().length} ships · maintenance <b class="res-metal">${U.fmt1(up)}</b> Metals + <b class="res-chemicals">${U.fmt1(up * DATA.upkeep.chemShare)}</b> Chemicals per Cycle${G.unpaid ? ' · <span class="bad">unpaid: no repairs</span>' : ''}</div>
         ${fleets || '<p class="muted">No fleets. Build ships at the Shipyard.</p>'}`) +
       this.panel(`Hangar <span class="${hangar.length > cap ? 'bad' : full ? 'res-power' : 'muted'}">${hangar.length} / ${cap}</span>`, `
         <p class="small muted">Ships in no fleet wait here. Each Orbital Shipyard holds ${DATA.hangar.base} ships, plus ${DATA.hangar.perLevel} for every level above 1.${cap ? '' : ' <span class="bad">You have no shipyard, so there is no room.</span>'}${full ? ' <span class="res-power">Full: new ships need a fleet with room.</span>' : ''}</p>
@@ -281,7 +281,7 @@ Object.assign(UI, {
       <div class="kv"><span>Class</span><b>${t.name} · ${DATA.sizes[sh.size].name}</b></div>
       <div class="kv"><span>Shield / Hull</span><b>${sh.shield} / ${Math.round(sh.hullNow)}${sh.hullNow < sh.hull ? ` of ${sh.hull}` : ''}</b></div>
       <div class="kv"><span>Speed · Evasion</span><b>${sh.speed} · ${sh.maneuver}%</b></div>
-      <div class="kv"><span title="Grows steeply with rarity and with the stat roll (quality), plus a personal random factor">Maintenance</span><b><span class="res-metal">${DATA.resources.metal.icon}${U.fmt1(sh.upkeep)}</span> <span class="res-chemicals">${DATA.resources.chemicals.icon}${U.fmt1(sh.upkeep / 2)}</span> <small class="muted">/ Cycle</small></b></div>
+      <div class="kv"><span title="Grows steeply with rarity and with the stat roll (quality), plus a personal random factor">Maintenance</span><b><span class="res-metal">${DATA.resources.metal.icon}${U.fmt1(sh.upkeep)}</span> <span class="res-chemicals">${DATA.resources.chemicals.icon}${U.fmt1(sh.upkeep * DATA.upkeep.chemShare)}</span> <small class="muted">/ Cycle</small></b></div>
       <div class="kv"><span>Roll quality</span><b>${sh.quality}% <small class="muted">of an average ${DATA.shipRarities[sh.rarity].name} ${t.name}</small></b></div>
       <div class="kv"><span>Fleet</span><b>${f ? U.esc(f.name) : 'Hangar'}</b></div>
       <h4>Weapons (${slots} slot${slots > 1 ? 's' : ''})</h4>${weps}

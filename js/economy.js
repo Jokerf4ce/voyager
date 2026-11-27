@@ -346,7 +346,7 @@ const Economy = {
       }
       const up = Ships.upkeep();
       if (k === 'metal' && up) minus.push(['Fleet maintenance', up]);
-      if (k === 'chemicals' && up) minus.push(['Fleet maintenance', up / 2]);
+      if (k === 'chemicals' && up) minus.push(['Fleet maintenance', up * DATA.upkeep.chemShare]);
       if (k === 'research' && G.researching && DATA.techs[G.researching]) {
         const left = Research.cost(G.researching) - G.researchProgress;
         minus.push([`Project: ${DATA.techs[G.researching].name}`, Math.min(left, this.net().research + G.res.research)]);
@@ -421,7 +421,7 @@ const Economy = {
     const i = this.income();
     const up = Ships.upkeep();
     return { metal: i.metal - i.inputs.metal - up, rare: i.rare - i.inputs.rare, organics: i.organics - i.inputs.organics,
-      electronics: i.electronics, chemicals: i.chemicals - up * 0.5, research: i.research, crypto: i.crypto, caps: i.caps, upkeep: up };
+      electronics: i.electronics, chemicals: i.chemicals - up * DATA.upkeep.chemShare, research: i.research, crypto: i.crypto, caps: i.caps, upkeep: up };
   },
 
   tick() {
@@ -442,12 +442,12 @@ const Economy = {
       const over = Object.keys(DATA.capacities).filter((k) => c[k].used > c[k].cap).map((k) => `${DATA.capacities[k].name} ${Math.round(c[k].used)}/${Math.round(c[k].cap)}`).join(', ');
       Log.add(`Rationing! Over capacity: ${over}. Production is down to ${Math.round(c.eff * 100)}%.`, 'bad');
     }
-    // Ship maintenance: Metals, plus half as much Chemicals.
+    // Ship maintenance: Metals, plus DATA.upkeep.chemShare as much Chemicals.
     const up = Ships.upkeep();
     if (up > 0) {
-      const short = G.res.metal < up || G.res.chemicals < up * 0.5;
+      const short = G.res.metal < up || G.res.chemicals < up * DATA.upkeep.chemShare;
       G.res.metal = Math.max(0, G.res.metal - up);
-      G.res.chemicals = Math.max(0, G.res.chemicals - up * 0.5);
+      G.res.chemicals = Math.max(0, G.res.chemicals - up * DATA.upkeep.chemShare);
       if (short && G.cycle % 5 === 0) Log.add('The fleet\'s maintenance cannot be fully paid. Crews go hungry; nothing gets repaired.', 'bad');
       G.unpaid = short;
     } else G.unpaid = false;

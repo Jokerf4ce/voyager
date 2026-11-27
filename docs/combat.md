@@ -390,7 +390,7 @@ Monsters have almost no shields, so physical weapons are the answer.
 
 ### 6.3 Maintenance
 
-Every ship costs its **maintenance** in Metals each Cycle, plus **half as much in Chemicals**. If you can't pay:
+Every ship costs its **maintenance** in Metals each Cycle, plus **a quarter as much in Chemicals** (`DATA.upkeep.chemShare`; half until v0.65). If you can't pay:
 - Your stores bottom out at 0.
 - No ship repairs until maintenance is paid again.
 

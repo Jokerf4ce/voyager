@@ -210,7 +210,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 - **The Void Signals gacha is removed** (no leaders, relics or blueprints). Random weapons come from the **Weapon Forge** (paid in Shards until v0.43, now in Rare Minerals and Electronics).
 
 **Decided for now, easy to change:**
-- Maintenance is paid each Cycle in Metals, plus half as much in Chemicals.
+- Maintenance is paid each Cycle in Metals, plus a quarter as much in Chemicals (half until v0.65, which squeezed Chemicals at the start).
 - All hull sizes are available from the start (v0.45; before, research unlocked Medium and Large hulls).
 - Weapons come from scrapping ships (which also refunds 30 % of a hull's cost), from wrecks after a victory (30 % chance per destroyed alien ship) and from the Weapon Forge (25 Rare Minerals + 15 Electronics, rarity rolled like a ship's).
 - Alien raids (decided v0.40: only after a grace period of 3 colonies founded besides the capital, and rarer, see `docs/combat.md`) appear as threats with a countdown. When one arrives you choose a fleet to defend; the system's Bastions and Defense Platforms fight as one **Planetary Defenses** card (the capital always has one). If the defense loses, the system falls.
