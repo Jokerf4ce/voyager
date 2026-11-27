@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.60.1 — 2026-11-27
+- Tutorial on phones: when a step points at something in the lower half of the screen (like the weapon buttons in "Your turn"), the panel moves to the top so you can still use it.
+
 ## 0.60.0 — 2026-11-27
 - **Rules of engagement is now a pop-up** (the ⚖ button under the battle log; Esc or Close shuts it, and the battle pauses while it is open). It has four parts:
   - **Size triangle:** a diagram of Small → Large → Medium → Small with the ×1.5 advantage on each arrow, plus the ×0.7 penalty and same-size ×1.

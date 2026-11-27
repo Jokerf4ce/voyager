@@ -137,7 +137,8 @@ const Tutorial = {
     // Keep the panel clear of what it points at: bottom corner, unless the target sits low on the screen.
     const r = ts.length && ts[0].getBoundingClientRect();
     const low = r && r.top > window.innerHeight * 0.55 && r.height < window.innerHeight * 0.5;
-    box.classList.toggle('top', !!low && !st.pos);
+    // placed steps keep their spot on wide screens; on phones the panel still jumps to the top when the target is low
+    box.classList.toggle('top', !!low && (!st.pos || window.innerWidth <= 820));
     box.classList.toggle('center', !ts.length);
     box.classList.toggle('left', st.pos === 'left');
     box.classList.toggle('side', st.pos === 'side');

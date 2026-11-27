@@ -719,3 +719,4 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .rules section { text-align: left; }
 .rules section h4 { text-align: center; }
 .rsvg .rx { font-size: 13px; }
+@media (max-width: 820px) { #tutorial.side.top, #tutorial.left.top { top: 8px; bottom: auto; } }
