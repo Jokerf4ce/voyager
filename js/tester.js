@@ -8,6 +8,7 @@ const Tester = {
   // A fresh galaxy, then: more systems charted, three extra colonies with random buildings, and full stores.
   newTestGame() {
     State.newGame();
+    G.difficulty = 'learning';
     const home = G.systems[G.homeId];
     const dH = U.distances(home.id);
     const aiHomes = Object.values(G.ai).map((a) => a.homeId);

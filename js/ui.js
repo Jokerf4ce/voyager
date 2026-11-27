@@ -253,7 +253,7 @@ const UI = {
       ${this.panel('Construction', this.constructionList())}
       ${this.panel('Buildings', this.buildingSummary())}
       ${this.panel('Xenos', ['chorus', 'remnant'].map(factionRow).join('') + `<p class="muted small">Destroy every alien world to win. Lose all your colonies and the Covenant ends.</p>`)}
-      ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${DATA.raids.graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), DATA.raids.graceColonies)}/${DATA.raids.graceColonies}).</p>`)) + (away || '<p class="muted small">All fleets are home.</p>'))}
+      ${this.panel('Threats & Missions', (threats || (G.raidsOpen ? '<p class="muted small">No raids detected.</p>' : (AI.raids().graceColonies ? `<p class="muted small">The xenos have not noticed you yet. Raids begin once you have founded ${AI.raids().graceColonies} colonies besides your capital (${Math.min(AI.foundedColonies(), AI.raids().graceColonies)}/${AI.raids().graceColonies}).</p>` : `<p class="muted small bad">No grace period on ${State.diff().name}: raids can come from Cycle ${AI.raids().fromCycle || 1}.</p>`))) + (away || '<p class="muted small">All fleets are home.</p>'))}
       ${this.panel('Battle Reports', this.reportList(5))}
     </div>`;
   },
@@ -267,6 +267,7 @@ const UI = {
       <h1>The Covenant Ends</h1>
       <p class="flavor">The last colony falls. The frozen souls in the Ark-holds will never wake.<br>Something in the dark sings over the ruins.</p>
       <div class="stats go-stats">
+        <div><small>Difficulty</small><b>${State.diff().name}</b></div>
         <div><small>Cycles endured</small>${n(G.cycle)}</div>
         <div><small>Systems charted</small>${n(st.explored)}</div>
         <div><small>Worlds taken</small>${n(st.coloniesTaken)}</div>
@@ -391,7 +392,7 @@ const UI = {
           const exp = G.expeditions.find((m) => m.target === s.id && m.planet === p.idx);
           const why = Missions.colonizeBlocker(s.id, p.idx);
           act = exp ? `<span class="small good">➤ Colonists arrive in ${exp.eta}</span>`
-            : this.btn(`Send colonists <small>${U.costText(DATA.colonize.cost)}</small>`, 'colonize', `${s.id}:${p.idx}`, !!why, 'small gold') + (why && why !== 'Not enough resources' && why !== 'Colonists are on their way' ? ` <small class="muted">${why}</small>` : '');
+            : this.btn(`Send colonists <small>${U.costText(State.cost(DATA.colonize.cost))}</small>`, 'colonize', `${s.id}:${p.idx}`, !!why, 'small gold') + (why && why !== 'Not enough resources' && why !== 'Colonists are on their way' ? ` <small class="muted">${why}</small>` : '');
         }
       }
       return `<div class="planet-row ${p.colony ? 'settled' : ''} ${this.selPlanet === p.idx ? 'sel' : ''}" data-act="selplanet" data-a="${p.idx}">${this.planetImg(s, p, 40)}
@@ -576,6 +577,7 @@ const UI = {
       }).join('')}</div>
       <div class="kv"><span>Assistant</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
+      <div class="kv"><span>Difficulty</span><span><b class="diff-name d-${G.difficulty || 'learning'}">${State.diff().name}</b> <small class="muted">${State.achievementsAllowed() ? 'achievements can be earned' : 'no achievements'} · set when the game starts</small></span></div>
       <div class="kv"><span>Sound effects</span><span class="btnrow">${this.btn(Sfx.enabled ? 'On' : 'Off', 'sfx', '', false, Sfx.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Sfx.volume * 100)}" data-input="sfxvol" aria-label="Sound effects volume" class="slider"></span></div>
       <h4>Fleet colours</h4>
@@ -604,6 +606,21 @@ const UI = {
 
   colorPreview() {
     return ['fighter', 'frigate', 'battleship'].map((t) => `<img class="px" src="${Sprites.shipImg(t, 'player')}" alt="">`).join('');
+  },
+
+  // ---------- difficulty ----------
+  // Shown when a new real game starts. It can't be dismissed: a difficulty has to be picked.
+  difficultyPicker() {
+    this.pickingDifficulty = true;
+    const card = ([id, d]) => `<button class="diffcard d-${id}" ${d.locked ? 'disabled' : `data-act="difficulty" data-a="${id}"`}>
+        <h3>${d.name}</h3><em>${U.esc(d.tag)}</em>
+        <p>${State.diffText(id, d.desc)}</p>
+        <ul>${d.points.map((x) => `<li>${State.diffText(id, x)}</li>`).join('')}</ul>
+        ${d.locked ? '<span class="diff-lock">Locked</span>' : ''}</button>`;
+    this.modal(`<h2>Choose your difficulty</h2>
+      <p class="flavor small">This can't be changed once the voyage has begun.</p>
+      <div class="diffcards">${Object.entries(DATA.difficulty).map(card).join('')}</div>`);
+    this.$('modal').querySelector('.modal-box').classList.add('wide');
   },
 
   // ---------- modal ----------

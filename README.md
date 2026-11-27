@@ -15,6 +15,7 @@ Or open `index.html` locally in a browser. No server or build step is needed. Sa
 - **Hangar:** global fleets of up to 5 ship cards each, the hangar (10 ships per Orbital Shipyard, +2 per level; sort by newest, hull, rarity, power, type or name) and the armory. Drag ships between fleet slots and the hangar (or click a ship, then a free slot); refit weapons in its panel.
 - **Shipyard:** pick a hull size (Small, Medium, Large) and the rest is rolled: type, rarity (Normal → Omega), stats and weapons. Stats come from a normal distribution, so every ship is different.
 - **Battles:** turn-based card battles. Pick a weapon, then a target; or use Auto, Resolve instantly or Retreat.
+- **Difficulty:** picked at the start of every new game. *Learning* (relaxed, grace period before raids), *Adaptive* (coming later) or *Commander* (no grace period, frequent raids, stronger xenos, all prices ×1.5; achievements only here).
 - **Tutorial:** a 12-step guided tour on the first game in a browser (skippable; Settings → *Replay tutorial*).
 - The side menu collapses on its own 10 seconds after the cursor leaves it; ☰ opens it again.
 - **Tester mode:** Settings → *Open tester mode*, or add `#tester` to the address. A separate save with extra colonies, random buildings, ships of every rarity and full stores, for testing. The real save is not touched.

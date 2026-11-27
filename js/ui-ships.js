@@ -123,7 +123,7 @@ Object.assign(UI, {
         <div class="buildtiles">${['S', 'M', 'L'].map(tile).join('')}</div>${reveal}`) +
       `<div class="grid2">` +
       this.panel('Weapon Forge', `<p class="small">${DATA.forge.desc} Fit forged weapons to ships on the Hangar screen.</p>
-        <div class="btnrow">${['S', 'M', 'L'].map((z) => this.btn(`${DATA.sizes[z].name} weapon <small>${U.costText(DATA.forge.cost)}</small>`, 'forge', z, !Ships.unlocked(z) || !Colonies.canAfford(DATA.forge.cost))).join('')}</div>
+        <div class="btnrow">${['S', 'M', 'L'].map((z) => this.btn(`${DATA.sizes[z].name} weapon <small>${U.costText(State.cost(DATA.forge.cost))}</small>`, 'forge', z, !Ships.unlocked(z) || !Colonies.canAfford(State.cost(DATA.forge.cost)))).join('')}</div>
         ${lw ? `<div class="forged">New: ${this.weaponChip(lw)} <small class="muted">(${DATA.sizes[lw.size].name})</small></div>` : ''}`) +
       `</div>`;
   },
@@ -245,7 +245,7 @@ Object.assign(UI, {
     const etaText = eta ? ` · ${eta} Cycle${eta > 1 ? 's' : ''}` : '';
     if (!s.explored && Explore.isSeen(s.id)) {
       const why = Missions.surveyBlocker(s.id);
-      opts.push(`<h4>Explore</h4><div class="btnrow">${this.btn(`Launch a survey probe <small>${U.costText(DATA.survey.cost)}${etaText}</small>`, 'survey', s.id, !!why, 'gold')}</div>${why && why !== 'Not enough resources' ? `<small class="muted">${why}</small>` : ''}`);
+      opts.push(`<h4>Explore</h4><div class="btnrow">${this.btn(`Launch a survey probe <small>${U.costText(State.cost(DATA.survey.cost))}${etaText}</small>`, 'survey', s.id, !!why, 'gold')}</div>${why && why !== 'Not enough resources' ? `<small class="muted">${why}</small>` : ''}`);
     }
     if (s.explored && Missions.hostile(s)) {
       const enemyPower = g ? Ships.groupPower(g.ships) : 0;
@@ -256,7 +256,7 @@ Object.assign(UI, {
     }
     if (s.explored && !s.owner && !g) {
       const going = G.expeditions.find((m) => m.target === s.id);
-      opts.push(`<h4>Settle</h4><p class="small">${going ? 'Colonists are on their way.' : `Choose a planet below and <b>send colonists</b> there: a colony expedition costs ${U.costText(DATA.colonize.cost)}${etaText}.`}</p>`);
+      opts.push(`<h4>Settle</h4><p class="small">${going ? 'Colonists are on their way.' : `Choose a planet below and <b>send colonists</b> there: a colony expedition costs ${U.costText(State.cost(DATA.colonize.cost))}${etaText}.`}</p>`);
     }
     const coming = G.fleets.filter((f) => f.mission && f.mission.target === s.id);
     const exps = G.expeditions.filter((m) => m.target === s.id), probes = G.surveys.filter((m) => m.target === s.id);

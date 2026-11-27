@@ -7,6 +7,7 @@ const State = {
     G = {
       version: 15,
       cycle: 1,
+      difficulty: null,   // chosen right after the galaxy is made (State.setDifficulty); null = not picked yet
       res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 20, research: 0, crypto: 0 },
       systems: [],
       ships: {},          // every Covenant ship card, by id (js/ships.js)
@@ -38,6 +39,27 @@ const State = {
     Log.add('The Covenant fleet arrives at the edge of the Shroud. The homeworld is ash behind it, and the void ahead is full of things that hunger.', 'story');
     Log.add('Send your probes into the dark. Find worlds. Survive.', 'story');
     Log.add('Open the Star Map, pick a "?" system and send a survey probe to chart it.', 'story');
+  },
+
+  // Difficulty of this game (DATA.difficulty); saves from before difficulties existed are Learning.
+  diff() { return DATA.difficulty[G && G.difficulty] || DATA.difficulty.learning; },
+  // A price after the difficulty's cost multiplier (rounded up).
+  cost(c) { const m = this.diff().costMult, out = {}; for (const k in c) out[k] = m === 1 ? c[k] : Math.ceil(c[k] * m); return out; },
+  // Later achievements can only be unlocked on difficulties that allow them.
+  achievementsAllowed() { return !!this.diff().achievements; },
+  // Sets the difficulty of a freshly generated game and applies its starting conditions.
+  setDifficulty(id) {
+    const d = DATA.difficulty[id];
+    if (!d || d.locked) return false;
+    G.difficulty = id;
+    for (const k of Object.keys(G.ai)) G.ai[k].ore = d.ai.startOre;
+    Log.add(`Difficulty: ${d.name}.${id === 'commander' ? ' The xenos already know where you are.' : ''}`, id === 'commander' ? 'bad' : 'story');
+    return true;
+  },
+  // A difficulty's text with its live numbers filled in.
+  diffText(id, s) {
+    const d = DATA.difficulty[id];
+    return s.replace('{grace}', d.raids.graceColonies).replace('{from}', d.raids.fromCycle || 1).replace('{mult}', d.costMult);
   },
 
   // Sum of every bonus source (research).

@@ -55,7 +55,7 @@ const Colonies = {
   settleCost(p) {
     const n = this.playerPlanets().length;
     const out = {};
-    for (const k in DATA.settleCost) out[k] = Math.ceil(DATA.settleCost[k] * Math.pow(DATA.settleGrowth, Math.max(0, n - 1)) * this.habMult(p, p.slots.surface ? 'surface' : 'orbit')); // no surface: an orbital station
+    for (const k in DATA.settleCost) out[k] = Math.ceil(DATA.settleCost[k] * State.diff().costMult * Math.pow(DATA.settleGrowth, Math.max(0, n - 1)) * this.habMult(p, p.slots.surface ? 'surface' : 'orbit')); // no surface: an orbital station
     return out;
   },
 
@@ -95,7 +95,7 @@ const Colonies = {
     const def = DATA.buildings[key];
     const out = {};
     const next = (p.colony && p.colony[layer] && p.colony[layer][key] || 0) + 1;
-    const m = this.habMult(p, layer) * this.levelMult(next);
+    const m = this.habMult(p, layer) * this.levelMult(next) * State.diff().costMult;
     for (const k in def.cost) out[k] = Math.ceil(def.cost[k] * m);
     return out;
   },
@@ -129,7 +129,7 @@ const Colonies = {
   // ---- demolishing ----
   // Everything paid for a building so far: the price of each level from 1 up to its current level.
   invested(p, layer, key) {
-    const def = DATA.buildings[key], lvl = (p.colony && p.colony[layer][key]) || 0, h = this.habMult(p, layer), out = {};
+    const def = DATA.buildings[key], lvl = (p.colony && p.colony[layer][key]) || 0, h = this.habMult(p, layer) * State.diff().costMult, out = {};
     for (let i = 1; i <= lvl; i++) for (const k in def.cost) out[k] = (out[k] || 0) + Math.ceil(def.cost[k] * h * this.levelMult(i));
     return out;
   },

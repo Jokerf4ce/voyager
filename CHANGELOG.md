@@ -2,6 +2,15 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.56.0 — 2026-11-27
+- **Difficulty selection** when a new game starts (`DATA.difficulty`). It can't be changed later; Settings and the game over screen show it.
+  - **Learning:** the game as it was: a grace period until 3 colonies besides the capital, rare small raids, normal prices, no achievements.
+  - **Adaptive:** shown greyed out ("Coming later"): will start easy and harden toward Commander as the empire grows.
+  - **Commander:** no grace period, raids possible from Cycle 12 (chance 6 % × aggression per empire per Cycle, 6-Cycle cooldown, +1 ship per raid); xeno ore income ×1.4, +1 to their ship rolls, 100 starting ore; **every resource price ×1.5** (buildings, settling, probes, expeditions, hulls, forge; refunds scale with it). Later achievements can only be unlocked here (`State.achievementsAllowed()`).
+  - The picker can't be dismissed; closing the page before picking asks again on the next visit. The tutorial and the greeting start after the pick.
+  - Saves from before this version count as Learning (no save reset needed).
+- Tutorial and Overview describe the raid rule of the chosen difficulty.
+
 ## 0.55.0 — 2026-11-27
 - **New-ship splash.** Laying down a hull now opens a full-screen reveal of the new ship:
   - The hull is "printed" from the bottom up behind a scan line, in a flash of its rarity colour, then bobs gently.

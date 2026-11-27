@@ -132,7 +132,7 @@ const Ships = {
 
   // ---------- building (the gacha) ----------
   // A hull's price: DATA.sizes (shipyard levels don't make ships cheaper; they add hangar space).
-  buildCost(size) { return Object.assign({}, DATA.sizes[size].cost); },
+  buildCost(size) { return State.cost(DATA.sizes[size].cost); },
   blocker(size) {
     if (!Colonies.yards().length) return 'No Orbital Shipyard';
     if (!this.unlocked(size)) return 'Requires ' + DATA.techs[DATA.sizes[size].req].name;
@@ -160,8 +160,8 @@ const Ships = {
   },
 
   forge(size) {
-    if (!this.unlocked(size) || !Colonies.canAfford(DATA.forge.cost)) return null;
-    Colonies.pay(DATA.forge.cost);
+    if (!this.unlocked(size) || !Colonies.canAfford(State.cost(DATA.forge.cost))) return null;
+    Colonies.pay(State.cost(DATA.forge.cost));
     const w = this.makeWeapon(size, this.rollRarity());
     G.armory.push(w);
     Log.add(`The forge spits out a ${DATA.shipRarities[w.rarity].name} ${w.name} (${DATA.sizes[size].name}).`, w.rarity === 'normal' ? '' : 'good');
@@ -241,7 +241,7 @@ const Ships = {
     const ship = G.ships[shipId], f = this.fleetOf(shipId);
     if (!ship || (f && f.mission)) return false;
     for (const w of ship.weapons) if (w) G.armory.push(w);
-    const cost = DATA.sizes[ship.size].cost;
+    const cost = this.buildCost(ship.size);
     for (const k in cost) G.res[k] += Math.floor(cost[k] * DATA.scrapRefund);
     delete G.ships[shipId];
     this.cleanup();
@@ -268,7 +268,7 @@ const Ships = {
   // What scrapping these ships would give back.
   scrapRefund(ships) {
     const out = {};
-    for (const s of ships) for (const [k, v] of Object.entries(DATA.sizes[s.size].cost)) out[k] = (out[k] || 0) + Math.floor(v * DATA.scrapRefund);
+    for (const s of ships) for (const [k, v] of Object.entries(this.buildCost(s.size))) out[k] = (out[k] || 0) + Math.floor(v * DATA.scrapRefund);
     return out;
   },
   // Scrap many ships at once, with one line in the Chronicle.

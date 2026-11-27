@@ -7,7 +7,7 @@ const AI = {
   shipCost: { S: 14, M: 30, L: 65 },
 
   // Better rarities and bigger hulls as the game goes on.
-  bias() { return Math.min(5, G.cycle / 35); },
+  bias() { return Math.min(5, G.cycle / 35) + State.diff().ai.bias; },
   pickSize() {
     const c = G.cycle, r = Math.random();
     if (c > 60 && r < 0.3) return 'L';
@@ -26,12 +26,21 @@ const AI = {
   },
   setGuard(s, id, n) { s.guard = { owner: id, name: DATA.factions[id].short + ' Garrison', ships: this.team(id, n) }; },
 
-  // Colonies the player founded besides the capital (the grace period lasts until DATA.raids.graceColonies).
+  // Colonies the player founded besides the capital (the grace period lasts until raids().graceColonies).
   foundedColonies() { return Colonies.playerPlanets().filter(({ p }) => !p.colony.capital).length; },
+  // This game's raid settings (they depend on the difficulty, see DATA.difficulty).
+  raids() { return State.diff().raids; },
+  // One sentence on when raids start in this game (tutorial and Overview).
+  raidRule() {
+    const R = this.raids();
+    if (R.graceColonies) return `The xenos ignore you at first. Raids only begin once you have founded <b>${R.graceColonies}</b> colonies besides your capital.`;
+    return `On <b>${State.diff().name}</b> there is no grace period: the xenos know where you are, and raids can come from Cycle <b>${R.fromCycle || 1}</b>.`;
+  },
   // Raids are possible once the grace period is over. The first time, the player is warned.
   raidsOpen() {
     if (G.raidsOpen) return true;
-    if (this.foundedColonies() < DATA.raids.graceColonies) return false;
+    const R = this.raids();
+    if (this.foundedColonies() < (R.graceColonies || 0) || G.cycle < (R.fromCycle || 0)) return false;
     G.raidsOpen = true;
     Log.add('⚠ The Covenant has grown loud enough to be heard. The xenos have noticed you: from now on, expect raids on your colonies.', 'bad');
     if (typeof Voice !== 'undefined' && VoiceLines.signatures) Voice.say('signatures', (VoiceTriggers.combat || {}).style);
@@ -44,7 +53,7 @@ const AI = {
       const ai = G.ai[id];
       if (!ai.alive) continue;
       const owned = G.systems.filter((s) => s.owner === id);
-      ai.ore += owned.length * (3 + G.cycle * 0.06);
+      ai.ore += owned.length * (3 + G.cycle * 0.06) * State.diff().ai.income;
 
       // garrisons repair a little each Cycle
       for (const s of owned) if (s.guard) for (const sh of s.guard.ships) sh.hullNow = Math.min(sh.hull, sh.hullNow + Math.ceil(sh.hull * 0.1));
@@ -83,11 +92,11 @@ const AI = {
         home.guard.ships[home.guard.ships.indexOf(weakest)] = this.makeShip(id, size);
       }
 
-      // Raids on the Covenant (after the grace period; see DATA.raids).
-      const R = DATA.raids;
+      // Raids on the Covenant (after the grace period; see DATA.raids and DATA.difficulty).
+      const R = this.raids();
       if (this.raidsOpen() && !G.threats.some((t) => t.owner === id) && G.cycle - (ai.lastRaid || -999) >= R.cooldown
           && Math.random() < R.chance * (ai.aggro + aggro)) {
-        const n = Math.min(DATA.fleetMax, 2 + Math.floor(Math.max(0, G.cycle - 20) / 30));
+        const n = Math.min(DATA.fleetMax, 2 + (R.extraShips || 0) + Math.floor(Math.max(0, G.cycle - 20) / 30));
         const cost = n * 16;
         const target = this.pickTarget(id);
         if (target && ai.ore >= cost) {

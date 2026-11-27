@@ -46,8 +46,19 @@ const Game = {
     UI.screen = 'map';
     State.save();
     UI.render();
-    if (State.slot !== 'tester') Tutorial.start(); // every new real game opens with the tour
-    // the Assistant wakes you; before the first click the browser blocks sound, so the first click plays it
+    if (State.slot === 'tester') return;
+    UI.difficultyPicker(); // a real game asks for the difficulty first, then opens the tour
+  },
+
+  // The difficulty is picked: apply it, then the tour starts and the Assistant wakes you
+  // (before the first click the browser blocks sound, so the first click plays it).
+  startWith(id) {
+    if (!State.setDifficulty(id)) return;
+    UI.pickingDifficulty = false;
+    UI.modalOpen = false; UI.$('modal').classList.remove('show'); UI.$('modal').innerHTML = '';
+    State.save();
+    UI.render();
+    Tutorial.start(); // every new real game opens with the tour
     if (this.gestured) Voice.trigger('first', true); else this.fresh = true;
   },
 
@@ -56,7 +67,7 @@ const Game = {
     State.save();
     State.slot = slot;
     history.replaceState(null, '', slot === 'tester' ? '#tester' : location.pathname + location.search);
-    if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); }
+    if (State.load()) { this.overShown = !!G.over; UI.selSys = G.homeId; UI.screen = 'overview'; UI.render(); if (G.difficulty === null && slot === 'main') UI.difficultyPicker(); }
     else this.newGame();
   },
 
@@ -175,6 +186,7 @@ const Game = {
         <div class="btnrow">${UI.btn('Regenerate', 'newgame-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>` : `<h2>Abandon this galaxy?</h2><p>Your current game will be lost.</p>
         <div class="btnrow">${UI.btn('Yes, start over', 'newgame-confirm', '', false, 'danger')}${UI.btn('Cancel', 'close')}</div>`);
     },
+    difficulty: (a) => { Game.startWith(a); },
     'newgame-confirm': () => { UI.modalOpen = false; UI.$('modal').classList.remove('show'); Game.newGame(); },
   },
 };
@@ -310,7 +322,7 @@ window.addEventListener('DOMContentLoaded', () => {
   Voice.init();
   Sfx.loadPrefs();
   // The first click or key: music starts and the Assistant greets you (a new game gets its own greeting).
-  const firstGesture = () => { Game.gestured = true; Voice.activated = true; Sfx.warm(); Music.start(); Voice.trigger(Game.fresh ? 'first' : 'start'); Game.fresh = false; UI.renderTop(); };
+  const firstGesture = () => { Game.gestured = true; Voice.activated = true; Sfx.warm(); Music.start(); if (!UI.pickingDifficulty) Voice.trigger(Game.fresh ? 'first' : 'start'); Game.fresh = false; UI.renderTop(); };
   document.addEventListener('pointerdown', firstGesture, { once: true });
   document.addEventListener('keydown', firstGesture, { once: true });
   // Side menu: ☰ toggles it; it collapses on its own 10 s after the cursor leaves it.
@@ -337,6 +349,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     if (G.over) Game.overShown = true;
     if (G.over === 'lose') { UI.screen = 'gameover'; UI.render(); }
+    if (G.difficulty === null && State.slot === 'main') UI.difficultyPicker(); // closed before picking one
   } else {
     Game.newGame(); // starts the tutorial
   }

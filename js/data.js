@@ -227,6 +227,30 @@ DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon
 // capital; after that each living empire rolls chance × its aggression every Cycle, at most one raid underway
 // per empire, and waits cooldown Cycles after launching one.
 DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
+
+// Difficulty, chosen when a new game starts (G.difficulty; old saves count as 'learning'). It can't be changed later.
+//   costMult   every resource price (buildings, settling, probes, expeditions, hulls, forge) is multiplied by this;
+//              refunds (demolish, scrap, failed expeditions) scale with it, since they return part of what was paid
+//   raids      replaces DATA.raids. graceColonies: no raids until that many colonies besides the capital;
+//              fromCycle: no raids before that Cycle; extraShips: added to every raid
+//   ai         income: multiplies the xeno empires' ore income; bias: added to their ship rolls (better rarities);
+//              startOre: their ore at the start
+//   achievements  later achievements can only be unlocked on difficulties that allow them
+//   locked     shown but can't be picked yet
+DATA.difficulty = {
+  learning: { name: 'Learning', tag: 'A relaxed start',
+    desc: 'Learn the game. The xenos leave you alone until you have founded {grace} colonies besides your capital, and raids stay rare.',
+    points: ['Grace period before raids', 'Rare, small raids', 'Normal prices', 'No achievements'],
+    costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false },
+  adaptive: { name: 'Adaptive', tag: 'Coming later', locked: true,
+    desc: 'Starts gently and hardens toward Commander as your empire grows.',
+    points: ['Scales with your empire'],
+    costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false },
+  commander: { name: 'Commander', tag: 'The way the game is meant to be played',
+    desc: 'No grace period. The xenos know where you are, raid early and often, grow faster and field better ships, and everything costs half again as much.',
+    points: ['Raids from Cycle {from}, no grace period', 'Frequent, larger raids', 'Stronger, richer xenos', 'All prices ×{mult}', 'Achievements can be earned'],
+    costMult: 1.5, raids: { graceColonies: 0, fromCycle: 12, chance: 0.06, cooldown: 6, extraShips: 1 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
+};
 DATA.battleFxMs = 2000;                    // how long MISS / RESTORED float over a card
 DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of max shields / hull regained
 // Hangar: ships in no fleet wait at an Orbital Shipyard. Each shipyard holds `base` ships at level 1, plus
@@ -390,7 +414,7 @@ DATA.tutorial = [
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
     text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, <b>Medium</b> or <b>Large</b>, all available from the start. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>, and every new ship is unveiled on screen as it leaves the slipway.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
   { screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',
-    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and half as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>The xenos ignore you at first. Raids only begin once you have founded <b>{grace}</b> colonies besides your capital.' },
+    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and half as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>{raids}' },
   { target: '.nav-btn[data-a="battle"]', nav: true, title: 'Battle',
     text: 'Battles are fought in turns, ship by ship, five lanes a side. Ships fire at the ship opposite them. If that lane is empty they fire at the next one, with a heavy penalty to hit. On a ship\'s turn you can fire, <b>move</b> it to another lane (the ships in between slide over) or <b>Restore</b> some of its shields and hull. <b>Auto</b> fights for you.<br><br>While a fight is on, <b>End Cycle</b> is locked. Once it is over, end the Cycle or open another screen to move on.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',

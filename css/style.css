@@ -631,3 +631,26 @@ body.splashing #comms { bottom: auto; top: 8px; } /* Assistant subtitles move up
 @media (prefers-reduced-motion: reduce) {
   .splash *, .splash { animation-duration: .01s !important; animation-iteration-count: 1 !important; }
 }
+
+/* ---------- difficulty picker (UI.difficultyPicker) ---------- */
+.modal-box.wide { width: min(880px, 94vw); max-height: 95vh; }
+.diffcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.diffcard { position: relative; text-align: left; background: #120f0c; color: var(--bone); border: 2px solid var(--edge-hi); padding: 12px; cursor: pointer;
+  font-family: var(--font-body); font-size: 17px; box-shadow: 4px 4px 0 #000; display: flex; flex-direction: column; }
+.diffcard h3 { margin: 0 0 2px; font-size: 16px; color: var(--bone); }
+.diffcard em { font-style: normal; font-size: 15px; color: var(--ash); }
+.diffcard p { margin: 8px 0 6px; line-height: 1.2; }
+.diffcard ul { margin: auto 0 0; padding-left: 18px; color: var(--ash); font-size: 16px; }
+.diffcard:not([disabled]):hover, .diffcard:not([disabled]):focus-visible { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 #000; outline: none; }
+.diffcard.d-learning { border-color: #5a8a5a; } .diffcard.d-learning h3 { color: #9ac070; }
+.diffcard.d-commander { border-color: var(--blood); background: radial-gradient(circle at 50% 0%, #2a1010, #120f0c 70%); }
+.diffcard.d-commander h3 { color: #ff5a4a; } .diffcard.d-commander em { color: var(--gold); }
+.diffcard[disabled] { cursor: not-allowed; opacity: .45; filter: grayscale(1); }
+.diff-lock { position: absolute; top: 10px; right: 10px; font-family: var(--font-head); font-size: 9px; letter-spacing: 1px; border: 1px solid var(--edge-hi); padding: 2px 5px; }
+.diff-name.d-commander { color: #ff5a4a; } .diff-name.d-learning { color: #9ac070; }
+@media (max-width: 760px) {
+  .diffcards { grid-template-columns: 1fr; gap: 6px; }
+  .diffcard { padding: 8px 10px; font-size: 16px; }
+  .diffcard p { margin: 4px 0; }
+  .diffcard ul { display: none; }
+}

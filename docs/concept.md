@@ -115,6 +115,20 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 
 **Balance (v0.33):** flat costs let the economy run away (in bot tests, buildings reached level 27 and 266 Metals per Cycle by Cycle 150). With the level curve the same bot stays around level 3–6 and 90 Metals per Cycle, and grows by founding colonies instead.
 
+## 4a-3. Difficulty
+
+**Decided (v0.56):** a difficulty is picked when a new game starts and can't be changed later (`DATA.difficulty`, stored as `G.difficulty`).
+
+| Difficulty | Raids | Xenos | Prices | Achievements |
+|---|---|---|---|---|
+| Learning | grace period until 3 colonies besides the capital, then rare (2.5 % × aggression, 12-Cycle cooldown) | normal | ×1 | no |
+| Adaptive | *locked, coming later:* starts like Learning and hardens toward Commander as the empire grows | | | |
+| Commander | from Cycle 12, no grace period, 6 % × aggression, 6-Cycle cooldown, +1 ship per raid | ore income ×1.4, +1 to ship rolls, 100 starting ore | ×1.5 | yes |
+
+Commander is "the way the game is meant to be played"; achievements (not built yet) can only be earned there.
+
+**Open:** how Adaptive measures empire growth and how fast it ramps.
+
 ## 4b. Resources
 
 **Decided:** three gathered resources, two refined goods and three capacities, plus Research and Crypto Shards (v0.47, an interstellar currency for trade, deliberately scarce). (Void Shards were removed in v0.43.)
