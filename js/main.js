@@ -72,6 +72,8 @@ const Game = {
   tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort',
     'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
     'rules', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
+  // Actions that make their own sound (or one that follows right away), so they don't also click.
+  ownSound: new Set(['buildship', 'forge', 'bfire', 'brestore', 'build', 'project', 'buildauto', 'bauto', 'bplace', 'sfx', 'voicetest', 'difficulty']),
   tourPractice: new Set(['bfire', 'bswapnav', 'brestore', 'bswapconfirm', 'battleauto', 'bresolve', 'bretreat', 'bdefend']),
   lockedByTour(act) {
     if (!Tutorial.active || this.tourSafe.has(act)) return false;
@@ -173,7 +175,7 @@ const Game = {
     rules: () => { UI.rulesModal(); },
     project: (a) => { const [sid, key] = a.split(':'); Colonies.buildProject(+sid, key); },
     splashhangar: () => { const id = UI.splash; UI.closeSplash(); UI.screen = 'fleets'; if (id && G.ships[id]) UI.selShip = id; },
-    forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
+    forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; Sfx.play('forge'); if (['epic', 'legendary', 'omega'].includes(w.rarity)) setTimeout(() => Sfx.play('rare', { rate: w.rarity === 'omega' ? 0.84 : 1 }), 450); } },
     research: (a) => { Research.select(a); Research.tick(); },
     bopen: (a) => { UI.bOpen = UI.bOpen === a ? null : a; },
     bshow: (a) => { UI.bOpen = a; UI.screen = 'buildings'; },
@@ -220,6 +222,7 @@ document.addEventListener('click', (ev) => {
   const fn = Game.actions[b.dataset.act];
   if (!fn) return;
   if (Game.lockedByTour(b.dataset.act)) { Tutorial.nudge(); return; }
+  if (!Game.ownSound.has(b.dataset.act)) Sfx.play('click'); // actions with their own sound skip the click
   fn(b.dataset.a);
   if (G) { State.save(); UI.render(); }
 });

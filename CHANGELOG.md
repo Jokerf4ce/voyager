@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.64.0 — 2026-11-27
+- **More sound effects**, synthesised like the others (`js/sfx.js`), all under the Sound effects switch and volume in Settings:
+  - Battle: hits on shields (an electric crackle) and on hull (a metallic knock), misses (a whistle), ships destroyed (a boom with crackling debris), Restore (a rising hum), and a brass chord for victory or a sinking one for defeat. Pitch varies a little per shot. "Resolve instantly" skips the shot-by-shot sounds and plays only the result.
+  - Weapon Forge: a grinding press, steam and a clang; Epic and better add the dark rare chord.
+  - Research complete: a data chime (once per Cycle, however many levels finished).
+  - Construction starting (buildings, upgrades and system projects): a pneumatic ratchet.
+  - Ordinary buttons: a quiet tick (actions with their own sound skip it).
+
 ## 0.63.0 — 2026-11-27
 - **Five new ship designs for every class** (45 in all, eleven per class now). A new ship rolls one at random; ships you already have keep their look.
   - Scout: stiletto (forked prongs around a glowing sensor), moth (glass sails), kite (diamond sail with a beaded tail), courier (drop tanks and a dish), tri-fin needle with a long lance.

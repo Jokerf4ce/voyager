@@ -34,6 +34,7 @@ const Research = {
         if (this.maxed(id)) G.researching = this.nextSuggestion(); // otherwise the next level follows
       }
     }
+    if (done.length && typeof Sfx !== 'undefined') Sfx.play('research'); // once, however many levels finished
     return done;
   },
 

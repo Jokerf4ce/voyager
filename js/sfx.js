@@ -8,11 +8,14 @@
 //   Sfx.play('blip')   — a star is picked on the Star Map: a short digital chirp
 //   Sfx.play('reveal') — a new ship on the splash: fabricator whine, clamp release, confirm tones
 //   Sfx.play('rare')   — added for Epic and better: a dark shimmering chord
+//   UI: click (ordinary buttons), construct (a build or upgrade starts), research (a level is done), forge (a weapon is forged)
+//   battle: shield / hull (a hit, by where the damage went), miss, explode (a ship destroyed), restore, victory, defeat
 
 const Sfx = {
   enabled: true,
   volume: 0.7,
   prefsKey: 'voyager_sfx',
+  quiet: false,
   buffers: {},          // name -> AudioBuffer
   pending: {},          // name -> Promise<AudioBuffer>
   rate: 44100,
@@ -33,7 +36,7 @@ const Sfx = {
   // ---- playback ----
   // opts.rate: playback speed (1 = as rendered), opts.gain: extra loudness for this one play
   play(name, opts = {}) {
-    if (!this.enabled || !this.recipes[name]) return;
+    if (!this.enabled || this.quiet || !this.recipes[name]) return; // quiet: a battle resolved instantly stays silent
     if (typeof Voice === 'undefined' || !Voice.activated) return; // browsers block sound before the first click
     const ctx = Voice.audio();
     if (!ctx) return;
@@ -45,7 +48,7 @@ const Sfx = {
         src.playbackRate.value = opts.rate || 1;
         g.gain.value = this.volume * (opts.gain ?? 1);
         src.connect(g); g.connect(ctx.destination);
-        src.start(ctx.currentTime + 0.01);
+        src.start(ctx.currentTime + 0.01 + (opts.delay || 0));
       } catch (e) { /* audio unavailable */ }
     };
     if (this.buffers[name]) go(this.buffers[name]);
@@ -99,6 +102,22 @@ const Sfx = {
     g.gain.exponentialRampToValueAtTime(0.0001, t + decay * 6);
     o.connect(g); g.connect(out);
     o.start(t); o.stop(t + decay * 6 + 0.05);
+  },
+  // Brass-like chords (filtered saws) for battle stingers: steps = [[time, [freqs]], …], all fading out by `end`.
+  brass(ctx, steps, end) {
+    const room = this.hall(ctx, 1.4, 0.4); room.output.connect(ctx.destination);
+    const out = ctx.createGain(); out.connect(ctx.destination); out.connect(room.input);
+    steps.forEach(([t, freqs], i) => {
+      const until = i < steps.length - 1 ? steps[i + 1][0] + 0.05 : end;
+      for (const f of freqs) for (const det of [-5, 5]) {
+        const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det;
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(400, t); lp.frequency.linearRampToValueAtTime(1800, t + 0.12); lp.frequency.exponentialRampToValueAtTime(700, until);
+        const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.12, t + 0.06);
+        g.gain.setValueAtTime(0.12, Math.max(t + 0.07, until - 0.15)); g.gain.linearRampToValueAtTime(0, until);
+        o.connect(lp); lp.connect(g); g.connect(out); o.start(t); o.stop(until + 0.05);
+      }
+    });
   },
   // A big empty hall: a convolver fed with decaying noise.
   hall(ctx, seconds, wet) {
@@ -216,6 +235,143 @@ const Sfx = {
         this.ring(ctx, ctx.destination, 0.02, { freq: 1174.7, gain: 0.12, decay: 0.25 });
         this.ring(ctx, room.input, 0.02, { freq: 1760, gain: 0.06, decay: 0.2 });
       },
+    },
+
+    // ---- UI ----
+    // A dry little tick for ordinary buttons.
+    click: {
+      seconds: 0.06, peak: 0.13,
+      draw(ctx) {
+        this.burst(ctx, ctx.destination, 0, { freq: 3200, q: 3, gain: 0.6, decay: 0.002 });
+        this.ring(ctx, ctx.destination, 0, { freq: 1900, gain: 0.25, decay: 0.006, type: 'square' });
+      },
+    },
+    // Construction begins: a pneumatic ratchet, three quick clanks and a hiss.
+    construct: {
+      seconds: 0.6, peak: 0.35,
+      draw(ctx) {
+        for (const [t, f] of [[0, 900], [0.09, 1000], [0.18, 1150]]) {
+          this.burst(ctx, ctx.destination, t, { type: 'lowpass', freq: 1400, gain: 0.8, decay: 0.008 });
+          this.ring(ctx, ctx.destination, t, { freq: f, gain: 0.12, decay: 0.02 });
+          this.ring(ctx, ctx.destination, t, { freq: 140, freq2: 90, gain: 0.4, decay: 0.02 });
+        }
+        this.burst(ctx, ctx.destination, 0.26, { type: 'highpass', freq: 4000, gain: 0.25, decay: 0.05, len: 0.4 });
+      },
+    },
+    // Research complete: a falling-rising data chime with an echo.
+    research: {
+      seconds: 1.2, peak: 0.3,
+      draw(ctx) {
+        const room = this.hall(ctx, 0.9, 0.4); room.output.connect(ctx.destination);
+        const out = ctx.createGain(); out.connect(ctx.destination); out.connect(room.input);
+        [659.3, 784, 987.8, 1318.5].forEach((f, i) => {
+          this.ring(ctx, out, i * 0.07, { freq: f, gain: 0.3, decay: 0.09, type: 'triangle' });
+          this.ring(ctx, out, i * 0.07 + 0.25, { freq: f * 2, gain: 0.05, decay: 0.05 });
+        });
+      },
+    },
+    // The Weapon Forge: a grinding press, a hiss of steam and the clang of a finished barrel.
+    forge: {
+      seconds: 1.2, peak: 0.5,
+      draw(ctx) {
+        const room = this.hall(ctx, 0.8, 0.25); room.output.connect(ctx.destination);
+        const out = ctx.createGain(); out.connect(ctx.destination); out.connect(room.input);
+        { // grinding press
+          const src = ctx.createBufferSource(); src.buffer = this.noise(ctx, 0.5);
+          const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 3;
+          f.frequency.setValueAtTime(200, 0); f.frequency.exponentialRampToValueAtTime(700, 0.42);
+          const g = ctx.createGain(); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(2.2, 0.3); g.gain.linearRampToValueAtTime(0, 0.44);
+          const lfo = ctx.createOscillator(); lfo.frequency.value = 22; const lg = ctx.createGain(); lg.gain.value = 0.25;
+          lfo.connect(lg); lg.connect(g.gain); lfo.start(0); lfo.stop(0.5);
+          src.connect(f); f.connect(g); g.connect(out); src.start(0);
+        }
+        const t = 0.45; // the clang
+        this.ring(ctx, out, t, { freq: 110, freq2: 70, gain: 0.6, decay: 0.05 });
+        this.burst(ctx, out, t, { type: 'lowpass', freq: 1500, gain: 0.6, decay: 0.01 });
+        for (const [f, g, d] of [[523, 0.12, 0.15], [1187, 0.08, 0.12], [1843, 0.05, 0.1], [2797, 0.03, 0.07]]) this.ring(ctx, out, t, { freq: f, gain: g, decay: d });
+        this.burst(ctx, out, t + 0.05, { type: 'highpass', freq: 3500, gain: 0.3, decay: 0.08, len: 0.6 });   // steam
+      },
+    },
+
+    // ---- battle ----
+    // A shot splashes on shields: a bright electric crackle sliding down.
+    shield: {
+      seconds: 0.45, peak: 0.32,
+      draw(ctx) {
+        const out = ctx.createGain(); out.connect(ctx.destination);
+        const o = ctx.createOscillator(); o.type = 'sawtooth';
+        o.frequency.setValueAtTime(1400, 0); o.frequency.exponentialRampToValueAtTime(300, 0.3);
+        const fm = ctx.createOscillator(); fm.frequency.value = 55; const fg = ctx.createGain(); fg.gain.value = 300;
+        fm.connect(fg); fg.connect(o.frequency);
+        const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2; bp.frequency.setValueAtTime(3000, 0); bp.frequency.exponentialRampToValueAtTime(800, 0.3);
+        const g = ctx.createGain(); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.4, 0.005); g.gain.exponentialRampToValueAtTime(0.001, 0.38);
+        o.connect(bp); bp.connect(g); g.connect(out); o.start(0); o.stop(0.4); fm.start(0); fm.stop(0.4);
+        this.burst(ctx, out, 0, { type: 'highpass', freq: 5000, gain: 0.35, decay: 0.03, len: 0.3 });
+      },
+    },
+    // A shot tears into the hull: a heavy metallic knock with a short ring.
+    hull: {
+      seconds: 0.5, peak: 0.42,
+      draw(ctx) {
+        const out = ctx.createGain(); out.connect(ctx.destination);
+        this.ring(ctx, out, 0, { freq: 95, freq2: 45, gain: 1, decay: 0.05 });
+        this.burst(ctx, out, 0, { type: 'lowpass', freq: 1200, gain: 0.9, decay: 0.012 });
+        this.burst(ctx, out, 0, { freq: 2500, q: 2, gain: 0.3, decay: 0.004 });
+        for (const [f, g, d] of [[337, 0.1, 0.08], [719, 0.06, 0.06], [1133, 0.04, 0.05]]) this.ring(ctx, out, 0.002, { freq: f, gain: g, decay: d });
+        this.burst(ctx, out, 0.06, { freq: 1800, q: 4, gain: 0.12, decay: 0.01 });                            // debris
+      },
+    },
+    // A miss: the shot whistles past.
+    miss: {
+      seconds: 0.35, peak: 0.22,
+      draw(ctx) {
+        const src = ctx.createBufferSource(); src.buffer = this.noise(ctx, 0.35);
+        const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 6;
+        f.frequency.setValueAtTime(2600, 0); f.frequency.exponentialRampToValueAtTime(500, 0.3);
+        const g = ctx.createGain(); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.6, 0.06); g.gain.exponentialRampToValueAtTime(0.001, 0.32);
+        src.connect(f); f.connect(g); g.connect(ctx.destination); src.start(0);
+      },
+    },
+    // A ship is destroyed: a deep boom, a roar of fire and crackling debris.
+    explode: {
+      seconds: 1.6, peak: 0.7,
+      draw(ctx) {
+        const room = this.hall(ctx, 1.2, 0.35); room.output.connect(ctx.destination);
+        const out = ctx.createGain(); out.connect(ctx.destination); out.connect(room.input);
+        this.ring(ctx, out, 0, { freq: 70, freq2: 28, gain: 1, decay: 0.12 });
+        this.burst(ctx, out, 0, { type: 'lowpass', freq: 900, gain: 1, decay: 0.08, len: 1.0 });
+        this.burst(ctx, out, 0, { type: 'lowpass', freq: 300, gain: 0.8, decay: 0.15, len: 1.2 });
+        for (let i = 0; i < 14; i++) {                                                                         // crackle
+          const t = 0.08 + Math.random() * 0.9;
+          this.burst(ctx, out, t, { freq: 1500 + Math.random() * 2500, q: 3, gain: 0.25 * (1 - t), decay: 0.003 });
+        }
+      },
+    },
+    // Restore: a soft rising hum as shields and plating knit back.
+    restore: {
+      seconds: 0.8, peak: 0.25,
+      draw(ctx) {
+        const out = ctx.createGain(); out.gain.setValueAtTime(0, 0); out.gain.linearRampToValueAtTime(1, 0.2); out.gain.setValueAtTime(1, 0.45); out.gain.linearRampToValueAtTime(0, 0.75);
+        out.connect(ctx.destination);
+        for (const [f, type] of [[280, 'triangle'], [420, 'sine'], [560, 'sine']]) {
+          const o = ctx.createOscillator(); o.type = type;
+          o.frequency.setValueAtTime(f, 0); o.frequency.exponentialRampToValueAtTime(f * 1.6, 0.7);
+          const g = ctx.createGain(); g.gain.value = 0.25;
+          const trem = ctx.createOscillator(); trem.frequency.value = 12; const tg = ctx.createGain(); tg.gain.value = 0.1;
+          trem.connect(tg); tg.connect(g.gain);
+          o.connect(g); g.connect(out); o.start(0); o.stop(0.8); trem.start(0); trem.stop(0.8);
+        }
+      },
+    },
+    // The battle is won: a rising brass chord.
+    victory: {
+      seconds: 2.0, peak: 0.42,
+      draw(ctx) { this.brass(ctx, [[0, [146.8, 220]], [0.28, [146.8, 220, 293.7, 370]]], 1.6); },
+    },
+    // The battle is lost: a sinking minor line.
+    defeat: {
+      seconds: 2.2, peak: 0.42,
+      draw(ctx) { this.brass(ctx, [[0, [293.7, 349.2]], [0.35, [233.1, 293.7]], [0.75, [220, 261.6, 110]]], 1.9); },
     },
 
     // A short digital chirp: two square-wave tones and a tiny falling sweep.

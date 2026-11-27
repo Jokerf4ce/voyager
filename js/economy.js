@@ -129,6 +129,7 @@ const Colonies = {
     this.pay(this.buildCost(p, layer, key));
     const n = DATA.construction.cycles, lvl = (p.colony[layer][key] || 0) + 1;
     (p.colony.build = p.colony.build || []).push({ layer, key, eta: n, total: n });
+    if (typeof Sfx !== 'undefined') Sfx.play('construct');
     Log.add(`Construction begins: ${DATA.buildings[key].name} ${lvl > 1 ? `level ${lvl}` : ''} (${DATA.layers[layer]}) on ${this.planetName(s, p)}, ready in ${n} Cycles.`);
     return true;
   },
@@ -266,6 +267,7 @@ const Colonies = {
     this.pay(this.projectCost(key));
     const n = DATA.systemProjects[key].cycles;
     (s.projectBuild = s.projectBuild || []).push({ key, eta: n, total: n });
+    if (typeof Sfx !== 'undefined') Sfx.play('construct', { rate: 0.8 });
     Log.add(`Construction begins: ${DATA.systemProjects[key].name} around ${s.name}, ready in ${n} Cycles.`);
     return true;
   },

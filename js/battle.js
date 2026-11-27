@@ -239,6 +239,12 @@ const Battle = {
     const b = G.battle, now = Date.now();
     b.fx = (b.fx || []).filter((f) => now - f.t < DATA.battleFxMs && f.unit !== unit);
     b.fx.push(Object.assign({ unit, kind, t: now }, data));
+    if (typeof Sfx !== 'undefined') {
+      const rate = 0.94 + Math.random() * 0.12;
+      if (kind === 'miss') Sfx.play('miss', { rate });
+      else if (kind === 'restore') Sfx.play('restore');
+      else if (kind === 'hit') Sfx.play(data && data.hu > 0 ? 'hull' : 'shield', { rate });
+    }
   },
 
   // ---------- restore ----------
@@ -278,7 +284,9 @@ const Battle = {
     if (!b || b.phase !== 'fight') return;
     b.auto = true;
     let guard = 0;
-    while (G.battle === b && b.phase === 'fight' && guard++ < 2000) this.step();
+    Sfx.quiet = true; // skipping to the end: no shot-by-shot sounds, only the result
+    try { while (G.battle === b && b.phase === 'fight' && guard++ < 2000) this.step(); } finally { Sfx.quiet = false; }
+    if (b.phase === 'over' && b.result) Sfx.play(b.result === 'win' ? 'victory' : 'defeat');
   },
 
   retreat() {
@@ -333,7 +341,7 @@ const Battle = {
     if (d.shield >= 0.5) parts.push(`${Math.round(d.shield)} shield`);
     if (d.hull >= 0.5) parts.push(`${Math.round(d.hull)} hull`);
     let line = `${a.name} hits ${t.name}${across} with ${w.name}: ${parts.join(' + ') || 'no damage'}${sm > 1 ? ' (size advantage!)' : sm < 1 ? ' (size disadvantage)' : ''}.`;
-    if (t.hull <= 0) { t.dead = true; line += ` ${t.name} is destroyed!`; }
+    if (t.hull <= 0) { t.dead = true; line += ` ${t.name} is destroyed!`; if (typeof Sfx !== 'undefined') Sfx.play('explode', { delay: 0.12, rate: 0.9 + Math.random() * 0.2 }); }
     this.say(line, a.side);
     b.lastHit = { from: b.units.indexOf(a), to: b.units.indexOf(t), t: Date.now() };
     this.fx(b.units.indexOf(t), 'hit', { sh: Math.round(d.shield), hu: Math.round(d.hull) });
@@ -371,6 +379,7 @@ const Battle = {
     const b = G.battle, s = G.systems[b.sys];
     b.phase = 'over';
     b.result = result;
+    if (typeof Sfx !== 'undefined') Sfx.play(result === 'win' ? 'victory' : 'defeat', { delay: 0.5 }); // after the last shot lands
     const m = State.mods();
     const myLost = [], theirLost = [];
     // your ships: losses are permanent, damage carries over

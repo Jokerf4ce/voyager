@@ -308,7 +308,9 @@ Recorded audio files can be added as tracks alongside the generated ones.
 
 **New-ship splash** (decided v0.55): every ship built is revealed on a full-screen splash (sprite printed in with a scan line, rarity name, rolls, weapons, where it went), with Show in Hangar, Build another and Close.
 
-**Open:** more sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
+**More sound effects** (decided v0.64): battles (a shot on shields: an electric crackle; on hull: a metallic knock; a miss: a whistle; a ship destroyed: a boom with crackling debris; Restore: a rising hum; victory and defeat: short brass chords), the Weapon Forge (a press, steam and a clang, plus the dark chord for Epic and better), research complete (a data chime, once per Cycle), construction starting (a pneumatic ratchet) and a quiet tick for ordinary buttons. "Resolve instantly" plays only the result.
+
+**Open:** picking music tracks by situation (for example Iron Tide during wars).
 
 **Ship's computer voice** (decided: a lightly distorted, glitching British female computer voice, recorded as mp3 files). Lines and their triggers are data in `js/voicelines.js`. Each line's audio is `assets/voice/<line id>.mp3`. The robotic effect is baked into each file (text-to-speech.online "Sonia - GB", then echo and a −3 % pitch-shifted double track in Audacity). The engine (`js/voice.js`) plays the file as recorded, with no extra processing, and shows each line on screen as a glitching "SHIP AI" transmission. In Settings the section is called "Assistant". A line without a file yet is shown as text only. The `combat` trigger (start of every battle) shows its lines as a red alert transmission (`style: 'danger'`, decided v0.25).
 - **Triggers so far:**
