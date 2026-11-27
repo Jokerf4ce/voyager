@@ -414,6 +414,7 @@ const UI = {
     const now = Date.now(), dbl = s && this.lastClick && this.lastClick.id === s.id && now - this.lastClick.t < 450;
     this.lastClick = s ? { id: s.id, t: now } : null;
     if (!s) return;
+    Sfx.play('blip', { rate: 0.96 + Math.random() * 0.08 });
     this.selSys = s.id;
     if (dbl) { this.openSystem(); return; }
     this.render();
@@ -575,6 +576,8 @@ const UI = {
       }).join('')}</div>
       <div class="kv"><span>Assistant</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
         <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
+      <div class="kv"><span>Sound effects</span><span class="btnrow">${this.btn(Sfx.enabled ? 'On' : 'Off', 'sfx', '', false, Sfx.enabled ? 'on' : '')}
+        <input type="range" min="0" max="100" value="${Math.round(Sfx.volume * 100)}" data-input="sfxvol" aria-label="Sound effects volume" class="slider"></span></div>
       <h4>Fleet colours</h4>
       <div class="colors">${[['hull', 'Hull'], ['metal', 'Metal'], ['accent', 'Trim'], ['glass', 'Glass'], ['glow', 'Engines'], ['halo', 'Engine glow']].map(([m, l]) =>
         `<label class="colorpick"><input type="color" value="${DATA.shipPalettes.player[m]}" data-input="shipcolor" data-mat="${m}"><span>${l}</span></label>`).join('')}

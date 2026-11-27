@@ -6,6 +6,7 @@ const Game = {
     if (G.over || UI.modalOpen) return;
     if (G.battle && G.battle.phase === 'over') Battle.close(); // a finished battle is put away (the next queued one may start)
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
+    Sfx.play('lever');
     Missions.tick();
     Economy.tick();
     Ships.repair();
@@ -158,6 +159,7 @@ const Game = {
     musicmode: (a) => { Music.setMode(a); },
     voice: () => { Voice.toggle(); },
     voicetest: () => { Voice.enabled = true; Voice.savePrefs(); Voice.failedAt = {}; Voice.trigger('test', true); },
+    sfx: () => { Sfx.toggle(); if (Sfx.enabled) Sfx.play('blip'); },
     subtitles: () => { Voice.subtitles = !Voice.subtitles; Voice.savePrefs(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },
     export: () => { UI.$('savebox').value = State.exportSave(); },
@@ -209,6 +211,7 @@ document.addEventListener('input', (ev) => {
   const el = ev.target.closest('[data-input]');
   if (el && el.dataset.input === 'volume') Music.setVolume(el.value / 100);
   if (el && el.dataset.input === 'voicevol') Voice.setVolume(el.value / 100);
+  if (el && el.dataset.input === 'sfxvol') Sfx.setVolume(el.value / 100);
   if (el && el.dataset.input === 'shipcolor') {
     Sprites.setPlayerColor(el.dataset.mat, el.value);
     const prev = document.getElementById('color-preview');
@@ -299,8 +302,9 @@ window.addEventListener('DOMContentLoaded', () => {
   UI.$('btn-music').onclick = (ev) => { ev.stopPropagation(); if (!Music.timer && Music.enabled) Music.start(); else Music.toggle(); UI.renderTop(); if (UI.screen === 'settings') UI.render(); };
   // Only refresh the top bar here: a full re-render would replace the element being clicked and swallow the click.
   Voice.init();
+  Sfx.loadPrefs();
   // The first click or key: music starts and the Assistant greets you (a new game gets its own greeting).
-  const firstGesture = () => { Game.gestured = true; Music.start(); Voice.trigger(Game.fresh ? 'first' : 'start'); Game.fresh = false; UI.renderTop(); };
+  const firstGesture = () => { Game.gestured = true; Voice.activated = true; Sfx.warm(); Music.start(); Voice.trigger(Game.fresh ? 'first' : 'start'); Game.fresh = false; UI.renderTop(); };
   document.addEventListener('pointerdown', firstGesture, { once: true });
   document.addEventListener('keydown', firstGesture, { once: true });
   // Side menu: ☰ toggles it; it collapses on its own 10 s after the cursor leaves it.
@@ -343,3 +347,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 650);
   window.addEventListener('beforeunload', () => State.save());
 });
+
+// Letting go of the effects slider plays a blip at the new volume.
+document.addEventListener('change', (ev) => { const el = ev.target.closest && ev.target.closest('[data-input="sfxvol"]'); if (el) Sfx.play('blip'); });

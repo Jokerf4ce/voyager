@@ -269,7 +269,9 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 Recorded audio files can be added as tracks alongside the generated ones.
 
-**Open:** sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
+**Sound effects** (decided v0.54): synthesised with Web Audio in `js/sfx.js`, rendered once per effect into a buffer and then replayed. End Cycle plays a heavy power-plant lever (ratchet, slam, mains hum surging); picking a star on the Star Map plays a short digital chirp. On/Off and volume are in Settings.
+
+**Open:** more sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
 
 **Ship's computer voice** (decided: a lightly distorted, glitching British female computer voice, recorded as mp3 files). Lines and their triggers are data in `js/voicelines.js`. Each line's audio is `assets/voice/<line id>.mp3`. The robotic effect is baked into each file (text-to-speech.online "Sonia - GB", then echo and a −3 % pitch-shifted double track in Audacity). The engine (`js/voice.js`) plays the file as recorded, with no extra processing, and shows each line on screen as a glitching "SHIP AI" transmission. In Settings the section is called "Assistant". A line without a file yet is shown as text only. The `combat` trigger (start of every battle) shows its lines as a red alert transmission (`style: 'danger'`, decided v0.25).
 - **Triggers so far:**

@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.54.0 — 2026-11-27
+- **Sound effects**, synthesised in the browser like the music (new `js/sfx.js`, no audio files).
+  - End Cycle: a heavy power-plant lever. The ratchet clatters faster as the arm swings down, it slams into its stop with a deep thud and ringing steel, and a 50 Hz mains hum surges as the circuit closes.
+  - Clicking a star on the Star Map: a short digital chirp, with a slight random pitch so repeated clicks don't sound identical.
+  - Settings: a new "Sound effects" row with On/Off and a volume slider (releasing the slider plays a sample).
+  - Each sound is rendered once into a buffer and then replayed, so it costs almost nothing and doesn't crackle on phones.
+
 ## 0.53.0 — 2026-11-27
 - **Ship maintenance is much more expensive, and it scales with how good the ship is.**
   - Formula: type maintenance × 3, × the rarity multiplier^1.5, × (roll quality)², × a personal random factor (about ±12 %).
