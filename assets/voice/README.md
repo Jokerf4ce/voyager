@@ -15,8 +15,10 @@ The ship's computer voice plays mp3 files from this folder. Each file is named a
 | `forces.mp3` | "Warning! Hostile forces inbound!" | battle start (combat, red alert) |
 | `signatures.mp3` | "Warning! Unknown signatures detected!" | battle start (combat, red alert) |
 | `hell.mp3` | "Commander! Give them hell!" | battle start (combat, red alert) |
+| `construction.mp3` | "Construction completed!" | a building is finished or upgraded |
+| `new_colony.mp3` | "New colony established, congratulations!" | a new colony is founded |
 
-When several lines share a trigger, one is picked at random. The Test button in Settings → Assistant plays any line. Lines with the `combat` trigger play at the start of every battle and show as a red alert transmission. The other lines added since (`second_monitor`, `posture`, `airlock`, `blink`, `coffee`, `cryopod`, `ripley`, …) are listed with their triggers in `js/voicelines.js`.
+When several lines share a trigger, one is picked at random. The `return`, `combat`, `construction` and `colony` triggers only speak about one time in three (`chance: 0.33` in `VoiceTriggers`), so they don't nag. The Test button in Settings → Assistant plays any line. Lines with the `combat` trigger play at the start of every battle and show as a red alert transmission. The other lines added since (`second_monitor`, `posture`, `airlock`, `blink`, `coffee`, `cryopod`, `ripley`, …) are listed with their triggers in `js/voicelines.js`.
 
 ## How the voice is made
 

@@ -134,6 +134,7 @@ const Missions = {
       Colonies.found(s.id, p, 'player');
       Explore.reveal(s.id);
       Log.add(`A colony is founded on ${Colonies.planetName(s, s.planets[p])}. The colonists bury their dead first, then start building.`, 'good');
+      if (typeof Voice !== 'undefined') Voice.trigger('colony');
     }
     for (const t of G.threats.slice()) {
       if (--t.eta > 0) continue;

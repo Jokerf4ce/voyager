@@ -2,6 +2,15 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.52.0 — 2026-11-27
+- **Assistant: two new triggers wired up**, for the new lines `construction` ("Construction completed!") and `new_colony` ("New colony established, congratulations!").
+  - **construction** plays when a building is finished or upgraded: once per Cycle however many finish, and not for work that finished while the game was closed.
+  - **colony** plays when a colony expedition founds a colony or you settle a planet.
+- **The `return`, `combat`, `construction` and `colony` triggers now speak only about one time in three** (a new per-trigger `chance` setting, 0.33), so the Assistant doesn't nag.
+
+## 0.51.1 — 2026-11-27
+- New voice lines (version bumped by hand).
+
 ## 0.51.0 — 2026-11-27
 - **Construction takes time.** Every build or upgrade is paid up front and takes **3 Cycles**.
   - Meanwhile the construction site draws **3 Power and 3 Infrastructure**, and the building can't be upgraded again or demolished. An upgrade keeps working at its old level until it is done.

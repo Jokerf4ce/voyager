@@ -100,6 +100,7 @@ const Voice = {
   trigger(name, force = false) {
     if (!this.enabled || (this.speaking && !force)) return false;
     const cfg = VoiceTriggers[name] || {};
+    if (cfg.chance != null && Math.random() >= cfg.chance) return false; // some triggers only speak now and then
     const now = Date.now();
     if (!force && cfg.cooldown && this.lastPlayed[name] && now - this.lastPlayed[name] < cfg.cooldown * 1000) return false;
     // 'test' (the Test button) can play any line; other triggers play the lines that list them

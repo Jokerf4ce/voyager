@@ -18,11 +18,15 @@
 //   test    the Test button in Settings (Assistant): plays any line at random
 //   random  ship announcements at a random moment every 5 to 30 minutes while you play
 //           (never the same line twice in a row if there is a choice; skipped while the tab is hidden)
+//   first   the greeting of a brand-new game (instead of start)
 //   combat  the start of every battle (attacks and raid defenses); shown in danger red
+//   construction  a building is finished or upgraded (once per Cycle, however many finish)
+//   colony  a new colony is founded (a colony expedition arrives, or you settle a planet)
 //
 // When several lines share a trigger, one of them is picked at random each time.
 // Trigger options below: cooldown (seconds), noRepeat (never the same line twice in a row),
-// style (on-screen look of the transmission: 'danger' = red instead of the normal blue).
+// style (on-screen look of the transmission: 'danger' = red instead of the normal blue),
+// chance (0..1: how often the trigger speaks at all; 0.33 = about one time in three, so it doesn't nag).
 //
 // Lines with an empty text play without an on-screen transmission.
 // The mp3 is played exactly as recorded: add the robotic effect in the file (see assets/voice/README.md).
@@ -53,8 +57,10 @@ const VoiceLines = {
 const VoiceTriggers = {
   first:  { cooldown: 0 },          // a brand-new game (instead of 'start')
   start:  { cooldown: 0 },
-  return: { cooldown: 60, idleMinutes: 5 },
+  return: { cooldown: 60, idleMinutes: 5, chance: 0.33 },
   test:   { cooldown: 0 },
   random: { cooldown: 0, minMinutes: 5, maxMinutes: 30, noRepeat: true },
-  combat: { cooldown: 0, style: 'danger' },
+  combat: { cooldown: 0, style: 'danger', chance: 0.33 },
+  construction: { cooldown: 0, chance: 0.33 },
+  colony: { cooldown: 0, chance: 0.33 },
 };

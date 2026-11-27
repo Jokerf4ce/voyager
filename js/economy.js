@@ -19,7 +19,8 @@ const Colonies = {
   // ---- construction: every build or upgrade takes DATA.construction.cycles; meanwhile the site draws DATA.construction.cap ----
   constructing(p, layer, key) { return (p.colony && p.colony.build || []).find((c) => c.layer === layer && c.key === key) || null; },
   // Count down every construction site; finished ones raise the building's level.
-  tickBuild() {
+  tickBuild(silent) {
+    let done = 0;
     for (const { s, p } of this.playerPlanets()) {
       if (!p.colony.build || !p.colony.build.length) continue;
       for (const c of p.colony.build.slice()) {
@@ -28,8 +29,11 @@ const Colonies = {
         p.colony[c.layer][c.key] = (p.colony[c.layer][c.key] || 0) + 1;
         if (c.key === 'bastion' || c.key === 'platform') s.garrison = this.maxGarrison(s);
         Log.add(`${DATA.buildings[c.key].name} (${DATA.layers[c.layer]}) ${p.colony[c.layer][c.key] > 1 ? `upgraded to level ${p.colony[c.layer][c.key]}` : 'completed'} on ${this.planetName(s, p)}.`, 'good');
+        done++;
       }
     }
+    if (done && !silent && typeof Voice !== 'undefined') Voice.trigger('construction'); // once per Cycle, however many finished
+    return done;
   },
   level(p, key) { return p.colony ? (p.colony.surface[key] || 0) + (p.colony.orbit[key] || 0) : 0; },
   sysLevel(s, key) { return s.planets.reduce((a, p) => a + this.level(p, key), 0); },
@@ -64,6 +68,7 @@ const Colonies = {
     this.pay(cost);
     this.found(sysId, pIdx, 'player');
     Log.add(`Settlers land on ${this.planetName(s, p)}.`, 'good');
+    if (typeof Voice !== 'undefined') Voice.trigger('colony');
     return true;
   },
 
