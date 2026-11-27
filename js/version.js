@@ -1,3 +1,3 @@
 // Voyager — build version. Bump this with every change and add a line to CHANGELOG.md.
 // Format: MAJOR.MINOR.PATCH — MINOR for new features, PATCH for fixes and tweaks.
-const VERSION = { number: '0.62.0', date: '2026-11-27' };
+const VERSION = { number: '0.63.0', date: '2026-11-27' };

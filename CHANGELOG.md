@@ -2,6 +2,18 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.63.0 — 2026-11-27
+- **Five new ship designs for every class** (45 in all, eleven per class now). A new ship rolls one at random; ships you already have keep their look.
+  - Scout: stiletto (forked prongs around a glowing sensor), moth (glass sails), kite (diamond sail with a beaded tail), courier (drop tanks and a dish), tri-fin needle with a long lance.
+  - Fighter: talon (forward-swept wings with claws), twin boom, bat-wing, box-wing, scythe (drooping blade wings).
+  - Heavy: hammer bomber (open bomb bay, four engines), beetle (armoured shell, mandible guns), tri-hull, rotary gunship, manta bomber.
+  - Corvette: shark (dorsal fin and gills), trident, rail corvette (a railgun through coil rings), blockade runner (six engines), raptor.
+  - Frigate: ring frigate, arch catamaran, monitor (one huge twin turret), sail frigate, spear with turret outriggers.
+  - Gunboat: fortress, mortar boat, flak hedgehog, twin cannon, crab (claw arms holding its guns).
+  - Destroyer: sword (crossguard wings, pommel engine), torpedo lancer, stealth wedge with glowing slits, twin spine, ram.
+  - Battleship: citadel (stepped ziggurat), spinal lance, monolith (black slab with glowing seams), trident dreadnought, ark with a habitat ring.
+  - Carrier: angled deck, hangar wheel, manta carrier, tiered decks, hive.
+
 ## 0.62.0 — 2026-11-27
 - **System projects:** a new building slot at star-system level. Every system you hold has one project slot, shown on the Colonies screen under the system's star (`DATA.systemProjects`, `DATA.systemSlots`).
   - **Dyson Sphere:** +80 Power × the star's starlight for the whole empire (a G-type star gives 80, a blue giant 128, the hypergiant 160, a black hole 16). Costs 2,500 Metals, 600 Rare Minerals, 900 Electronics, 400 Chemicals and 2 Crypto Shards (× difficulty prices) and takes 12 Cycles; the site draws 3 Power and 3 Infrastructure like any other.
