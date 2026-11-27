@@ -30,10 +30,12 @@ const Sfx = {
   // Recorded effects. src is relative to index.html; gain scales this file only; fallback names the recipe to
   // play when the file can't (default: the recipe of the same name).
   files: {
-    cycle: { src: 'assets/sfx/cycle.mp3', gain: 1, fallback: 'lever' },
-    hull: { src: 'assets/sfx/hull.mp3', gain: 1 },     // a hit that reaches the hull
-    shield: { src: 'assets/sfx/shield.mp3', gain: 1 }, // a hit the shields take
-    miss: { src: 'assets/sfx/evade.mp3', gain: 1 },    // a shot evaded / missed
+    cycle: { src: 'assets/sfx/cycle.mp3', gain: 1 },
+    hull: { src: 'assets/sfx/hull.mp3', gain: 1 },
+    shield: { src: 'assets/sfx/shield.mp3', gain: 1 },
+    miss: { src: 'assets/sfx/evade.mp3', gain: 1 },
+    explode: { src: 'assets/sfx/explode.mp3', gain: 1 },
+    construct: { src: 'assets/sfx/construct.mp3', gain: 1 },
   },
 
   loadPrefs() {
