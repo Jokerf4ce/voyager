@@ -392,7 +392,7 @@ const UI = {
           const exp = G.expeditions.find((m) => m.target === s.id && m.planet === p.idx);
           const why = Missions.colonizeBlocker(s.id, p.idx);
           act = exp ? `<span class="small good">➤ Colonists arrive in ${exp.eta}</span>`
-            : this.btn(`Send colonists <small>${U.costText(State.cost(DATA.colonize.cost))}</small>`, 'colonize', `${s.id}:${p.idx}`, !!why, 'small gold') + (why && why !== 'Not enough resources' && why !== 'Colonists are on their way' ? ` <small class="muted">${why}</small>` : '');
+            : this.btn(`Send colonists <small>${U.costText(State.cost(DATA.colonize.cost, 'colonize'))}</small>`, 'colonize', `${s.id}:${p.idx}`, !!why, 'small gold') + (why && why !== 'Not enough resources' && why !== 'Colonists are on their way' ? ` <small class="muted">${why}</small>` : '');
         }
       }
       return `<div class="planet-row ${p.colony ? 'settled' : ''} ${this.selPlanet === p.idx ? 'sel' : ''}" data-act="selplanet" data-a="${p.idx}">${this.planetImg(s, p, 40)}

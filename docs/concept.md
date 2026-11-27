@@ -123,9 +123,15 @@ Rare special stars (proposed): a **Red Hypergiant** (luminosity class 0, about 1
 |---|---|---|---|---|
 | Learning | grace period until 3 colonies besides the capital, then rare (2.5 % × aggression, 12-Cycle cooldown) | normal | ×1 | no |
 | Adaptive | *locked, coming later:* starts like Learning and hardens toward Commander as the empire grows | | | |
-| Commander | from Cycle 12, no grace period, 6 % × aggression, 6-Cycle cooldown, +1 ship per raid | ore income ×1.4, +1 to ship rolls, 100 starting ore | ×1.5 | yes |
+| Commander | from Cycle 25, no grace period, 6 % × aggression, 6-Cycle cooldown, +1 ship per raid | ore income ×1.4, +1 to ship rolls, 100 starting ore | ×1.25 (colony expeditions excepted) | yes |
 
 Commander is "the way the game is meant to be played"; achievements (not built yet) can only be earned there.
+
+Raids go for outlying colonies first; the capital system is only targeted when it is the only one a raid can reach (v0.57, all difficulties).
+
+**Playtests** (`tools/playtest/playtest.py`, 5 games each, 200 Cycles, the same scripted player):
+- v0.56: Commander at ×1.5 prices and raids from Cycle 12 was lost in all 5 games by Cycle 50–78; the bot never founded a second colony.
+- v0.57: Learning 5/5 survived, 12–22 colonies at Cycle 100, about 7 raids per game. Commander 5/5 survived, 4–14 colonies at Cycle 100, about 15 raids per game, losing a colony to almost every raid. The bot fights on auto and under-builds its fleet, so a human should hold more raids off.
 
 **Open:** how Adaptive measures empire growth and how fast it ramps.
 

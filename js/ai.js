@@ -110,14 +110,19 @@ const AI = {
     }
   },
 
-  // The Covenant system nearest to this faction's worlds.
+  // The Covenant system nearest to this faction's worlds. Raids go for the outlying colonies first: the capital
+  // system is only targeted when it is the only one left (or the only one they can reach).
   pickTarget(id) {
     const mine = G.systems.filter((s) => s.owner === id);
-    let best = null;
+    let best = null, capital = null;
     for (const s of mine) {
       const d = U.distances(s.id);
-      for (const t of Colonies.playerSystems()) if (d[t.id] != null && (!best || d[t.id] < best.d)) best = { s: t, d: d[t.id] };
+      for (const t of Colonies.playerSystems()) {
+        if (d[t.id] == null) continue;
+        if (t.id === G.homeId) { if (!capital || d[t.id] < capital.d) capital = { s: t, d: d[t.id] }; continue; }
+        if (!best || d[t.id] < best.d) best = { s: t, d: d[t.id] };
+      }
     }
-    return best;
+    return best || capital;
   },
 };

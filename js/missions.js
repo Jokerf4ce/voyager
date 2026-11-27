@@ -92,12 +92,12 @@ const Missions = {
     if (this.guard(s)) return 'Guarded: clear it first';
     if (this.targeted(sysId, 'colonize')) return 'Colonists are on their way';
     if (this.distance(sysId) == null) return 'No known route';
-    if (!Colonies.canAfford(State.cost(DATA.colonize.cost))) return 'Not enough resources';
+    if (!Colonies.canAfford(State.cost(DATA.colonize.cost, 'colonize'))) return 'Not enough resources';
     return null;
   },
   colonize(sysId, pIdx) {
     if (this.colonizeBlocker(sysId, pIdx)) return false;
-    Colonies.pay(State.cost(DATA.colonize.cost));
+    Colonies.pay(State.cost(DATA.colonize.cost, 'colonize'));
     const eta = this.distance(sysId), s = G.systems[sysId];
     G.expeditions.push({ target: sysId, planet: pIdx, eta, total: eta });
     Log.add(`A colony expedition departs for ${Colonies.planetName(s, s.planets[pIdx])} (${eta} Cycle${eta > 1 ? 's' : ''}).`);
@@ -125,7 +125,7 @@ const Missions = {
       G.expeditions.splice(G.expeditions.indexOf(m), 1);
       const s = G.systems[m.target];
       if (s.owner || this.guard(s)) {
-        { const c = State.cost(DATA.colonize.cost); for (const k in c) G.res[k] += Math.floor(c[k] / 2); }
+        { const c = State.cost(DATA.colonize.cost, 'colonize'); for (const k in c) G.res[k] += Math.floor(c[k] / 2); }
         Log.add(`The colonists find ${s.name} taken or guarded and turn back. Half of the supplies are recovered.`, 'bad');
         continue;
       }

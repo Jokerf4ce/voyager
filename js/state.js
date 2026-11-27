@@ -43,8 +43,8 @@ const State = {
 
   // Difficulty of this game (DATA.difficulty); saves from before difficulties existed are Learning.
   diff() { return DATA.difficulty[G && G.difficulty] || DATA.difficulty.learning; },
-  // A price after the difficulty's cost multiplier (rounded up).
-  cost(c) { const m = this.diff().costMult, out = {}; for (const k in c) out[k] = m === 1 ? c[k] : Math.ceil(c[k] * m); return out; },
+  // A price after the difficulty's cost multiplier (rounded up). what: a price the difficulty may exempt ('colonize').
+  cost(c, what) { const d = this.diff(), m = what && (d.exempt || []).includes(what) ? 1 : d.costMult, out = {}; for (const k in c) out[k] = m === 1 ? c[k] : Math.ceil(c[k] * m); return out; },
   // Later achievements can only be unlocked on difficulties that allow them.
   achievementsAllowed() { return !!this.diff().achievements; },
   // Sets the difficulty of a freshly generated game and applies its starting conditions.

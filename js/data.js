@@ -229,8 +229,9 @@ DATA.forge = { cost: { rare: 25, electronics: 15 }, desc: 'Forge a random weapon
 DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
 
 // Difficulty, chosen when a new game starts (G.difficulty; old saves count as 'learning'). It can't be changed later.
-//   costMult   every resource price (buildings, settling, probes, expeditions, hulls, forge) is multiplied by this;
-//              refunds (demolish, scrap, failed expeditions) scale with it, since they return part of what was paid
+//   costMult   every resource price (buildings, settling, probes, hulls, forge) is multiplied by this; refunds
+//              (demolish, scrap) scale with it, since they return part of what was paid
+//   exempt     prices the multiplier leaves alone (colony expeditions: expanding early has to stay possible)
 //   raids      replaces DATA.raids. graceColonies: no raids until that many colonies besides the capital;
 //              fromCycle: no raids before that Cycle; extraShips: added to every raid
 //   ai         income: multiplies the xeno empires' ore income; bias: added to their ship rolls (better rarities);
@@ -239,9 +240,9 @@ DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12 };
 //   locked     shown but can't be picked yet
 DATA.difficulty = {
   commander: { name: 'Commander', tag: 'The way the game is meant to be played',
-    desc: 'No grace period. The xenos know where you are, raid early and often, grow faster and field better ships, and all prices are 50% higher.',
-    points: ['Raids from Cycle {from}, no grace period', 'Frequent, larger raids', 'Stronger, richer xenos', 'All prices ×{mult}', 'Achievements can be earned'],
-    costMult: 1.5, raids: { graceColonies: 0, fromCycle: 12, chance: 0.06, cooldown: 6, extraShips: 1 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
+    desc: 'No grace period. The xenos know where you are, raid early and often, grow faster and field better ships, and prices are 25% higher.',
+    points: ['Raids from Cycle {from}, no grace period', 'Frequent, larger raids', 'Stronger, richer xenos', 'Prices ×{mult} (colony expeditions excepted)', 'Achievements can be earned'],
+    costMult: 1.25, exempt: ['colonize'], raids: { graceColonies: 0, fromCycle: 25, chance: 0.06, cooldown: 6, extraShips: 1 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true },
   adaptive: { name: 'Adaptive', tag: 'Coming later', locked: true,
     desc: 'Starts gently and hardens toward Commander as your empire grows.',
     points: ['Scales with your empire'],

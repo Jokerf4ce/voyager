@@ -49,7 +49,7 @@ const Tutorial = {
   clear() { document.querySelectorAll('.tut-focus').forEach((el) => el.classList.remove('tut-focus')); },
 
   text(st) {
-    return st.text.replace('{survey}', U.costText(State.cost(DATA.survey.cost))).replace('{colonize}', U.costText(State.cost(DATA.colonize.cost))).replace('{raids}', AI.raidRule()).replace('{hangar}', DATA.hangar.base).replace('{build}', DATA.construction.cycles);
+    return st.text.replace('{survey}', U.costText(State.cost(DATA.survey.cost))).replace('{colonize}', U.costText(State.cost(DATA.colonize.cost, 'colonize'))).replace('{raids}', AI.raidRule()).replace('{hangar}', DATA.hangar.base).replace('{build}', DATA.construction.cycles);
   },
 
   // Called after every UI.render (the screens are rebuilt, so the outline has to be put back).

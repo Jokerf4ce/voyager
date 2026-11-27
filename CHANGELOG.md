@@ -2,6 +2,14 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.57.0 — 2026-11-27
+- **Commander retuned after a playtest** (the bot lost all 5 games by Cycle 50–78 and never got past the capital):
+  - Raids from Cycle 25 (was 12).
+  - Prices ×1.25 (was ×1.5), and colony expeditions are no longer more expensive (`exempt: ['colonize']` in `DATA.difficulty`).
+- **Raids go for outlying colonies first** (all difficulties): the capital system is only targeted when it is the only Covenant system a raid can reach.
+- **Playtest bot** in `tools/playtest/playtest.py`: plays whole games in a headless browser with the real game code and reports survival, expansion, raids and battles per difficulty (see `tools/playtest/README.md`).
+- Retest, 5 games each, 200 Cycles: Learning 5/5 survived (colonies at C100: 12–22, first raid C34–89, about 7 raids per game); Commander 5/5 survived (colonies at C100: 4–14, first raid C30–36, about 15 raids per game, a colony lost to almost every raid).
+
 ## 0.56.1 — 2026-11-27
 - Difficulty picker: Commander comes first, then Adaptive, then Learning.
 - Commander's description now says "all prices are 50% higher" (it read as if things cost half as much).

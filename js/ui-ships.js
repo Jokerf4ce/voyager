@@ -256,7 +256,7 @@ Object.assign(UI, {
     }
     if (s.explored && !s.owner && !g) {
       const going = G.expeditions.find((m) => m.target === s.id);
-      opts.push(`<h4>Settle</h4><p class="small">${going ? 'Colonists are on their way.' : `Choose a planet below and <b>send colonists</b> there: a colony expedition costs ${U.costText(State.cost(DATA.colonize.cost))}${etaText}.`}</p>`);
+      opts.push(`<h4>Settle</h4><p class="small">${going ? 'Colonists are on their way.' : `Choose a planet below and <b>send colonists</b> there: a colony expedition costs ${U.costText(State.cost(DATA.colonize.cost, 'colonize'))}${etaText}.`}</p>`);
     }
     const coming = G.fleets.filter((f) => f.mission && f.mission.target === s.id);
     const exps = G.expeditions.filter((m) => m.target === s.id), probes = G.surveys.filter((m) => m.target === s.id);
