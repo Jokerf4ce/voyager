@@ -73,15 +73,16 @@ const Ships = {
       name: opts.name || (t.monster || t.structure ? t.name : this.freshName()),
       shield: r.shield, hull: r.hull, speed: r.speed, maneuver: r.maneuver,
       quality: Math.round(quality * 100),
-      // better rolls cost more to keep flying
-      upkeep: Math.round(t.upkeep * (1 + (mult - 1) * 0.8) * quality * 100) / 100,
+      upkeep: 0, // set below (rollUpkeep)
       weapons: [],
       variant: U.randInt(0, Sprites.shipVariants(type) - 1),   // which of the type's designs it looks like
       built: G.cycle,
+      upkeepRoll: Math.max(0.7, Math.min(1.3, U.gauss(1, DATA.upkeep.spread))),   // its personal share of the randomness
     };
     ship.hullNow = ship.hull;
     if (t.monster) for (let i = 0; i < slots; i++) ship.weapons.push(this.makeWeapon(t.size, rarity, null, i % 2 ? 'spit' : 'claws'));
     else for (let i = 0; i < slots; i++) ship.weapons.push(this.makeWeapon(t.size, rarity, opts.kindBias));
+    ship.upkeep = this.rollUpkeep(ship);
     return ship;
   },
 
@@ -120,6 +121,13 @@ const Ships = {
   },
   groupPower(list) { return list.reduce((a, s) => a + this.power(s), 0); },
   upkeep() { return this.all().reduce((a, s) => a + s.upkeep, 0); },
+  // Maintenance of one ship from its type, rarity, roll quality and personal random factor (DATA.upkeep).
+  rollUpkeep(ship) {
+    const t = DATA.shipTypes[ship.type], u = DATA.upkeep, mult = DATA.shipRarities[ship.rarity].mult;
+    if (ship.upkeepRoll == null) ship.upkeepRoll = Math.max(0.7, Math.min(1.3, U.gauss(1, u.spread)));
+    const v = t.upkeep * u.scale * Math.pow(mult, u.rarityExp) * Math.pow((ship.quality || 100) / 100, u.qualityExp) * ship.upkeepRoll;
+    return Math.round(v * 100) / 100;
+  },
   unlocked(size) { const req = DATA.sizes[size].req; return !req || Research.level(req) > 0; },
 
   // ---------- building (the gacha) ----------

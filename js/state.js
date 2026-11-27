@@ -67,6 +67,7 @@ const State = {
       if (!data || data.version !== 15) return false;
       // technologies that no longer exist (e.g. the old hull techs, removed in v0.45) are dropped
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) delete data.techs[id];
+      if (data.ships) for (const sh of Object.values(data.ships)) if (sh.upkeepRoll == null && DATA.shipTypes[sh.type]) sh.upkeep = Ships.rollUpkeep(sh); // v0.53 maintenance
       if (data.researching && !DATA.techs[data.researching]) { data.researching = null; data.researchProgress = 0; }
       G = data;
       return true;

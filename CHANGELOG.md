@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.53.0 — 2026-11-27
+- **Ship maintenance is much more expensive, and it scales with how good the ship is.**
+  - Formula: type maintenance × 3, × the rarity multiplier^1.5, × (roll quality)², × a personal random factor (about ±12 %).
+  - Averages in Metals per Cycle (plus half as much Chemicals): Normal Fighter 0.9 (Omega 2.9), Normal Frigate 3.0 (Omega 9.8), Normal Battleship 7.8 (Omega 25).
+  - The weakest and best rolls of the same ship differ by about ×2.
+  - Tuned in `DATA.upkeep`.
+- Existing ships get their maintenance re-rolled once with the new formula.
+- The ship panel shows maintenance in Metals and Chemicals.
+- Tutorial updated: the Hangar step mentions maintenance.
+
 ## 0.52.5 — 2026-11-27
 - Audio: music and the Assistant now ask the browser for large audio buffers (`latencyHint: 'playback'`). Audio starts a fraction of a second later, but phones get more slack, which should stop the crunchy, crackling sound there.
 

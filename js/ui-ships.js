@@ -177,7 +177,7 @@ Object.assign(UI, {
       <div class="kv"><span>Class</span><b>${t.name} · ${DATA.sizes[sh.size].name}</b></div>
       <div class="kv"><span>Shield / Hull</span><b>${sh.shield} / ${Math.round(sh.hullNow)}${sh.hullNow < sh.hull ? ` of ${sh.hull}` : ''}</b></div>
       <div class="kv"><span>Speed · Evasion</span><b>${sh.speed} · ${sh.maneuver}%</b></div>
-      <div class="kv"><span>Maintenance</span><b>${sh.upkeep} / Cycle</b></div>
+      <div class="kv"><span title="Grows steeply with rarity and with the stat roll (quality), plus a personal random factor">Maintenance</span><b><span class="res-metal">${DATA.resources.metal.icon}${U.fmt1(sh.upkeep)}</span> <span class="res-chemicals">${DATA.resources.chemicals.icon}${U.fmt1(sh.upkeep / 2)}</span> <small class="muted">/ Cycle</small></b></div>
       <div class="kv"><span>Roll quality</span><b>${sh.quality}% <small class="muted">of an average ${DATA.shipRarities[sh.rarity].name} ${t.name}</small></b></div>
       <div class="kv"><span>Fleet</span><b>${f ? U.esc(f.name) : 'Hangar'}</b></div>
       <h4>Weapons (${slots} slot${slots > 1 ? 's' : ''})</h4>${weps}

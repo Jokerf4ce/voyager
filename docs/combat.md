@@ -30,7 +30,7 @@ When one ship attacks another:
 
 ### 1.2 Types (average stats of a Normal ship)
 
-| Type | Size | Shield | Hull | Speed | Evasion | Slots | Maintenance |
+| Type | Size | Shield | Hull | Speed | Evasion | Slots | Base maintenance (×3, see 2.3) |
 |---|---|---|---|---|---|---|---|
 | Scout | S | 8 | 10 | 9 | 30 % | 1 | 0.2 |
 | Fighter | S | 10 | 14 | 8 | 25 % | 1 | 0.3 |
@@ -95,7 +95,7 @@ Rarities overlap. A lucky Normal can out-roll an unlucky Strong, but on average 
 - It is the mean of (rolled stat ÷ expected mean) over shield, hull, speed and evasion.
 - 100 is average, above 110 is shown green, below 90 red.
 
-**Maintenance** follows quality: `average maintenance × (1 + (m − 1) × 0.8) × Q / 100`. A well-rolled ship costs a little more to keep flying, and an Omega costs about twice a Normal of the same type.
+**Maintenance** (v0.53) grows steeply with rarity and roll: `type maintenance × 3 × m^1.5 × (Q / 100)² × r`, where `m` is the rarity multiplier and `r` a personal random factor of each ship (about ±12 %, never beyond ±30 %). Averages: a Normal Fighter about 0.9 Metals per Cycle, a Legendary one 2.1, an Omega 2.9; a Normal Battleship about 7.8, an Omega one about 25. Among Normal Fighters the weakest rolls (Q 85) cost about 0.6, the best (Q 116) about 1.2. `DATA.upkeep`.
 
 **Weapons:** one per slot, rolled at the ship's rarity (see 2.2).
 
