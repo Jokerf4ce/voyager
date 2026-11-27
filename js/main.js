@@ -4,6 +4,7 @@ const Game = {
 
   endCycle() {
     if (G.over || UI.modalOpen) return;
+    if (UI.splash) UI.closeSplash();
     if (G.battle && G.battle.phase === 'over') Battle.close(); // a finished battle is put away (the next queued one may start)
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
     Sfx.play('lever');
@@ -39,7 +40,7 @@ const Game = {
 
   newGame() {
     this.overShown = false;
-    UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null;
+    UI.selSys = null; UI.selShip = null; UI.lastShip = null; UI.lastWeapon = null; UI.closeSplash();
     if (State.slot === 'tester') Tester.newTestGame(); else State.newGame();
     UI.selSys = G.homeId;
     UI.screen = 'map';
@@ -139,7 +140,9 @@ const Game = {
     tutback: () => { Tutorial.back(); },
     tutskip: () => { Tutorial.finish(); },
     build: (a) => { const [sid, pi, layer, k] = a.split(':'); Colonies.build(sid + ':' + pi, layer, k); },
-    buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; } },
+    buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; UI.splashShip(s); } },
+    splashclose: () => { UI.closeSplash(); },
+    splashhangar: () => { const id = UI.splash; UI.closeSplash(); UI.screen = 'fleets'; if (id && G.ships[id]) UI.selShip = id; },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; } },
     research: (a) => { Research.select(a); Research.tick(); },
     bopen: (a) => { UI.bOpen = UI.bOpen === a ? null : a; },
@@ -180,6 +183,8 @@ function alertLog(msg) { Log.add(msg, 'bad'); }
 
 document.addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-act]');
+  // a click on the dark backdrop around the new-ship splash closes it (not in its first moment, so a double click doesn't)
+  if (!b && UI.splash && ev.target.closest('.splash') && !ev.target.closest('.sp-box') && Date.now() - UI.splashAt > 600) { UI.closeSplash(); return; }
   if (!b || b.disabled) return;
   const fn = Game.actions[b.dataset.act];
   if (!fn) return;
@@ -289,6 +294,7 @@ window.addEventListener('resize', () => {
 
 document.addEventListener('keydown', (ev) => {
   if (ev.target.tagName === 'TEXTAREA') return;
+  if (UI.splash && ['Space', 'Enter', 'Escape'].includes(ev.code)) { ev.preventDefault(); if (Date.now() - UI.splashAt > 400) UI.closeSplash(); return; }
   if (ev.code === 'Space' || ev.code === 'Enter') { ev.preventDefault(); if (!UI.modalOpen) Game.endCycle(); }
   if (ev.code === 'Escape') { if (UI.selShip) UI.selShip = null; else if (UI.selPlanet != null) UI.selPlanet = null; else UI.selSys = null; UI.render(); }
 });

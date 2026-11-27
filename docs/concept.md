@@ -269,7 +269,9 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 Recorded audio files can be added as tracks alongside the generated ones.
 
-**Sound effects** (decided v0.54): synthesised with Web Audio in `js/sfx.js`, rendered once per effect into a buffer and then replayed. End Cycle plays one heavy industrial lever thrown home, a single "ka-CHUNK" (v0.54.1); picking a star on the Star Map plays a short digital chirp. On/Off and volume are in Settings.
+**Sound effects** (decided v0.54): synthesised with Web Audio in `js/sfx.js`, rendered once per effect into a buffer and then replayed. End Cycle plays one heavy industrial lever thrown home, a single "ka-CHUNK" (v0.54.1); picking a star on the Star Map plays a short digital chirp. On/Off and volume are in Settings. A new ship plays a fabricator reveal (whine, clamp, confirm tones), plus a dark chord for Epic and better.
+
+**New-ship splash** (decided v0.55): every ship built is revealed on a full-screen splash (sprite printed in with a scan line, rarity name, rolls, weapons, where it went), with Show in Hangar, Build another and Close.
 
 **Open:** more sound effects (buttons, battles, gacha pulls); picking tracks by situation (for example Iron Tide during wars).
 

@@ -48,6 +48,53 @@ Object.assign(UI, {
     return Object.values(DATA.shipRarities).map((r) => `<span style="color:${r.color}">${r.name} ${+(r.rate * 100).toFixed(1)}%</span>`).join(' · ');
   },
 
+  // ---------- new-ship splash ----------
+  // A full-screen reveal when a ship leaves the slipway: the hull is "printed" from the bottom up in a flash of its
+  // rarity colour, then its name, rolls and weapons come in. Epic and better get turning light rays.
+  splash: null,       // id of the ship on the splash, or null
+  splashShip(ship) {
+    const el = this.$('splash');
+    if (!el || !ship) return;
+    this.splash = ship.id;
+    const t = DATA.shipTypes[ship.type], rar = DATA.shipRarities[ship.rarity] || DATA.shipRarities.normal;
+    const glow = ship.rarity === 'omega' ? '#ff4040' : ship.rarity === 'normal' ? '#d8d0c0' : rar.color;
+    const fleet = !ship.scrapped && Ships.fleetOf(ship.id);
+    const where = ship.scrapped ? '<span class="bad">Auto scrap: broken up for parts right away.</span>'
+      : fleet ? `Joined <b>${U.esc(fleet.name)}</b>.` : 'Waiting in the hangar.';
+    const why = Ships.blocker(ship.size);
+    const qc = ship.quality >= 110 ? 'hi' : ship.quality <= 90 ? 'lo' : '';
+    const stat = (icon, val, label) => `<span title="${label}"><i>${icon}</i>${val}</span>`;
+    const rare = ['epic', 'legendary', 'omega'].includes(ship.rarity);
+    el.innerHTML = `<div class="splash r-${ship.rarity} ${rare ? 'rare' : ''}" style="--rc:${rar.color};--glow:${glow}" role="dialog" aria-label="New ship">
+      ${rare ? '<div class="sp-rays"></div>' : ''}<div class="sp-flash"></div>
+      <div class="sp-box">
+        <div class="sp-kicker">◆ New hull commissioned ◆</div>
+        <div class="sp-rarity">${U.esc(rar.name.toUpperCase())}</div>
+        <div class="sp-ship"><img class="px" src="${Sprites.shipImg(ship.type, 'player', ship.variant || 0)}" alt="${U.esc(t.name)}"><i class="sp-scan"></i></div>
+        <div class="sp-info">
+          <div class="sp-name">"${U.esc(ship.name)}"</div>
+          <div class="sp-type">${U.esc(t.name)} · ${DATA.sizes[ship.size].name} hull · <span class="q ${qc}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${ship.quality}</span></div>
+          <div class="sp-stats">${stat('◈', ship.shieldMax ?? ship.shield, 'Shield')}${stat('▦', ship.hullMax ?? ship.hull, 'Hull')}${stat('»', ship.speed, 'Speed (turn order)')}${stat('◌', ship.maneuver + '%', 'Maneuverability (evasion chance)')}${stat('⚙', ship.upkeep, 'Maintenance per Cycle (Metals, plus half as much Chemicals)')}</div>
+          <div class="sp-weps">${ship.weapons.map((w) => this.weaponChip(w)).join('')}</div>
+          <div class="sp-where small">${where}</div>
+          <div class="btnrow">${ship.scrapped ? '' : this.btn('Show in Hangar', 'splashhangar')}${this.btn(`Build another ${DATA.sizes[ship.size].name} <small>${U.costText(Ships.buildCost(ship.size))}</small>`, 'buildship', ship.size, !!why)}${this.btn('Close', 'splashclose', '', false, 'gold')}</div>
+        </div>
+      </div></div>`;
+    el.classList.add('show');
+    document.body.classList.add('splashing');
+    this.splashAt = Date.now();
+    if (typeof Sfx !== 'undefined') {
+      Sfx.play('reveal');
+      if (rare) setTimeout(() => Sfx.play('rare', { rate: ship.rarity === 'omega' ? 0.84 : ship.rarity === 'legendary' ? 1.12 : 1 }), 380);
+    }
+  },
+  closeSplash() {
+    const el = this.$('splash');
+    this.splash = null;
+    document.body.classList.remove('splashing');
+    if (el) { el.classList.remove('show'); el.innerHTML = ''; }
+  },
+
   // ---------- Shipyard ----------
   screen_shipyard() {
     const yards = Colonies.yards();

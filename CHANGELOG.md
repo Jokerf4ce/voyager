@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.55.0 — 2026-11-27
+- **New-ship splash.** Laying down a hull now opens a full-screen reveal of the new ship:
+  - The hull is "printed" from the bottom up behind a scan line, in a flash of its rarity colour, then bobs gently.
+  - The rarity name lands in big letters; Epic, Legendary and Omega get slowly turning light rays (Omega's name glitches).
+  - Below it: name, type, hull size, Q roll, shield, hull, speed, evasion, maintenance and weapons, and where the ship went (fleet, hangar or auto scrap).
+  - Buttons: Show in Hangar (opens the Hangar with the ship selected), Build another of the same size, Close. Space, Enter, Esc or a click on the dark backdrop also close it.
+  - Sound: a fabricator whine, a clamp letting go and two confirm tones; Epic and better add a dark shimmering chord (lower for Omega).
+  - Assistant subtitles move to the top edge while the splash is open, so they don't cover its buttons.
+- Tutorial: the Shipyard step mentions the reveal.
+
 ## 0.54.1 — 2026-11-27
 - The End Cycle lever is now one heavy industrial "ka-CHUNK": a brief low swing straight into a deep thud and a dull knock of thick steel, with the latch biting inside the same hit and a short concrete-hall tail. The ratchet clatter and the mains hum are gone.
 

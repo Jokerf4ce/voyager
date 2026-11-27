@@ -579,3 +579,55 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
   .fleetrow .lanelbl { font-size: 7px; letter-spacing: 0; }
   .fleethead b { font-size: 16px; }
 }
+
+/* ---------- new-ship splash (UI.splashShip) ---------- */
+#splash { display: none; }
+body.splashing #comms { bottom: auto; top: 8px; } /* Assistant subtitles move up, clear of the splash buttons */
+#splash.show { display: block; }
+.splash { --glow: #d8d0c0; position: fixed; left: 0; right: 0; top: 0; height: 95vh; height: 95dvh; z-index: 12; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--glow) 22%, #0c0b0a) 0%, rgba(8, 7, 6, .94) 58%);
+  animation: sp-in .25s steps(4); }
+.sp-box { position: relative; cursor: default; width: min(560px, 94vw); max-height: 100%; overflow: auto; text-align: center; padding: 14px 16px;
+  background: rgba(16, 13, 11, .92); border: 2px solid var(--glow); box-shadow: 0 0 0 2px #000, 0 0 28px color-mix(in srgb, var(--glow) 45%, transparent), 6px 6px 0 #000; }
+.sp-kicker { font-family: var(--font-head); font-size: 10px; letter-spacing: 3px; color: var(--ash); text-transform: uppercase; }
+.sp-rarity { font-family: var(--font-head); font-size: clamp(22px, 6vw, 36px); letter-spacing: 6px; margin: 8px 0 2px; color: var(--glow);
+  text-shadow: 3px 3px 0 #000, 0 0 14px var(--glow); animation: sp-word .6s steps(6) both .15s; }
+.sp-ship { position: relative; display: flex; align-items: center; justify-content: center; height: clamp(110px, 30vh, 260px); margin: 4px 0; }
+.sp-ship img { height: 100%; max-width: 100%; object-fit: contain; image-rendering: pixelated;
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 60%, transparent));
+  animation: sp-print .7s steps(14) both .2s, sp-bob 3s ease-in-out infinite 1s; }
+.sp-scan { position: absolute; left: 12%; right: 12%; height: 3px; bottom: 0; background: var(--glow); box-shadow: 0 0 12px var(--glow); opacity: 0;
+  animation: sp-scan .7s steps(14) .2s; }
+.sp-info { animation: sp-fade .4s steps(4) both .8s; }
+.sp-name { font-size: 26px; color: var(--bone); }
+.sp-type { color: var(--ash); font-size: 17px; }
+.sp-type .q.hi { color: #9ac070; } .sp-type .q.lo { color: #c07060; }
+.sp-stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 14px; margin: 8px 0 6px; font-size: 18px; }
+.sp-stats i { font-style: normal; color: var(--glow); margin-right: 3px; }
+.sp-weps { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.sp-where { color: var(--ash); margin-bottom: 8px; }
+.sp-box .btnrow { justify-content: center; }
+.sp-flash { position: absolute; inset: 0; background: var(--glow); opacity: 0; pointer-events: none; animation: sp-flash .5s steps(5) .2s; }
+.sp-rays { position: absolute; left: 50%; top: 42%; width: 220vmax; height: 220vmax; margin: -110vmax 0 0 -110vmax; pointer-events: none; opacity: .22;
+  background: repeating-conic-gradient(from 0deg, var(--glow) 0deg 5deg, transparent 5deg 20deg); animation: sp-spin 24s linear infinite;
+  -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 40%); mask-image: radial-gradient(circle, #000 0%, transparent 40%); }
+.splash.r-omega .sp-rarity { animation: sp-word .6s steps(6) both .15s, sp-glitch 1.6s steps(1) infinite 1s; }
+.splash.r-normal .sp-box { border-color: var(--edge-hi); }
+@keyframes sp-in { from { opacity: 0; } }
+@keyframes sp-flash { 0% { opacity: .55; } 100% { opacity: 0; } }
+@keyframes sp-print { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes sp-scan { 0% { bottom: 0; opacity: 1; } 99% { bottom: 100%; opacity: 1; } 100% { bottom: 100%; opacity: 0; } }
+@keyframes sp-bob { 50% { transform: translateY(-5px); } }
+@keyframes sp-word { from { letter-spacing: 22px; opacity: 0; } to { letter-spacing: 6px; opacity: 1; } }
+@keyframes sp-fade { from { opacity: 0; transform: translateY(8px); } }
+@keyframes sp-spin { to { transform: rotate(360deg); } }
+@keyframes sp-glitch { 0%, 88%, 100% { transform: none; } 90% { transform: translate(3px, -1px); color: #fff; } 94% { transform: translate(-3px, 1px); } }
+@media (max-width: 560px) {
+  .sp-box { padding: 10px; }
+  .sp-name { font-size: 22px; }
+  .sp-stats { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash *, .splash { animation-duration: .01s !important; animation-iteration-count: 1 !important; }
+}

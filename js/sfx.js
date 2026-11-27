@@ -6,6 +6,8 @@
 //
 //   Sfx.play('lever')  — End Cycle: one heavy industrial lever thrown home ("ka-CHUNK")
 //   Sfx.play('blip')   — a star is picked on the Star Map: a short digital chirp
+//   Sfx.play('reveal') — a new ship on the splash: fabricator whine, clamp release, confirm tones
+//   Sfx.play('rare')   — added for Epic and better: a dark shimmering chord
 
 const Sfx = {
   enabled: true,
@@ -155,6 +157,64 @@ const Sfx = {
         const latch = hit + 0.028;
         this.burst(ctx, dry, latch, { type: 'lowpass', freq: 1200, gain: 0.45, decay: 0.008 });
         this.ring(ctx, dry, latch, { freq: 520, gain: 0.06, decay: 0.03 });
+      },
+    },
+
+    // A ship leaves the slipway: a rising fabricator whine, a heavy clamp letting go, and a two-note confirm.
+    reveal: {
+      seconds: 1.2,
+      peak: 0.6,
+      draw(ctx) {
+        const out = ctx.createGain(); out.connect(ctx.destination);
+        const room = this.hall(ctx, 0.7, 0.25); room.output.connect(ctx.destination);
+        out.connect(room.input);
+        // the fabricator: filtered noise and a whine sweeping up
+        {
+          const src = ctx.createBufferSource(); src.buffer = this.noise(ctx, 0.5);
+          const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 5;
+          f.frequency.setValueAtTime(300, 0); f.frequency.exponentialRampToValueAtTime(3500, 0.42);
+          const g = ctx.createGain(); g.gain.setValueAtTime(0, 0); g.gain.linearRampToValueAtTime(0.35, 0.38); g.gain.linearRampToValueAtTime(0, 0.46);
+          src.connect(f); f.connect(g); g.connect(out); src.start(0);
+          const o = ctx.createOscillator(); o.type = 'sawtooth';
+          o.frequency.setValueAtTime(120, 0); o.frequency.exponentialRampToValueAtTime(900, 0.42);
+          const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1800;
+          const og = ctx.createGain(); og.gain.setValueAtTime(0, 0); og.gain.linearRampToValueAtTime(0.08, 0.36); og.gain.linearRampToValueAtTime(0, 0.45);
+          o.connect(lp); lp.connect(og); og.connect(out); o.start(0); o.stop(0.5);
+        }
+        // the clamp lets go
+        const t = 0.45;
+        this.ring(ctx, out, t, { freq: 90, freq2: 50, gain: 0.7, decay: 0.05 });
+        this.burst(ctx, out, t, { type: 'lowpass', freq: 900, gain: 0.6, decay: 0.012 });
+        this.burst(ctx, out, t, { type: 'highpass', freq: 3000, gain: 0.2, decay: 0.004 });
+        // confirm: two clean tones a fifth apart
+        this.ring(ctx, out, t + 0.06, { freq: 587, gain: 0.16, decay: 0.08, type: 'triangle' });
+        this.ring(ctx, out, t + 0.15, { freq: 880, gain: 0.16, decay: 0.1, type: 'triangle' });
+      },
+    },
+
+    // Epic and better: a dark, shimmering chord swells in after the reveal (played slower and lower for Omega).
+    rare: {
+      seconds: 2.6,
+      peak: 0.5,
+      draw(ctx) {
+        const out = ctx.createGain(); out.gain.setValueAtTime(0, 0);
+        out.gain.linearRampToValueAtTime(1, 0.35); out.gain.setValueAtTime(1, 0.9); out.gain.exponentialRampToValueAtTime(0.0001, 2.55);
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(600, 0); lp.frequency.exponentialRampToValueAtTime(4000, 0.6); lp.frequency.exponentialRampToValueAtTime(1200, 2.4);
+        out.connect(lp);
+        const room = this.hall(ctx, 1.6, 0.5); room.output.connect(ctx.destination);
+        lp.connect(ctx.destination); lp.connect(room.input);
+        // D minor with an added ninth, each note doubled and detuned for a choir-like shimmer
+        for (const [f, g] of [[146.8, 0.5], [293.7, 0.35], [349.2, 0.3], [440, 0.3], [659.3, 0.18]]) {
+          for (const det of [-6, 6]) {
+            const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det;
+            const og = ctx.createGain(); og.gain.value = g * 0.12;
+            o.connect(og); og.connect(out); o.start(0); o.stop(2.6);
+          }
+        }
+        // a bell on top
+        this.ring(ctx, ctx.destination, 0.02, { freq: 1174.7, gain: 0.12, decay: 0.25 });
+        this.ring(ctx, room.input, 0.02, { freq: 1760, gain: 0.06, decay: 0.2 });
       },
     },
 
