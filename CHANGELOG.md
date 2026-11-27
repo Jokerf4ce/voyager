@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.68.0 — 2026-11-28
+- **Sound effects can be recorded files.** `Sfx.files` in `js/sfx.js` maps a sound name to a file (mp3 or anything the browser plays), with its own gain and a synthesised fallback. Files are fetched and decoded once in the background and then played like the synthesised sounds; when a file can't be fetched (missing, or the game opened from disk) it plays through a plain audio element, and failing that, the fallback recipe plays.
+- End Cycle now plays `assets/sfx/cycle.mp3` instead of the synthesised lever (which stays as its fallback).
+
 ## 0.67.1 — 2026-11-28
 - **Officer slot moved in the Hangar.** Each fleet's officer now sits in its own card after the fleet's five ship lanes (was in the fleet header), as tall as the ship cards, with portrait, rank, name, ★ ability and passives. ✕ relieves the officer; an empty slot reads ＋ Officer. On phones it is a compact sixth column. The tutorial's Hangar step says so.
 

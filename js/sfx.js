@@ -1,10 +1,16 @@
-// Voyager — sound effects, synthesised in the browser (no audio files).
+// Voyager — sound effects: synthesised in the browser, or recorded files (mp3 or any format the browser plays).
 //
-// Each effect is a recipe that draws into an OfflineAudioContext. It is rendered once into an AudioBuffer the
+// Files are listed in Sfx.files (name -> { src, gain, fallback }) and take priority over a recipe of the same
+// name. A file is fetched and decoded once, then played from its buffer like a recipe. When it can't be fetched
+// (missing, or the page opened from disk) it plays through a plain <audio> element, and if that fails too, the
+// fallback recipe plays instead. To swap a synthesised sound for a recording, drop the file in assets/sfx/ and
+// add a line to Sfx.files.
+//
+// Each synthesised effect is a recipe that draws into an OfflineAudioContext. It is rendered once into an AudioBuffer the
 // first time it is needed and then played from that buffer, so playing a sound costs almost nothing (and phones
 // don't crackle). Playback shares the Assistant's audio context, which in turn shares the music's.
 //
-//   Sfx.play('lever')  — End Cycle: one heavy industrial lever thrown home ("ka-CHUNK")
+//   Sfx.play('cycle')  — End Cycle: assets/sfx/cycle.mp3 (falls back to 'lever', a synthesised "ka-CHUNK")
 //   Sfx.play('blip')   — a star is picked on the Star Map: a short digital chirp
 //   Sfx.play('reveal') — a new ship on the splash: fabricator whine, clamp release, confirm tones
 //   Sfx.play('rare')   — added for Epic and better: a dark shimmering chord
@@ -19,6 +25,12 @@ const Sfx = {
   buffers: {},          // name -> AudioBuffer
   pending: {},          // name -> Promise<AudioBuffer>
   rate: 44100,
+  failed: {},           // file name -> true once it could not be fetched/decoded (then <audio> or the fallback is used)
+
+  // Recorded effects. src is relative to index.html; gain scales this file only; fallback names a recipe.
+  files: {
+    cycle: { src: 'assets/sfx/cycle.mp3', gain: 1, fallback: 'lever' },
+  },
 
   loadPrefs() {
     try {
@@ -36,7 +48,7 @@ const Sfx = {
   // ---- playback ----
   // opts.rate: playback speed (1 = as rendered), opts.gain: extra loudness for this one play
   play(name, opts = {}) {
-    if (!this.enabled || this.quiet || !this.recipes[name]) return; // quiet: a battle resolved instantly stays silent
+    if (!this.enabled || this.quiet || !(this.files[name] || this.recipes[name])) return; // quiet: a battle resolved instantly stays silent
     if (typeof Voice === 'undefined' || !Voice.activated) return; // browsers block sound before the first click
     const ctx = Voice.audio();
     if (!ctx) return;
@@ -51,14 +63,47 @@ const Sfx = {
         src.start(ctx.currentTime + 0.01 + (opts.delay || 0));
       } catch (e) { /* audio unavailable */ }
     };
-    if (this.buffers[name]) go(this.buffers[name]);
-    else this.render(name).then(go, () => {});
+    const file = this.files[name];
+    if (file) opts = { ...opts, gain: (opts.gain ?? 1) * (file.gain ?? 1) };
+    if (this.buffers[name]) { go(this.buffers[name]); return; }
+    if (file && this.failed[name]) { this.playBasic(name, opts); return; }
+    this.render(name).then(go, () => { if (file) this.playBasic(name, opts); });
+  },
+
+  // A file that could not be decoded (e.g. opened from disk, where fetch() is blocked): try an <audio> element,
+  // then the fallback recipe.
+  playBasic(name, opts) {
+    const file = this.files[name];
+    const fallback = () => { if (file.fallback && this.recipes[file.fallback]) this.play(file.fallback, { ...opts, gain: (opts.gain ?? 1) / (file.gain ?? 1) }); };
+    let a = null;
+    try { a = new Audio(file.src); } catch (e) { /* no <audio> */ }
+    if (!a) { fallback(); return; }
+    a.volume = Math.max(0, Math.min(1, this.volume * (opts.gain ?? 1)));
+    if (opts.rate) a.playbackRate = opts.rate;
+    const start = () => a.play().catch(fallback);
+    a.onerror = fallback;
+    if (opts.delay) setTimeout(start, opts.delay * 1000); else start();
+  },
+
+  // Fetches and decodes a recorded file once.
+  loadFile(name) {
+    const file = this.files[name];
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    if (!OAC || !window.fetch) return Promise.reject(new Error('no audio decoding'));
+    const dec = new OAC(1, 1, this.rate); // decoding needs no user gesture on an offline context
+    this.pending[name] = fetch(file.src)
+      .then((res) => { if (!res.ok) throw new Error('missing ' + file.src); return res.arrayBuffer(); })
+      .then((data) => new Promise((ok, bad) => dec.decodeAudioData(data, ok, bad)))
+      .then((buf) => { this.buffers[name] = buf; delete this.pending[name]; return buf; },
+        (e) => { this.failed[name] = true; delete this.pending[name]; throw e; });
+    return this.pending[name];
   },
 
   // Renders a recipe once; later calls get the same buffer.
   render(name) {
     if (this.buffers[name]) return Promise.resolve(this.buffers[name]);
     if (this.pending[name]) return this.pending[name];
+    if (this.files[name]) return this.failed[name] ? Promise.reject(new Error('failed')) : this.loadFile(name);
     const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
     if (!OAC) return Promise.reject(new Error('no OfflineAudioContext'));
     const r = this.recipes[name];
@@ -74,7 +119,7 @@ const Sfx = {
   },
 
   // Render everything in the background so the first play is instant.
-  warm() { for (const n of Object.keys(this.recipes)) this.render(n).catch(() => {}); },
+  warm() { for (const n of [...Object.keys(this.files), ...Object.keys(this.recipes)]) this.render(n).catch(() => {}); },
 
   // ---- building blocks (all take the offline context) ----
   noise(ctx, seconds) {
