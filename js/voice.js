@@ -10,6 +10,7 @@ const Voice = {
   volume: 0.8,
   ctx: null,
   speaking: false,
+  current: null,            // the line playing now: { src | el, finish } (stopped when another line starts)
   lastPlayed: {},           // trigger -> time (ms)
   lastLine: {},             // trigger -> id of the line it played last
   randomTimer: null,
@@ -122,6 +123,7 @@ const Voice = {
   say(id, style = '') {
     const line = VoiceLines[id];
     if (!line || !this.enabled) return false;
+    this.stopCurrent(); // one voice at a time: a new line (e.g. a battle warning) cuts the one playing
     this.style = style || line.style || '';
     const ctx = this.audio();
     if (ctx && ctx.state === 'suspended') ctx.resume();
@@ -134,6 +136,14 @@ const Voice = {
     };
     this.playFile(id, line, done);
     return true;
+  },
+
+  // Stops the line that is playing (if any), so two lines never overlap.
+  stopCurrent() {
+    const c = this.current; this.current = null;
+    if (!c) return;
+    try { if (c.src) c.src.stop(); if (c.el) c.el.pause(); } catch (e) { /* already stopped */ }
+    if (c.finish) c.finish();
   },
 
   // Lower the music while she speaks.
@@ -164,6 +174,7 @@ const Voice = {
     let ended = false;
     const end = () => { if (!ended) { ended = true; done(); } };
     a.onended = end;
+    this.current = { el: a, finish: end };
     a.onerror = () => { if (!ended) { ended = true; this.noFile(id, line, glitch, done); } };
     a.play().then(() => {
       this.status[id] = 'basic';
@@ -197,8 +208,10 @@ const Voice = {
     const src = ctx.createBufferSource(); src.buffer = buf;
     src.connect(g);
     let finished = false;
-    const finish = () => { if (!finished) { finished = true; done(); } };
+    const finish = () => { if (!finished) { finished = true; if (this.current === me) this.current = null; done(); } };
     src.onended = finish;
+    const me = { src, finish };
+    this.current = me;
     src.start(ctx.currentTime + 0.05);
     setTimeout(finish, (buf.duration + 1.5) * 1000); // in case onended never fires
   },

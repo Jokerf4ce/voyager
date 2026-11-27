@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.68.2 — 2026-11-28
+- **Battle warning no longer repeats.** When several battles come in one Cycle (two raids, or a raid and an attack), the Assistant warns once at the first; the ones queued behind it start silently. (The Cycle had moved on by the time the second battle started, so it spoke again.)
+- **One voice line at a time.** A new line now stops the one playing (the battle warning used to talk over a construction or new-colony line from the same End Cycle).
+- **Battles hold for 2 s before the first shot** (`DATA.battleStartMs`), so the warning, the music swell and the first hits don't all land at once. Your own actions aren't held.
+
 ## 0.68.1 — 2026-11-28
 - **Recorded battle sounds.** A hit on the hull plays `assets/sfx/hull.mp3`, a hit the shields take plays `shield.mp3`, and a miss or evasion plays `evade.mp3`. Each keeps the random ±6 % pitch so repeated hits don't sound identical.
 - `js/sfx.js`: a file now falls back to the synthesised sound of the same name unless it names another `fallback`. File buffers are kept apart from recipe buffers, and recipes replaced by a file are no longer rendered up front (only if the file fails).

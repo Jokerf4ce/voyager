@@ -393,6 +393,9 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (!G || !G.battle || G.battle.phase !== 'fight' || UI.screen !== 'battle' || UI.modalOpen) return;
+    // a new fight on screen holds for DATA.battleStartMs before the first shot, so it doesn't land on the warning
+    if (Battle.heldFor !== G.battle) { Battle.heldFor = G.battle; Battle.holdUntil = Date.now() + DATA.battleStartMs; }
+    if (Date.now() < Battle.holdUntil) return;
     if (Battle.step()) { State.save(); UI.render(); }
   }, 650);
   window.addEventListener('beforeunload', () => State.save());

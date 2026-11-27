@@ -259,6 +259,7 @@ DATA.difficulty = {
     points: ['Grace period before raids', 'Rare, small raids', 'Normal prices', 'No achievements'],
     costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false },
 };
+DATA.battleStartMs = 2000;                 // a battle waits this long before the first ship acts (the warning and music go first)
 DATA.battleFxMs = 2000;                    // how long MISS / RESTORED float over a card
 DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of max shields / hull regained
 // Hangar: ships in no fleet wait at an Orbital Shipyard. Each shipyard holds `base` ships at level 1, plus

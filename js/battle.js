@@ -18,13 +18,15 @@ const Battle = {
     if (!G.battle) this.next();
   },
 
-  next() {
+  // chained: this battle was queued behind one that just ended (the Assistant already warned about it)
+  next(chained = false) {
     const s = G.battleQueue.shift();
     if (!s) return;
     G.battle = Object.assign({ phase: s.kind === 'defend' ? 'setup' : 'fight', units: [], order: [], turn: 0, round: 0, log: [], result: null, auto: false }, s);
     if (G.battle.phase === 'fight') this.begin();
     if (typeof Music !== 'undefined') Music.battle(0.8);
-    if (typeof Voice !== 'undefined') Voice.trigger('combat', true); // a warning from the Assistant, in red
+    // a warning from the Assistant, in red; battles queued behind this one don't repeat it
+    if (typeof Voice !== 'undefined' && !chained) Voice.trigger('combat', true);
   },
 
   // ---------- setting up ----------
@@ -505,7 +507,7 @@ const Battle = {
   close() {
     if (!G.battle || G.battle.phase !== 'over') return;
     G.battle = null;
-    this.next();
+    this.next(true);
   },
 
   checkFactions() {
