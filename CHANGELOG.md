@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.67.1 — 2026-11-28
+- **Officer slot moved in the Hangar.** Each fleet's officer now sits in its own card after the fleet's five ship lanes (was in the fleet header), as tall as the ship cards, with portrait, rank, name, ★ ability and passives. ✕ relieves the officer; an empty slot reads ＋ Officer. On phones it is a compact sixth column. The tutorial's Hangar step says so.
+
 ## 0.67.0 — 2026-11-27
 - **Modular, more detailed portraits.** Faces are now built from parts by a new `js/faces.js` at 32×32 (was hand-drawn 16×16): background (plain, banner, stars, halo), outfit (uniform, admiral, coat, robe, armor), head (oval, square, long, gaunt), eyes (normal, narrow, wide, closed, cyber), brows, nose, mouth, hair (bald, short, crop, slick, bun, long, mohawk, braids), beard, headgear (hood, cap, helmet, circlet, visor) and any number of marks (scar, eyepatch, bandage, third eye, tattoo, wrinkles, cyber jaw, monocle, earring, freckles, visor). Shapes shade themselves (light from the upper left, three tones per colour), and the figure gets an outline.
   - The three officers were redone as face specs (`face:` in `DATA.officers`): Kroll with her bun, scar and admiral's braid on a red banner; Sable hooded with a cyan visor; Iszra bald, blindfolded, with a third eye and glowing tattoos.

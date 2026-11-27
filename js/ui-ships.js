@@ -78,13 +78,20 @@ Object.assign(UI, {
       <div class="ocards">${cards}</div><div class="btnrow">${this.btn('Close', 'close', '', false)}</div>`);
     this.$('modal').querySelector('.modal-box').classList.add('wide');
   },
-  // The officer slot in a fleet's header on the Hangar screen.
+  // The officer slot at the end of a fleet's row on the Hangar screen, as tall as the ship cards.
   officerSlot(f) {
-    if (f.officer && DATA.officers[f.officer]) {
-      const o = DATA.officers[f.officer];
-      return `<span class="oslot"><button class="ochip" data-act="officerinfo" data-a="${f.officer}" title="${U.esc(o.passives.map((p) => p.text).join(' · ') + ' · ★ ' + o.ability.name)}">${this.portrait(f.officer, 32)}<span>${U.esc(o.rank)} <b>${U.esc(o.name)}</b></span></button>${f.mission ? '' : `<button class="icon-btn small" data-act="officerpick" data-a="${f.id}" title="Change officer">⇄</button><button class="icon-btn small" data-act="officeroff" data-a="${f.id}" title="Relieve of command">✕</button>`}</span>`;
+    const o = f.officer && DATA.officers[f.officer];
+    if (!o) {
+      if (f.mission || !Ships.officers().length) return this.emptySlot(null, null, '');
+      return `<div class="scard empty oempty" data-act="officerpick" data-a="${f.id}"><span>＋ Officer</span></div>`;
     }
-    return f.mission || !Ships.officers().length ? '' : `<button class="btn small oadd" data-act="officerpick" data-a="${f.id}">＋ Officer</button>`;
+    const tip = `${o.passives.map((p) => p.text).join(' · ')} · ★ ${o.ability.name}: ${o.ability.text}`;
+    return `<div class="scard ocslot" data-act="${f.mission ? 'officerinfo' : 'officerpick'}" data-a="${f.mission ? f.officer : f.id}" title="${U.esc(tip)}">
+      ${f.mission ? '' : `<button class="icon-btn small oremove" data-act="officeroff" data-a="${f.id}" title="Relieve of command">✕</button>`}
+      ${this.portrait(f.officer, 64)}
+      <small class="muted">${U.esc(o.rank)}</small><b>${U.esc(o.name)}</b>
+      <span class="oab">★ ${U.esc(o.ability.name)}</span>
+      <ul class="opass-mini">${o.passives.map((p) => `<li>${U.esc(p.text)}</li>`).join('')}</ul></div>`;
   },
 
   // The officer in battle: portrait, name and the ability button (once per battle, on your turn).
@@ -250,9 +257,9 @@ Object.assign(UI, {
         else slots.push(`<div class="lanewrap" ${drop ? `data-dropship="${drop}"` : ''}>${canDrop ? this.emptySlot('assign', `${sel.id}|${f.id}`, '＋ move here') : this.emptySlot(null, null, f.mission ? '' : '＋')}</div>`);
       }
       const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : '<span class="muted">at home · ready</span>';
-      return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button> ${this.officerSlot(f)}
+      return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button>
           <span class="small">${status}</span><span class="small muted">power ${Ships.groupPower(ships)} · ${ships.length}/${DATA.fleetMax}</span></div>
-        <div class="cardrow">${slots.join('')}</div></div>`;
+        <div class="cardrow">${slots.join('')}<div class="lanewrap officerlane"><span class="lanelbl">Officer</span>${this.officerSlot(f)}</div></div></div>`;
     }).join('');
     const sorts = this.hangarSorts();
     const sortFn = (sorts[this.hangarSort] || sorts.built).fn;
