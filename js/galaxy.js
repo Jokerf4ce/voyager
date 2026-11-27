@@ -191,6 +191,7 @@ const Galaxy = {
     // Starting fleet: a Scout, two Fighters and a Heavy Fighter, all Normal cards.
     const give = (type, fleet) => { const sh = Ships.make(type, { rarity: 'normal' }); G.ships[sh.id] = sh; fleet.ships.push(sh.id); };
     const guard = Ships.newFleet('Home Guard');
+    guard.officer = 'kroll'; // the Home Guard starts under the Iron Matron (DATA.officers)
     give('scout', guard); give('fighter', guard); give('fighter', guard); give('heavy', guard);
 
     // Space near home is safe: no lairs next door.

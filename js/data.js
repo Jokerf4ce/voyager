@@ -276,6 +276,36 @@ DATA.systemProjects = {
     cost: { metal: 2500, rare: 600, electronics: 900, chemicals: 400, crypto: 2 },
     desc: 'A shell of collectors around the star, drinking its light. Enormous Power for the whole empire, scaled by the star\'s starlight; a dim remnant gives little, a blue giant or the hypergiant a flood.' },
 };
+// Officers (v0.66): a card that leads a fleet. One officer per fleet (fleet.officer), owned officers in G.officers.
+// In battle the officer's passives apply to the fleet's ships (not to Planetary Defenses), and its ability can be
+// used once per battle on your turn, without using the ship's turn (Battle.useOfficer).
+//   passives  stat: hull / evade / acc (all ships), dmgL (Large ships), speedS (Small ships), energy (energy weapons)
+//   ability   key: holdline / smoke / ruin (see Battle.abilities)
+//   art       16×16 portrait, one character per pixel (pal: colours; '.' = transparent)
+DATA.officers = {
+  kroll: { name: 'Vashti Kroll', rank: 'Admiral', title: 'The Iron Matron',
+    flavor: 'Forty years at the helm and not one ship surrendered. She does not raise her voice; she does not need to.',
+    passives: [{ stat: 'hull', value: 0.1, text: '+10 % hull for every ship' }, { stat: 'dmgL', value: 0.12, text: '+12 % damage for Large ships' }],
+    ability: { key: 'holdline', name: 'Hold the Line', text: 'Every ship of yours regains 30 % of its max shields.' },
+    pal: { k: '#0e0b09', h: '#b8b0a4', H: '#6e675e', s: '#d0a080', S: '#8a5e44', r: '#b03030', u: '#3a4a5a', w: '#e8e0c8', g: '#d0a040' },
+    art: ['....kkkkkkk.....', '...khhhhhhhk....', '..khhhhhhhhhk...', '..khsssssssHk...', '..kssksssksSk...', '..ksssssssrSk...', '..kssssksssSk...', '...ksskkkssk....',
+          '...kSsssssSk....', '....kSSSSSk.....', '..kkgukkkugkk...', '.kgguuuuuuuggk..', '.kuuuuwuuuuuuk..', '.kuuuurruuuuuk..', '.kuuuuuuuuuuuk..', '.kkkkkkkkkkkkk..'] },
+  sable: { name: 'Oren Sable', rank: 'Commander', title: 'Ghost of Tharsis',
+    flavor: 'Officially he died at Tharsis. Unofficially, nobody who saw him there lived to file the report.',
+    passives: [{ stat: 'evade', value: 6, text: '+6 evasion for every ship' }, { stat: 'speedS', value: 2, text: '+2 speed for Small ships' }],
+    ability: { key: 'smoke', name: 'Smoke and Mirrors', text: 'Until the end of the round, enemy shots have half their hit chance.' },
+    pal: { k: '#0b0a0c', U: '#24242c', u: '#3c3c48', c: '#50e0f0', s: '#b08870', S: '#6e5040' },
+    art: ['.....kkkkkk.....', '...kkUUUUUUkk...', '..kUUuuuuuuUUk..', '..kUuUUUUUUuUk..', '..kUukkkkkkuUk..', '..kUkcccccckUk..', '..kUkkkkkkkkUk..', '..kUUkSsssSkUk..',
+          '..kUUksssssUUk..', '...kUUkkkkUUk...', '..kUUUUUUUUUUk..', '.kUuuUUUUUUuuUk.', '.kUuuuUccUuuuUk.', '.kUuuuUccUuuuUk.', '.kUuuuuuuuuuuUk.', '.kkkkkkkkkkkkkk.'] },
+  iszra: { name: 'Iszra', rank: 'Fleet Augur', title: 'The Blind Seer',
+    flavor: 'She gave her eyes to the warp-choirs and got something better back. She sees where the shot will be, not where the ship is.',
+    passives: [{ stat: 'acc', value: 0.05, text: '+5 % hit chance' }, { stat: 'energy', value: 0.12, text: '+12 % damage with energy weapons' }],
+    ability: { key: 'ruin', name: 'Prophecy of Ruin', text: 'The ship your active ship targets loses all its shields.' },
+    pal: { k: '#0c090c', s: '#c09478', S: '#7a5444', e: '#f0a0ff', c: '#c060f0', b: '#d8d0b8', w: '#7a2020', p: '#5a2a6a', P: '#341838', g: '#d0a040' },
+    art: ['.....kkkkkk.....', '....kssssssk....', '...ksssssesSk...', '...ksssscsssk...', '...kbbbbbbbbk...', '...kbwbbbbwbk...', '...ksssssssSk...', '....ksskksSk....',
+          '....kSsssSk.....', '...kpkSSSkpk....', '..kpPppppppPpk..', '.kpPPpppcpppPPk.', '.kpPpppppppppPk.', '.kpPpgpppppgpPk.', '.kpPpppppppppPk.', '.kkkkkkkkkkkkkk.'] },
+};
+
 // Fixed deposits (v0.65): a planet with p.deposit = key gets +bonus to that resource's rating. Every new game puts one
 // Rare deposit on a Scorched Rock in a system next to home (Galaxy.placeStarts), so Electronics never starve for lack
 // of Rare Minerals. Its crust is stable enough (habitability 3) for Core Drills on the surface.
@@ -440,7 +470,7 @@ DATA.tutorial = [
   { screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
     text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, <b>Medium</b> or <b>Large</b>, all available from the start. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>, and every new ship is unveiled on screen as it leaves the slipway.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
   { screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',
-    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and a quarter as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.' },
+    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and a quarter as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>Each fleet can be led by an <b>officer</b> (＋ Officer in the fleet\'s header). Officers give the fleet\'s ships passive bonuses in battle and have one ★ ability.' },
   { screen: 'overview', demo: 'raid', pos: 'left', target: '#main .panel.threats', title: 'Raids',
     text: 'Sooner or later the xenos come for your worlds. {raids}<br><br>A raid is spotted a few Cycles before it arrives: it shows here with its size and arrival time, and as <b style="color:#ff5a4a">! RAID</b> on the Star Map. Raids hit your <b>outlying colonies</b> first; the capital only when nothing else is in reach.<br><br>This raid is staged for practice. Let\'s play it out.' },
   { screen: 'battle', demo: 'setup', pos: 'side', target: '#main .panel', title: 'A raid arrives',
@@ -450,7 +480,7 @@ DATA.tutorial = [
   { screen: 'battle', demo: 'fight', pos: 'side', target: '#board .scard.target, #board .scard.acting', all: true, title: 'Damage',
     text: 'Damage hits <b>shields</b> first, then <b>hull</b>. <b>Physical</b> weapons tear hull but bounce off shields; <b>energy</b> weapons strip shields.<br><br>Sizes beat each other: <b>Small beats Large, Large beats Medium, Medium beats Small</b>. The tag on the target arrow shows the bonus (×{adv}) or penalty (×{disadv}).' },
   { screen: 'battle', demo: 'fight', pos: 'side', target: '#board .bcontrols', title: 'Your turn',
-    text: 'On your ship\'s turn, pick one:<br>• <b>Fire</b> a weapon. Each button shows the damage and hit chance; small, fast ships can make you <b>MISS</b>.<br>• <b>Restore</b>: hold position and regain {restore}.<br>• <b>Move</b>: drag the ship to another lane, or use ◀ ▶ on its card. Ships in between slide over.<br><br>Try it: this practice fight doesn\'t count.' },
+    text: 'On your ship\'s turn, pick one:<br>• <b>Fire</b> a weapon. Each button shows the damage and hit chance; small, fast ships can make you <b>MISS</b>.<br>• <b>Restore</b>: hold position and regain {restore}.<br>• <b>Move</b>: drag the ship to another lane, or use ◀ ▶ on its card. Ships in between slide over.<br><br>Try it: this practice fight doesn\'t count.<br><br>Your fleet\'s <b>officer</b> sits next to its name below the ships: the <b>★ ability</b> can be used once per battle, on your turn, and doesn\'t use the ship\'s turn.' },
   { screen: 'battle', demo: 'fight', pos: 'side', target: '#board .bhead2 .btnrow', title: 'Auto, and after the fight',
     text: '<b>Auto</b> fights for you, <b>Resolve instantly</b> skips to the end, <b>Retreat</b> pulls out (in a defense, that loses the system). <b>End Cycle</b> is locked while a fight is on.<br><br>Afterwards, damage stays: fleets at home repair {repair} % of their hull per Cycle, and destroyed ships are gone for good. Victories can salvage weapons for the armory.<br><br><b>⚖ Rules of engagement</b>, under the battle log, sums all of this up with diagrams.' },
   { target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',

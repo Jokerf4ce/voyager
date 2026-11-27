@@ -7,6 +7,7 @@ const State = {
     G = {
       version: 15,
       cycle: 1,
+      officers: Object.fromEntries(Object.keys(DATA.officers).map((k) => [k, true])), // officers you command
       difficulty: null,   // chosen right after the galaxy is made (State.setDifficulty); null = not picked yet
       res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 35, research: 0, crypto: 0 },
       systems: [],
@@ -88,6 +89,12 @@ const State = {
       const data = JSON.parse(raw);
       if (!data || data.version !== 15) return false;
       // technologies that no longer exist (e.g. the old hull techs, removed in v0.45) are dropped
+      if (!data.officers) { // saves from before v0.66: every officer joins, and the Admiral takes the first fleet
+        data.officers = Object.fromEntries(Object.keys(DATA.officers).map((k) => [k, true]));
+        const first = (data.fleets || []).find((f) => !f.mission);
+        if (first) first.officer = 'kroll';
+      }
+      for (const f of data.fleets || []) if (f.officer && !DATA.officers[f.officer]) f.officer = null;
       let dropped = 0;
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) { delete data.techs[id]; dropped++; }
       if (data.techs) for (const id in data.techs) data.techs[id] = Math.min(DATA.techMax, data.techs[id] | 0);

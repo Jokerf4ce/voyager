@@ -40,6 +40,58 @@ const Battle = {
     };
   },
 
+  // ---------- officers (DATA.officers) ----------
+  // An officer's passives, applied to one of its fleet's ships at the start of a battle.
+  officerPassives(u, key) {
+    const o = DATA.officers[key];
+    if (!o) return u;
+    for (const p of o.passives) {
+      if (p.stat === 'hull') { u.hullMax = Math.round(u.hullMax * (1 + p.value)); u.hull = Math.round(u.hull * (1 + p.value)); }
+      else if (p.stat === 'evade') u.maneuver = Math.min(75, u.maneuver + p.value);
+      else if (p.stat === 'acc') u.accMult = (u.accMult || 1) * (1 + p.value);
+      else if (p.stat === 'dmgL' && u.size === 'L') u.dmgMult *= 1 + p.value;
+      else if (p.stat === 'speedS' && u.size === 'S') u.speed += p.value;
+      else if (p.stat === 'energy') u.energyMult = (u.energyMult || 1) * (1 + p.value);
+    }
+    return u;
+  },
+  // What each ability does, and when Auto (and Resolve instantly) uses it.
+  abilities: {
+    holdline: {
+      use(b) {
+        for (const u of Battle.alive('player')) { u.shield = Math.min(u.shieldMax, Math.round((u.shield + u.shieldMax * 0.3) * 10) / 10); Battle.fx(b.units.indexOf(u), 'restore'); }
+        return 'every ship\'s shields surge back';
+      },
+      wise(b) { const ps = Battle.alive('player'); const now = ps.reduce((a, u) => a + u.shield, 0), max = ps.reduce((a, u) => a + u.shieldMax, 0); return max > 0 && now < max * 0.5; },
+    },
+    smoke: {
+      use(b) { b.smoke = b.round; return 'enemy gunners lose their mark until the round ends'; },
+      wise(b) { return Battle.sidePower('enemy') > Battle.sidePower('player') * 0.6 && b.turn < b.order.length / 2; },
+    },
+    ruin: {
+      use(b) {
+        const t = Battle.targetFor(Battle.current());
+        if (!t) return 'there is nothing to curse';
+        const was = Math.round(t.shield); t.shield = 0;
+        Battle.fx(b.units.indexOf(t), 'hit', { sh: was, hu: 0 });
+        return `${t.name}'s shields collapse (−${was})`;
+      },
+      wise(b) { const t = Battle.targetFor(Battle.current()); return !!t && t.shield >= Math.max(12, t.shieldMax * 0.5); },
+    },
+  },
+  canUseOfficer() { const b = G.battle; return !!b && b.phase === 'fight' && !!b.officer && !b.officer.used && !!this.current() && this.current().side === 'player'; },
+  // Use the officer's ability: once per battle, on your turn, without using the ship's turn.
+  useOfficer() {
+    const b = G.battle;
+    if (!this.canUseOfficer()) return false;
+    const o = DATA.officers[b.officer.key], ab = this.abilities[o.ability.key];
+    b.officer.used = true;
+    const what = ab.use(b);
+    this.say(`${o.rank} ${o.name}: ${o.ability.name}! ${what.charAt(0).toUpperCase() + what.slice(1)}.`, 'player');
+    if (typeof Sfx !== 'undefined') Sfx.play('officer');
+    return true;
+  },
+
   // The defending side chooses a fleet (or none) before a raid battle starts.
   defendWith(fleetId) {
     const b = G.battle;
@@ -56,7 +108,8 @@ const Battle = {
     const b = G.battle, s = G.systems[b.sys];
     const units = [];
     const f = b.fleetId != null ? Ships.fleet(b.fleetId) : null;
-    if (f) for (const ship of Ships.fleetShips(f)) units.push(this.unitFrom(ship, 'player', ship.id));
+    if (f) for (const ship of Ships.fleetShips(f)) units.push(this.officerPassives(this.unitFrom(ship, 'player', ship.id), f.officer));
+    b.officer = f && f.officer && DATA.officers[f.officer] ? { key: f.officer, used: false } : null;
     if (b.kind === 'attack') {
       const g = Missions.guard(s);
       if (g) g.ships.slice(0, DATA.fleetMax).forEach((ship, i) => units.push(this.unitFrom(ship, 'enemy', i)));
@@ -137,6 +190,7 @@ const Battle = {
     const u = this.current();
     if (!u) return false;
     if (u.side === 'player' && !b.auto) return false;
+    if (u.side === 'player' && this.canUseOfficer() && this.abilities[DATA.officers[b.officer.key].ability.key].wise(b)) this.useOfficer();
     const sw = this.swapWorth(u);
     if (sw >= 0) { this.swap(u, sw); return true; }
     if (this.restoreWorth(u)) { this.restore(u); return true; }
@@ -306,14 +360,15 @@ const Battle = {
   hitChance(w, t, a) {
     const lane = a && a.lane !== t.lane ? DATA.offLaneHit : 1;
     const track = a && a.size === 'L' && t.size === 'S' ? DATA.largeVsSmallHit : 1; // big guns can't track small ships
-    const aug = a && a.side === 'player' ? State.mods().acc : 1; // Targeting Augurs
-    return Math.max(0.05, Math.min(1, (w.acc / 100) * (1 - t.maneuver / 100) * lane * track * aug));
+    const aug = a && a.side === 'player' ? State.mods().acc * (a.accMult || 1) : 1; // Targeting Augurs, officer passives
+    const smoke = a && a.side === 'enemy' && G.battle && G.battle.smoke === G.battle.round ? 0.5 : 1; // Smoke and Mirrors
+    return Math.max(0.05, Math.min(1, (w.acc / 100) * (1 - t.maneuver / 100) * lane * track * aug * smoke));
   },
 
   // Damage a weapon would do right now: { shield, hull } taken off the target (before randomness).
   preview(a, w, t, roll = 1) {
     const dt = DATA.damageTypes[w.kind];
-    const base = w.dmg * a.dmgMult * this.sizeMult(a, t) * roll;
+    const base = w.dmg * a.dmgMult * (w.kind === 'energy' ? a.energyMult || 1 : 1) * this.sizeMult(a, t) * roll;
     let toShield = 0, toHull = 0;
     if (t.shield > 0) {
       const eff = base * dt.shield;

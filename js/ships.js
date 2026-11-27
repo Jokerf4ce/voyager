@@ -120,6 +120,25 @@ const Ships = {
     return Math.round((s.shield + s.hull) * 0.25 + dmg * 2 + s.speed);
   },
   groupPower(list) { return list.reduce((a, s) => a + this.power(s), 0); },
+  // ---- officers (DATA.officers): one per fleet, stored as fleet.officer ----
+  officers() { return Object.keys(DATA.officers).filter((k) => G.officers && G.officers[k]); },
+  officerFleet(key) { return G.fleets.find((f) => f.officer === key) || null; },
+  // Put an officer in charge of a fleet (taking it from another fleet if needed). Fleets on a mission can't change.
+  assignOfficer(key, fleetId) {
+    const f = this.fleet(+fleetId), from = this.officerFleet(key);
+    if (!f || !G.officers[key] || f.mission || (from && from.mission)) return false;
+    if (from) from.officer = null;
+    f.officer = key;
+    Log.add(`${DATA.officers[key].rank} ${DATA.officers[key].name} takes command of ${f.name}.`);
+    return true;
+  },
+  unassignOfficer(fleetId) {
+    const f = this.fleet(+fleetId);
+    if (!f || f.mission || !f.officer) return false;
+    f.officer = null;
+    return true;
+  },
+
   upkeep() { return this.all().reduce((a, s) => a + s.upkeep, 0) * Math.max(0, State.mods().upkeep); }, // research can lower it
   // Maintenance of one ship from its type, rarity, roll quality and personal random factor (DATA.upkeep).
   rollUpkeep(ship) {

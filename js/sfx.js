@@ -293,6 +293,14 @@ const Sfx = {
       },
     },
 
+    // An officer's ability: a radio click and a short rising horn call.
+    officer: {
+      seconds: 1.2, peak: 0.38,
+      draw(ctx) {
+        this.burst(ctx, ctx.destination, 0, { type: 'bandpass', freq: 2500, q: 1, gain: 0.5, decay: 0.01, len: 0.1 });
+        this.brass(ctx, [[0.06, [196, 293.7]], [0.26, [261.6, 392, 523.3]]], 0.95);
+      },
+    },
     // ---- battle ----
     // A shot splashes on shields: a bright electric crackle sliding down.
     shield: {

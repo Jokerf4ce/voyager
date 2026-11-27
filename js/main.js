@@ -71,10 +71,10 @@ const Game = {
   // and on its practice steps fight the practice battle. Anything else nudges the tutorial panel instead.
   tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort',
     'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
-    'rules', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
+    'rules', 'officerinfo', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
   // Actions that make their own sound (or one that follows right away), so they don't also click.
-  ownSound: new Set(['buildship', 'forge', 'bfire', 'brestore', 'build', 'project', 'buildauto', 'bauto', 'bplace', 'sfx', 'voicetest', 'difficulty']),
-  tourPractice: new Set(['bfire', 'bswapnav', 'brestore', 'bswapconfirm', 'battleauto', 'bresolve', 'bretreat', 'bdefend']),
+  ownSound: new Set(['officer', 'buildship', 'forge', 'bfire', 'brestore', 'build', 'project', 'buildauto', 'bauto', 'bplace', 'sfx', 'voicetest', 'difficulty']),
+  tourPractice: new Set(['officer', 'bfire', 'bswapnav', 'brestore', 'bswapconfirm', 'battleauto', 'bresolve', 'bretreat', 'bdefend']),
   lockedByTour(act) {
     if (!Tutorial.active || this.tourSafe.has(act)) return false;
     return !(Tutorial.sandboxed && this.tourPractice.has(act));
@@ -173,6 +173,11 @@ const Game = {
     buildship: (a) => { const s = Ships.build(a); if (s) { UI.lastShip = s.id; UI.lastScrapped = s.scrapped ? s : null; UI.lastWeapon = null; UI.splashShip(s); } },
     splashclose: () => { UI.closeSplash(); },
     rules: () => { UI.rulesModal(); },
+    officer: () => { Battle.useOfficer(); },
+    officerpick: (a) => { UI.officerPicker(+a); },
+    officerset: (a) => { const [key, fid] = a.split('|'); Ships.assignOfficer(key, fid); UI.closeModal(); },
+    officeroff: (a) => { Ships.unassignOfficer(a); },
+    officerinfo: (a) => { UI.officerModal(a); },
     project: (a) => { const [sid, key] = a.split(':'); Colonies.buildProject(+sid, key); },
     splashhangar: () => { const id = UI.splash; UI.closeSplash(); UI.screen = 'fleets'; if (id && G.ships[id]) UI.selShip = id; },
     forge: (a) => { const w = Ships.forge(a); if (w) { UI.lastWeapon = w.id; UI.lastShip = null; Sfx.play('forge'); if (['epic', 'legendary', 'omega'].includes(w.rarity)) setTimeout(() => Sfx.play('rare', { rate: w.rarity === 'omega' ? 0.84 : 1 }), 450); } },

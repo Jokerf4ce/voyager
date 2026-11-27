@@ -48,6 +48,51 @@ Object.assign(UI, {
     return Object.values(DATA.shipRarities).map((r) => `<span style="color:${r.color}">${r.name} ${+(r.rate * 100).toFixed(1)}%</span>`).join(' · ');
   },
 
+  // ---------- officers ----------
+  portrait(key, size = 48) { return `<img class="px portrait" src="${Sprites.portrait(key)}" width="${size}" height="${size}" alt="">`; },
+  // An officer card: portrait, name, passives and the ability. opts.foot: extra html at the bottom.
+  officerCard(key, opts = {}) {
+    const o = DATA.officers[key];
+    return `<div class="ocard ${opts.cls || ''}">
+      <div class="ohead">${this.portrait(key, 48)}<div><small class="muted">${U.esc(o.rank)}</small><br><b>${U.esc(o.name)}</b><br><i>${U.esc(o.title)}</i></div></div>
+      <ul class="opass">${o.passives.map((p) => `<li>${U.esc(p.text)}</li>`).join('')}</ul>
+      <div class="oabil"><b>★ ${U.esc(o.ability.name)}</b> <small class="muted">once per battle · free action</small><br><small>${U.esc(o.ability.text)}</small></div>
+      ${opts.flavor ? `<p class="flavor small">${U.esc(o.flavor)}</p>` : ''}${opts.foot || ''}</div>`;
+  },
+  officerModal(key) {
+    if (!DATA.officers[key]) return;
+    const f = Ships.officerFleet(key);
+    this.modal(`${this.officerCard(key, { flavor: true })}<p class="small muted">${f ? `Leads ${U.esc(f.name)}.` : 'Not leading a fleet.'}</p><div class="btnrow">${this.btn('Close', 'close', '', false, 'gold')}</div>`);
+  },
+  // Pick an officer for a fleet: every officer you command, taken from another fleet if needed.
+  officerPicker(fleetId) {
+    const f = Ships.fleet(fleetId);
+    if (!f) return;
+    const cards = Ships.officers().map((k) => {
+      const from = Ships.officerFleet(k), here = from === f, busy = from && from.mission;
+      return this.officerCard(k, { cls: here ? 'sel' : '', foot: `<div class="btnrow">${here ? '<span class="lvl">Leading this fleet</span>'
+        : this.btn(from ? `Take from ${U.esc(from.name)}` : 'Assign', 'officerset', `${k}|${f.id}`, !!busy, 'gold')}${busy ? '<small class="bad">its fleet is away</small>' : ''}</div>` });
+    }).join('');
+    this.modal(`<h2>Officer for ${U.esc(f.name)}</h2><p class="small muted">An officer's passives apply to the fleet's ships in battle; the ability can be used once per battle on your turn, without using the ship's turn.</p>
+      <div class="ocards">${cards}</div><div class="btnrow">${this.btn('Close', 'close', '', false)}</div>`);
+    this.$('modal').querySelector('.modal-box').classList.add('wide');
+  },
+  // The officer slot in a fleet's header on the Hangar screen.
+  officerSlot(f) {
+    if (f.officer && DATA.officers[f.officer]) {
+      const o = DATA.officers[f.officer];
+      return `<span class="oslot"><button class="ochip" data-act="officerinfo" data-a="${f.officer}" title="${U.esc(o.passives.map((p) => p.text).join(' · ') + ' · ★ ' + o.ability.name)}">${this.portrait(f.officer, 20)}<span>${U.esc(o.rank)} <b>${U.esc(o.name)}</b></span></button>${f.mission ? '' : `<button class="icon-btn small" data-act="officerpick" data-a="${f.id}" title="Change officer">⇄</button><button class="icon-btn small" data-act="officeroff" data-a="${f.id}" title="Relieve of command">✕</button>`}</span>`;
+    }
+    return f.mission || !Ships.officers().length ? '' : `<button class="btn small oadd" data-act="officerpick" data-a="${f.id}">＋ Officer</button>`;
+  },
+
+  // The officer in battle: portrait, name and the ability button (once per battle, on your turn).
+  battleOfficer(b) {
+    const o = DATA.officers[b.officer.key], can = Battle.canUseOfficer() && Battle.waiting();
+    return `<span class="bofficer"><button class="ochip" data-act="officerinfo" data-a="${b.officer.key}" title="${U.esc(o.passives.map((p) => p.text).join(' · '))}">${this.portrait(b.officer.key, 22)}<span>${U.esc(o.name)}</span></button>
+      <button class="btn small oability ${b.officer.used ? 'used' : can ? 'ready' : ''}" data-act="officer" ${can ? '' : 'disabled'} title="${U.esc(o.ability.text)} Once per battle, on your turn; does not use the ship's turn.">★ ${U.esc(o.ability.name)}${b.officer.used ? ' · used' : ''}</button></span>`;
+  },
+
   // ---------- rules of engagement (pop-up from the battle screen) ----------
   rulesModal() {
     const P = DATA.damageTypes.physical, E = DATA.damageTypes.energy, adv = DATA.sizeAdvantage, dis = DATA.sizeDisadvantage;
@@ -99,7 +144,8 @@ Object.assign(UI, {
             <li value="8">Speed: faster ships act earlier in the round (the turn order at the bottom).</li>
             <li value="9">Evasion: the share of shots this ship dodges.</li>
           </ol>
-          <p class="small muted">Blue bar: shields. Orange bar: hull. <b>Restore</b> shows what it would give back.</p></section>
+          <p class="small muted">Blue bar: shields. Orange bar: hull. <b>Restore</b> shows what it would give back.</p>
+          <p><b>Officers:</b> the officer leading your fleet (next to its name) gives its ships passive bonuses for the whole battle. Its <b>★ ability</b> can be used once per battle on your turn and doesn't use the ship's turn.</p></section>
       </div>
       <div class="btnrow">${this.btn('Close', 'close', '', false, 'gold')}</div></div>`);
     this.$('modal').querySelector('.modal-box').classList.add('wide');
@@ -203,7 +249,7 @@ Object.assign(UI, {
         else slots.push(`<div class="lanewrap" ${drop ? `data-dropship="${drop}"` : ''}>${canDrop ? this.emptySlot('assign', `${sel.id}|${f.id}`, '＋ move here') : this.emptySlot(null, null, f.mission ? '' : '＋')}</div>`);
       }
       const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : '<span class="muted">at home · ready</span>';
-      return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button>
+      return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button> ${this.officerSlot(f)}
           <span class="small">${status}</span><span class="small muted">power ${Ships.groupPower(ships)} · ${ships.length}/${DATA.fleetMax}</span></div>
         <div class="cardrow">${slots.join('')}</div></div>`;
     }).join('');
@@ -222,6 +268,8 @@ Object.assign(UI, {
         ${sel && selFleet && !selFleet.mission && !full ? this.emptySlot('assign', `${sel.id}|hangar`, '＋ to hangar') : ''}</div>
         ${hangar.length ? '' : '<p class="muted small">Empty. New ships join a fleet at home with room, or wait here. Drop a ship here to take it out of its fleet.</p>'}`) +
       this.autoScrapPanel() +
+      this.panel(`Officers (${Ships.officers().length})`, `<p class="small muted">Each fleet can be led by one officer (＋ Officer on the fleet). Passives apply to its ships in battle; the ★ ability is used once per battle.</p>
+        <div class="ocards">${Ships.officers().map((k) => { const f = Ships.officerFleet(k); return this.officerCard(k, { foot: `<small class="${f ? 'good' : 'muted'}">${f ? `Leads ${U.esc(f.name)}` : 'Not leading a fleet'}</small>` }); }).join('')}</div>`) +
       this.panel(`Armory (${G.armory.length})`, G.armory.length ? ['S', 'M', 'L'].map((z) => {
         const ws = G.armory.filter((w) => w.size === z);
         return ws.length ? `<div class="kv"><span>${DATA.sizes[z].name}</span><span class="wlist">${ws.map((w) => this.weaponChip(w)).join('')}</span></div>` : '';
@@ -340,7 +388,7 @@ Object.assign(UI, {
       return this.panel(`⚠ ${U.esc(b.threat.name)} at ${U.esc(s.name)}`, `<p class="flavor">${DATA.factions[b.threat.owner].name} drops out of the warp above ${U.esc(s.name)}. Choose who stands between them and your people.</p>
         <div class="cardrow wrap">${b.threat.ships.map((sh) => this.shipCard(sh, { owner: b.threat.owner, small: true })).join('')}</div>
         <p class="small muted">Enemy power ${Ships.groupPower(b.threat.ships)}.${def ? ' Your Planetary Defenses fight alongside whoever you send.' : ' This system has no Bastions or Defense Platforms.'}</p>
-        <div class="btnrow big">${idle.map((f) => this.btn(`Defend with ${U.esc(f.name)} <small>power ${Ships.groupPower(Ships.fleetShips(f))} · ${f.ships.length} ships</small>`, 'bdefend', f.id, false, 'gold')).join('')}
+        <div class="btnrow big">${idle.map((f) => this.btn(`Defend with ${U.esc(f.name)} <small>power ${Ships.groupPower(Ships.fleetShips(f))} · ${f.ships.length} ships${f.officer && DATA.officers[f.officer] ? ` · ${U.esc(DATA.officers[f.officer].name)}` : ''}</small>`, 'bdefend', f.id, false, 'gold')).join('')}
         ${this.btn(def ? 'Defenses only' : 'Leave them undefended', 'bdefend', '', false, 'danger')}</div>
         ${idle.length ? '' : '<p class="small bad">Every fleet is away.</p>'}`);
     }
@@ -432,7 +480,7 @@ Object.assign(UI, {
       <div class="bside enemy" style="--lanes:${lanes}">${side('enemy')}</div>
       <div class="bgap"></div>
       <div class="bside player" style="--lanes:${lanes}">${side('player')}</div>
-      <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b><span>fleet power <b>${pP}</b></span></div>
+      <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b>${b.officer ? this.battleOfficer(b) : ''}<span>fleet power <b>${pP}</b></span></div>
       <svg class="barrow" id="barrow"></svg>
       <div class="bcontrols">${controls}</div>
       ${order}

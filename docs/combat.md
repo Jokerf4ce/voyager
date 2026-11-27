@@ -262,6 +262,8 @@ The base is then applied to the target's shield first, then its hull:
 - 6 of those 10 were needed, so 40 % of the base (8) carries over.
 - The hull takes 8 × 1.5 = **12**.
 
+**Officers** (v0.66, `DATA.officers`): the officer leading a fleet adds its passives to that fleet's ships at the start of a battle (hull, evasion, hit chance, damage for a size or a damage type, speed for a size), and its ability can be used once per battle on your turn without using the ship's turn (Hold the Line, Smoke and Mirrors, Prophecy of Ruin). Planetary Defenses get no officer bonuses.
+
 **Research bonuses** apply to your ships only (each up to 10 levels, see `DATA.techs`):
 - *Plasma Weave*: +3 % weapon damage per level.
 - *Bone-grown Hulls*: +3 % shield and hull per level.

@@ -2,6 +2,16 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.66.0 — 2026-11-27
+- **Officers:** a new kind of card that leads a fleet. Each officer has passive bonuses for the fleet's ships in battle and one ★ ability, usable once per battle on your turn without using the ship's turn. Auto and "Resolve instantly" use it when it fits.
+  - **Admiral Vashti Kroll, The Iron Matron:** +10 % hull, +12 % damage for Large ships. ★ Hold the Line: every ship regains 30 % of its max shields.
+  - **Commander Oren Sable, Ghost of Tharsis:** +6 evasion, +2 speed for Small ships. ★ Smoke and Mirrors: until the round ends, enemy shots have half their hit chance.
+  - **Fleet Augur Iszra, The Blind Seer:** +5 % hit chance, +12 % energy weapon damage. ★ Prophecy of Ruin: the active ship's target loses all its shields.
+  - Hangar: an officer slot in every fleet's header (＋ Officer opens a picker; ⇄ change, ✕ relieve; not while the fleet is away) and an Officers panel with every card. Each officer has a 16×16 pixel portrait.
+  - Battle: the officer sits next to your fleet's name with the ★ ability button (it glows when ready); the defense setup lists each fleet's officer; a short horn call plays when the ability is used.
+  - Every game starts with all three officers; the Home Guard starts under Kroll. Existing saves get all three, and their first fleet gets Kroll.
+  - Tutorial (Hangar and Your turn steps) and Rules of engagement mention officers.
+
 ## 0.65.0 — 2026-11-27
 - **A Rare deposit next to home.** Every new game puts one fixed Rare deposit in a system adjacent to the starting system: an average Scorched Rock labelled "Rare deposit", Rare rating 5 (the best in the game), with a stable crust (Barren, habitability 3) so Core Drills can be built on its surface. Electronics no longer starve for lack of Rare Minerals when the home system is poor in them.
   - Deposits are a general mechanism (`p.deposit`, `DATA.deposits`): +2 to that resource's rating. Rating dots now show up to 5.

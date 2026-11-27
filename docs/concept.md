@@ -137,6 +137,18 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 
 **Tutorial practice battle** (decided v0.58): the tutorial explains raids and battles with a staged raid and a live practice fight. Those steps (`demo:` in `DATA.tutorial`) run in a sandbox copy of `G` that is never saved; the real game is restored when a step without `demo` is shown or the tutorial ends.
 
+## 4a-7. Officers
+
+**Decided (v0.66):** officers are a new kind of card that leads a fleet (`DATA.officers`, owned in `G.officers`, assigned as `fleet.officer`; one officer per fleet, one fleet per officer, not while the fleet is away). Each has one or more **passives** that apply to the fleet's ships for the whole battle (not to Planetary Defenses) and exactly one **ability**, usable once per battle on your turn without using the ship's turn; Auto and "Resolve instantly" use it when it fits (`Battle.abilities[key].wise`). Managed in the Hangar (＋ Officer on a fleet, the Officers panel); shown in battle next to your fleet's name with a ★ button.
+
+| Officer | Passives | Ability |
+|---|---|---|
+| Admiral Vashti Kroll, *The Iron Matron* | +10 % hull (all ships), +12 % damage (Large ships) | **Hold the Line:** every ship regains 30 % of max shields |
+| Commander Oren Sable, *Ghost of Tharsis* | +6 evasion (all ships), +2 speed (Small ships) | **Smoke and Mirrors:** until the round ends, enemy shots have half their hit chance |
+| Fleet Augur Iszra, *The Blind Seer* | +5 % hit chance, +12 % energy weapon damage | **Prophecy of Ruin:** the active ship's target loses all its shields |
+
+Every game starts with all three; the Home Guard starts under Kroll. **Open:** how new officers are found (recruitment, rewards, a gacha banner), officer levels or traits, enemy officers.
+
 ## 4a-6. Fixed deposits
 
 **Decided (v0.65):** a planet can carry a fixed deposit (`p.deposit`, `DATA.deposits`) that adds to one resource's rating. Every new game places one **Rare deposit** in a system next to home: an average Scorched Rock (Rare rating 3, +2 from the deposit = 5) with a stable crust (habitability 3, Barren) so Core Drills can go on its surface. Reason: a playtest game whose start had poor Rare Minerals could never afford Electronics to rebuild its fleet. Playtest after (5 games each, 200 Cycles): no game stuck, the weakest Commander game at 12 colonies by Cycle 200 (before: 1).
