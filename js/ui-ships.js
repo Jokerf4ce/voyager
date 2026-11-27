@@ -270,7 +270,7 @@ Object.assign(UI, {
         } else extra += `<div class="floater ${fx.kind}" style="${timing}">${fx.kind === 'miss' ? 'MISS' : '+ RESTORED'}</div>`;
       }
       if (u.dead) extra += '<div class="wreck-stamp">✕ DESTROYED</div>';
-      extra += isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? ` · across lanes ×${DATA.offLaneHit} hit` : ''}</div>` : '';
+      extra += isT ? `<div class="preview">◎ target${cur.lane !== u.lane ? `<i> · across lanes ×${DATA.offLaneHit} hit</i>` : ''}</div>` : '';
       // the acting ship gets little arrows to pick a lane to swap to
       if (acting && myTurn) {
         extra += `<div class="swapnav"><button class="btn small" data-act="bswapnav" data-a="-1" title="Pick a lane to the left">◀</button><span>swap</span><button class="btn small" data-act="bswapnav" data-a="1" title="Pick a lane to the right">▶</button></div>`;

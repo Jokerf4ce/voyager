@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.52.2 — 2026-11-27
+- **Battle screen fixed on phones and small tablets.** The two rows of ships no longer collapse on top of each other and the Auto / Resolve / Retreat buttons.
+  - Cards are compact on phones: size badge, picture, shield and hull bars. The prompt names the acting ship and its target.
+  - The swap arrows are smaller, and the turn order is one strip you can swipe.
+  - The battle log and rules sit below.
+  - Desktop is unchanged.
+
 ## 0.52.1 — 2026-11-27
 - Phones: the resource bar stacks into a compact grid (about 4 per row) under the buttons instead of one long row you had to scroll sideways, so everything is visible at once.
 
