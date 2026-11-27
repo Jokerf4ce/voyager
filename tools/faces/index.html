@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voyager · Face Workshop</title>
+<style>
+  body { margin: 0; background: #0c0a08; color: #d8d0c0; font: 15px/1.35 ui-monospace, Menlo, Consolas, monospace; }
+  main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 16px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 18px; letter-spacing: 3px; color: #d0a040; margin: 0 0 4px; grid-column: 1 / -1; }
+  .note { color: #8a8070; font-size: 13px; grid-column: 1 / -1; margin: 0 0 6px; }
+  .ctl { background: #15110d; border: 1px solid #3a3028; padding: 10px; }
+  label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0; }
+  select, input[type=color] { background: #1c1712; color: #d8d0c0; border: 1px solid #4a3e30; font: inherit; }
+  select { width: 170px; }
+  .marks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin: 4px 0 8px; }
+  .marks label { justify-content: flex-start; margin: 0; }
+  h3 { font-size: 13px; color: #d0a040; letter-spacing: 2px; margin: 10px 0 4px; text-transform: uppercase; }
+  .colors label { margin: 2px 0; }
+  button { background: #2a2018; color: #f0d070; border: 1px solid #8a6a30; padding: 5px 10px; font: inherit; cursor: pointer; }
+  button:hover { background: #3a2c1e; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .view { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+  .view img { image-rendering: pixelated; background: #000; border: 2px solid #3a3028; }
+  textarea { width: 100%; height: 150px; background: #15110d; color: #c8c0b0; border: 1px solid #3a3028; font: 12px ui-monospace, monospace; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, 96px); gap: 8px; margin-top: 12px; }
+  .grid img { width: 96px; height: 96px; image-rendering: pixelated; cursor: pointer; border: 1px solid #3a3028; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>FACE WORKSHOP</h1>
+  <p class="note">Build a portrait from parts (js/faces.js). Copy the spec into an officer's <code>face:</code> in js/data.js. New parts: add a function to <code>Faces.parts.&lt;slot&gt;</code> and it shows up here.</p>
+  <div class="ctl">
+    <div id="slots"></div>
+    <h3>Marks</h3><div class="marks" id="marks"></div>
+    <h3>Colours</h3><div class="colors" id="colors"></div>
+    <div class="row"><button id="rnd">⚄ Random</button><button id="rndc">Random colours</button><select id="officer"><option value="">Load officer…</option></select></div>
+  </div>
+  <div>
+    <div class="view"><img id="big" width="320" height="320" alt=""><img id="mid" width="96" height="96" alt=""><img id="small" width="48" height="48" alt=""><img id="tiny" width="24" height="24" alt=""></div>
+    <h3>Spec</h3>
+    <textarea id="spec" spellcheck="false"></textarea>
+    <div class="row"><button id="copy">Copy spec</button><button id="apply">Apply edited spec</button><button id="many">Show 24 random faces</button></div>
+    <div class="grid" id="gallery"></div>
+  </div>
+</main>
+<script src="../../js/data.js"></script>
+<script src="../../js/faces.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const P = Faces.parts, SLOTS = ['bg', 'outfit', 'head', 'eyes', 'brows', 'nose', 'mouth', 'hair', 'beard', 'headgear'];
+const COLORS = { skin: '#c89a78', hair: '#3a2a20', iris: '#5a7090', cloth: '#3a3a44', cloth2: '#8a8070', trim: '#c8a040', metal: '#5c5c66', glow: '#50e0f0', bg: '#2a2026' };
+const SKINS = ['#ecc8a8', '#e0b090', '#c89a78', '#a87858', '#8a5a3c', '#5e3c28', '#d8c0a8', '#b0a090'];
+const HAIRS = ['#1c1410', '#3a2a20', '#6a4024', '#a06030', '#d0b080', '#c0b8b0', '#e8e0d0', '#602020', '#2a3040'];
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const hsl = (h, s, l) => { const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return Faces.toHex([(r + m) * 255, (g + m) * 255, (b + m) * 255]); };
+let spec = JSON.parse(JSON.stringify(DATA.officers.kroll.face));
+
+function build() {
+  $('slots').innerHTML = SLOTS.map((s) => `<label>${s}<select data-slot="${s}">${Object.keys(P[s]).map((k) => `<option>${k}</option>`).join('')}</select></label>`).join('');
+  $('marks').innerHTML = Object.keys(P.marks).map((k) => `<label><input type="checkbox" data-mark="${k}"> ${k}</label>`).join('');
+  $('colors').innerHTML = Object.keys(COLORS).map((k) => `<label>${k}<input type="color" data-color="${k}"></label>`).join('');
+  $('officer').innerHTML += Object.keys(DATA.officers).map((k) => `<option value="${k}">${DATA.officers[k].name}</option>`).join('');
+  document.querySelectorAll('[data-slot]').forEach((el) => el.onchange = () => { spec[el.dataset.slot] = el.value; draw(); });
+  document.querySelectorAll('[data-mark]').forEach((el) => el.onchange = () => { spec.marks = [...document.querySelectorAll('[data-mark]:checked')].map((m) => m.dataset.mark); draw(); });
+  document.querySelectorAll('[data-color]').forEach((el) => el.oninput = () => { spec.colors = Object.assign({}, spec.colors, { [el.dataset.color]: el.value }); draw(); });
+}
+function sync() {
+  document.querySelectorAll('[data-slot]').forEach((el) => { el.value = spec[el.dataset.slot] || Object.keys(P[el.dataset.slot])[0]; });
+  document.querySelectorAll('[data-mark]').forEach((el) => { el.checked = (spec.marks || []).includes(el.dataset.mark); });
+  document.querySelectorAll('[data-color]').forEach((el) => { el.value = (spec.colors || {})[el.dataset.color] || COLORS[el.dataset.color]; });
+}
+function draw() {
+  const url = Faces.render(spec);
+  for (const id of ['big', 'mid', 'small', 'tiny']) $(id).src = url;
+  $('spec').value = 'face: ' + JSON.stringify(spec, null, 1).replace(/\n\s*/g, ' ').replace(/"(\w+)":/g, '$1:').replace(/"/g, "'") + ',';
+}
+function randomColors() {
+  const h = Math.random() * 360;
+  return { skin: pick(SKINS), hair: pick(HAIRS), iris: hsl(Math.random() * 360, 0.45, 0.5), cloth: hsl(h, 0.3, 0.2), cloth2: hsl(h, 0.15, 0.6),
+    trim: pick(['#d0a040', '#b8b8c0', '#c07040', '#a03030']), metal: hsl(h, 0.08, 0.35), glow: hsl(Math.random() * 360, 0.85, 0.62), bg: hsl(Math.random() * 360, 0.35, 0.1) };
+}
+function randomSpec() {
+  const r = (s) => pick(Object.keys(P[s]));
+  return { head: r('head'), eyes: r('eyes'), brows: r('brows'), nose: r('nose'), mouth: r('mouth'), hair: r('hair'), beard: Math.random() < 0.6 ? 'none' : r('beard'),
+    headgear: Math.random() < 0.5 ? 'none' : r('headgear'), outfit: r('outfit'), marks: Object.keys(P.marks).filter(() => Math.random() < 0.15), bg: r('bg'), colors: randomColors() };
+}
+$('rnd').onclick = () => { spec = randomSpec(); sync(); draw(); };
+$('rndc').onclick = () => { spec.colors = randomColors(); sync(); draw(); };
+$('officer').onchange = (e) => { if (e.target.value) { spec = JSON.parse(JSON.stringify(DATA.officers[e.target.value].face)); sync(); draw(); } };
+$('copy').onclick = () => { $('spec').select(); navigator.clipboard && navigator.clipboard.writeText($('spec').value); };
+$('apply').onclick = () => {
+  try { spec = Function('return ({' + $('spec').value.replace(/,\s*$/, '') + '}).face')(); sync(); draw(); } catch (e) { alert('Could not read that spec: ' + e.message); }
+};
+$('many').onclick = () => {
+  const specs = Array.from({ length: 24 }, randomSpec);
+  $('gallery').innerHTML = specs.map((s, i) => `<img src="${Faces.render(s)}" data-i="${i}" title="click to edit">`).join('');
+  $('gallery').querySelectorAll('img').forEach((img) => img.onclick = () => { spec = specs[+img.dataset.i]; sync(); draw(); });
+};
+build(); sync(); draw();
+</script>
+</body>
+</html>

@@ -281,29 +281,29 @@ DATA.systemProjects = {
 // used once per battle on your turn, without using the ship's turn (Battle.useOfficer).
 //   passives  stat: hull / evade / acc (all ships), dmgL (Large ships), speedS (Small ships), energy (energy weapons)
 //   ability   key: holdline / smoke / ruin (see Battle.abilities)
-//   art       16×16 portrait, one character per pixel (pal: colours; '.' = transparent)
+//   face      the portrait, drawn by js/faces.js from parts and colours (try them in tools/faces/index.html)
 DATA.officers = {
   kroll: { name: 'Vashti Kroll', rank: 'Admiral', title: 'The Iron Matron',
     flavor: 'Forty years at the helm and not one ship surrendered. She does not raise her voice; she does not need to.',
     passives: [{ stat: 'hull', value: 0.1, text: '+10 % hull for every ship' }, { stat: 'dmgL', value: 0.12, text: '+12 % damage for Large ships' }],
     ability: { key: 'holdline', name: 'Hold the Line', text: 'Every ship of yours regains 30 % of its max shields.' },
-    pal: { k: '#0e0b09', h: '#b8b0a4', H: '#6e675e', s: '#d0a080', S: '#8a5e44', r: '#b03030', u: '#3a4a5a', w: '#e8e0c8', g: '#d0a040' },
-    art: ['....kkkkkkk.....', '...khhhhhhhk....', '..khhhhhhhhhk...', '..khsssssssHk...', '..kssksssksSk...', '..ksssssssrSk...', '..kssssksssSk...', '...ksskkkssk....',
-          '...kSsssssSk....', '....kSSSSSk.....', '..kkgukkkugkk...', '.kgguuuuuuuggk..', '.kuuuuwuuuuuuk..', '.kuuuurruuuuuk..', '.kuuuuuuuuuuuk..', '.kkkkkkkkkkkkk..'] },
+    face: { head: 'oval', eyes: 'normal', brows: 'stern', nose: 'straight', mouth: 'grim', hair: 'bun', beard: 'none', headgear: 'none', outfit: 'admiral', marks: ['scar', 'wrinkles', 'earring'], bg: 'banner',
+      colors: { skin: '#d0a080', hair: '#b8b0a4', iris: '#6a9ac8', cloth: '#2e3c4e', cloth2: '#c8c0b0', trim: '#d0a040', bg: '#5a1a1c', glow: '#f0d070' } },
+  },
   sable: { name: 'Oren Sable', rank: 'Commander', title: 'Ghost of Tharsis',
     flavor: 'Officially he died at Tharsis. Unofficially, nobody who saw him there lived to file the report.',
     passives: [{ stat: 'evade', value: 6, text: '+6 evasion for every ship' }, { stat: 'speedS', value: 2, text: '+2 speed for Small ships' }],
     ability: { key: 'smoke', name: 'Smoke and Mirrors', text: 'Until the end of the round, enemy shots have half their hit chance.' },
-    pal: { k: '#0b0a0c', U: '#24242c', u: '#3c3c48', c: '#50e0f0', s: '#b08870', S: '#6e5040' },
-    art: ['.....kkkkkk.....', '...kkUUUUUUkk...', '..kUUuuuuuuUUk..', '..kUuUUUUUUuUk..', '..kUukkkkkkuUk..', '..kUkcccccckUk..', '..kUkkkkkkkkUk..', '..kUUkSsssSkUk..',
-          '..kUUksssssUUk..', '...kUUkkkkUUk...', '..kUUUUUUUUUUk..', '.kUuuUUUUUUuuUk.', '.kUuuuUccUuuuUk.', '.kUuuuUccUuuuUk.', '.kUuuuuuuuuuuUk.', '.kkkkkkkkkkkkkk.'] },
+    face: { head: 'long', eyes: 'normal', brows: 'flat', nose: 'hooked', mouth: 'smirk', hair: 'crop', beard: 'stubble', headgear: 'hood', outfit: 'coat', marks: ['visor'], bg: 'stars',
+      colors: { skin: '#b08870', hair: '#2a2420', iris: '#50e0f0', cloth: '#26262e', cloth2: '#6a6a74', trim: '#8a8a94', metal: '#3a3a44', bg: '#0c1018', glow: '#50e0f0' } },
+  },
   iszra: { name: 'Iszra', rank: 'Fleet Augur', title: 'The Blind Seer',
     flavor: 'She gave her eyes to the warp-choirs and got something better back. She sees where the shot will be, not where the ship is.',
     passives: [{ stat: 'acc', value: 0.05, text: '+5 % hit chance' }, { stat: 'energy', value: 0.12, text: '+12 % damage with energy weapons' }],
     ability: { key: 'ruin', name: 'Prophecy of Ruin', text: 'The ship your active ship targets loses all its shields.' },
-    pal: { k: '#0c090c', s: '#c09478', S: '#7a5444', e: '#f0a0ff', c: '#c060f0', b: '#d8d0b8', w: '#7a2020', p: '#5a2a6a', P: '#341838', g: '#d0a040' },
-    art: ['.....kkkkkk.....', '....kssssssk....', '...ksssssesSk...', '...ksssscsssk...', '...kbbbbbbbbk...', '...kbwbbbbwbk...', '...ksssssssSk...', '....ksskksSk....',
-          '....kSsssSk.....', '...kpkSSSkpk....', '..kpPppppppPpk..', '.kpPPpppcpppPPk.', '.kpPpppppppppPk.', '.kpPpgpppppgpPk.', '.kpPpppppppppPk.', '.kkkkkkkkkkkkkk.'] },
+    face: { head: 'gaunt', eyes: 'closed', brows: 'none', nose: 'straight', mouth: 'neutral', hair: 'bald', beard: 'none', headgear: 'circlet', outfit: 'robe', marks: ['bandage', 'thirdeye', 'tattoo'], bg: 'halo',
+      colors: { skin: '#c09478', iris: '#f0a0ff', cloth: '#4a2458', cloth2: '#d8d0b8', trim: '#d0a040', bg: '#24122c', glow: '#e890ff' } },
+  },
 };
 
 // Fixed deposits (v0.65): a planet with p.deposit = key gets +bonus to that resource's rating. Every new game puts one

@@ -265,17 +265,8 @@ const Sprites = {
   },
   buildingPal: { k: '#14100c', '=': '#9a8c78', '#': '#4e443a', o: '#e07030', y: '#f0d060', w: '#f4ecd8', b: '#4f8fb8', g: '#6f9a3c', p: '#9a6cc8', r: '#b03030' },
 
-  // An officer's 16×16 portrait (DATA.officers[key].art / pal).
-  portrait(key) {
-    const k = 'o:' + key;
-    if (this.cache[k]) return this.cache[k];
-    const o = DATA.officers[key], c = this.canvas(16, 16), ctx = c.getContext('2d');
-    o.art.forEach((row, y) => [...row.padEnd(16, '.').slice(0, 16)].forEach((ch, x) => {
-      if (ch === '.' || !o.pal[ch]) return;
-      ctx.fillStyle = o.pal[ch]; ctx.fillRect(x, y, 1, 1);
-    }));
-    return (this.cache[k] = c.toDataURL());
-  },
+  // An officer's portrait: 32×32, built by js/faces.js from DATA.officers[key].face.
+  portrait(key) { return Faces.render(DATA.officers[key].face); },
 
   building(key) {
     const k = 'b:' + key;

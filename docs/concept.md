@@ -147,7 +147,9 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 | Commander Oren Sable, *Ghost of Tharsis* | +6 evasion (all ships), +2 speed (Small ships) | **Smoke and Mirrors:** until the round ends, enemy shots have half their hit chance |
 | Fleet Augur Iszra, *The Blind Seer* | +5 % hit chance, +12 % energy weapon damage | **Prophecy of Ruin:** the active ship's target loses all its shields |
 
-Every game starts with all three; the Home Guard starts under Kroll. **Open:** how new officers are found (recruitment, rewards, a gacha banner), officer levels or traits, enemy officers.
+Every game starts with all three; the Home Guard starts under Kroll.
+
+**Portraits** (decided v0.67): faces are built by `js/faces.js` from parts at 32×32: background, outfit, head shape, eyes, brows, nose, mouth, hair, beard, headgear and any number of marks (scars, eyepatch, bandage, third eye, tattoos, cybernetics, monocle, earring, freckles, visor), plus colours for skin, hair, eyes, cloth, trim, metal, glow and background. Each part paints materials into a grid; shapes shade themselves (light from the upper left, three tones per colour, warm skin shadows) and the figure gets a dark outline. An officer's look is its `face:` spec in `DATA.officers`. **Face Workshop** (`tools/faces/index.html`): pick parts and colours, see the face at four sizes, browse random faces, copy the spec. **Open:** how new officers are found (recruitment, rewards, a gacha banner), officer levels or traits, enemy officers.
 
 ## 4a-6. Fixed deposits
 

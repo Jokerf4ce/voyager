@@ -783,3 +783,6 @@ body.touring [data-dragship] { cursor: not-allowed; }
 @keyframes oglow { 50% { box-shadow: 0 0 2px rgba(208, 160, 64, .2); } }
 @media (max-width: 560px) { .bofficer .ochip span { display: none; } .bofficer { margin-left: 4px; } .oability { font-size: 13px; } }
 .bpower.player { align-items: center; }
+.bofficer .ochip { padding: 0 6px 0 0; }
+.bofficer .portrait { width: 28px; height: 28px; }
+@media (min-height: 861px) { .bofficer .portrait { width: 32px; height: 32px; } }

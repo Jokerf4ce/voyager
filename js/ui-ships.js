@@ -49,12 +49,13 @@ Object.assign(UI, {
   },
 
   // ---------- officers ----------
-  portrait(key, size = 48) { return `<img class="px portrait" src="${Sprites.portrait(key)}" width="${size}" height="${size}" alt="">`; },
+  // The source is 32×32: whole multiples (32, 64) keep the pixels crisp.
+  portrait(key, size = 64) { return `<img class="px portrait" src="${Sprites.portrait(key)}" width="${size}" height="${size}" alt="">`; },
   // An officer card: portrait, name, passives and the ability. opts.foot: extra html at the bottom.
   officerCard(key, opts = {}) {
     const o = DATA.officers[key];
     return `<div class="ocard ${opts.cls || ''}">
-      <div class="ohead">${this.portrait(key, 48)}<div><small class="muted">${U.esc(o.rank)}</small><br><b>${U.esc(o.name)}</b><br><i>${U.esc(o.title)}</i></div></div>
+      <div class="ohead">${this.portrait(key, 64)}<div><small class="muted">${U.esc(o.rank)}</small><br><b>${U.esc(o.name)}</b><br><i>${U.esc(o.title)}</i></div></div>
       <ul class="opass">${o.passives.map((p) => `<li>${U.esc(p.text)}</li>`).join('')}</ul>
       <div class="oabil"><b>★ ${U.esc(o.ability.name)}</b> <small class="muted">once per battle · free action</small><br><small>${U.esc(o.ability.text)}</small></div>
       ${opts.flavor ? `<p class="flavor small">${U.esc(o.flavor)}</p>` : ''}${opts.foot || ''}</div>`;
@@ -81,7 +82,7 @@ Object.assign(UI, {
   officerSlot(f) {
     if (f.officer && DATA.officers[f.officer]) {
       const o = DATA.officers[f.officer];
-      return `<span class="oslot"><button class="ochip" data-act="officerinfo" data-a="${f.officer}" title="${U.esc(o.passives.map((p) => p.text).join(' · ') + ' · ★ ' + o.ability.name)}">${this.portrait(f.officer, 20)}<span>${U.esc(o.rank)} <b>${U.esc(o.name)}</b></span></button>${f.mission ? '' : `<button class="icon-btn small" data-act="officerpick" data-a="${f.id}" title="Change officer">⇄</button><button class="icon-btn small" data-act="officeroff" data-a="${f.id}" title="Relieve of command">✕</button>`}</span>`;
+      return `<span class="oslot"><button class="ochip" data-act="officerinfo" data-a="${f.officer}" title="${U.esc(o.passives.map((p) => p.text).join(' · ') + ' · ★ ' + o.ability.name)}">${this.portrait(f.officer, 32)}<span>${U.esc(o.rank)} <b>${U.esc(o.name)}</b></span></button>${f.mission ? '' : `<button class="icon-btn small" data-act="officerpick" data-a="${f.id}" title="Change officer">⇄</button><button class="icon-btn small" data-act="officeroff" data-a="${f.id}" title="Relieve of command">✕</button>`}</span>`;
     }
     return f.mission || !Ships.officers().length ? '' : `<button class="btn small oadd" data-act="officerpick" data-a="${f.id}">＋ Officer</button>`;
   },
@@ -89,7 +90,7 @@ Object.assign(UI, {
   // The officer in battle: portrait, name and the ability button (once per battle, on your turn).
   battleOfficer(b) {
     const o = DATA.officers[b.officer.key], can = Battle.canUseOfficer() && Battle.waiting();
-    return `<span class="bofficer"><button class="ochip" data-act="officerinfo" data-a="${b.officer.key}" title="${U.esc(o.passives.map((p) => p.text).join(' · '))}">${this.portrait(b.officer.key, 22)}<span>${U.esc(o.name)}</span></button>
+    return `<span class="bofficer"><button class="ochip" data-act="officerinfo" data-a="${b.officer.key}" title="${U.esc(o.passives.map((p) => p.text).join(' · '))}">${this.portrait(b.officer.key, 32)}<span>${U.esc(o.name)}</span></button>
       <button class="btn small oability ${b.officer.used ? 'used' : can ? 'ready' : ''}" data-act="officer" ${can ? '' : 'disabled'} title="${U.esc(o.ability.text)} Once per battle, on your turn; does not use the ship's turn.">★ ${U.esc(o.ability.name)}${b.officer.used ? ' · used' : ''}</button></span>`;
   },
 

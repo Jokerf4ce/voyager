@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.67.0 — 2026-11-27
+- **Modular, more detailed portraits.** Faces are now built from parts by a new `js/faces.js` at 32×32 (was hand-drawn 16×16): background (plain, banner, stars, halo), outfit (uniform, admiral, coat, robe, armor), head (oval, square, long, gaunt), eyes (normal, narrow, wide, closed, cyber), brows, nose, mouth, hair (bald, short, crop, slick, bun, long, mohawk, braids), beard, headgear (hood, cap, helmet, circlet, visor) and any number of marks (scar, eyepatch, bandage, third eye, tattoo, wrinkles, cyber jaw, monocle, earring, freckles, visor). Shapes shade themselves (light from the upper left, three tones per colour), and the figure gets an outline.
+  - The three officers were redone as face specs (`face:` in `DATA.officers`): Kroll with her bun, scar and admiral's braid on a red banner; Sable hooded with a cyan visor; Iszra bald, blindfolded, with a third eye and glowing tattoos.
+  - **Face Workshop** (`tools/faces/index.html`): menus for every part, mark checkboxes and colour pickers, previews at four sizes, random faces and colours, a gallery of 24 random faces, and a spec to copy into `js/data.js`. New parts added to `Faces.parts` show up there automatically.
+  - Portraits are shown at whole multiples of 32 px (64 on cards, 32 in chips) so the pixels stay crisp.
+
 ## 0.66.0 — 2026-11-27
 - **Officers:** a new kind of card that leads a fleet. Each officer has passive bonuses for the fleet's ships in battle and one ★ ability, usable once per battle on your turn without using the ship's turn. Auto and "Resolve instantly" use it when it fits.
   - **Admiral Vashti Kroll, The Iron Matron:** +10 % hull, +12 % damage for Large ships. ★ Hold the Line: every ship regains 30 % of its max shields.
