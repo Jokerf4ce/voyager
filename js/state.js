@@ -7,7 +7,8 @@ const State = {
     G = {
       version: 15,
       cycle: 1,
-      officers: Object.fromEntries(Object.keys(DATA.officers).map((k) => [k, true])), // officers you command
+      officerDefs: Officers.generate(3), // this game's officers, rolled (js/officers.js); DATA.officers reads them
+      officers: null,     // officers you command, by key (set below)
       difficulty: null,   // chosen right after the galaxy is made (State.setDifficulty); null = not picked yet
       res: { metal: 300, rare: 20, organics: 150, electronics: 30, chemicals: 200, research: 0, crypto: 0 },
       systems: [],
@@ -36,6 +37,7 @@ const State = {
       over: null,
       stats: { explored: 0, battlesWon: 0, battlesLost: 0, coloniesTaken: 0 },
     };
+    G.officers = Object.fromEntries(Object.keys(G.officerDefs).map((k) => [k, true]));
     Galaxy.generate();
     Galaxy.placeStarts();
     Log.add('The Covenant fleet arrives at the edge of the Shroud. The homeworld is ash behind it, and the void ahead is full of things that hunger.', 'story');
@@ -90,12 +92,13 @@ const State = {
       const data = JSON.parse(raw);
       if (!data || data.version !== 15) return false;
       // technologies that no longer exist (e.g. the old hull techs, removed in v0.45) are dropped
+      const defs = data.officerDefs || DATA.officerPresets; // the officers of this save (G is not set yet, so not DATA.officers)
       if (!data.officers) { // saves from before v0.66: every officer joins, and the Admiral takes the first fleet
-        data.officers = Object.fromEntries(Object.keys(DATA.officers).map((k) => [k, true]));
+        data.officers = Object.fromEntries(Object.keys(defs).map((k) => [k, true]));
         const first = (data.fleets || []).find((f) => !f.mission);
         if (first) first.officer = 'kroll';
       }
-      for (const f of data.fleets || []) if (f.officer && !DATA.officers[f.officer]) f.officer = null;
+      for (const f of data.fleets || []) if (f.officer && !defs[f.officer]) f.officer = null;
       if (!data.history) data.history = [];
       let dropped = 0;
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) { delete data.techs[id]; dropped++; }

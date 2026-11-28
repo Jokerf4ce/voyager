@@ -188,11 +188,15 @@ const Galaxy = {
       homes.push(h);
     }
 
-    // Starting fleet: two small ships (a Scout and a Fighter), a medium Frigate and a large Destroyer. The Destroyer is an Epic card.
+    // Starting fleet, random each game: two small ships, one medium and one large, of random types; one of the four is an Epic card.
     const give = (type, fleet, rarity = 'normal') => { const sh = Ships.make(type, { rarity }); sh.starter = true; G.ships[sh.id] = sh; fleet.ships.push(sh.id); }; // starter: left out of raid strength early (AI.playerStrength)
     const guard = Ships.newFleet('Home Guard');
-    guard.officer = 'kroll'; // the Home Guard starts under the Iron Matron (DATA.officers)
-    give('scout', guard); give('fighter', guard); give('frigate', guard); give('destroyer', guard, 'epic');
+    guard.officer = Object.keys(DATA.officers)[0]; // the first of this game's officers leads the Home Guard
+    const types = (size) => Object.keys(DATA.shipTypes).filter((k) => { const t = DATA.shipTypes[k]; return t.size === size && !t.monster && !t.structure; });
+    const small = U.shuffle(types('S'));
+    const start = [small[0], small[1], U.pick(types('M')), U.pick(types('L'))];
+    const epic = Math.floor(Math.random() * start.length);
+    start.forEach((t, i) => give(t, guard, i === epic ? 'epic' : 'normal'));
 
     // Space near home is safe: no lairs next door.
     const dH = U.distances(home.id);

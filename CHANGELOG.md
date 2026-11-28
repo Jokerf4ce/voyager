@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.73.0 — 2026-11-28
+- **Random starting fleet:** every new game rolls the Home Guard's ships: two small, one medium and one large of random types (Scout, Fighter or Heavy Fighter; Corvette, Frigate or Gunboat; Destroyer, Battleship or Carrier). One of the four, at random, is an Epic card.
+- **Random officers:** every new game rolls three new officers (js/officers.js): name, rank, title, story and a portrait from the face generator, two passives with rolled values, and one ability each (Hold the Line, Smoke and Mirrors, Prophecy of Ruin, one per officer). The first leads the Home Guard. Names, ranks and titles never repeat within a game.
+- Saves from before this version keep Kroll, Sable and Iszra (now `DATA.officerPresets`, also used by the Face Workshop).
+
 ## 0.72.0 — 2026-11-28
 - **Rationing warning:** a Build or Upgrade button that would push Power, Infrastructure or Compute over its cap now says so, e.g. "⚠ rations to 92 % while building" (the construction site's draw) or "⚠ rations production to 80 %" (once the new level is online). Shown only when it makes rationing worse than now. System projects too.
 - **Statistics: compare metrics.** Toggle up to five metrics at once, each line in its own colour. New empire metrics next to the resources: Fleet power, Raid strength, Colonies and Fleet upkeep (recorded from this version on). **Compare** presets (Gathered, Refined, Fleet vs raids, Metals vs upkeep, Growth). **Scale:** Shared axis, or Each own so lines of very different size can be compared by shape. Hover the chart for every value at that Cycle. The summary is now a table per metric (latest, average, highest, lowest, change).

@@ -291,7 +291,7 @@ DATA.systemProjects = {
 //   passives  stat: hull / evade / acc (all ships), dmgL (Large ships), speedS (Small ships), energy (energy weapons)
 //   ability   key: holdline / smoke / ruin (see Battle.abilities)
 //   face      the portrait, drawn by js/faces.js from parts and colours (try them in tools/faces/index.html)
-DATA.officers = {
+DATA.officerPresets = {
   kroll: {
     name: 'Vashti Kroll', rank: 'Admiral', title: 'The Iron Matron',
     flavor: 'Forty years at the helm and not one ship surrendered. She does not raise her voice; she does not need to.',
@@ -323,6 +323,9 @@ DATA.officers = {
     },
   },
 };
+// The officers of the current game: rolled per game (js/officers.js → G.officerDefs); saves from before v0.73 and
+// tools without a game (the Face Workshop) use the three hand-made presets above.
+Object.defineProperty(DATA, 'officers', { get: () => (typeof G !== 'undefined' && G && G.officerDefs) || DATA.officerPresets });
 
 // Fixed deposits (v0.65): a planet with p.deposit = key gets +bonus to that resource's rating. Every new game puts one
 // Rare deposit on a Scorched Rock in a system next to home (Galaxy.placeStarts), so Electronics never starve for lack
