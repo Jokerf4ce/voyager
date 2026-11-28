@@ -98,11 +98,15 @@ Object.assign(UI, {
       <ul class="opass-mini">${o.passives.map((p) => `<li>${U.esc(p.text)}</li>`).join('')}</ul></div>`;
   },
 
-  // The officer in battle: portrait, name and the ability button (once per battle, on your turn).
+  // The officer in battle: a card as big as the ship cards, at the end of your row (portrait, name, passives and
+  // the ability button: once per battle, on your turn).
   battleOfficer(b) {
     const o = DATA.officers[b.officer.key], can = Battle.canUseOfficer() && Battle.waiting();
-    return `<span class="bofficer"><button class="ochip" data-act="officerinfo" data-a="${b.officer.key}" title="${U.esc(o.passives.map((p) => p.text).join(' · '))}">${this.portrait(b.officer.key, 40)}<span>${U.esc(o.name)}</span></button>
-      <button class="btn small oability ${b.officer.used ? 'used' : can ? 'ready' : ''}" data-act="officer" ${can ? '' : 'disabled'} title="${U.esc(o.ability.text)} Once per battle, on your turn; does not use the ship's turn.">★ ${U.esc(o.ability.name)}${b.officer.fatigued ? ' · in maintenance' : b.officer.used ? ' · used' : ''}</button></span>`;
+    return `<div class="scard ocslot bocard" title="${U.esc(o.passives.map((p) => p.text).join(' · '))}">
+      <button class="obport" data-act="officerinfo" data-a="${b.officer.key}" title="Officer details">${this.portrait(b.officer.key, 80)}</button>
+      <small class="muted">${U.esc(o.rank)}</small><b>${U.esc(o.name)}</b>
+      <ul class="opass-mini">${o.passives.map((p) => `<li>${U.esc(p.text)}</li>`).join('')}</ul>
+      <button class="btn small oability ${b.officer.used ? 'used' : can ? 'ready' : ''}" data-act="officer" ${can ? '' : 'disabled'} title="${U.esc(o.ability.text)} Once per battle, on your turn; does not use the ship's turn.">★ ${U.esc(o.ability.name)}${b.officer.fatigued ? '<small>in maintenance</small>' : b.officer.used ? '<small>used</small>' : ''}</button></div>`;
   },
 
   // ---------- rules of engagement (pop-up from the battle screen) ----------
@@ -455,6 +459,8 @@ Object.assign(UI, {
         cells.push(i >= 0 ? unitCard(b.units[i], i)
           : `<div class="lane-empty ${name === 'player' && pick === l ? 'swap-dest' : ''}" ${name === 'player' ? `data-droplane="${l}"` : ''}>${name === 'player' && pick === l ? '⇄ here' : ''}</div>`);
       }
+      // the officer's card closes your row; the enemy row gets an empty cell there so the lanes stay opposite
+      if (b.officer) cells.push(name === 'player' ? this.battleOfficer(b) : '<div class="ospacer"></div>');
       return cells.join('');
     };
     // turn order, pinned to the bottom of the screen
@@ -492,10 +498,10 @@ Object.assign(UI, {
       ${powerBar}
       <div class="bhead2"><h3>⚔ ${U.esc(s.name)}</h3><span class="muted small">${b.kind === 'attack' ? 'Attack' : 'Defense'} · Round ${b.round}${G.battleQueue.length ? ` · ${G.battleQueue.length} more battle${G.battleQueue.length > 1 ? 's' : ''} waiting` : ''}</span>${tools}</div>
       <div class="bpower enemy" style="--fc:${this.factionColor(enemyOwner)}"><b>${U.esc(enemyName)}</b><span>fleet power <b>${pE}</b></span></div>
-      <div class="bside enemy" style="--lanes:${lanes}">${side('enemy')}</div>
+      <div class="bside enemy${b.officer ? ' woff' : ''}" style="--lanes:${lanes}">${side('enemy')}</div>
       <div class="bgap"></div>
-      <div class="bside player" style="--lanes:${lanes}">${side('player')}</div>
-      <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b>${b.officer ? this.battleOfficer(b) : ''}<span>fleet power <b>${pP}</b></span></div>
+      <div class="bside player${b.officer ? ' woff' : ''}" style="--lanes:${lanes}">${side('player')}</div>
+      <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b><span>fleet power <b>${pP}</b></span></div>
       <svg class="barrow" id="barrow"></svg>
       <div class="bcontrols">${controls}</div>
       ${order}

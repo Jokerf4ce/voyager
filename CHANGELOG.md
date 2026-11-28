@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.74.1 — 2026-11-28
+- **Battle screen: the officer is now a card as big as the ship cards**, at the end of your row (the enemy row keeps an empty cell there so the lanes stay opposite). It shows the portrait, rank, name, passives and the ★ ability button; on smaller screens rank and passives are hidden. Click the portrait for the officer's details.
+
 ## 0.74.0 — 2026-11-28
 - **In maintenance:** after every battle the fleet is in maintenance for 1 Cycle plus 1 for every 25 % of its total hull it lost (destroyed ships count fully), up to 4; one Cycle less on Learning, one more on Commander (`DATA.maintenance`). A fleet in maintenance can still fight, but **fatigued**: −25 % damage, shields start at 50 %, and its officer's ability is unavailable. Your strongest fleet can no longer answer every raid at full strength.
 - Shown in the Hangar ("⚙ in maintenance · 2 Cycles"), on the Defend buttons (rested fleets listed first), on Attack buttons when the fleet would still be in maintenance on arrival, in the battle log and Chronicle, in the Rules of engagement and in the tutorial's battle step. Maintenance runs down while the game is closed.

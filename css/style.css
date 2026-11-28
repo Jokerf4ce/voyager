@@ -775,19 +775,12 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .ocard .oabil b { color: var(--gold); font-weight: normal; }
 .ocard .btnrow { margin-top: auto; }
 .oslot { display: inline-flex; align-items: center; gap: 2px; }
-.ochip { display: inline-flex; align-items: center; gap: 5px; background: #1c1712; border: 1px solid #6a5630; color: var(--bone); padding: 1px 6px 1px 1px; cursor: pointer; font: inherit; font-size: 15px; }
-.ochip:hover { border-color: var(--gold); }
 .oadd { padding: 1px 6px; }
-.bofficer { display: inline-flex; align-items: center; gap: 6px; margin: 0 auto 0 10px; }
 .oability { text-transform: none; padding: 1px 8px; }
 .oability.ready { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 8px rgba(208, 160, 64, .45); animation: oglow 1.6s ease-in-out infinite; }
 .oability.used { opacity: .5; }
 @keyframes oglow { 50% { box-shadow: 0 0 2px rgba(208, 160, 64, .2); } }
-@media (max-width: 560px) { .bofficer .ochip span { display: none; } .bofficer { margin-left: 4px; } .oability { font-size: 13px; } }
 .bpower.player { align-items: center; }
-.bofficer .ochip { padding: 0 6px 0 0; }
-.bofficer .portrait { width: 31px; height: 28px; }
-@media (min-height: 861px) { .bofficer .portrait { width: 40px; height: 36px; } }
 /* the officer slot after a fleet's ships: stretches to the height of the ship cards */
 .fleetrow .cardrow { align-items: stretch; }
 .officerlane { margin-left: 6px; padding-left: 8px; border-left: 1px dashed var(--edge); }
@@ -836,3 +829,18 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .stattable th { color: var(--ash); font-weight: normal; }
 .bld .ration { color: var(--warn, #e0a040); }
 .maint { color: #e0a040; }
+/* the officer's card in battle: an extra column after the lanes, as big as a ship card (v0.74.1) */
+.bside.woff { grid-template-columns: repeat(var(--lanes), minmax(0, 150px)) minmax(0, 150px); }
+.bside .ospacer { visibility: hidden; }
+.scard.bocard { cursor: default; justify-content: flex-start; }
+.scard.bocard .obport { background: none; border: 0; padding: 0; cursor: pointer; line-height: 0; }
+.scard.bocard .obport .portrait { width: min(80px, 100%); height: auto; aspect-ratio: 80 / 72; }
+.scard.bocard .oability { margin-top: auto; width: 100%; white-space: normal; line-height: 1.15; padding: 3px 4px; }
+.scard.bocard .oability small { display: block; font-size: 11px; opacity: .8; }
+@media (max-height: 860px) {
+  .scard.bocard .opass-mini, .scard.bocard small.muted { display: none; }
+  .scard.bocard .obport .portrait { width: min(52px, 100%); }
+  .scard.bocard b { font-size: 13px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .scard.bocard .oability { font-size: 11px; }
+}
+@media (max-width: 560px) { .scard.bocard small.muted, .scard.bocard .opass-mini { display: none; } .scard.bocard b { font-size: 11px; } .scard.bocard .oability { font-size: 10px; padding: 2px; } }
