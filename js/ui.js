@@ -696,35 +696,53 @@ const UI = {
     return this.panel('Chronicle', G.log.map((l) => `<div class="log ${l.cls}"><i>C${l.c}</i> ${U.esc(l.t)}</div>`).join(''));
   },
 
+  // Settings: a grid of tiles of one size. The track list and the fleet colours open as full-width drawers right
+  // under their tile's row (UI.setOpen, toggled by 'setopen').
   screen_settings() {
-    return this.panel('Settings', `
-      <div class="kv"><span>Music</span><span class="btnrow">${this.btn(Music.enabled ? 'On' : 'Off', 'music', '', false, Music.enabled ? 'on' : '')}
-        <input type="range" min="0" max="100" value="${Math.round(Music.volume * 100)}" data-input="volume" aria-label="Music volume" class="slider"></span></div>
-      <div class="kv"><span>Playlist</span><span class="btnrow">${[['order', 'In order'], ['shuffle', 'Shuffle'], ['repeat', 'Repeat one']].map(([m, l]) => this.btn(l, 'musicmode', m, false, Music.mode === m ? 'on' : '')).join('')}${this.btn('Next track ▸▸', 'musicskip', '', !Music.timer)}</span></div>
-      <div class="tracks">${Music.tracks.map((t) => {
-        const now = Music.timer && Music.trackId === t.id;
-        return `<div class="track ${now ? 'now' : ''}"><div><b>${now ? '♪ ' : ''}${U.esc(t.name)}</b><br><small class="muted">${U.esc(t.mood || '')}</small></div>
-          ${this.btn(now ? 'Playing' : '▶ Play', 'musicplay', t.id, now, now ? 'on' : '')}</div>`;
-      }).join('')}</div>
-      <div class="kv"><span>Assistant</span><span class="btnrow">${this.btn(Voice.enabled ? 'On' : 'Off', 'voice', '', false, Voice.enabled ? 'on' : '')}
-        <input type="range" min="0" max="100" value="${Math.round(Voice.volume * 100)}" data-input="voicevol" aria-label="Voice volume" class="slider">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, Voice.subtitles ? 'on' : '')}${this.btn('Test', 'voicetest')}</span></div>
-      <div class="kv"><span>Difficulty</span><span><b class="diff-name d-${G.difficulty || 'learning'}">${State.diff().name}</b> <small class="muted">${State.achievementsAllowed() ? 'achievements can be earned' : 'no achievements'} · set when the game starts</small></span></div>
-      <div class="kv"><span>Sound effects</span><span class="btnrow">${this.btn(Sfx.enabled ? 'On' : 'Off', 'sfx', '', false, Sfx.enabled ? 'on' : '')}
-        <input type="range" min="0" max="100" value="${Math.round(Sfx.volume * 100)}" data-input="sfxvol" aria-label="Sound effects volume" class="slider"></span></div>
-      <h4>Fleet colours</h4>
-      <div class="colors">${[['hull', 'Hull'], ['metal', 'Metal'], ['accent', 'Trim'], ['glass', 'Glass'], ['glow', 'Engines'], ['halo', 'Engine glow']].map(([m, l]) =>
-        `<label class="colorpick"><input type="color" value="${DATA.shipPalettes.player[m]}" data-input="shipcolor" data-mat="${m}"><span>${l}</span></label>`).join('')}
-        ${this.btn('Reset', 'resetcolors', '', false, 'small')}</div>
+    const open = this.setOpen || (this.setOpen = {});
+    const tile = (icon, title, body, cls = '') => `<section class="stile ${cls}"><h4>${icon} ${title}</h4><div class="stile-body">${body}</div></section>`;
+    const toggle = (key, label) => `<button class="btn small stoggle ${open[key] ? 'on' : ''}" data-act="setopen" data-a="${key}" aria-expanded="${!!open[key]}">${label} ${open[key] ? '▴' : '▾'}</button>`;
+    const onoff = (on, act) => this.btn(on ? 'On' : 'Off', act, '', false, 'small ' + (on ? 'on' : ''));
+    const slider = (v, input, label) => `<input type="range" min="0" max="100" value="${Math.round(v * 100)}" data-input="${input}" aria-label="${label}" class="slider">`;
+    const playing = Music.timer && Music.tracks.find((t) => t.id === Music.trackId);
+    const colors = [['hull', 'Hull'], ['metal', 'Metal'], ['accent', 'Trim'], ['glass', 'Glass'], ['glow', 'Engines'], ['halo', 'Engine glow']];
+
+    const music = tile('♪', 'Music', `
+      <div class="srow">${onoff(Music.enabled, 'music')}${slider(Music.volume, 'volume', 'Music volume')}</div>
+      <div class="srow">${[['order', 'In order'], ['shuffle', 'Shuffle'], ['repeat', 'Repeat one']].map(([m, l]) => this.btn(l, 'musicmode', m, false, 'small' + (Music.mode === m ? ' on' : ''))).join('')}</div>
+      <div class="srow"><small class="muted snow">${playing ? `♪ ${U.esc(playing.name)}` : 'Nothing playing'}</small>${this.btn('Next ▸▸', 'musicskip', '', !Music.timer, 'small')}</div>
+      <div class="srow">${toggle('tracks', `Tracks (${Music.tracks.length})`)}</div>`);
+    const tracks = open.tracks ? `<div class="sdrawer"><div class="tracks">${Music.tracks.map((t) => {
+      const now = Music.timer && Music.trackId === t.id;
+      return `<div class="track ${now ? 'now' : ''}"><div><b>${now ? '♪ ' : ''}${U.esc(t.name)}</b><br><small class="muted">${U.esc(t.mood || '')}</small></div>
+        ${this.btn(now ? 'Playing' : '▶ Play', 'musicplay', t.id, now, 'small ' + (now ? 'on' : ''))}</div>`;
+    }).join('')}</div></div>` : '';
+
+    const voice = tile('☊', 'Assistant', `
+      <div class="srow">${onoff(Voice.enabled, 'voice')}${slider(Voice.volume, 'voicevol', 'Voice volume')}</div>
+      <div class="srow">${this.btn('Subtitles: ' + (Voice.subtitles ? 'On' : 'Off'), 'subtitles', '', false, 'small ' + (Voice.subtitles ? 'on' : ''))}${this.btn('Test', 'voicetest', '', false, 'small')}</div>
+      <small class="muted">The ship's AI calls out raids, battles and new colonies.</small>`);
+    const sfx = tile('♫', 'Sound effects', `
+      <div class="srow">${onoff(Sfx.enabled, 'sfx')}${slider(Sfx.volume, 'sfxvol', 'Sound effects volume')}</div>
+      <small class="muted">Clicks, the End Cycle lever, weapons and hits.</small>`);
+    const fleet = tile('✦', 'Fleet colours', `
       <div id="color-preview" class="color-preview">${this.colorPreview()}</div>
-      <div class="btnrow">${this.btn('Save now', 'save')}${this.btn('Export save', 'export')}${this.btn('Import save', 'import')}</div>
-      <textarea id="savebox" placeholder="Exported save appears here. Paste a save here, then press Import."></textarea>
-      <div class="btnrow">${this.btn(State.slot === 'tester' ? 'Regenerate the tester game' : 'Abandon and start a new galaxy', 'newgame', '', false, 'danger')}</div>
-      <div class="kv"><span>Tutorial</span><span class="btnrow">${this.btn('Replay tutorial', 'tutorial')}</span></div>
-      <div class="kv"><span>Tester mode</span><span class="btnrow">${State.slot === 'tester'
-        ? this.btn('Back to the real game', 'slot', 'main', false, 'gold')
-        : this.btn('Open tester mode', 'slot', 'tester')}</span></div>
-      <p class="muted small">Tester mode has its own save (extra colonies with random buildings, ships of every rarity, plenty of resources). Your real game is not touched. You can also open it with <code>#tester</code> at the end of the address.</p>
-      <p class="muted small">Voyager v${VERSION.number} (${VERSION.date}) · saves stay in this browser (localStorage).</p>`);
+      <div class="srow">${toggle('colors', 'Edit colours')}${this.btn('Reset', 'resetcolors', '', false, 'small')}</div>`);
+    const colorDrawer = open.colors ? `<div class="sdrawer"><div class="colors">${colors.map(([m, l]) =>
+      `<label class="colorpick"><input type="color" value="${DATA.shipPalettes.player[m]}" data-input="shipcolor" data-mat="${m}"><span>${l}</span></label>`).join('')}</div></div>` : '';
+    const diff = tile('⚖', 'Difficulty', `<div class="srow"><b class="diff-name d-${G.difficulty || 'learning'}">${State.diff().name}</b></div>
+      <small class="muted">${State.achievementsAllowed() ? 'Achievements can be earned.' : 'No achievements.'} Set when the game starts; it can't be changed.</small>`);
+    const save = tile('⛁', 'Save', `
+      <div class="srow">${this.btn('Save now', 'save', '', false, 'small')}${this.btn('Export', 'export', '', false, 'small')}${this.btn('Import', 'import', '', false, 'small')}</div>
+      <textarea id="savebox" placeholder="Export puts the save here. Paste a save, then Import.">${U.esc(this.saveText || '')}</textarea>`);
+    const tut = tile('☰', 'Tutorial', `<div class="srow">${this.btn('Replay tutorial', 'tutorial', '', false, 'small')}</div>
+      <small class="muted">The guided tour of every screen, with a practice battle.</small>`);
+    const tester = tile('⚗', 'Tester mode', `<div class="srow">${State.slot === 'tester' ? this.btn('Back to the real game', 'slot', 'main', false, 'small gold') : this.btn('Open tester mode', 'slot', 'tester', false, 'small')}</div>
+      <small class="muted">Its own save: Cycle 50, extra colonies, ships of every rarity, plenty of resources. Your real game is not touched. Also <code>#tester</code> in the address.</small>`);
+    const danger = tile('☠', State.slot === 'tester' ? 'New tester game' : 'New galaxy', `<div class="srow">${this.btn(State.slot === 'tester' ? 'Regenerate the tester game' : 'Abandon and start anew', 'newgame', '', false, 'small danger')}</div>
+      <small class="muted">${State.slot === 'tester' ? 'Rolls a fresh tester game.' : 'This voyage is lost for good.'} Voyager v${VERSION.number} (${VERSION.date}) · saves stay in this browser.</small>`, 'sdanger');
+    // drawers follow the tile whose row they open under (grid-auto-flow: dense keeps the rows full)
+    return this.panel('Settings', `<div class="sgrid">${music}${tracks}${voice}${sfx}${fleet}${colorDrawer}${diff}${save}${tut}${tester}${danger}</div>`);
   },
 
   // "×1.45" after a cost; red once a level is past the soft cap (expanding wide is cheaper).

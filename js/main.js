@@ -73,7 +73,7 @@ const Game = {
   // and on its practice steps fight the practice battle. Anything else nudges the tutorial panel instead.
   tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort', 'statsmetric', 'statsview', 'statsrange', 'statsscale', 'statspreset',
     'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
-    'rules', 'officerinfo', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
+    'rules', 'officerinfo', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'setopen', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
   // Actions that make their own sound (or one that follows right away), so they don't also click.
   ownSound: new Set(['officer', 'buildship', 'forge', 'bfire', 'brestore', 'build', 'project', 'buildauto', 'bauto', 'bplace', 'sfx', 'voicetest', 'difficulty']),
   tourPractice: new Set(['officer', 'bfire', 'bswapnav', 'brestore', 'bswapconfirm', 'battleauto', 'bresolve', 'bretreat', 'bdefend']),
@@ -212,7 +212,8 @@ const Game = {
     sfx: () => { Sfx.toggle(); if (Sfx.enabled) Sfx.play('blip'); },
     subtitles: () => { Voice.subtitles = !Voice.subtitles; Voice.savePrefs(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },
-    export: () => { UI.$('savebox').value = State.exportSave(); },
+    export: () => { UI.saveText = State.exportSave(); },
+    setopen: (a) => { UI.setOpen = UI.setOpen || {}; UI.setOpen[a] = !UI.setOpen[a]; },
     import: () => {
       try { State.importSave(UI.$('savebox').value); Game.overShown = false; State.save(); Log.add('Save imported.'); }
       catch (e) { alertLog('Import failed: ' + e.message); }

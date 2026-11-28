@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.75.0 — 2026-11-28
+- **Settings screen reworked** into a grid of tiles of one size: Music, Assistant, Sound effects, Fleet colours, Difficulty, Save, Tutorial, Tester mode and New galaxy.
+- **Music tracks are a collapsible list:** "Tracks (6) ▾" in the Music tile opens them as a full-width drawer under that row. The tile shows what is playing and Next.
+- **Fleet colours are collapsible:** the tile shows the preview ships, Reset and "Edit colours ▾", which opens the six colour pickers in a drawer.
+- Export keeps the save text in its box after the screen redraws. On phones the tiles stack in one column.
+
 ## 0.74.3 — 2026-11-28
 - **Longer maintenance:** a fleet is now in maintenance for **4 to 7 Cycles** after a battle (was 1 to 4): 4, plus 1 for every 25 % of its total hull lost, up to 7. Learning takes one Cycle off and Commander adds one, but never below 4 or above 7 (Learning 4–6, Commander 5–7).
 
