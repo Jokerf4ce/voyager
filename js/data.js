@@ -466,6 +466,7 @@ DATA.config = {
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
   historyMax: 400,        // Cycles kept for the Statistics screen
+  statsMax: 5,            // metrics drawn at once on the Statistics screen
   saveKey: 'voyager_save_v15',
 };
 
@@ -516,7 +517,7 @@ DATA.tutorial = [
   },
   {
     screen: 'stats', target: '#main .panel', title: 'Statistics',
-    text: 'Every Cycle you end is recorded here. <b>Per Cycle</b> shows what each resource gains or loses after upkeep; <b>Stockpile</b> shows what you hold. Pick a resource with the chips, and how far back to look.<br><br>A line that keeps falling is a shortage in the making: find the building or fleet that drains it before the stores run dry.'
+    text: 'Every Cycle you end is recorded here. <b>Per Cycle</b> shows what each resource gains or loses after upkeep; <b>Stockpile</b> shows what you hold. Pick up to five metrics to compare, resources or empire numbers such as fleet power against raid strength, or start from a <b>Compare</b> preset. <b>Each own</b> scale lets lines of very different size share the chart.<br><br>A line that keeps falling is a shortage in the making: find the building or fleet that drains it before the stores run dry.'
   },
   {
     screen: 'overview', demo: 'raid', pos: 'left', target: '#main .panel.threats', title: 'Raids',
@@ -548,3 +549,18 @@ DATA.tutorial = [
   },
 ];
 
+
+// Statistics screen: empire metrics recorded next to the resources (Economy.record → snap.emp), and quick comparisons.
+DATA.statsEmpire = {
+  fleet: { name: 'Fleet power', icon: '⚔', color: '#e06a5a', desc: 'Battle power of your strongest five ships' },
+  threat: { name: 'Raid strength', icon: '☠', color: '#b07ae0', desc: 'The strength raids are built to' },
+  colonies: { name: 'Colonies', icon: '⌂', color: '#7aa6e0', desc: 'Planets you hold' },
+  upkeep: { name: 'Fleet upkeep', icon: '⚙', color: '#c8a070', desc: 'Metals per Cycle spent on maintenance' },
+};
+DATA.statsPresets = [
+  ['Gathered', ['metal', 'rare', 'organics']],
+  ['Refined', ['electronics', 'chemicals']],
+  ['Fleet vs raids', ['fleet', 'threat']],
+  ['Metals vs upkeep', ['metal', 'upkeep']],
+  ['Growth', ['colonies', 'research', 'metal']],
+];

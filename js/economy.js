@@ -122,6 +122,29 @@ const Colonies = {
     return null;
   },
 
+  // How a build or upgrade would ration production (Economy.caps().eff): while the site draws its capacity,
+  // and once the new level is online. Null when neither is worse than now.
+  buildEffect(p, layer, key) {
+    const now = Economy.caps().eff;
+    const site = { layer, key, eta: 1, total: 1, probe: true };
+    (p.colony.build = p.colony.build || []).push(site);
+    const during = Economy.caps().eff;
+    p.colony.build.pop();
+    const lvl = p.colony[layer][key] || 0;
+    p.colony[layer][key] = lvl + 1;
+    const after = Economy.caps().eff;
+    p.colony[layer][key] = lvl;
+    return during < now - 1e-9 || after < now - 1e-9 ? { now, during, after } : null;
+  },
+  // The same for a system project: only the construction site draws (a finished project gives Power).
+  projectEffect(s) {
+    const now = Economy.caps().eff;
+    (s.projectBuild = s.projectBuild || []).push({ key: '_probe', eta: 1, total: 1 });
+    const during = Economy.caps().eff;
+    s.projectBuild.pop();
+    return during < now - 1e-9 ? { now, during, after: now } : null;
+  },
+
   build(ref, layer, key) {
     const { s, p } = this.get(ref);
     if (!p || !p.colony || s.owner !== 'player' || this.blocker(p, layer, key)) return false;
@@ -430,6 +453,8 @@ const Economy = {
       snap.net[k] = Math.round((n[k] || 0) * 100) / 100;
       snap.res[k] = Math.round((G.res[k] || 0) * 100) / 100;
     }
+    const top = Ships.all().map((s) => [s, Ships.power(s)]).sort((a, b) => b[1] - a[1]).slice(0, DATA.fleetMax).map(([s]) => s);
+    snap.emp = { fleet: Math.round(Ships.groupPower(top)), threat: G.threatLevel == null ? null : Math.round(G.threatLevel), colonies: Colonies.playerPlanets().length, upkeep: Math.round(Ships.upkeep() * 10) / 10 };
     G.history = G.history || [];
     G.history.push(snap);
     if (G.history.length > DATA.config.historyMax) G.history.splice(0, G.history.length - DATA.config.historyMax);

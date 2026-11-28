@@ -70,7 +70,7 @@ const Game = {
 
   // While the tutorial runs the game is locked: you can look around, change audio settings and use the tutorial,
   // and on its practice steps fight the practice battle. Anything else nudges the tutorial panel instead.
-  tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort', 'statsmetric', 'statsview', 'statsrange',
+  tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort', 'statsmetric', 'statsview', 'statsrange', 'statsscale', 'statspreset',
     'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
     'rules', 'officerinfo', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
   // Actions that make their own sound (or one that follows right away), so they don't also click.
@@ -120,7 +120,12 @@ const Game = {
     bswapnav: (a) => { UI.swapNav(+a); },
     brestore: () => { Battle.restoreTurn(); },
     hangarsort: (a) => { UI.hangarSort = a; },
-    statsmetric: (a) => { UI.statsMetric = a; },
+    statsmetric: (a) => { // toggle a metric on or off; at least one stays, at most DATA.config.statsMax
+      const on = UI.statsKeys();
+      UI.statsSel = on.includes(a) ? (on.length > 1 ? on.filter((k) => k !== a) : on) : [...on, a].slice(-DATA.config.statsMax);
+    },
+    statsscale: (a) => { UI.statsScale = a; },
+    statspreset: (a) => { const p = DATA.statsPresets[+a]; if (p) { UI.statsSel = [...p[1]]; UI.statsScale = p[1].length > 1 ? 'own' : 'shared'; } },
     statsview: (a) => { UI.statsView = a; },
     statsrange: (a) => { UI.statsRange = +a; },
     scrapf: (a) => {

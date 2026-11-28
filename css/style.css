@@ -825,3 +825,13 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .statchart .saxis { fill: var(--ash); font-size: 11px; font-family: inherit; }
 .statsum { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 6px; }
 .statsum small { display: block; }
+.statchip .sw, .stattable .sw { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; background: var(--c); opacity: .35; }
+.statchip.on .sw, .stattable .sw { opacity: 1; }
+.statchip.on { box-shadow: inset 0 -2px 0 var(--c); }
+.statchart .scol { fill: transparent; }
+.statchart .scol:hover { fill: rgba(255,255,255,.06); }
+.stattable { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.stattable th, .stattable td { text-align: right; padding: 3px 6px; border-bottom: 1px solid var(--edge); white-space: nowrap; }
+.stattable th:first-child, .stattable td:first-child { text-align: left; }
+.stattable th { color: var(--ash); font-weight: normal; }
+.bld .ration { color: var(--warn, #e0a040); }

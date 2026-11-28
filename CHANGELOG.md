@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.72.0 — 2026-11-28
+- **Rationing warning:** a Build or Upgrade button that would push Power, Infrastructure or Compute over its cap now says so, e.g. "⚠ rations to 92 % while building" (the construction site's draw) or "⚠ rations production to 80 %" (once the new level is online). Shown only when it makes rationing worse than now. System projects too.
+- **Statistics: compare metrics.** Toggle up to five metrics at once, each line in its own colour. New empire metrics next to the resources: Fleet power, Raid strength, Colonies and Fleet upkeep (recorded from this version on). **Compare** presets (Gathered, Refined, Fleet vs raids, Metals vs upkeep, Growth). **Scale:** Shared axis, or Each own so lines of very different size can be compared by shape. Hover the chart for every value at that Cycle. The summary is now a table per metric (latest, average, highest, lowest, change).
+
 ## 0.71.2 — 2026-11-28
 - **Fixed a soft-lock: Power, Infrastructure and Compute no longer block building.** With a capacity exactly full (e.g. 14 / 14 Power) nothing could be built, not even the plant that would add more. Now you can always build; going over a cap rations all production until you add capacity. The same goes for System projects.
 - **Start:** Metals 800 → 300, and the capital's Power Plant starts at level 3 (was 2).

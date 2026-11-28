@@ -472,11 +472,20 @@ const UI = {
       if (built) return `<div class="bld proj done-proj">${head}<div class="right"><span class="lvl">Online</span></div></div>`;
       if (c) return `<div class="bld proj building">${head}<div class="right"><small>${c.eta} Cycle${c.eta > 1 ? 's' : ''} left</small><div class="bar build-bar"><i style="width:${(c.total - c.eta) / c.total * 100}%"></i></div><small class="muted">site draws ${this.capText(DATA.construction.cap, false)}</small></div></div>`;
       if (used >= DATA.systemSlots) return '';
-      return `<div class="bld proj new">${head}<div class="right">${U.costText(Colonies.projectCost(key))}<br><small class="muted">${d.cycles} Cycles</small><br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn('Build', 'project', `${s.id}:${key}`, !!why)}</div></div>`;
+      return `<div class="bld proj new">${head}<div class="right">${U.costText(Colonies.projectCost(key))}<br><small class="muted">${d.cycles} Cycles</small><br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${!why || why === 'Not enough resources' ? this.rationTag(Colonies.projectEffect(s)) : ''}${this.btn('Build', 'project', `${s.id}:${key}`, !!why)}</div></div>`;
     };
     const rows = Object.keys(DATA.systemProjects).map(row).join('');
     return `<div class="projects"><h4>System projects <span class="muted">${used}/${DATA.systemSlots} slot${DATA.systemSlots > 1 ? 's' : ''}</span></h4>
       ${used ? rows : `<details data-key="proj-${s.id}"><summary class="small">Megastructures for the whole system (${Object.keys(DATA.systemProjects).length})</summary>${rows}</details>`}</div>`;
+  },
+
+  // Warning under a Build button when it would push a capacity over its cap (fx from Colonies.buildEffect).
+  rationTag(fx) {
+    if (!fx) return '';
+    const pc = (e) => Math.round(e * 100) + ' %';
+    const worst = Math.min(fx.during, fx.after);
+    const txt = fx.after < fx.now - 1e-9 ? `⚠ rations production to ${pc(fx.after)}${fx.during < fx.after - 1e-9 ? ` (${pc(fx.during)} while building)` : ''}` : `⚠ rations to ${pc(fx.during)} while building`;
+    return `<small class="ration" title="Production now ${pc(fx.now)}. Over a capacity cap, all production is rationed until you add capacity.">${txt}</small><br>`;
   },
 
   // The full build panel of one colony (both layers).
@@ -493,7 +502,7 @@ const UI = {
           if (c) return `<div class="bld building">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''} <span class="res-power">⚒ ${lvl ? `→ Lv ${lvl + 1}` : 'under construction'}</span><br><small title="${U.esc(b.desc)}">${this.bDesc(k)}</small></div>
             <div class="right"><small>${c.eta} Cycle${c.eta > 1 ? 's' : ''} left</small><div class="bar build-bar"><i style="width:${(c.total - c.eta) / c.total * 100}%"></i></div><small class="muted">site draws ${this.capText(DATA.construction.cap, false)}</small></div></div>`;
           return `<div class="bld ${lvl ? '' : 'new'}">${this.bIcon(k, 24)}<div class="grow"><b>${b.name}</b>${lvl ? ` <span class="lvl">Lv ${lvl}</span>` : ''}<br><small title="${U.esc(b.desc)}">${this.bDesc(k)}</small>${this.capUses(b.cap) ? ` <small>· ${this.capUses(b.cap)}</small>` : ''}</div>
-            <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}${lvl ? ' ' + this.demolishBtn(`${s.id}:${p.idx}:${L}:${k}`) : ''}</div></div>`;
+            <div class="right">${U.costText(cost)}${this.levelTag(lvl + 1)}<br>${why && why !== 'Not enough resources' ? `<small class="bad">${why}</small><br>` : ''}${!why || why === 'Not enough resources' ? this.rationTag(Colonies.buildEffect(p, L, k)) : ''}${this.btn(lvl ? 'Upgrade' : 'Build', 'build', `${s.id}:${p.idx}:${L}:${k}`, !!why)}${lvl ? ' ' + this.demolishBtn(`${s.id}:${p.idx}:${L}:${k}`) : ''}</div></div>`;
         };
         return `<div class="layer"><h4>${DATA.layers[L]} <span class="${used >= max ? 'bad' : 'muted'}">${used}/${max} slots</span></h4>
           ${built.map(row).join('')}
@@ -592,73 +601,95 @@ const UI = {
       + this.panel('Archives of the Covenant · War', group('military'));
   },
 
+  // Statistics: the metrics on (resources from DATA.resources, empire metrics from DATA.statsEmpire).
+  statsKeys() {
+    const ok = (k) => DATA.resources[k] || DATA.statsEmpire[k];
+    const sel = (UI.statsSel || (UI.statsMetric ? [UI.statsMetric] : ['metal'])).filter(ok);
+    return sel.length ? sel : ['metal'];
+  },
+  statsMeta(k) {
+    const r = DATA.resources[k], e = DATA.statsEmpire[k];
+    return r ? { name: r.name, icon: r.icon, color: r.color, fmt: (v) => U.amount(k, v), res: true }
+      : { name: e.name, icon: e.icon, color: e.color, fmt: (v) => U.fmt1(v), res: false, desc: e.desc };
+  },
+
   screen_stats() {
-    const keys = Object.keys(DATA.resources);
-    const metric = keys.includes(UI.statsMetric) ? UI.statsMetric : 'metal';
+    const sel = this.statsKeys();
     const view = UI.statsView === 'res' ? 'res' : 'net';
+    const scale = sel.length > 1 && UI.statsScale === 'own' ? 'own' : 'shared';
     const range = UI.statsRange ?? 25;
     const all = G.history || [];
     const pts = range ? all.slice(-range) : all;
-    const r = DATA.resources[metric];
-    const chips = keys.map((k) => this.btn(`${DATA.resources[k].icon} ${DATA.resources[k].name}`, 'statsmetric', k, false, 'small' + (k === metric ? ' on' : ''))).join('');
-    const views = [['net', 'Per Cycle'], ['res', 'Stockpile']].map(([v, l]) => this.btn(l, 'statsview', v, false, 'small' + (view === v ? ' on' : ''))).join('');
-    const ranges = [[25, 'Last 25'], [100, 'Last 100'], [0, 'All']].map(([v, l]) => this.btn(l, 'statsrange', String(v), false, 'small' + (range === v ? ' on' : ''))).join('');
-    const what = view === 'net' ? `${r.name} gained per Cycle, after upkeep` : `${r.name} in stock`;
+    const chip = (k) => { const m = this.statsMeta(k), on = sel.includes(k);
+      return `<button class="btn small statchip${on ? ' on' : ''}" data-act="statsmetric" data-a="${k}" style="--c:${m.color}"${m.desc ? ` title="${U.esc(m.desc)}"` : ''}><i class="sw"></i>${m.icon} ${m.name}</button>`; };
+    const seg = (act, list, cur) => list.map(([v, l, t]) => `<button class="btn small${cur === v ? ' on' : ''}" data-act="${act}" data-a="${v}"${t ? ` title="${U.esc(t)}"` : ''}>${l}</button>`).join('');
+    const presets = DATA.statsPresets.map(([l], i) => this.btn(l, 'statspreset', String(i), false, 'small')).join('');
+    const series = sel.map((k) => {
+      const m = this.statsMeta(k);
+      const vals = pts.map((p) => (m.res ? (p[view] || {})[k] : (p.emp || {})[k]) ?? null);
+      return { k, ...m, vals };
+    });
     let body;
     if (pts.length < 2) {
       body = `<p class="muted">No history yet. Every Cycle you end is recorded here, so the chart appears after the second Cycle.</p>`;
     } else {
-      const vals = pts.map((p) => p[view][metric]);
-      const hi0 = Math.max(...vals), lo0 = Math.min(...vals);
-      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-      const last = vals[vals.length - 1], first = vals[0];
-      const sign = (v) => (v > 0 ? '+' : '') + U.amount(metric, v);
-      body = this.statsChart(pts, metric, view, r.color)
-        + `<div class="statsum small">
-            <div><small class="muted">Latest</small><b class="res-${metric}">${U.amount(metric, last)}</b></div>
-            <div><small class="muted">Average</small><b>${U.amount(metric, avg)}</b></div>
-            <div><small class="muted">Highest</small><b>${U.amount(metric, hi0)}</b></div>
-            <div><small class="muted">Lowest</small><b>${U.amount(metric, lo0)}</b></div>
-            <div><small class="muted">Change over range</small><b class="${last - first >= 0 ? 'good' : 'bad'}">${sign(last - first)}</b></div>
-          </div>`;
+      const rows = series.map((sr) => {
+        const v = sr.vals.filter((x) => x != null);
+        if (!v.length) return `<tr><td><i class="sw" style="--c:${sr.color}"></i>${sr.icon} ${sr.name}</td><td colspan="5" class="muted">not recorded in this range</td></tr>`;
+        const last = v[v.length - 1], d = last - v[0], avg = v.reduce((a, b) => a + b, 0) / v.length;
+        return `<tr><td><i class="sw" style="--c:${sr.color}"></i>${sr.icon} ${sr.name}</td><td><b>${sr.fmt(last)}</b></td><td>${sr.fmt(avg)}</td><td>${sr.fmt(Math.max(...v))}</td><td>${sr.fmt(Math.min(...v))}</td><td class="${d >= 0 ? 'good' : 'bad'}">${d > 0 ? '+' : ''}${sr.fmt(d)}</td></tr>`;
+      }).join('');
+      body = this.statsChart(pts, series, scale)
+        + `<table class="stattable small"><tr><th>Metric</th><th>Latest</th><th>Average</th><th>Highest</th><th>Lowest</th><th>Change</th></tr>${rows}</table>`;
     }
+    const what = scale === 'own' ? 'Each line is drawn on its own scale (its lowest to highest value in the range), so you can compare shapes; hover for the real numbers.' : 'All lines share one axis.';
     return this.panel('Statistics', `
-      <p class="small muted">The economy, cycle by cycle: ${what}. Up to ${DATA.config.historyMax} Cycles are kept.</p>
-      <div class="btnrow sortrow"><small class="muted">Metric</small>${chips}</div>
-      <div class="btnrow sortrow"><small class="muted">Show</small>${views}</div>
-      <div class="btnrow sortrow"><small class="muted">Range</small>${ranges}</div>
+      <p class="small muted">The empire, Cycle by Cycle. Pick up to ${DATA.config.statsMax} metrics to compare. ${what} Up to ${DATA.config.historyMax} Cycles are kept.</p>
+      <div class="btnrow sortrow"><small class="muted">Compare</small>${presets}</div>
+      <div class="btnrow sortrow"><small class="muted">Resources</small>${Object.keys(DATA.resources).map(chip).join('')}</div>
+      <div class="btnrow sortrow"><small class="muted">Empire</small>${Object.keys(DATA.statsEmpire).map(chip).join('')}</div>
+      <div class="btnrow sortrow"><small class="muted">Resources as</small>${seg('statsview', [['net', 'Per Cycle', 'Net change per Cycle, after upkeep'], ['res', 'Stockpile', 'What you hold']], view)}
+        <small class="muted">Scale</small>${sel.length > 1 ? seg('statsscale', [['shared', 'Shared', 'One axis for every line'], ['own', 'Each own', 'Each line fills the chart, to compare shapes']], scale) : '<small class="muted">one metric</small>'}
+        <small class="muted">Range</small>${seg('statsrange', [[25, 'Last 25'], [100, 'Last 100'], [0, 'All']], range)}</div>
       ${body}`);
   },
 
-  // An inline SVG line chart of one metric over the given Cycles (no libraries).
-  statsChart(pts, key, view, color) {
-    const W = 640, H = 260, L = 58, R = 16, T = 14, B = 30;
-    const vals = pts.map((p) => p[view][key]);
-    let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
-    if (hi === lo) hi = lo + 1;
-    const pad = (hi - lo) * 0.06;
-    hi += pad; if (lo < 0) lo -= pad;
-    const x = (i) => L + (pts.length === 1 ? 0 : (i / (pts.length - 1)) * (W - L - R));
-    const y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
-    const base = y(Math.max(lo, Math.min(hi, 0)));
+  // An inline SVG line chart of several series over the given Cycles (no libraries). scale 'own' draws each
+  // series from its own lowest to highest value; hover a column for every value at that Cycle.
+  statsChart(pts, series, scale) {
+    const W = 640, H = 260, L = 58, R = 16, T = 14, B = 30, n = pts.length;
+    const x = (i) => L + (n === 1 ? 0 : (i / (n - 1)) * (W - L - R));
+    const span = (vals, zero) => { const v = vals.filter((a) => a != null); let lo = Math.min(...v, ...(zero ? [0] : [])), hi = Math.max(...v, ...(zero ? [0] : []));
+      if (!v.length) { lo = 0; hi = 1; } if (hi === lo) { hi += 1; lo -= zero ? 0 : 1; } const pad = (hi - lo) * 0.06; return [lo - (lo < 0 || !zero ? pad : 0), hi + pad]; };
+    const shared = span(series.flatMap((s) => s.vals), true);
+    const yOf = (lo, hi) => (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
     let grid = '';
+    const [glo, ghi] = scale === 'own' ? [0, 100] : shared, gy = yOf(glo, ghi);
     for (let t = 0; t <= 4; t++) {
-      const v = lo + ((hi - lo) * t) / 4;
-      grid += `<line x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="sgrid"/>`
-        + `<text x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" class="saxis">${U.esc(U.amount(key, v))}</text>`;
+      const v = glo + ((ghi - glo) * t) / 4;
+      const lab = scale === 'own' ? `${Math.round(v)} %` : (series.length === 1 ? series[0].fmt(v) : U.fmt1(Math.round(v * 10) / 10));
+      grid += `<line x1="${L}" x2="${W - R}" y1="${gy(v).toFixed(1)}" y2="${gy(v).toFixed(1)}" class="sgrid"/><text x="${L - 6}" y="${(gy(v) + 4).toFixed(1)}" text-anchor="end" class="saxis">${U.esc(lab)}</text>`;
     }
-    const line = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
-    const area = `${line} L${x(vals.length - 1).toFixed(1)} ${base.toFixed(1)} L${x(0).toFixed(1)} ${base.toFixed(1)} Z`;
-    const dots = pts.length <= 60 ? vals.map((v, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.6" fill="${color}"><title>C${pts[i].c}: ${U.esc(U.amount(key, v))}</title></circle>`).join('') : '';
-    return `<div class="statchart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${U.esc(DATA.resources[key].name)} per Cycle">
-      ${grid}
-      <line x1="${L}" x2="${W - R}" y1="${base.toFixed(1)}" y2="${base.toFixed(1)}" class="szero"/>
-      <path d="${area}" fill="${color}" fill-opacity="0.14"/>
-      <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
-      ${dots}
-      <text x="${L}" y="${H - 8}" class="saxis">C${pts[0].c}</text>
-      <text x="${W - R}" y="${H - 8}" text-anchor="end" class="saxis">C${pts[pts.length - 1].c}</text>
-    </svg></div>`;
+    if (scale !== 'own' && glo < 0 && ghi > 0) grid += `<line x1="${L}" x2="${W - R}" y1="${gy(0).toFixed(1)}" y2="${gy(0).toFixed(1)}" class="szero"/>`;
+    let lines = '';
+    for (const s of series) {
+      const [lo, hi] = scale === 'own' ? span(s.vals, false) : shared, y = yOf(lo, hi);
+      let d = '', pen = false;
+      s.vals.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)} `; pen = true; });
+      if (series.length === 1 && d) {
+        const base = y(Math.max(lo, Math.min(hi, 0))), idx = s.vals.map((v, i) => (v == null ? -1 : i)).filter((i) => i >= 0);
+        lines += `<path d="${d}L${x(idx[idx.length - 1]).toFixed(1)} ${base.toFixed(1)} L${x(idx[0]).toFixed(1)} ${base.toFixed(1)} Z" fill="${s.color}" fill-opacity="0.14"/>`;
+      }
+      lines += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round"/>`;
+      if (n <= 60) lines += s.vals.map((v, i) => (v == null ? '' : `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.4" fill="${s.color}"/>`)).join('');
+    }
+    // one invisible column per Cycle, with every value at that Cycle as its tooltip
+    const cw = n > 1 ? (W - L - R) / (n - 1) : W - L - R;
+    const cols = pts.map((p, i) => `<rect class="scol" x="${(x(i) - cw / 2).toFixed(1)}" y="${T}" width="${cw.toFixed(1)}" height="${H - T - B}"><title>Cycle ${p.c}\n${series.map((s) => `${s.name}: ${s.vals[i] == null ? '—' : s.fmt(s.vals[i])}`).join('\n')}</title></rect>`).join('');
+    return `<div class="statchart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${U.esc(series.map((s) => s.name).join(', '))} per Cycle">
+      ${grid}${lines}
+      <text x="${L}" y="${H - 8}" class="saxis">C${pts[0].c}</text><text x="${W - R}" y="${H - 8}" text-anchor="end" class="saxis">C${pts[n - 1].c}</text>
+      ${cols}</svg></div>`;
   },
 
   screen_log() {
