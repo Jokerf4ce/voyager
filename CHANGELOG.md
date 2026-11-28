@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.75.2 — 2026-11-28
+- **Settings:** one tile per row (up to 900 px wide, all the same height); the track list and colour pickers still open right under their tile. Volume sliders keep a sensible width.
+
 ## 0.75.1 — 2026-11-28
 - **Maintenance is per ship now, not per fleet.** After a battle each surviving ship is in maintenance for 4 Cycles plus 1 for every 25 % of its *own* hull it lost (up to 7; Learning −1, Commander +1, always 4–7). A ship in maintenance can fight, fatigued (−25 % damage, shields start at 50 %). Swap in rested ships from the hangar to field a fresh fleet.
 - **"⚙ MAINTENANCE · n" stamp** across every ship card in maintenance (Hangar, fleets, battle), like the "DESTROYED" stamp on wrecks; hover it for the details.
