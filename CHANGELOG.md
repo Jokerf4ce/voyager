@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.70.1 — 2026-11-28
+- **Tester mode starts at Cycle 50.** The generated test game now simulates 50 Cycles before it opens (production, missions, research, raids and battles, fought out on the spot), so the Statistics screen has history from the start. The stores are refilled after the simulation and the raid is fresh for you to try.
+
 ## 0.70.0 — 2026-11-28
 - **Statistics screen** (nav, between Hangar and Chronicle). Every Cycle you end is recorded (the net change per Cycle after upkeep, and the stockpiles), up to 400 Cycles. The screen draws one resource as a line chart: pick the metric (Metals, Rare Minerals, Organics, Electronics, Chemicals, Crypto Shards, Research), show it **Per Cycle** or as the **Stockpile**, and look back over the last 25, last 100 or all Cycles. Below the chart: latest, average, highest, lowest and the change over the range.
 - **Tutorial:** a new step after the Hangar explains the Statistics screen.
