@@ -254,7 +254,7 @@ DATA.difficulty = {
   },
   adaptive: {
     name: 'Adaptive', tag: 'Coming later', locked: true,
-    desc: 'Starts gently and hardens toward Commander as your empire grows.',
+    desc: 'Starts gently and hardens toward Commander as your empire grows. Don\'t relax to much, you will regret it.',
     points: ['Achievements disabled', 'Grace period before raids', 'Adaptive raids', 'Ships are destroyed forever', 'Standard prices', ],
     costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false
   },
