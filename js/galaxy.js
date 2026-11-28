@@ -155,7 +155,7 @@ const Galaxy = {
     G.galaxy.names.push(home.name);
     G.homeId = home.id;
     G.homePlanet = capital.idx;
-    Colonies.found(home.id, capital.idx, 'player', { mine: 2, harvester: 1, refinery: 1, dome: 1, fusion: 2 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
+    Colonies.found(home.id, capital.idx, 'player', { mine: 2, harvester: 1, refinery: 1, dome: 1, fusion: 3 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
     capital.colony.capital = true;
 
     // One system next door always holds a rich Rare deposit: a Scorched Rock with a stable crust (DATA.deposits).

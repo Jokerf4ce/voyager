@@ -117,8 +117,7 @@ const Colonies = {
     if (this.constructing(p, layer, key)) return 'Under construction';
     if (!(p.colony[layer][key] > 0) && this.slotsUsed(p, layer) >= this.slots(p, layer)) return `No free ${layer} slots`;
     if (def.gathers && !(Economy.rating(p, def.gathers) > 0 || (def.also && Economy.rating(p, def.also) > 0))) return `Nothing to gather here`;
-    const short = Economy.capShortfall(def.cap);
-    if (short) return `Not enough ${DATA.capacities[short].name}`;
+    // Power, Infrastructure and Compute never block a build: going over a cap rations production instead (v0.71.2).
     if (!this.canAfford(this.buildCost(p, layer, key))) return 'Not enough resources';
     return null;
   },
@@ -256,8 +255,6 @@ const Colonies = {
     if ((s.projects || {})[key]) return 'Already built';
     if ((s.projectBuild || []).some((c) => c.key === key)) return 'Under construction';
     if (this.projectSlotsUsed(s) >= DATA.systemSlots) return 'No free project slot';
-    const short = Economy.capShortfall(DATA.construction.cap);
-    if (short) return `Needs ${DATA.construction.cap[short]} free ${DATA.capacities[short].name}`;
     if (!this.canAfford(this.projectCost(key))) return 'Not enough resources';
     return null;
   },

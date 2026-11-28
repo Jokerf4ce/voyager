@@ -18,7 +18,7 @@ DATA.resources = {
 };
 
 // Capacities: not stockpiled. Buildings provide them and buildings/ships use them.
-// You cannot build past a cap. If usage ends up over a cap (a colony is lost), all production is rationed.
+// Building past a cap is allowed: while usage is over any cap, all production is rationed (cap / used).
 //   Power:          used by almost every building.
 //   Infrastructure: life support, meals and bunks for colony workers and ship crews.
 //   Compute:        needed by Research Labs, Defense Platforms and advanced warships.

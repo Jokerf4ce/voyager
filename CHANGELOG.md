@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.71.2 — 2026-11-28
+- **Fixed a soft-lock: Power, Infrastructure and Compute no longer block building.** With a capacity exactly full (e.g. 14 / 14 Power) nothing could be built, not even the plant that would add more. Now you can always build; going over a cap rations all production until you add capacity. The same goes for System projects.
+- **Start:** Metals 800 → 300, and the capital's Power Plant starts at level 3 (was 2).
+
 ## 0.71.1 — 2026-11-28
 - **Raids ignore the starting fleet for the first 25 Cycles** (`DATA.raidScale.starterGrace`). The Home Guard's starting ships are left out of your strength, so the first raids stay small; after Cycle 25 the raid strength catches up gradually.
 - **The capital starts with a level 2 Planetary mining rig** (was level 1). The Power Plant already started at level 2.
