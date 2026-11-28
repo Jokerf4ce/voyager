@@ -63,6 +63,7 @@ const Tester = {
     try {
       G.cycle = 0;
       for (let i = 0; i < n; i++) {
+        Ships.tickMaint();
         Missions.tick();
         Economy.tick();
         Economy.record();
@@ -80,7 +81,7 @@ const Tester = {
   settleBattles() {
     for (let guard = 0; G.battle && guard < 40; guard++) {
       const b = G.battle;
-      if (b.phase === 'setup') { const f = G.fleets.find((x) => !x.mission && x.ships.length); Battle.defendWith(f ? f.id : null); }
+      if (b.phase === 'setup') { const f = Ships.byReadiness(G.fleets.filter((x) => !x.mission && x.ships.length))[0]; Battle.defendWith(f ? f.id : null); }
       else if (b.phase === 'fight') Battle.resolve();
       else Battle.close();
       if (G.battle === b && b.phase === 'setup') { b.fleetId = null; b.phase = 'fight'; Battle.begin(); }

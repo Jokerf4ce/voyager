@@ -34,7 +34,7 @@ Object.assign(UI, {
       <div class="sc-img"><img class="px" src="${Sprites.shipImg(d.type, owner, d.variant || 0)}" alt="${U.esc(t.name)}"></div>
       <b class="sc-name" title="${U.esc(d.name)}">${U.esc(d.name)}</b><small class="sc-type">${t.name}</small>
       ${this.bar('sh', shield, shieldMax)}${this.bar('hu', hull, hullMax)}
-      <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Maintenance per Cycle">⚙${d.upkeep}</span>` : ''}${d.quality != null && !opts.small && !t.structure ? `<span class="q ${d.quality >= 110 ? 'hi' : d.quality <= 90 ? 'lo' : ''}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${d.quality}</span>` : ''}</div>
+      <div class="sc-stats"><span title="Speed (turn order)">»${d.speed}</span><span title="Maneuverability (evasion chance)">◌${d.maneuver}%</span>${d.upkeep != null && !opts.small && !t.monster && !t.structure ? `<span title="Upkeep per Cycle">⚙${d.upkeep}</span>` : ''}${d.quality != null && !opts.small && !t.structure ? `<span class="q ${d.quality >= 110 ? 'hi' : d.quality <= 90 ? 'lo' : ''}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${d.quality}</span>` : ''}</div>
       ${opts.small ? '' : `<div class="sc-weps">${d.weapons.map((w) => this.weaponChip(w)).join('')}</div>`}
       ${opts.extra || ''}
     </div>`;
@@ -102,7 +102,7 @@ Object.assign(UI, {
   battleOfficer(b) {
     const o = DATA.officers[b.officer.key], can = Battle.canUseOfficer() && Battle.waiting();
     return `<span class="bofficer"><button class="ochip" data-act="officerinfo" data-a="${b.officer.key}" title="${U.esc(o.passives.map((p) => p.text).join(' · '))}">${this.portrait(b.officer.key, 40)}<span>${U.esc(o.name)}</span></button>
-      <button class="btn small oability ${b.officer.used ? 'used' : can ? 'ready' : ''}" data-act="officer" ${can ? '' : 'disabled'} title="${U.esc(o.ability.text)} Once per battle, on your turn; does not use the ship's turn.">★ ${U.esc(o.ability.name)}${b.officer.used ? ' · used' : ''}</button></span>`;
+      <button class="btn small oability ${b.officer.used ? 'used' : can ? 'ready' : ''}" data-act="officer" ${can ? '' : 'disabled'} title="${U.esc(o.ability.text)} Once per battle, on your turn; does not use the ship's turn.">★ ${U.esc(o.ability.name)}${b.officer.fatigued ? ' · in maintenance' : b.officer.used ? ' · used' : ''}</button></span>`;
   },
 
   // ---------- rules of engagement (pop-up from the battle screen) ----------
@@ -157,7 +157,8 @@ Object.assign(UI, {
             <li value="9">Evasion: the share of shots this ship dodges.</li>
           </ol>
           <p class="small muted">Blue bar: shields. Orange bar: hull. <b>Restore</b> shows what it would give back.</p>
-          <p><b>Officers:</b> the officer leading your fleet (next to its name) gives its ships passive bonuses for the whole battle. Its <b>★ ability</b> can be used once per battle on your turn and doesn't use the ship's turn.</p></section>
+          <p><b>Officers:</b> the officer leading your fleet (next to its name) gives its ships passive bonuses for the whole battle. Its <b>★ ability</b> can be used once per battle on your turn and doesn't use the ship's turn.</p>
+          <p><b>⚙ In maintenance:</b> after a battle the fleet is in maintenance for ${DATA.maintenance.base} Cycle plus 1 for every ${Math.round(DATA.maintenance.per * 100)} % of its total hull it lost (up to ${DATA.maintenance.max}; one less on Learning, one more on Commander). It can still fight, but fatigued: −${Math.round((1 - DATA.maintenance.dmg) * 100)} % damage, shields start at ${Math.round(DATA.maintenance.shields * 100)} %, and no officer ability.</p></section>
       </div>
       <div class="btnrow">${this.btn('Close', 'close', '', false, 'gold')}</div></div>`);
     this.$('modal').querySelector('.modal-box').classList.add('wide');
@@ -189,7 +190,7 @@ Object.assign(UI, {
         <div class="sp-info">
           <div class="sp-name">"${U.esc(ship.name)}"</div>
           <div class="sp-type">${U.esc(t.name)} · ${DATA.sizes[ship.size].name} hull · <span class="q ${qc}" title="Stat roll compared with the average ${U.esc(t.name)} of this rarity (100 = average)">Q${ship.quality}</span></div>
-          <div class="sp-stats">${stat('◈', ship.shieldMax ?? ship.shield, 'Shield')}${stat('▦', ship.hullMax ?? ship.hull, 'Hull')}${stat('»', ship.speed, 'Speed (turn order)')}${stat('◌', ship.maneuver + '%', 'Maneuverability (evasion chance)')}${stat('⚙', ship.upkeep, 'Maintenance per Cycle (Metals, plus a quarter as much Chemicals)')}</div>
+          <div class="sp-stats">${stat('◈', ship.shieldMax ?? ship.shield, 'Shield')}${stat('▦', ship.hullMax ?? ship.hull, 'Hull')}${stat('»', ship.speed, 'Speed (turn order)')}${stat('◌', ship.maneuver + '%', 'Maneuverability (evasion chance)')}${stat('⚙', ship.upkeep, 'Upkeep per Cycle (Metals, plus a quarter as much Chemicals)')}</div>
           <div class="sp-weps">${ship.weapons.map((w) => this.weaponChip(w)).join('')}</div>
           <div class="sp-where small">${where}</div>
           <div class="btnrow">${ship.scrapped ? '' : this.btn('Show in Hangar', 'splashhangar')}${this.btn(`Build another ${DATA.sizes[ship.size].name} <small>${U.costText(Ships.buildCost(ship.size))}</small>`, 'buildship', ship.size, !!why)}${this.btn('Close', 'splashclose', '', false, 'gold')}</div>
@@ -260,7 +261,7 @@ Object.assign(UI, {
         if (ships[i]) slots.push(`<div class="lanewrap"><span class="lanelbl">Lane ${i + 1}</span>${cardOf(ships[i], !!f.mission, drop)}</div>`);
         else slots.push(`<div class="lanewrap" ${drop ? `data-dropship="${drop}"` : ''}>${canDrop ? this.emptySlot('assign', `${sel.id}|${f.id}`, '＋ move here') : this.emptySlot(null, null, f.mission ? '' : '＋')}</div>`);
       }
-      const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : '<span class="muted">at home · ready</span>';
+      const status = f.mission ? `<span class="res-power">${U.esc(Missions.label(f.mission))}</span> ${f.mission.phase === 'out' ? this.btn('Recall', 'recall', f.id, false, 'small') : ''}` : Ships.inMaint(f) ? `<span class="maint" title="Fatigued if it fights: −${Math.round((1 - DATA.maintenance.dmg) * 100)} % damage, shields start at ${Math.round(DATA.maintenance.shields * 100)} %, no officer ability">⚙ in maintenance · ${f.maint} Cycle${f.maint > 1 ? 's' : ''}</span>` : '<span class="muted">at home · ready</span>';
       return `<div class="fleetrow"><div class="fleethead"><b>${U.esc(f.name)}</b> <button class="icon-btn small" data-act="renamefleet" data-a="${f.id}" title="Rename">✎</button>
           <span class="small">${status}</span><span class="small muted">power ${Ships.groupPower(ships)} · ${ships.length}/${DATA.fleetMax}</span></div>
         <div class="cardrow">${slots.join('')}<div class="lanewrap officerlane"><span class="lanelbl">Officer</span>${this.officerSlot(f)}</div></div></div>`;
@@ -271,7 +272,7 @@ Object.assign(UI, {
     const cap = Ships.hangarCap(), full = hangar.length >= cap;
     const up = Ships.upkeep();
     const left = this.panel('Fleets', `<p class="small muted">Drag a ship onto a fleet slot or into the hangar (or click it, then click a free slot). A ship's position is its <b>lane in battle</b>: it shoots the enemy opposite first, so put your heaviest guns where they face the biggest threats. Fleets on a mission can't be changed. Up to ${DATA.fleetMax} ships per fleet. Send fleets out from the Star Map.</p>
-        <div class="small">${Ships.all().length} ships · maintenance <b class="res-metal">${U.fmt1(up)}</b> Metals + <b class="res-chemicals">${U.fmt1(up * DATA.upkeep.chemShare)}</b> Chemicals per Cycle${G.unpaid ? ' · <span class="bad">unpaid: no repairs</span>' : ''}</div>
+        <div class="small">${Ships.all().length} ships · upkeep <b class="res-metal">${U.fmt1(up)}</b> Metals + <b class="res-chemicals">${U.fmt1(up * DATA.upkeep.chemShare)}</b> Chemicals per Cycle${G.unpaid ? ' · <span class="bad">unpaid: no repairs</span>' : ''}</div>
         ${fleets || '<p class="muted">No fleets. Build ships at the Shipyard.</p>'}`) +
       this.panel(`Hangar <span class="${hangar.length > cap ? 'bad' : full ? 'res-power' : 'muted'}">${hangar.length} / ${cap}</span>`, `
         <p class="small muted">Ships in no fleet wait here. Each Orbital Shipyard holds ${DATA.hangar.base} ships, plus ${DATA.hangar.perLevel} for every level above 1.${cap ? '' : ' <span class="bad">You have no shipyard, so there is no room.</span>'}${full ? ' <span class="res-power">Full: new ships need a fleet with room.</span>' : ''}</p>
@@ -341,7 +342,7 @@ Object.assign(UI, {
       <div class="kv"><span>Class</span><b>${t.name} · ${DATA.sizes[sh.size].name}</b></div>
       <div class="kv"><span>Shield / Hull</span><b>${sh.shield} / ${Math.round(sh.hullNow)}${sh.hullNow < sh.hull ? ` of ${sh.hull}` : ''}</b></div>
       <div class="kv"><span>Speed · Evasion</span><b>${sh.speed} · ${sh.maneuver}%</b></div>
-      <div class="kv"><span title="Grows steeply with rarity and with the stat roll (quality), plus a personal random factor">Maintenance</span><b><span class="res-metal">${DATA.resources.metal.icon}${U.fmt1(sh.upkeep)}</span> <span class="res-chemicals">${DATA.resources.chemicals.icon}${U.fmt1(sh.upkeep * DATA.upkeep.chemShare)}</span> <small class="muted">/ Cycle</small></b></div>
+      <div class="kv"><span title="Grows steeply with rarity and with the stat roll (quality), plus a personal random factor">Upkeep</span><b><span class="res-metal">${DATA.resources.metal.icon}${U.fmt1(sh.upkeep)}</span> <span class="res-chemicals">${DATA.resources.chemicals.icon}${U.fmt1(sh.upkeep * DATA.upkeep.chemShare)}</span> <small class="muted">/ Cycle</small></b></div>
       <div class="kv"><span>Roll quality</span><b>${sh.quality}% <small class="muted">of an average ${DATA.shipRarities[sh.rarity].name} ${t.name}</small></b></div>
       <div class="kv"><span>Fleet</span><b>${f ? U.esc(f.name) : 'Hangar'}</b></div>
       <h4>Weapons (${slots} slot${slots > 1 ? 's' : ''})</h4>${weps}
@@ -368,7 +369,8 @@ Object.assign(UI, {
       const enemyPower = g ? Ships.groupPower(g.ships) : 0;
       opts.push(`<h4>Attack</h4>` + (idle.length ? `<div class="btnrow">${idle.map((f) => {
         const p = Ships.groupPower(Ships.fleetShips(f));
-        return this.btn(`${U.esc(f.name)} <small>power ${p}${enemyPower ? (p >= enemyPower ? ' ✓' : ' ⚠') : ''} · ${Missions.distance(s.id) || '?'} Cycles</small>`, 'mission', `${f.id}|attack|${s.id}`, !!Missions.blocker(f.id, 'attack', s.id));
+        const tired = (f.maint || 0) > (Missions.distance(s.id) || 0); // still in maintenance when it arrives: fights fatigued
+        return this.btn(`${U.esc(f.name)} <small>power ${p}${enemyPower ? (p >= enemyPower ? ' ✓' : ' ⚠') : ''} · ${Missions.distance(s.id) || '?'} Cycles${tired ? ` · <span class="maint">⚙ arrives fatigued</span>` : ''}</small>`, 'mission', `${f.id}|attack|${s.id}`, !!Missions.blocker(f.id, 'attack', s.id));
       }).join('')}</div>` : '<p class="small muted">No fleet is free.</p>'));
     }
     if (s.explored && !s.owner && !g) {
@@ -400,9 +402,10 @@ Object.assign(UI, {
       return this.panel(`⚠ ${U.esc(b.threat.name)} at ${U.esc(s.name)}`, `<p class="flavor">${DATA.factions[b.threat.owner].name} drops out of the warp above ${U.esc(s.name)}. Choose who stands between them and your people.</p>
         <div class="cardrow wrap">${b.threat.ships.map((sh) => this.shipCard(sh, { owner: b.threat.owner, small: true })).join('')}</div>
         <p class="small muted">Enemy power ${Ships.groupPower(b.threat.ships)}.${def ? ' Your Planetary Defenses fight alongside whoever you send.' : ' This system has no Bastions or Defense Platforms.'}</p>
-        <div class="btnrow big">${idle.map((f) => this.btn(`Defend with ${U.esc(f.name)} <small>power ${Ships.groupPower(Ships.fleetShips(f))} · ${f.ships.length} ships${f.officer && DATA.officers[f.officer] ? ` · ${U.esc(DATA.officers[f.officer].name)}` : ''}</small>`, 'bdefend', f.id, false, 'gold')).join('')}
+        <div class="btnrow big">${Ships.byReadiness(idle).map((f) => this.btn(`Defend with ${U.esc(f.name)} <small>power ${Ships.groupPower(Ships.fleetShips(f))} · ${f.ships.length} ships${f.officer && DATA.officers[f.officer] ? ` · ${U.esc(DATA.officers[f.officer].name)}` : ''}${Ships.inMaint(f) ? ` · <span class="maint">⚙ in maintenance ${f.maint}: fatigued</span>` : ''}</small>`, 'bdefend', f.id, false, Ships.inMaint(f) ? '' : 'gold')).join('')}
         ${this.btn(def ? 'Defenses only' : 'Leave them undefended', 'bdefend', '', false, 'danger')}</div>
-        ${idle.length ? '' : '<p class="small bad">Every fleet is away.</p>'}`);
+        ${idle.length ? '' : '<p class="small bad">Every fleet is away.</p>'}
+        ${idle.some((f) => Ships.inMaint(f)) ? `<p class="small muted">A fleet in maintenance can fight, but fatigued: −${Math.round((1 - DATA.maintenance.dmg) * 100)} % damage, shields start at ${Math.round(DATA.maintenance.shields * 100)} %, and its officer's ability is unavailable.</p>` : ''}`);
     }
     const cur = Battle.current();
     const curIdx = cur ? b.units.indexOf(cur) : -1;

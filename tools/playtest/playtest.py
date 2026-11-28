@@ -43,7 +43,7 @@ window.bot = () => {
   let g = 0;
   while (G.battle && g++ < 10) {
     if (G.battle.phase === 'setup') {
-      const f = Ships.idleFleets().sort((a, b) => Ships.groupPower(Ships.fleetShips(b)) - Ships.groupPower(Ships.fleetShips(a)))[0];
+      const f = (Ships.byReadiness ? Ships.byReadiness(Ships.idleFleets()) : Ships.idleFleets().sort((a, b) => Ships.groupPower(Ships.fleetShips(b)) - Ships.groupPower(Ships.fleetShips(a))))[0]; // rested fleets first (v0.74)
       T.defLog = T.defLog || [];
       const th = G.battle.threat;
       T.defLog.push({ c: G.cycle, idle: Ships.idleFleets().length, fleets: G.fleets.length, mine: f ? Math.round(Ships.groupPower(Ships.fleetShips(f))) : 0,
@@ -69,7 +69,7 @@ window.bot = () => {
     if (c) Missions.colonize(c.id, Galaxy.bestPlanet(c));
   }
 
-  // the starting scout only costs maintenance: break it up on the first Cycle
+  // the starting scout only costs upkeep: break it up on the first Cycle
   if (G.cycle === 1) for (const sh of Ships.all()) if (sh.type === 'scout') Ships.scrap(sh.id);
   // while expanding, keep enough in store for the next colony expedition
   const expanding = planets < 8 && !G.expeditions.length && G.systems.some((s) => s.explored && !s.owner);

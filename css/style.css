@@ -835,3 +835,4 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .stattable th:first-child, .stattable td:first-child { text-align: left; }
 .stattable th { color: var(--ash); font-weight: normal; }
 .bld .ration { color: var(--warn, #e0a040); }
+.maint { color: #e0a040; }

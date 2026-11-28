@@ -9,6 +9,7 @@ const Game = {
     if (G.battle && G.battle.phase === 'over') Battle.close(); // a finished battle is put away (the next queued one may start)
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
     Sfx.play('cycle');
+    Ships.tickMaint();
     Missions.tick();
     Economy.tick();
     Economy.record();

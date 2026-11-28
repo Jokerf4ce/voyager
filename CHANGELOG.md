@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.74.0 — 2026-11-28
+- **In maintenance:** after every battle the fleet is in maintenance for 1 Cycle plus 1 for every 25 % of its total hull it lost (destroyed ships count fully), up to 4; one Cycle less on Learning, one more on Commander (`DATA.maintenance`). A fleet in maintenance can still fight, but **fatigued**: −25 % damage, shields start at 50 %, and its officer's ability is unavailable. Your strongest fleet can no longer answer every raid at full strength.
+- Shown in the Hangar ("⚙ in maintenance · 2 Cycles"), on the Defend buttons (rested fleets listed first), on Attack buttons when the fleet would still be in maintenance on arrival, in the battle log and Chronicle, in the Rules of engagement and in the tutorial's battle step. Maintenance runs down while the game is closed.
+- **Renamed "Maintenance" to "Upkeep"** for the per-Cycle cost of ships (ship stats, Hangar, Overview, hover cards, research and tutorial texts), so "maintenance" only means the post-battle state.
+- Playtest bot: defends with rested fleets first.
+
 ## 0.73.1 — 2026-11-28
 - **One officer at the start:** a new game rolls a single officer (random name, portrait, passives and ability), who leads the Home Guard. Saves from before keep their officers.
 

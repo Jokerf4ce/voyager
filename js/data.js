@@ -185,10 +185,10 @@ DATA.shipTypes = {
 DATA.statSpread = { shield: 0.15, hull: 0.15, speed: 0.15, maneuver: 0.2, dmg: 0.15 };
 
 // Rarity of a ship (and of a forged weapon). mult shifts the mean of every stat roll and of weapon damage.
-// Ship maintenance (Metals per Cycle, plus chemShare × that in Chemicals): the type's upkeep × scale, × the rarity's
+// Ship upkeep (Metals per Cycle, plus chemShare × that in Chemicals): the type's upkeep × scale, × the rarity's
 // stat multiplier ^ rarityExp, × the ship's quality (its roll, 1 = average) ^ qualityExp, × a personal random
 // factor (normal, sd `spread`, kept within ±30 %). Better ships cost much more to keep flying.
-DATA.upkeep = { scale: 3, rarityExp: 1.5, qualityExp: 2, spread: 0.12, chemShare: 0.25 }; // chemShare: Chemicals per Metal of maintenance (v0.65; was 0.5)
+DATA.upkeep = { scale: 3, rarityExp: 1.5, qualityExp: 2, spread: 0.12, chemShare: 0.25 }; // chemShare: Chemicals per Metal of upkeep (v0.65; was 0.5)
 DATA.shipRarities = {
   normal: { name: 'Normal', rate: 0.769, mult: 1.0, color: '#a3a3a3' },
   strong: { name: 'Strong', rate: 0.20, mult: 1.2, color: '#4059ac' },
@@ -272,6 +272,10 @@ DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of ma
 // `perLevel` for every level above 1; all shipyards add up.
 DATA.hangar = { base: 10, perLevel: 2 };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
+// In maintenance (v0.74): after a battle, a fleet is in maintenance for base + 1 Cycle per `per` of its total hull lost
+// (dead ships count fully), up to max, adjusted by difficulty. It can still fight, but fatigued: damage × dmg,
+// shields start at × shields, and its officer's ability is unavailable.
+DATA.maintenance = { base: 1, per: 0.25, max: 4, dmg: 0.75, shields: 0.5, diff: { learning: -1, commander: 1 } };
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
 // System projects (v0.62): megastructures built for a whole star system, not on a planet. Each system you hold has
 // DATA.systemSlots project slots; a project is built once per system and stays dormant while xenos hold it.
@@ -367,7 +371,7 @@ DATA.techs = {
   rationing: { group: 'economy', name: 'Ration Protocols', cost: 35, growth: 1.35, mods: { infra: 0.04 }, desc: '+4 % Infrastructure' },
   coldlogic: { group: 'economy', name: 'Cold Logic Engines', cost: 35, growth: 1.35, mods: { compute: 0.04 }, desc: '+4 % Compute' },
   ossuary: { group: 'economy', name: 'Ossuary Indexing', cost: 25, growth: 1.35, mods: { research: 0.05 }, desc: '+5 % Research' },
-  austerity: { group: 'economy', name: 'Austerity Rites', cost: 40, growth: 1.35, mods: { upkeep: -0.03 }, desc: '−3 % ship maintenance' },
+  austerity: { group: 'economy', name: 'Austerity Rites', cost: 40, growth: 1.35, mods: { upkeep: -0.03 }, desc: '−3 % ship upkeep' },
   plasmaweave: { group: 'military', name: 'Plasma Weave', cost: 40, growth: 1.35, mods: { atk: 0.03 }, desc: '+3 % weapon damage' },
   bonehulls: { group: 'military', name: 'Bone-grown Hulls', cost: 40, growth: 1.35, mods: { hp: 0.03 }, desc: '+3 % ship shields and hull' },
   augurs: { group: 'military', name: 'Targeting Augurs', cost: 45, growth: 1.35, mods: { acc: 0.02 }, desc: '+2 % hit chance' },
@@ -508,7 +512,7 @@ DATA.tutorial = [
   },
   {
     screen: 'research', target: '#main .panel', title: 'Research',
-    text: 'Research Labs produce Research. Spend it here on small, lasting advantages: richer yields, cheaper maintenance, stronger ships and defenses. Every project can be researched up to <b>{techmax}</b> times; each level adds its bonus again and costs more. Pick one and it advances every Cycle, level after level.'
+    text: 'Research Labs produce Research. Spend it here on small, lasting advantages: richer yields, cheaper upkeep, stronger ships and defenses. Every project can be researched up to <b>{techmax}</b> times; each level adds its bonus again and costs more. Pick one and it advances every Cycle, level after level.'
   },
   {
     screen: 'shipyard', target: '#main .buildtile, #main .panel', title: 'Shipyard',
@@ -516,7 +520,7 @@ DATA.tutorial = [
   },
   {
     screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',
-    text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and a quarter as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>Each fleet can be led by an <b>officer</b> (the ＋ Officer slot after the fleet\'s ships). Officers give the fleet\'s ships passive bonuses in battle and have one ★ ability.'
+    text: 'Ships fight in fleets of up to five, and every ship costs upkeep each Cycle (Metals and a quarter as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>Each fleet can be led by an <b>officer</b> (the ＋ Officer slot after the fleet\'s ships). Officers give the fleet\'s ships passive bonuses in battle and have one ★ ability.'
   },
   {
     screen: 'stats', target: '#main .panel', title: 'Statistics',
@@ -544,7 +548,7 @@ DATA.tutorial = [
   },
   {
     screen: 'battle', demo: 'fight', pos: 'side', target: '#board .bhead2 .btnrow', title: 'Auto, and after the fight',
-    text: '<b>Auto</b> fights for you, <b>Resolve instantly</b> skips to the end, <b>Retreat</b> pulls out (in a defense, that loses the system). <b>End Cycle</b> is locked while a fight is on.<br><br>Afterwards, damage stays: fleets at home repair {repair} % of their hull per Cycle, and destroyed ships are gone for good. Victories can salvage weapons for the armory.<br><br><b>⚖ Rules of engagement</b>, under the battle log, sums all of this up with diagrams.'
+    text: '<b>Auto</b> fights for you, <b>Resolve instantly</b> skips to the end, <b>Retreat</b> pulls out (in a defense, that loses the system). <b>End Cycle</b> is locked while a fight is on.<br><br>Afterwards, damage stays: fleets at home repair {repair} % of their hull per Cycle, and destroyed ships are gone for good. After every fight the fleet is <b>in maintenance</b> for 1 to 4 Cycles, the longer the more hull it lost: it can still fight, but <b>fatigued</b> (less damage, half shields, no officer ability), so keep a second fleet ready. Victories can salvage weapons for the armory.<br><br><b>⚖ Rules of engagement</b>, under the battle log, sums all of this up with diagrams.'
   },
   {
     target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
@@ -558,7 +562,7 @@ DATA.statsEmpire = {
   fleet: { name: 'Fleet power', icon: '⚔', color: '#e06a5a', desc: 'Battle power of your strongest five ships' },
   threat: { name: 'Raid strength', icon: '☠', color: '#b07ae0', desc: 'The strength raids are built to' },
   colonies: { name: 'Colonies', icon: '⌂', color: '#7aa6e0', desc: 'Planets you hold' },
-  upkeep: { name: 'Fleet upkeep', icon: '⚙', color: '#c8a070', desc: 'Metals per Cycle spent on maintenance' },
+  upkeep: { name: 'Fleet upkeep', icon: '⚙', color: '#c8a070', desc: 'Metals per Cycle spent on upkeep' },
 };
 DATA.statsPresets = [
   ['Gathered', ['metal', 'rare', 'organics']],

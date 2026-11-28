@@ -105,7 +105,7 @@ const State = {
       if (data.techs) for (const id in data.techs) data.techs[id] = Math.min(DATA.techMax, data.techs[id] | 0);
       if (dropped) { data.techs = {}; data.researching = 'scanning'; data.researchProgress = 0; } // a save from before v0.61: start the new tree clean
       if (dropped && data.log) data.log.unshift({ c: data.cycle, t: 'The Archives were reordered (v0.61): earlier research is lost, and the new, smaller projects start from nothing.', cls: 'story' });
-      if (data.ships) for (const sh of Object.values(data.ships)) if (sh.upkeepRoll == null && DATA.shipTypes[sh.type]) sh.upkeep = Ships.rollUpkeep(sh); // v0.53 maintenance
+      if (data.ships) for (const sh of Object.values(data.ships)) if (sh.upkeepRoll == null && DATA.shipTypes[sh.type]) sh.upkeep = Ships.rollUpkeep(sh); // v0.53 upkeep
       if (data.researching && !DATA.techs[data.researching]) { data.researching = 'scanning'; data.researchProgress = 0; }
       G = data;
       return true;
@@ -141,6 +141,7 @@ const State = {
       crypto: inc.crypto * cycles * eff,
     };
     for (const k in gained) G.res[k] += gained[k];
+    for (const f of G.fleets) if (f.maint > 0) f.maint = Math.max(0, f.maint - cycles); // maintenance finishes while you are away
     const completed = Research.tick();
     for (let i = 0; i < Math.min(cycles, DATA.construction.cycles); i++) Colonies.tickBuild(true); // construction finishes while you are away (quietly)
     const mins = Math.floor(secs / 60);

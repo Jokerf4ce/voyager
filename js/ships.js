@@ -140,7 +140,7 @@ const Ships = {
   },
 
   upkeep() { return this.all().reduce((a, s) => a + s.upkeep, 0) * Math.max(0, State.mods().upkeep); }, // research can lower it
-  // Maintenance of one ship from its type, rarity, roll quality and personal random factor (DATA.upkeep).
+  // Upkeep of one ship from its type, rarity, roll quality and personal random factor (DATA.upkeep).
   rollUpkeep(ship) {
     const t = DATA.shipTypes[ship.type], u = DATA.upkeep, mult = DATA.shipRarities[ship.rarity].mult;
     if (ship.upkeepRoll == null) ship.upkeepRoll = Math.max(0.7, Math.min(1.3, U.gauss(1, u.spread)));
@@ -317,8 +317,21 @@ const Ships = {
   },
 
   // Fleets at home repair their hulls each Cycle.
+  // ---- in maintenance (DATA.maintenance): fleet.maint = Cycles left ----
+  inMaint(f) { return !!f && (f.maint || 0) > 0; },
+  // Cycles of maintenance for a battle in which the fleet lost `lostFrac` of its total hull.
+  maintCycles(lostFrac) {
+    const M = DATA.maintenance;
+    const n = M.base + Math.floor(Math.max(0, lostFrac) / M.per + 1e-9);
+    return Math.max(1, Math.min(M.max, n) + (M.diff[G.difficulty] || 0));
+  },
+  // Once per Cycle, before new battles: every fleet in maintenance gets one Cycle closer to ready.
+  tickMaint() { for (const f of G.fleets) if (f.maint > 0) f.maint--; },
+  // Rested fleets first, then the strongest.
+  byReadiness(fleets) { return [...fleets].sort((a, b) => (this.inMaint(a) - this.inMaint(b)) || this.groupPower(this.fleetShips(b)) - this.groupPower(this.fleetShips(a))); },
+
   repair() {
-    if (G.unpaid) return; // no maintenance, no repairs
+    if (G.unpaid) return; // no upkeep, no repairs
     for (const s of this.all()) {
       const f = this.fleetOf(s.id);
       if (f && f.mission) continue;

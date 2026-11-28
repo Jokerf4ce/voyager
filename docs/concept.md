@@ -365,3 +365,5 @@ Recorded audio files can be added as tracks alongside the generated ones.
 5. Prestige/reset loop, or one endless campaign?
 6. How strong should idle/offline progress be compared with active play?
 7. ~~Is the gacha a core system?~~ Decided in v0.23: it is the shipbuilding itself (4c).
+
+**In maintenance** (decided v0.74.0): to stop the strongest fleet from answering every fight, a fleet is in maintenance after each battle for 1 Cycle + 1 per 25 % of total hull lost (max 4; −1 Learning, +1 Commander). It can still fight, fatigued (−25 % damage, shields start at 50 %, no officer ability). Fleets are deliberately **not** stationed in systems (no reach limit): that gets tedious as the empire grows. The ship cost per Cycle is called **Upkeep**, so "maintenance" only means this state.

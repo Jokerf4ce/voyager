@@ -354,7 +354,7 @@ const Economy = {
   },
 
   // Who makes and who uses a resource ('res:metal') or a capacity ('cap:power'), per Cycle, for the hover cards.
-  // Resources: producers and refining inputs per colony, fleet maintenance, the research project.
+  // Resources: producers and refining inputs per colony, fleet upkeep, the research project.
   // Capacities: what each colony provides, and what uses it by building type (plus construction sites).
   breakdown(key) {
     const [kind, k] = key.split(':'), plus = [], minus = [];
@@ -366,8 +366,8 @@ const Economy = {
         if (y.inputs[k] > 0.004) minus.push([`${name} · refining`, y.inputs[k]]);
       }
       const up = Ships.upkeep();
-      if (k === 'metal' && up) minus.push(['Fleet maintenance', up]);
-      if (k === 'chemicals' && up) minus.push(['Fleet maintenance', up * DATA.upkeep.chemShare]);
+      if (k === 'metal' && up) minus.push(['Fleet upkeep', up]);
+      if (k === 'chemicals' && up) minus.push(['Fleet upkeep', up * DATA.upkeep.chemShare]);
       if (k === 'research' && G.researching && DATA.techs[G.researching]) {
         const left = Research.cost(G.researching) - G.researchProgress;
         minus.push([`Project: ${DATA.techs[G.researching].name}`, Math.min(left, this.net().research + G.res.research)]);
@@ -478,13 +478,13 @@ const Economy = {
       const over = Object.keys(DATA.capacities).filter((k) => c[k].used > c[k].cap).map((k) => `${DATA.capacities[k].name} ${Math.round(c[k].used)}/${Math.round(c[k].cap)}`).join(', ');
       Log.add(`Rationing! Over capacity: ${over}. Production is down to ${Math.round(c.eff * 100)}%.`, 'bad');
     }
-    // Ship maintenance: Metals, plus DATA.upkeep.chemShare as much Chemicals.
+    // Ship upkeep: Metals, plus DATA.upkeep.chemShare as much Chemicals.
     const up = Ships.upkeep();
     if (up > 0) {
       const short = G.res.metal < up || G.res.chemicals < up * DATA.upkeep.chemShare;
       G.res.metal = Math.max(0, G.res.metal - up);
       G.res.chemicals = Math.max(0, G.res.chemicals - up * DATA.upkeep.chemShare);
-      if (short && G.cycle % 5 === 0) Log.add('The fleet\'s maintenance cannot be fully paid. Crews go hungry; nothing gets repaired.', 'bad');
+      if (short && G.cycle % 5 === 0) Log.add('The fleet\'s upkeep cannot be fully paid. Crews go hungry; nothing gets repaired.', 'bad');
       G.unpaid = short;
     } else G.unpaid = false;
   },
