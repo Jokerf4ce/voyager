@@ -526,7 +526,7 @@ textarea { width: 100%; height: 70px; background: var(--soot); color: var(--bone
 /* ---------- battle on phones and small tablets ---------- */
 @media (max-width: 820px) {
   /* the board scrolls with the page here, so the rows take their natural height (they collapsed before) */
-  .battlescreen .board, .battlescreen .bside { flex: none; }
+  .battlescreen .board, .battlescreen .bside, .battlescreen .brow { flex: none; }
   .battlescreen .bside { min-height: 0; }
   .bhead2 { gap: 6px; } .bhead2 h3 { font-size: 13px; }
   .bhead2 .btnrow { margin: 0; width: 100%; } .bhead2 .btnrow .btn { flex: 1; padding: 5px 4px; font-size: 9px; }
@@ -744,7 +744,7 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .swaprow .brestore .wchip { color: #70d0e0; font-size: 15px; }
 .swaprow { justify-content: center; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
 /* ship rows never shrink below their cards (they used to overlap on short windows); if space runs out the board scrolls */
-.battlescreen .bside { min-height: min-content; }
+.battlescreen .bside, .battlescreen .brow { min-height: min-content; }
 .battlescreen .board { overflow-y: auto; overflow-x: hidden; }
 @media (max-height: 740px) { .board .sc-img { height: 34px; } .board .bgap { height: 6px; } .bcontrols .bprompt { margin-bottom: 2px; } }
 .battlescreen .board > :not(.bside):not(.barrow) { flex: none; }
@@ -830,8 +830,6 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .bld .ration { color: var(--warn, #e0a040); }
 .maint { color: #e0a040; }
 /* the officer's card in battle: an extra column after the lanes, as big as a ship card (v0.74.1) */
-.bside.woff { grid-template-columns: repeat(var(--lanes), minmax(0, 150px)) minmax(0, 150px); }
-.bside .ospacer { visibility: hidden; }
 .scard.bocard { cursor: default; justify-content: flex-start; }
 .scard.bocard .obport { background: none; border: 0; padding: 0; cursor: pointer; line-height: 0; }
 .scard.bocard .obport .portrait { width: min(80px, 100%); height: auto; aspect-ratio: 80 / 72; }
@@ -844,3 +842,19 @@ body.touring [data-dragship] { cursor: not-allowed; }
   .scard.bocard .oability { font-size: 11px; }
 }
 @media (max-width: 560px) { .scard.bocard small.muted, .scard.bocard .opass-mini { display: none; } .scard.bocard b { font-size: 11px; } .scard.bocard .oability { font-size: 10px; padding: 2px; } }
+
+/* v0.74.2: the officer stands beside the lanes, not in them; fleet power inside the bar; controls on the left */
+.brow { display: flex; gap: 12px; align-items: center; flex: 1 1 0; min-height: 0; }
+.brow > .bside { flex: 1 1 auto; min-width: 0; align-self: stretch; }
+.bocol { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 2px; }
+.bocol.enemy { visibility: hidden; }
+.bocol-lbl { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ash); text-align: center; }
+.bocol .scard.bocard { width: 100%; box-sizing: border-box; flex: none; }
+.pbar { position: relative; height: 20px; margin: 2px 0; }
+.pbar span { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; font-size: 13px; line-height: 1; padding: 0 6px; white-space: nowrap; }
+.pbar .pb-me { left: 0; color: #1a140c; font-weight: bold; }
+.pbar .pb-them { right: 0; color: #f0d8c8; font-weight: bold; }
+.bcontrols { text-align: left; }
+.bcontrols .btnrow, .swaprow { justify-content: flex-start; }
+.bweps { margin: 4px 0 0; }
+@media (max-width: 560px) { .brow { gap: 4px; } .bocol-lbl { font-size: 9px; letter-spacing: 0; } }

@@ -46,7 +46,7 @@ const UI = {
       this.colSys = null;
     }
     this.lastScreen = this.screen;
-    if (this.screen === 'battle') this.drawBattleArrow();
+    if (this.screen === 'battle') { this.sizeOfficerCard(); this.drawBattleArrow(); }
     if (this.screen === 'map') {
       const cv = this.$('mapcanvas');
       StarMap.draw(cv); StarMap.attach(cv); // drag to pan, wheel/pinch to zoom, click to select, hover card on mouse

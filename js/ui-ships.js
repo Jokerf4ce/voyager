@@ -459,8 +459,6 @@ Object.assign(UI, {
         cells.push(i >= 0 ? unitCard(b.units[i], i)
           : `<div class="lane-empty ${name === 'player' && pick === l ? 'swap-dest' : ''}" ${name === 'player' ? `data-droplane="${l}"` : ''}>${name === 'player' && pick === l ? '⇄ here' : ''}</div>`);
       }
-      // the officer's card closes your row; the enemy row gets an empty cell there so the lanes stay opposite
-      if (b.officer) cells.push(name === 'player' ? this.battleOfficer(b) : '<div class="ospacer"></div>');
       return cells.join('');
     };
     // turn order, pinned to the bottom of the screen
@@ -493,15 +491,19 @@ Object.assign(UI, {
     const enemyName = b.kind === 'attack' ? ((s.guard && s.guard.name) || (DATA.factions[s.owner] || {}).name || 'Enemy') : b.threat.name;
     const f = b.fleetId != null ? Ships.fleet(b.fleetId) : null;
     const myName = f ? f.name : 'Planetary Defenses';
-    const powerBar = `<div class="pbar" title="Fleet power: yours ${pP}, theirs ${pE}"><i style="width:${share}%"></i></div>`;
+    // the tug-of-war bar carries both fleet powers: yours on the left (light), theirs on the right
+    const powerBar = `<div class="pbar" title="Fleet power: yours ${pP}, theirs ${pE}"><i style="width:${share}%"></i><span class="pb-me">⚔ ${pP}</span><span class="pb-them">${pE} ⚔</span></div>`;
+    // the officer stands beside your lanes, outside them (UI.sizeOfficerCard matches it to a ship card); an
+    // invisible twin beside the enemy lanes keeps the lanes opposite each other
+    const ocol = (who) => (b.officer ? `<div class="bocol ${who}">${who === 'player' ? `<span class="bocol-lbl">Officer</span>${this.battleOfficer(b)}` : ''}</div>` : '');
     return `<div class="battlescreen fitscreen"><div class="board ${myTurn && cur.weapons.length >= 3 ? 'tight' : ''}" id="board">
       ${powerBar}
       <div class="bhead2"><h3>⚔ ${U.esc(s.name)}</h3><span class="muted small">${b.kind === 'attack' ? 'Attack' : 'Defense'} · Round ${b.round}${G.battleQueue.length ? ` · ${G.battleQueue.length} more battle${G.battleQueue.length > 1 ? 's' : ''} waiting` : ''}</span>${tools}</div>
-      <div class="bpower enemy" style="--fc:${this.factionColor(enemyOwner)}"><b>${U.esc(enemyName)}</b><span>fleet power <b>${pE}</b></span></div>
-      <div class="bside enemy${b.officer ? ' woff' : ''}" style="--lanes:${lanes}">${side('enemy')}</div>
+      <div class="bpower enemy" style="--fc:${this.factionColor(enemyOwner)}"><b>${U.esc(enemyName)}</b></div>
+      <div class="brow"><div class="bside enemy" style="--lanes:${lanes}">${side('enemy')}</div>${ocol('enemy')}</div>
       <div class="bgap"></div>
-      <div class="bside player${b.officer ? ' woff' : ''}" style="--lanes:${lanes}">${side('player')}</div>
-      <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b><span>fleet power <b>${pP}</b></span></div>
+      <div class="brow"><div class="bside player" style="--lanes:${lanes}">${side('player')}</div>${ocol('player')}</div>
+      <div class="bpower player" style="--fc:${this.factionColor('player')}"><b>${U.esc(myName)}</b></div>
       <svg class="barrow" id="barrow"></svg>
       <div class="bcontrols">${controls}</div>
       ${order}
@@ -536,6 +538,21 @@ Object.assign(UI, {
       if (l === cur.lane) { this.swapPick.lane = null; return; }      // back at its own lane: no swap
       if (Battle.canSwapTo(cur, l)) { this.swapPick.lane = l; return; }
     }
+  },
+
+  // The officer's card (beside your lanes) gets the size of a ship card.
+  sizeOfficerCard() {
+    const ship = document.querySelector('.bside.player .scard[data-unit]');
+    const oc = document.querySelector('.bocol.player .bocard');
+    if (!ship || !oc) return;
+    // the lanes take the space the officer leaves them, so match widths a few times until they settle
+    oc.style.height = '';
+    for (let i = 0; i < 4; i++) {
+      const w = ship.offsetWidth;
+      document.querySelectorAll('.bocol').forEach((c) => { c.style.width = w + 'px'; });
+      if (ship.offsetWidth === w) break;
+    }
+    oc.style.height = ship.offsetHeight + 'px';
   },
 
   // The target arrow: a curved arrow from the acting ship to its target, floating between the rows.

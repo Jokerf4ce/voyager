@@ -336,7 +336,7 @@ document.addEventListener('drop', (ev) => {
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (typeof UI !== 'undefined' && G && UI.screen === 'map') { const cv = UI.$('mapcanvas'); if (cv) StarMap.draw(cv); } });
 window.addEventListener('resize', () => {
   if (typeof UI === 'undefined' || !G) return;
-  if (UI.screen === 'battle') UI.drawBattleArrow();
+  if (UI.screen === 'battle') { UI.sizeOfficerCard(); UI.drawBattleArrow(); }
   if (UI.screen === 'map') {
     const n = UI.narrow();
     if (n !== UI.wasNarrow) { UI.wasNarrow = n; UI.render(); } // the hint text differs on phones
