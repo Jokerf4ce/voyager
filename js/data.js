@@ -249,19 +249,19 @@ DATA.difficulty = {
   commander: {
     name: 'Commander', tag: 'The way the game is meant to be played',
     desc: 'They will find you, strive to survive! Make sure you keep your economy and fleet growing to win the war.',
-    points: ['Achievements enabled', 'No grace period', 'Challenging raids', 'Standard prices',],
+    points: ['Achievements enabled', 'No grace period', 'Challenging raids', 'Ships are destroyed forever', 'Standard prices',],
     costMult: 1.25, exempt: ['colonize'], raids: { graceColonies: 0, fromCycle: 25, chance: 0.06, cooldown: 6, strength: 1.15 }, ai: { income: 1.4, bias: 1, startOre: 100 }, achievements: true
   },
   adaptive: {
     name: 'Adaptive', tag: 'Coming later', locked: true,
     desc: 'Starts gently and hardens toward Commander as your empire grows.',
-    points: ['Achievements disabled', 'Grace period before raids', 'Adaptive raids', 'Standard prices', ],
+    points: ['Achievements disabled', 'Grace period before raids', 'Adaptive raids', 'Ships are destroyed forever', 'Standard prices', ],
     costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false
   },
   learning: {
     name: 'Learning', tag: 'A relaxed start',
     desc: 'Learn the game. The xenos leave you alone until you have founded {grace} colonies besides your capital, and raids stay rare.',
-    points: ['Achievements disabled', 'Grace period before raids', 'Rare, small raids', 'Cheaper prices', ],
+    points: ['Achievements disabled', 'Grace period before raids', 'Rare, small raids', 'Destroyed ships can be renewed', 'Cheaper prices', ],
     costMult: 1, raids: DATA.raids, ai: { income: 1, bias: 0, startOre: 40 }, achievements: false
   },
 };
