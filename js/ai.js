@@ -117,7 +117,8 @@ const AI = {
 
   // ---- raid strength follows the player (DATA.raidScale) ----
   // Your strength: the power of your 5 strongest ships, the best fleet you could put together.
-  playerStrength() { return Ships.groupPower(Ships.all().map((s) => [s, Ships.power(s)]).sort((a, b) => b[1] - a[1]).slice(0, DATA.fleetMax).map(([s]) => s)); },
+  // The starting fleet doesn't count for the first DATA.raidScale.starterGrace Cycles, so the first raids stay small.
+  playerStrength() { const early = G.cycle <= DATA.raidScale.starterGrace; return Ships.groupPower(Ships.all().filter((s) => !(early && s.starter)).map((s) => [s, Ships.power(s)]).sort((a, b) => b[1] - a[1]).slice(0, DATA.fleetMax).map(([s]) => s)); },
   // Once per Cycle: the threat level moves toward your strength (fast up, slow down) and creeps up a little.
   updateThreat() {
     const S = DATA.raidScale, P = this.playerStrength();

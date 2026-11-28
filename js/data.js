@@ -233,7 +233,7 @@ DATA.raids = { graceColonies: 3, chance: 0.025, cooldown: 12, strength: 0.9 };
 // back slowly when you lose ships (fall). On top of that it creeps up a little every Cycle once raids are possible,
 // so a player who stops growing faces only slowly stronger raids. Each raid is built to threat × the difficulty's
 // raids.strength (±spread), never below floor.
-DATA.raidScale = { rise: 0.15, fall: 0.02, creep: 0.002, floor: 55, spread: 0.15 };
+DATA.raidScale = { rise: 0.15, fall: 0.02, creep: 0.002, floor: 55, spread: 0.15, starterGrace: 25 }; // starterGrace: Cycles the starting fleet is left out of your strength
 
 // Difficulty, chosen when a new game starts (G.difficulty; old saves count as 'learning'). It can't be changed later.
 //   costMult   every resource price (buildings, settling, probes, hulls, forge) is multiplied by this; refunds

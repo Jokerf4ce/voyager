@@ -2,6 +2,10 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.71.1 — 2026-11-28
+- **Raids ignore the starting fleet for the first 25 Cycles** (`DATA.raidScale.starterGrace`). The Home Guard's starting ships are left out of your strength, so the first raids stay small; after Cycle 25 the raid strength catches up gradually.
+- **The capital starts with a level 2 Planetary mining rig** (was level 1). The Power Plant already started at level 2.
+
 ## 0.71.0 — 2026-11-28
 - **New starting fleet:** the Home Guard now starts with two small ships (a Scout and a Fighter), a medium Frigate and a large **Epic Destroyer** (was a Scout, two Fighters and a Heavy Fighter, all Normal).
 - **Bigger starting stores** to carry the larger fleet's maintenance (about 14 Metals and 3.5 Chemicals per Cycle) while the economy grows: Metals 120 → 800, Organics 40 → 150, Chemicals 35 → 200.

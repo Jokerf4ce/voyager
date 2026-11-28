@@ -155,7 +155,7 @@ const Galaxy = {
     G.galaxy.names.push(home.name);
     G.homeId = home.id;
     G.homePlanet = capital.idx;
-    Colonies.found(home.id, capital.idx, 'player', { mine: 1, harvester: 1, refinery: 1, dome: 1, fusion: 2 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
+    Colonies.found(home.id, capital.idx, 'player', { mine: 2, harvester: 1, refinery: 1, dome: 1, fusion: 2 }, { shipyard: 1, lab: 1, cogitator: 1, chemplant: 1 });
     capital.colony.capital = true;
 
     // One system next door always holds a rich Rare deposit: a Scorched Rock with a stable crust (DATA.deposits).
@@ -189,7 +189,7 @@ const Galaxy = {
     }
 
     // Starting fleet: two small ships (a Scout and a Fighter), a medium Frigate and a large Destroyer. The Destroyer is an Epic card.
-    const give = (type, fleet, rarity = 'normal') => { const sh = Ships.make(type, { rarity }); G.ships[sh.id] = sh; fleet.ships.push(sh.id); };
+    const give = (type, fleet, rarity = 'normal') => { const sh = Ships.make(type, { rarity }); sh.starter = true; G.ships[sh.id] = sh; fleet.ships.push(sh.id); }; // starter: left out of raid strength early (AI.playerStrength)
     const guard = Ships.newFleet('Home Guard');
     guard.officer = 'kroll'; // the Home Guard starts under the Iron Matron (DATA.officers)
     give('scout', guard); give('fighter', guard); give('frigate', guard); give('destroyer', guard, 'epic');
