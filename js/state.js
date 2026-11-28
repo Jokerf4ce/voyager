@@ -9,7 +9,7 @@ const State = {
       cycle: 1,
       officers: Object.fromEntries(Object.keys(DATA.officers).map((k) => [k, true])), // officers you command
       difficulty: null,   // chosen right after the galaxy is made (State.setDifficulty); null = not picked yet
-      res: { metal: 120, rare: 20, organics: 40, electronics: 30, chemicals: 35, research: 0, crypto: 0 },
+      res: { metal: 800, rare: 20, organics: 150, electronics: 30, chemicals: 200, research: 0, crypto: 0 },
       systems: [],
       ships: {},          // every Covenant ship card, by id (js/ships.js)
       fleets: [],         // [{ id, name, ships: [shipId], mission }]

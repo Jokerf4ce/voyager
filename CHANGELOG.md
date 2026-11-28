@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.71.0 — 2026-11-28
+- **New starting fleet:** the Home Guard now starts with two small ships (a Scout and a Fighter), a medium Frigate and a large **Epic Destroyer** (was a Scout, two Fighters and a Heavy Fighter, all Normal).
+- **Bigger starting stores** to carry the larger fleet's maintenance (about 14 Metals and 3.5 Chemicals per Cycle) while the economy grows: Metals 120 → 800, Organics 40 → 150, Chemicals 35 → 200.
+- Raids scale with your fleet's strength, so the first raids are now stronger too.
+
 ## 0.70.1 — 2026-11-28
 - **Tester mode starts at Cycle 50.** The generated test game now simulates 50 Cycles before it opens (production, missions, research, raids and battles, fought out on the spot), so the Statistics screen has history from the start. The stores are refilled after the simulation and the raid is fresh for you to try.
 
