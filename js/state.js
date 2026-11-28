@@ -30,7 +30,9 @@ const State = {
         remnant: { ore: 40, homeId: null, alive: true, aggro: 0.8 },
       },
       log: [],
-      history: [],        // per-Cycle economy snapshots for the Statistics screen (Economy.record)
+      history: [],
+      trade: [],          // trading posts found (js/trade.js)
+      nextTradeId: 1,        // per-Cycle economy snapshots for the Statistics screen (Economy.record)
       pendingEvents: [],
       reports: [],
       lastSeen: Date.now(),
@@ -100,6 +102,7 @@ const State = {
       }
       for (const f of data.fleets || []) if (f.officer && !defs[f.officer]) f.officer = null;
       if (!data.history) data.history = [];
+      if (!data.trade) { data.trade = []; data.nextTradeId = 1; }
       for (const f of data.fleets || []) if (f.maint != null) { for (const id of f.ships || []) if (data.ships && data.ships[id]) data.ships[id].maint = f.maint; delete f.maint; } // v0.75.1: maintenance per ship
       let dropped = 0;
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) { delete data.techs[id]; dropped++; }

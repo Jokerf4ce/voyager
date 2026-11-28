@@ -20,6 +20,7 @@ const UI = {
     ['colonies', '⌂', 'Colonies'],
     ['research', '☍', 'Research'],
     ['shipyard', '⚒', 'Shipyard'],
+    ['trade', '⚖', 'Trade'],
     ['fleets', '➤', 'Hangar'],
     ['stats', '∿', 'Statistics'],
     ['log', '☰', 'Chronicle'],
@@ -385,6 +386,7 @@ const UI = {
       <div class="small muted">${st.desc} Starlight ×${st.solar} Power${st.habMod ? ', habitability ' + st.habMod : ''}${st.mult ? ', ' + Object.entries(st.mult).map(([k, v]) => (DATA.capacities[k] || DATA.resources[k]).name + ' ×' + v).join(', ') : ''}.</div>
       <div style="color:${owner ? owner.color : '#8a8070'}">${owner ? owner.name : 'Unclaimed'}</div>
       ${this.missionPanel(s)}
+      ${Trade.at(s.id) ? `<div class="tnote">⚖ <b>${U.esc(Trade.title(Trade.at(s.id)))}</b> ${this.btn('Trade', 'gotrade', Trade.at(s.id).id, false, 'small gold')}</div>` : ''}
       <h4>Planets</h4>`;
     body += s.planets.map((p) => {
       let act = '';
@@ -698,6 +700,44 @@ const UI = {
 
   // Settings: a grid of tiles of one size. The track list and the fleet colours open as full-width drawers right
   // under their tile's row (UI.setOpen, toggled by 'setopen').
+  // Trade: every trading post found, with its services (js/trade.js). UI.tradeSel puts one post first.
+  screen_trade() {
+    const T = DATA.trade, posts = [...(G.trade || [])];
+    const cry = (v) => `<b class="res-crypto">${DATA.resources.crypto.icon} ${U.amount('crypto', v)}</b>`;
+    if (!posts.length) {
+      return this.panel('Trade', `<p class="muted">No trading posts known yet. Chart new systems with survey probes: about one in ${Math.round(1 / T.chance)} hides a <b>Black Market</b>, an <b>Exchange Hub</b> or an <b>Independent Station</b>.</p>
+        <p class="small muted">They sell ships and hire out officers for Crypto Shards (mined by Finance Districts), and swap materials, always at a loss. You can trade with any post whose system the xenos don't hold.</p>`);
+    }
+    if (this.tradeSel != null) posts.sort((a, b) => (b.id === this.tradeSel) - (a.id === this.tradeSel));
+    const out = posts.map((post) => {
+      const s = G.systems[post.sys], K = T.kinds[post.kind], open = Trade.open(post);
+      const where = `${U.esc(s.name)} · ${U.esc(Colonies.planetName(s, s.planets[post.planet]))}`;
+      const head = `<div class="tpost-head"><div><h3>${U.esc(Trade.title(post))}</h3><small class="muted">${where} · ${U.esc(K.desc)}</small></div>
+        <div class="right"><small class="${open ? 'muted' : 'bad'}">${open ? `new stock in ${Math.max(1, post.next - G.cycle)} Cycle${post.next - G.cycle > 1 ? 's' : ''}` : `Closed: ${U.esc(DATA.factions[s.owner].name)} hold the system`}</small><br>${this.btn('Star Map', 'mapsys', s.id, false, 'small')}</div></div>`;
+      const sec = [];
+      if (post.services.includes('ships')) {
+        const cards = post.ships.map((sh, i) => {
+          const why = Trade.buyShipBlocker(post, i);
+          return this.shipCard(sh, { extra: `<div class="tprice">${cry(sh.price)} ${this.btn('Buy', 'tradeship', `${post.id}:${i}`, !!why, 'small gold')}${why && why !== 'Not enough Crypto Shards' ? `<small class="bad">${why}</small>` : ''}</div>` });
+        }).join('');
+        sec.push(`<h4>${T.services.ships.icon} Ships</h4>${cards ? `<div class="cardrow wrap">${cards}</div>` : '<p class="small muted">Sold out until the next stock.</p>'}`);
+      }
+      if (post.services.includes('exchange')) {
+        const R = DATA.resources;
+        const rows = post.rates.map((r, i) => `<div class="trate"><span><b class="res-${r.from}">${R[r.from].icon} ${r.give} ${R[r.from].name}</b> → <b class="res-${r.to}">${R[r.to].icon} ${r.get} ${R[r.to].name}</b> <small class="bad">−${r.loss} %</small></span>
+          <span class="btnrow">${[1, 5].map((n) => this.btn(`×${n}`, 'tradex', `${post.id}:${i}:${n}`, !!Trade.exchangeBlocker(post, i, n), 'small')).join('')}</span></div>`).join('');
+        sec.push(`<h4>${T.services.exchange.icon} Material exchange</h4>${rows}<p class="small muted">The cut is the loss against a fair swap. Rates change with the stock.</p>`);
+      }
+      if (post.services.includes('officers')) {
+        const o = post.officer;
+        const why = o && Trade.officerBlocker(post);
+        sec.push(`<h4>${T.services.officers.icon} Officers</h4>${o ? `<div class="ocards">${this.officerCard(null, { def: o.def, flavor: true, foot: `<div class="btnrow">${cry(o.price)} ${this.btn('Hire', 'tradeofficer', post.id, !!why, 'small gold')}${why && why !== 'Not enough Crypto Shards' ? `<small class="bad">${why}</small>` : ''}</div>` })}</div>` : '<p class="small muted">Nobody for hire until the next stock.</p>'}`);
+      }
+      return `<div class="tpost ${open ? '' : 'closed'} ${post.id === this.tradeSel ? 'sel' : ''}">${head}${sec.join('')}</div>`;
+    }).join('');
+    return this.panel(`Trade (${posts.length} post${posts.length > 1 ? 's' : ''})`, `<p class="small muted">You hold ${cry(G.res.crypto)}. Ships and officers cost Crypto Shards; the exchange swaps materials at a loss. New stock every ${T.restock} Cycles.</p>${out}`);
+  },
+
   screen_settings() {
     const open = this.setOpen || (this.setOpen = {});
     const tile = (icon, title, body, cls = '') => `<section class="stile ${cls}"><h4>${icon} ${title}</h4><div class="stile-body">${body}</div></section>`;

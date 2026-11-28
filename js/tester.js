@@ -17,6 +17,9 @@ const Tester = {
     // Chart the nearest systems.
     const byDist = G.systems.slice().sort((a, b) => dH[a.id] - dH[b.id]);
     for (const s of byDist.slice(0, this.explored)) if (!s.explored) { s.explored = true; if (s.id !== G.homeId) G.stats.explored++; }
+    // a trading post with all three services next door, and the usual chance in the other charted systems
+    const near = byDist.slice(0, this.explored).filter((s) => s.id !== G.homeId && (!s.owner || s.owner === 'player'));
+    near.forEach((s, i) => { const p = Trade.maybeSpawn(s, i === 0); if (p && i === 0) { p.services = Object.keys(DATA.trade.services); Trade.restock(p); } });
     Galaxy.grow();
 
     // Candidate planets: other worlds at home first, then free worlds in charted neighbouring systems.
@@ -46,7 +49,7 @@ const Tester = {
     for (const z of ['S', 'M', 'L', 'S', 'M']) G.armory.push(Ships.makeWeapon(z, Ships.rollRarity(2)));
     this.simulate(this.startCycle);
     // the simulated Cycles spend the stores, so the tester starts with full stores again, and with a fresh raid to try a defense battle
-    for (const k in G.res) G.res[k] = k === 'crypto' ? 5 : 1500;
+    for (const k in G.res) G.res[k] = k === 'crypto' ? 60 : 1500;
     G.pendingEvents = [];
     const target = AI.pickTarget('chorus');
     if (target) G.threats.push({ id: 't' + (G.nextThreatId++), owner: 'chorus', name: 'Chorus Raid', target: target.s.id, eta: 2, total: 2, ships: AI.team('chorus', 3) });
@@ -64,6 +67,7 @@ const Tester = {
       G.cycle = 0;
       for (let i = 0; i < n; i++) {
         Ships.tickMaint();
+        Trade.tick();
         Missions.tick();
         Economy.tick();
         Economy.record();

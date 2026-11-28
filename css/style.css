@@ -882,3 +882,14 @@ body.touring [data-dragship] { cursor: not-allowed; }
   color: #f0b050; border: 2px solid #b07820; padding: 2px 6px; background: rgba(0, 0, 0, .72); white-space: nowrap; pointer-events: auto; cursor: help; z-index: 2; }
 .scard.small .maint-stamp { font-size: 8px; padding: 1px 3px; }
 @media (max-width: 560px) { .board .maint-stamp { font-size: 7px; padding: 1px 2px; } }
+/* Trade (v0.76) */
+.tpost { border: 1px solid var(--edge); background: #12100e; padding: 10px 12px; margin-bottom: 12px; }
+.tpost.sel { border-color: var(--gold); }
+.tpost.closed { opacity: .6; }
+.tpost-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.tpost-head h3 { margin: 0; }
+.tpost h4 { margin: 12px 0 6px; }
+.tprice { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.trate { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 6px; border-bottom: 1px solid #2a2420; flex-wrap: wrap; }
+.tnote { margin: 6px 0; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tnote b { font-size: 15px; }

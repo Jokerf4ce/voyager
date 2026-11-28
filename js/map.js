@@ -261,6 +261,7 @@ const StarMap = {
         }
       } else text('?', sx, sy - 26, '#8a7c6c', size + 2, false);
       if (G.threats.some((t) => t.target === s.id)) text('! RAID', sx, sy - 52, '#ff5a4a', size, true);
+      else if (s.explored && Trade.at(s.id)) text('⚖', sx, sy - 30, '#e0c070', size + 2, false); // a trading post
     }
 
     this.drawMinimap(out, cssW, cssH);

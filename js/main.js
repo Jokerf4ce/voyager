@@ -10,6 +10,7 @@ const Game = {
     if (G.battle) { UI.screen = 'battle'; UI.render(); return; } // finish the battle first
     Sfx.play('cycle');
     Ships.tickMaint();
+    Trade.tick();
     Missions.tick();
     Economy.tick();
     Economy.record();
@@ -213,6 +214,10 @@ const Game = {
     subtitles: () => { Voice.subtitles = !Voice.subtitles; Voice.savePrefs(); },
     save: () => { State.save(); Log.add('Chronicle saved.'); },
     export: () => { UI.saveText = State.exportSave(); },
+    tradeship: (a) => { const [p, i] = a.split(':').map(Number); const sh = Trade.buyShip(p, i); if (sh) { UI.lastShip = sh.id; UI.splashShip(sh); } },
+    tradex: (a) => { const [p, i, n] = a.split(':').map(Number); Trade.exchange(p, i, n || 1); },
+    tradeofficer: (a) => { const key = Trade.hireOfficer(+a); if (key) UI.officerModal(key); },
+    gotrade: (a) => { UI.tradeSel = a === '' ? null : +a; UI.screen = 'trade'; },
     setopen: (a) => { UI.setOpen = UI.setOpen || {}; UI.setOpen[a] = !UI.setOpen[a]; },
     import: () => {
       try { State.importSave(UI.$('savebox').value); Game.overShown = false; State.save(); Log.add('Save imported.'); }

@@ -571,3 +571,31 @@ DATA.statsPresets = [
   ['Metals vs upkeep', ['metal', 'upkeep']],
   ['Growth', ['colonies', 'research', 'metal']],
 ];
+
+// Trading posts (v0.76, js/trade.js): charting a new system may reveal one on a planet. Each offers 1–3 services
+// (its kind's speciality always). Ships and officers cost Crypto Shards; the exchange always takes a cut.
+DATA.trade = {
+  chance: 0.18,     // per newly charted system (not the home system, not one held by the xenos)
+  restock: 12,      // Cycles between new stock (ships, rates, the officer for hire)
+  kinds: {
+    blackmarket: { name: 'Black Market', special: 'ships', shipBias: 3, priceMult: 1.15, loss: [0.25, 0.45], desc: 'No questions asked. Better hulls, worse rates.' },
+    exchange: { name: 'Exchange Hub', special: 'exchange', shipBias: 1, priceMult: 1, loss: [0.10, 0.25], desc: 'A guild hub with the fairest rates in the Shroud.' },
+    station: { name: 'Independent Station', special: 'officers', shipBias: 1, priceMult: 0.9, loss: [0.20, 0.40], desc: 'Free spacers, deserters and veterans looking for a berth.' },
+  },
+  services: {
+    ships: { name: 'Ships', icon: '⚒', desc: 'Hulls for Crypto Shards' },
+    exchange: { name: 'Material exchange', icon: '⇄', desc: 'Swap materials, always at a loss' },
+    officers: { name: 'Officers', icon: '★', desc: 'Officers for hire, for Crypto Shards' },
+  },
+  names: ['Rustgate', 'The Hollow Coin', 'Saint Ferro\'s Rest', 'Lanternfall', 'Grieving Wheel', 'Ninefold', 'The Gilded Maw', 'Ashmarket', 'Low Choir',
+    'Tallow Dock', 'Vesper Ring', 'The Drowned Ledger', 'Brass Reliquary', 'Cinderhold', 'Mercy\'s Toll', 'The Pale Bazaar', 'Salt Anchor', 'Kettle Station',
+    'Last Lantern', 'Ironbough', 'The Weeping Scale', 'Gallows Quay', 'Copperhook', 'Sable Exchange', 'Widow\'s Purse', 'Oubliette Nine', 'Thorn Market', 'Grey Tithe'],
+  shipCount: [2, 3],
+  shipPrice: { normal: 1, strong: 2.5, epic: 6, legendary: 15, omega: 40 }, // Crypto Shards, × size below, ±10 %
+  sizePrice: { S: 1, M: 1.6, L: 2.4 },
+  officerPrice: [4, 8],
+  materials: ['metal', 'rare', 'organics', 'electronics', 'chemicals'],
+  value: { metal: 1, organics: 1, rare: 2, chemicals: 2, electronics: 2.5 }, // what one unit is worth, for the rates
+  lot: 50,          // units given per trade
+  rateCount: 3,
+};

@@ -2,6 +2,15 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.76.0 — 2026-11-28
+- **Trading posts.** Charting a new system has an 18 % chance to reveal a trading post on one of its planets (never in the home system or one held by the xenos): a **Black Market**, an **Exchange Hub** or an **Independent Station**, each with its own name (e.g. "Black Market – Rustgate"). Each post offers 1–3 services, always including its kind's speciality:
+  - **Ships for Crypto Shards** (2–3 hulls of any type; price by rarity and size). Black Markets stock better rarities at higher prices.
+  - **Material exchange**: three offers swapping 50 of one material for another, always at a loss (Exchange Hubs 10–25 %, others 20–45 %). Trade ×1 or ×5.
+  - **Officers for Crypto Shards**: one rolled officer for hire (Independent Stations are cheapest); hired officers join your roster for the Hangar.
+- Stock (ships, rates, the officer) renews every 12 Cycles. You trade remotely, as long as the xenos don't hold the post's system.
+- New **Trade** screen in the menu (after Shipyard) listing every post you found; posts show **⚖** on the Star Map and in the system panel with a Trade button; discoveries and deals go to the Chronicle.
+- Tester mode starts with a post that has all three services next door, and 60 Crypto Shards.
+
 ## 0.75.2 — 2026-11-28
 - **Settings:** one tile per row (up to 900 px wide, all the same height); the track list and colour pickers still open right under their tile. Volume sliders keep a sensible width.
 

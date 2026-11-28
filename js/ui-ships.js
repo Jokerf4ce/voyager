@@ -57,9 +57,10 @@ Object.assign(UI, {
   },
   // An officer card: portrait, name, passives and the ability. opts.foot: extra html at the bottom.
   officerCard(key, opts = {}) {
-    const o = DATA.officers[key];
+    const o = opts.def || DATA.officers[key];
+    const pic = opts.def ? `<img class="px portrait" src="${Faces.render(o.face)}" width="${Faces.W}" height="${Faces.H}" alt="">` : this.portrait(key, 80);
     return `<div class="ocard ${opts.cls || ''}">
-      <div class="ohead">${this.portrait(key, 80)}<div><small class="muted">${U.esc(o.rank)}</small><br><b>${U.esc(o.name)}</b><br><i>${U.esc(o.title)}</i></div></div>
+      <div class="ohead">${pic}<div><small class="muted">${U.esc(o.rank)}</small><br><b>${U.esc(o.name)}</b><br><i>${U.esc(o.title)}</i></div></div>
       <ul class="opass">${o.passives.map((p) => `<li>${U.esc(p.text)}</li>`).join('')}</ul>
       <div class="oabil"><b>★ ${U.esc(o.ability.name)}</b> <small class="muted">once per battle · free action</small><br><small>${U.esc(o.ability.text)}</small></div>
       ${opts.flavor ? `<p class="flavor small">${U.esc(o.flavor)}</p>` : ''}${opts.foot || ''}</div>`;

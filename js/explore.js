@@ -14,6 +14,7 @@ const Explore = {
       s.explored = true;
       if (s.id !== G.homeId) G.stats.explored++;
       Galaxy.grow(); // charting a system brings the space beyond it into being
+      Trade.maybeSpawn(s); // and it may hide a trading post
     }
   },
 
