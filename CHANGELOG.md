@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.69.0 — 2026-11-28
+- **Portraits at 80×72** (were 32×32). `js/faces.js` was redrawn at the new size with four tones per material (deep shadow, shadow, base, light) and lighting from the upper left, dithered between tones so faces and cloth shade smoothly. Faces now have almond eyes with irises, pupils and catch-lights, lids and creases, shaped brows, a lit nose bridge with nostrils, two-tone lips, ears, eye sockets and cheekbones, textured hair (combed, stubble, strands), rounded shoulders and more detailed outfits (epaulettes with fringe, medal ribbons, lapels, embroidered robes, plate armour). Background details get no outline. Same parts, same spec format: the three officers keep their looks.
+- Portraits show at 80×72 (1:1) in the Hangar officer slot and on officer cards, 40×36 in battle, smaller on phones (scaled smoothly below 1:1).
+- **Face Workshop reworked** (`tools/faces/index.html`): a large preview with the in-game sizes, a tab per part with clickable picture tiles (your current face with that option, zoomed in on the part: eyes, nose, mouth…), marks as toggle tiles, colour cards with the four tones and preset swatches, undo, ← → to step through options, ↑ ↓ to change tab, R for a random face. On phones the pickers come right after the preview.
+
 ## 0.68.2 — 2026-11-28
 - **Battle warning no longer repeats.** When several battles come in one Cycle (two raids, or a raid and an attack), the Assistant warns once at the first; the ones queued behind it start silently. (The Cycle had moved on by the time the second battle started, so it spoke again.)
 - **One voice line at a time.** A new line now stops the one playing (the battle warning used to talk over a construction or new-colony line from the same End Cycle).

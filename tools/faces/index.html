@@ -5,103 +5,252 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Voyager · Face Workshop</title>
 <style>
-  body { margin: 0; background: #0c0a08; color: #d8d0c0; font: 15px/1.35 ui-monospace, Menlo, Consolas, monospace; }
-  main { display: grid; grid-template-columns: 340px 1fr; gap: 20px; padding: 16px; max-width: 1100px; margin: 0 auto; }
-  h1 { font-size: 18px; letter-spacing: 3px; color: #d0a040; margin: 0 0 4px; grid-column: 1 / -1; }
-  .note { color: #8a8070; font-size: 13px; grid-column: 1 / -1; margin: 0 0 6px; }
-  .ctl { background: #15110d; border: 1px solid #3a3028; padding: 10px; }
-  label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 4px 0; }
-  select, input[type=color] { background: #1c1712; color: #d8d0c0; border: 1px solid #4a3e30; font: inherit; }
-  select { width: 170px; }
-  .marks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; margin: 4px 0 8px; }
-  .marks label { justify-content: flex-start; margin: 0; }
-  h3 { font-size: 13px; color: #d0a040; letter-spacing: 2px; margin: 10px 0 4px; text-transform: uppercase; }
-  .colors label { margin: 2px 0; }
-  button { background: #2a2018; color: #f0d070; border: 1px solid #8a6a30; padding: 5px 10px; font: inherit; cursor: pointer; }
-  button:hover { background: #3a2c1e; }
-  .row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
-  .view { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
-  .view img { image-rendering: pixelated; background: #000; border: 2px solid #3a3028; }
-  textarea { width: 100%; height: 150px; background: #15110d; color: #c8c0b0; border: 1px solid #3a3028; font: 12px ui-monospace, monospace; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, 96px); gap: 8px; margin-top: 12px; }
-  .grid img { width: 96px; height: 96px; image-rendering: pixelated; cursor: pointer; border: 1px solid #3a3028; }
-  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+  :root { --gold: #d0a040; --bone: #e8dcc0; --edge: #3a3028; --edge-hi: #6a5630; --panel: #15110d; --muted: #8a8070; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #0c0a08 radial-gradient(circle at 30% 0, #1c1610, #0c0a08 60%) fixed; color: #d8d0c0; font: 15px/1.35 ui-monospace, Menlo, Consolas, monospace; }
+  header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 16px; border-bottom: 1px solid var(--edge); background: #100d0a; position: sticky; top: 0; z-index: 5; }
+  header h1 { font-size: 18px; letter-spacing: 4px; color: var(--gold); margin: 0 12px 0 0; font-weight: normal; }
+  header .sp { flex: 1; }
+  button, select { background: #2a2018; color: #f0d070; border: 1px solid #8a6a30; padding: 5px 10px; font: inherit; cursor: pointer; box-shadow: 2px 2px 0 #000; }
+  button:hover, select:hover { background: #3a2c1e; }
+  button:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 #000; }
+  main { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 16px; max-width: 1280px; margin: 0 auto; }
+  .panel { background: var(--panel); border: 2px solid var(--edge); box-shadow: 3px 3px 0 #000; padding: 12px; }
+  h3 { font-size: 13px; color: var(--gold); letter-spacing: 2px; margin: 12px 0 6px; text-transform: uppercase; font-weight: normal; }
+  .left { position: sticky; top: 64px; align-self: start; display: flex; flex-direction: column; gap: 12px; }
+  .frame { padding: 10px; background: #0a0807; border: 2px solid var(--edge-hi); box-shadow: inset 0 0 0 2px #000, 3px 3px 0 #000; }
+  #big { display: block; width: 320px; height: 288px; image-rendering: pixelated; }
+  .sizes { display: flex; gap: 12px; align-items: flex-end; margin-top: 10px; }
+  .sizes figure { margin: 0; text-align: center; color: var(--muted); font-size: 11px; }
+  .sizes img { display: block; border: 1px solid var(--edge-hi); background: #000; margin-bottom: 3px; }
+  .px { image-rendering: pixelated; }
+  .summary { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .summary b { color: var(--bone); font-weight: normal; }
+  textarea { width: 100%; height: 120px; background: #0e0b09; color: #c8c0b0; border: 1px solid var(--edge); font: 12px ui-monospace, monospace; resize: vertical; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 2px solid var(--edge); margin-bottom: 12px; }
+  .tab { background: none; box-shadow: none; border: 2px solid transparent; border-bottom: 0; color: var(--muted); padding: 6px 10px; margin-bottom: -2px; }
+  .tab:hover { color: var(--bone); background: #1c1712; }
+  .tab.on { color: var(--gold); border-color: var(--edge); background: var(--panel); }
+  .tab small { color: #6a6050; margin-left: 4px; }
+  .hint { color: var(--muted); font-size: 13px; margin: -4px 0 10px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .tile { background: #0e0b09; border: 2px solid var(--edge); padding: 6px; cursor: pointer; text-align: center; box-shadow: 2px 2px 0 #000; color: var(--bone); font: inherit; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .tile:hover { border-color: var(--edge-hi); background: #17120e; }
+  .tile.on { border-color: var(--gold); background: #211a10; box-shadow: 0 0 10px rgba(208, 160, 64, .35), 2px 2px 0 #000; }
+  .tile .thumb { image-rendering: pixelated; background-repeat: no-repeat; border: 1px solid #000; }
+  .tile span { font-size: 13px; }
+  .tile.on span::before { content: '✓ '; color: var(--gold); }
+  .colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+  .color { background: #0e0b09; border: 2px solid var(--edge); padding: 8px; }
+  .color header { all: unset; display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .color header b { color: var(--bone); font-weight: normal; flex: 1; }
+  .color input[type=color] { width: 44px; height: 26px; padding: 0; border: 1px solid var(--edge-hi); background: none; cursor: pointer; }
+  .tones { display: flex; gap: 0; }
+  .tones i { width: 14px; height: 14px; display: inline-block; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 4px; }
+  .sw { width: 22px; height: 22px; border: 1px solid #000; cursor: pointer; padding: 0; box-shadow: none; }
+  .sw:hover { outline: 2px solid var(--gold); }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .gallery img { width: 100%; image-rendering: pixelated; cursor: pointer; border: 2px solid var(--edge); }
+  .gallery img:hover { border-color: var(--gold); }
+  kbd { border: 1px solid var(--edge-hi); padding: 0 4px; font-size: 11px; color: var(--bone); }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    .left { display: contents; }
+    .left > .panel:first-child { order: 1; } .right { order: 2; } .left > .panel:last-child { order: 3; }
+    header { position: static; } header .summary { display: none; }
+    #big { width: 100%; height: auto; aspect-ratio: 80 / 72; }
+    .tiles { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+  }
 </style>
 </head>
 <body>
-<main>
+<header>
   <h1>FACE WORKSHOP</h1>
-  <p class="note">Build a portrait from parts (js/faces.js). Copy the spec into an officer's <code>face:</code> in js/data.js. New parts: add a function to <code>Faces.parts.&lt;slot&gt;</code> and it shows up here.</p>
-  <div class="ctl">
-    <div id="slots"></div>
-    <h3>Marks</h3><div class="marks" id="marks"></div>
-    <h3>Colours</h3><div class="colors" id="colors"></div>
-    <div class="row"><button id="rnd">⚄ Random</button><button id="rndc">Random colours</button><select id="officer"><option value="">Load officer…</option></select></div>
+  <button id="rnd" title="R">⚄ Random face</button>
+  <button id="rndc" title="C">⚄ Random colours</button>
+  <select id="officer"><option value="">Load officer…</option></select>
+  <button id="undo" title="Ctrl+Z">↶ Undo</button>
+  <span class="sp"></span>
+  <span class="summary"><kbd>←</kbd><kbd>→</kbd> option · <kbd>↑</kbd><kbd>↓</kbd> tab · <kbd>R</kbd> random</span>
+</header>
+<main>
+  <div class="left">
+    <div class="panel">
+      <div class="frame"><img id="big" alt="portrait"></div>
+      <div class="sizes">
+        <figure><img id="s1" class="px" width="80" height="72" alt="">1:1 · Hangar</figure>
+        <figure><img id="s2" width="40" height="36" alt="">battle chip</figure>
+        <figure><img id="s3" width="34" height="31" alt="">phone</figure>
+      </div>
+      <h3>Parts</h3>
+      <div class="summary" id="summary"></div>
+    </div>
+    <div class="panel">
+      <h3 style="margin-top:0">Spec</h3>
+      <textarea id="spec" spellcheck="false"></textarea>
+      <div class="row"><button id="copy">Copy spec</button><button id="apply">Apply edited spec</button></div>
+      <div class="summary" style="margin-top:6px">Paste it as an officer's <b>face:</b> in js/data.js. New parts: add a function to <b>Faces.parts.&lt;slot&gt;</b> in js/faces.js and it shows up here.</div>
+    </div>
   </div>
-  <div>
-    <div class="view"><img id="big" width="320" height="320" alt=""><img id="mid" width="96" height="96" alt=""><img id="small" width="48" height="48" alt=""><img id="tiny" width="24" height="24" alt=""></div>
-    <h3>Spec</h3>
-    <textarea id="spec" spellcheck="false"></textarea>
-    <div class="row"><button id="copy">Copy spec</button><button id="apply">Apply edited spec</button><button id="many">Show 24 random faces</button></div>
-    <div class="grid" id="gallery"></div>
+  <div class="right">
+    <div class="panel">
+      <div class="tabs" id="tabs"></div>
+      <div class="hint" id="hint"></div>
+      <div id="pane"></div>
+    </div>
+    <div class="panel" style="margin-top:16px">
+      <div class="row" style="margin:0 0 10px"><button id="many">⚄ 24 random faces</button><span class="summary" style="align-self:center">Click one to edit it.</span></div>
+      <div class="gallery" id="gallery"></div>
+    </div>
   </div>
 </main>
 <script src="../../js/data.js"></script>
 <script src="../../js/faces.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
-const P = Faces.parts, SLOTS = ['bg', 'outfit', 'head', 'eyes', 'brows', 'nose', 'mouth', 'hair', 'beard', 'headgear'];
+const P = Faces.parts, W = Faces.W, H = Faces.H;
 const COLORS = { skin: '#c89a78', hair: '#3a2a20', iris: '#5a7090', cloth: '#3a3a44', cloth2: '#8a8070', trim: '#c8a040', metal: '#5c5c66', glow: '#50e0f0', bg: '#2a2026' };
-const SKINS = ['#ecc8a8', '#e0b090', '#c89a78', '#a87858', '#8a5a3c', '#5e3c28', '#d8c0a8', '#b0a090'];
-const HAIRS = ['#1c1410', '#3a2a20', '#6a4024', '#a06030', '#d0b080', '#c0b8b0', '#e8e0d0', '#602020', '#2a3040'];
+const COLOR_INFO = { skin: 'Skin', hair: 'Hair and brows', iris: 'Eyes', cloth: 'Clothing', cloth2: 'Shirt, bandages', trim: 'Trim, gold, jewellery', metal: 'Metal, armour, implants', glow: 'Glow: lights, tattoos, gems', bg: 'Background' };
+const PRESETS = {
+  skin: ['#f0d0b4', '#ecc8a8', '#e0b090', '#d0a080', '#c89a78', '#b08870', '#a87858', '#8a5a3c', '#6e4630', '#5e3c28', '#d8c0a8', '#b0a090', '#a0b0a0', '#9890b0'],
+  hair: ['#1c1410', '#3a2a20', '#6a4024', '#a06030', '#c08040', '#d0b080', '#c0b8b0', '#e8e0d0', '#602020', '#2a3040', '#405030'],
+  iris: ['#5a7090', '#6a9ac8', '#4a7a40', '#7a5030', '#3a3a3a', '#50e0f0', '#f0a0ff', '#e04030', '#d0b040'],
+  cloth: ['#2e3c4e', '#3a3a44', '#26262e', '#3a2a2a', '#2a3a2a', '#4a2458', '#5a1a1c', '#4a4030', '#202830'],
+  cloth2: ['#c8c0b0', '#d8d0b8', '#8a8070', '#6a6a74', '#a89878'],
+  trim: ['#d0a040', '#b8b8c0', '#c07040', '#a03030', '#50a0c0'],
+  metal: ['#5c5c66', '#3a3a44', '#7a6a50', '#4a5a6a', '#6a3a30'],
+  glow: ['#50e0f0', '#f0d070', '#e890ff', '#60f080', '#ff5040', '#f0f0ff'],
+  bg: ['#2a2026', '#5a1a1c', '#0c1018', '#24122c', '#1a2a1a', '#2a2418', '#101418', '#3a2a10'],
+};
+// What a tab's thumbnails zoom in on (art pixels: x, y, w, h), so small parts are easy to compare.
+const TABS = [
+  { slot: 'bg', name: 'Background', crop: null },
+  { slot: 'outfit', name: 'Outfit', crop: [0, 36, 80, 36] },
+  { slot: 'head', name: 'Head', crop: [10, 4, 60, 56] },
+  { slot: 'eyes', name: 'Eyes', crop: [16, 20, 48, 20] },
+  { slot: 'brows', name: 'Brows', crop: [16, 18, 48, 20] },
+  { slot: 'nose', name: 'Nose', crop: [24, 26, 32, 22] },
+  { slot: 'mouth', name: 'Mouth', crop: [24, 36, 32, 22] },
+  { slot: 'hair', name: 'Hair', crop: [4, 0, 72, 60] },
+  { slot: 'beard', name: 'Beard', crop: [14, 30, 52, 32] },
+  { slot: 'headgear', name: 'Headgear', crop: [4, 0, 72, 60] },
+  { slot: 'marks', name: 'Marks', crop: [8, 2, 64, 58], multi: true },
+  { slot: 'colors', name: 'Colours' },
+];
+const HINTS = {
+  marks: 'Marks stack: click to add or remove one. Each tile shows your face wearing that mark.',
+  colors: 'Every colour makes four tones (deep, shadow, base, light). Click a swatch or pick your own.',
+};
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
+const clone = (o) => JSON.parse(JSON.stringify(o));
 const hsl = (h, s, l) => { const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
   const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
   return Faces.toHex([(r + m) * 255, (g + m) * 255, (b + m) * 255]); };
-let spec = JSON.parse(JSON.stringify(DATA.officers.kroll.face));
 
-function build() {
-  $('slots').innerHTML = SLOTS.map((s) => `<label>${s}<select data-slot="${s}">${Object.keys(P[s]).map((k) => `<option>${k}</option>`).join('')}</select></label>`).join('');
-  $('marks').innerHTML = Object.keys(P.marks).map((k) => `<label><input type="checkbox" data-mark="${k}"> ${k}</label>`).join('');
-  $('colors').innerHTML = Object.keys(COLORS).map((k) => `<label>${k}<input type="color" data-color="${k}"></label>`).join('');
-  $('officer').innerHTML += Object.keys(DATA.officers).map((k) => `<option value="${k}">${DATA.officers[k].name}</option>`).join('');
-  document.querySelectorAll('[data-slot]').forEach((el) => el.onchange = () => { spec[el.dataset.slot] = el.value; draw(); });
-  document.querySelectorAll('[data-mark]').forEach((el) => el.onchange = () => { spec.marks = [...document.querySelectorAll('[data-mark]:checked')].map((m) => m.dataset.mark); draw(); });
-  document.querySelectorAll('[data-color]').forEach((el) => el.oninput = () => { spec.colors = Object.assign({}, spec.colors, { [el.dataset.color]: el.value }); draw(); });
+let spec = clone(DATA.officers.kroll.face), tab = 'eyes';
+const history = [];
+const set = (fn) => { history.push(clone(spec)); if (history.length > 60) history.shift(); fn(); draw(); };
+const val = (slot) => spec[slot] || Object.keys(P[slot])[0];
+
+// a tile showing the face (or a crop of it), scaled up in whole pixels
+function thumb(url, crop, maxW) {
+  const [x, y, w, h] = crop || [0, 0, W, H];
+  const k = Math.max(1, Math.floor(maxW / w));
+  return `<div class="thumb" style="width:${w * k}px;height:${h * k}px;background-image:url(${url});background-size:${W * k}px ${H * k}px;background-position:-${x * k}px -${y * k}px"></div>`;
 }
-function sync() {
-  document.querySelectorAll('[data-slot]').forEach((el) => { el.value = spec[el.dataset.slot] || Object.keys(P[el.dataset.slot])[0]; });
-  document.querySelectorAll('[data-mark]').forEach((el) => { el.checked = (spec.marks || []).includes(el.dataset.mark); });
-  document.querySelectorAll('[data-color]').forEach((el) => { el.value = (spec.colors || {})[el.dataset.color] || COLORS[el.dataset.color]; });
+
+function drawTabs() {
+  $('tabs').innerHTML = TABS.map((t) => {
+    const cur = t.slot === 'colors' ? '' : t.multi ? (spec.marks || []).length || '' : val(t.slot);
+    return `<button class="tab ${t.slot === tab ? 'on' : ''}" data-tab="${t.slot}">${t.name}${cur !== '' ? `<small>${cur}</small>` : ''}</button>`;
+  }).join('');
+  $('tabs').querySelectorAll('[data-tab]').forEach((b) => b.onclick = () => { tab = b.dataset.tab; drawPane(); drawTabs(); });
 }
+
+function drawPane() {
+  const t = TABS.find((x) => x.slot === tab);
+  $('hint').textContent = HINTS[tab] || `Each tile is your face with that ${t.name.toLowerCase()} — click to use it.`;
+  const tileW = window.innerWidth < 860 ? 100 : 150;
+  if (tab === 'colors') {
+    $('pane').innerHTML = `<div class="colors">${Object.keys(COLORS).map((k) => {
+      const c = (spec.colors || {})[k] || COLORS[k];
+      return `<div class="color"><header><b>${COLOR_INFO[k]}</b><span class="tones">${Faces.tones(c).map((t) => `<i style="background:${t}"></i>`).join('')}</span>
+        <input type="color" data-color="${k}" value="${c}"></header>
+        <div class="swatches">${(PRESETS[k] || []).map((s) => `<button class="sw" data-sw="${k}" data-v="${s}" style="background:${s}" title="${s}"></button>`).join('')}</div></div>`;
+    }).join('')}</div><div class="row" style="margin-top:10px"><button id="rndc2">⚄ Random colours</button><button id="defc">Reset to defaults</button></div>`;
+    $('pane').querySelectorAll('[data-color]').forEach((el) => { el.onchange = () => set(() => { spec.colors = Object.assign({}, spec.colors, { [el.dataset.color]: el.value }); }); });
+    $('pane').querySelectorAll('[data-sw]').forEach((el) => { el.onclick = () => set(() => { spec.colors = Object.assign({}, spec.colors, { [el.dataset.sw]: el.dataset.v }); }); });
+    $('rndc2').onclick = () => set(() => { spec.colors = randomColors(); });
+    $('defc').onclick = () => set(() => { spec.colors = {}; });
+    return;
+  }
+  const names = Object.keys(P[t.slot]);
+  $('pane').innerHTML = `<div class="tiles">${names.map((n) => {
+    let s = clone(spec), on;
+    if (t.multi) { const has = (s.marks || []).includes(n); on = has; s.marks = has ? s.marks.filter((m) => m !== n) : [...(s.marks || []), n]; if (has) s = clone(spec); }
+    else { on = val(t.slot) === n; s[t.slot] = n; }
+    return `<button class="tile ${on ? 'on' : ''}" data-opt="${n}">${thumb(Faces.render(s), t.crop, tileW)}<span>${n}</span></button>`;
+  }).join('')}</div>`;
+  $('pane').querySelectorAll('[data-opt]').forEach((b) => b.onclick = () => choose(t, b.dataset.opt));
+}
+
+function choose(t, n) {
+  set(() => {
+    if (t.multi) { const m = spec.marks || []; spec.marks = m.includes(n) ? m.filter((x) => x !== n) : [...m, n]; }
+    else spec[t.slot] = n;
+  });
+}
+
 function draw() {
   const url = Faces.render(spec);
-  for (const id of ['big', 'mid', 'small', 'tiny']) $(id).src = url;
+  for (const id of ['big', 's1', 's2', 's3']) $(id).src = url;
+  $('summary').innerHTML = TABS.filter((t) => t.slot !== 'colors').map((t) => `${t.name}: <b>${t.multi ? (spec.marks || []).join(', ') || '—' : val(t.slot)}</b>`).join(' · ');
   $('spec').value = 'face: ' + JSON.stringify(spec, null, 1).replace(/\n\s*/g, ' ').replace(/"(\w+)":/g, '$1:').replace(/"/g, "'") + ',';
+  drawTabs(); drawPane();
 }
+
 function randomColors() {
   const h = Math.random() * 360;
-  return { skin: pick(SKINS), hair: pick(HAIRS), iris: hsl(Math.random() * 360, 0.45, 0.5), cloth: hsl(h, 0.3, 0.2), cloth2: hsl(h, 0.15, 0.6),
-    trim: pick(['#d0a040', '#b8b8c0', '#c07040', '#a03030']), metal: hsl(h, 0.08, 0.35), glow: hsl(Math.random() * 360, 0.85, 0.62), bg: hsl(Math.random() * 360, 0.35, 0.1) };
+  return { skin: pick(PRESETS.skin), hair: pick(PRESETS.hair), iris: hsl(Math.random() * 360, 0.45, 0.5), cloth: hsl(h, 0.3, 0.2), cloth2: hsl(h, 0.15, 0.6),
+    trim: pick(PRESETS.trim), metal: hsl(h, 0.08, 0.35), glow: hsl(Math.random() * 360, 0.85, 0.62), bg: hsl(Math.random() * 360, 0.35, 0.1) };
 }
 function randomSpec() {
   const r = (s) => pick(Object.keys(P[s]));
   return { head: r('head'), eyes: r('eyes'), brows: r('brows'), nose: r('nose'), mouth: r('mouth'), hair: r('hair'), beard: Math.random() < 0.6 ? 'none' : r('beard'),
-    headgear: Math.random() < 0.5 ? 'none' : r('headgear'), outfit: r('outfit'), marks: Object.keys(P.marks).filter(() => Math.random() < 0.15), bg: r('bg'), colors: randomColors() };
+    headgear: Math.random() < 0.5 ? 'none' : r('headgear'), outfit: r('outfit'), marks: Object.keys(P.marks).filter(() => Math.random() < 0.12), bg: r('bg'), colors: randomColors() };
 }
-$('rnd').onclick = () => { spec = randomSpec(); sync(); draw(); };
-$('rndc').onclick = () => { spec.colors = randomColors(); sync(); draw(); };
-$('officer').onchange = (e) => { if (e.target.value) { spec = JSON.parse(JSON.stringify(DATA.officers[e.target.value].face)); sync(); draw(); } };
-$('copy').onclick = () => { $('spec').select(); navigator.clipboard && navigator.clipboard.writeText($('spec').value); };
+
+$('officer').innerHTML += Object.keys(DATA.officers).map((k) => `<option value="${k}">${DATA.officers[k].name}</option>`).join('');
+$('rnd').onclick = () => set(() => { spec = randomSpec(); });
+$('rndc').onclick = () => set(() => { spec.colors = randomColors(); });
+$('undo').onclick = () => { if (history.length) { spec = history.pop(); draw(); } };
+$('officer').onchange = (e) => { if (e.target.value) set(() => { spec = clone(DATA.officers[e.target.value].face); }); e.target.value = ''; };
+$('copy').onclick = () => { $('spec').select(); navigator.clipboard && navigator.clipboard.writeText($('spec').value); $('copy').textContent = 'Copied ✓'; setTimeout(() => { $('copy').textContent = 'Copy spec'; }, 1200); };
 $('apply').onclick = () => {
-  try { spec = Function('return ({' + $('spec').value.replace(/,\s*$/, '') + '}).face')(); sync(); draw(); } catch (e) { alert('Could not read that spec: ' + e.message); }
+  try { const s = Function('return ({' + $('spec').value.replace(/,\s*$/, '') + '}).face')(); set(() => { spec = s; }); } catch (e) { alert('Could not read that spec: ' + e.message); }
 };
 $('many').onclick = () => {
   const specs = Array.from({ length: 24 }, randomSpec);
   $('gallery').innerHTML = specs.map((s, i) => `<img src="${Faces.render(s)}" data-i="${i}" title="click to edit">`).join('');
-  $('gallery').querySelectorAll('img').forEach((img) => img.onclick = () => { spec = specs[+img.dataset.i]; sync(); draw(); });
+  $('gallery').querySelectorAll('img').forEach((img) => img.onclick = () => { set(() => { spec = specs[+img.dataset.i]; }); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 };
-build(); sync(); draw();
+// keyboard: ← → step through the current tab's options, ↑ ↓ change tab, R random, C colours, Ctrl+Z undo
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('textarea, input, select')) return;
+  const ti = TABS.findIndex((t) => t.slot === tab), t = TABS[ti];
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { $('undo').click(); e.preventDefault(); return; }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { tab = TABS[(ti + (e.key === 'ArrowDown' ? 1 : TABS.length - 1)) % TABS.length].slot; drawTabs(); drawPane(); e.preventDefault(); return; }
+  if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && !t.multi && t.slot !== 'colors') {
+    const names = Object.keys(P[t.slot]), i = names.indexOf(val(t.slot));
+    choose(t, names[(i + (e.key === 'ArrowRight' ? 1 : names.length - 1)) % names.length]); e.preventDefault(); return;
+  }
+  if (e.key === 'r' || e.key === 'R') $('rnd').click();
+  if (e.key === 'c' || e.key === 'C') $('rndc').click();
+});
+let rs; window.addEventListener('resize', () => { clearTimeout(rs); rs = setTimeout(drawPane, 150); });
+draw();
 </script>
 </body>
 </html>

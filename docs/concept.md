@@ -149,7 +149,7 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 
 Every game starts with all three; the Home Guard starts under Kroll.
 
-**Portraits** (decided v0.67): faces are built by `js/faces.js` from parts at 32×32: background, outfit, head shape, eyes, brows, nose, mouth, hair, beard, headgear and any number of marks (scars, eyepatch, bandage, third eye, tattoos, cybernetics, monocle, earring, freckles, visor), plus colours for skin, hair, eyes, cloth, trim, metal, glow and background. Each part paints materials into a grid; shapes shade themselves (light from the upper left, three tones per colour, warm skin shadows) and the figure gets a dark outline. An officer's look is its `face:` spec in `DATA.officers`. **Face Workshop** (`tools/faces/index.html`): pick parts and colours, see the face at four sizes, browse random faces, copy the spec. **Open:** how new officers are found (recruitment, rewards, a gacha banner), officer levels or traits, enemy officers.
+**Portraits** (decided v0.67, 80×72 since v0.69): faces are built by `js/faces.js` from parts at 80×72 (shown 1:1 in the Hangar and on officer cards): background, outfit, head shape, eyes, brows, nose, mouth, hair, beard, headgear and any number of marks (scars, eyepatch, bandage, third eye, tattoos, cybernetics, monocle, earring, freckles, visor), plus colours for skin, hair, eyes, cloth, trim, metal, glow and background. Each part paints materials into a grid; shapes shade themselves (light from the upper left, four tones per colour dithered into each other, warm skin shadows) and the figure gets a dark outline. An officer's look is its `face:` spec in `DATA.officers`. **Face Workshop** (`tools/faces/index.html`): pick parts from picture tiles (zoomed on the part), toggle marks, pick colours from swatches, see the face at its in-game sizes, undo, browse random faces, copy the spec. **Open:** how new officers are found (recruitment, rewards, a gacha banner), officer levels or traits, enemy officers.
 
 ## 4a-6. Fixed deposits
 
@@ -297,7 +297,7 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 **Proposed:**
 - A limited, desaturated palette: deep blacks, rust, sickly greens, bone white, with sharp accent colours for danger and rarity.
-- Low base resolution for art, for example 32×32 icons, 64×64 portraits and 16×16 UI glyphs, scaled up with `image-rendering: pixelated`.
+- Low base resolution for art, for example 32×32 icons, 80×72 portraits and 16×16 UI glyphs, scaled up with `image-rendering: pixelated`.
 - A pixel font for headings, and a readable font for body text.
 - Emojis or simple placeholders until the art exists.
 
