@@ -444,6 +444,7 @@ DATA.config = {
   offlineSecondsPerCycle: 60,
   offlineMaxCycles: 120,
   offlineEfficiency: 0.5,
+  historyMax: 400,        // Cycles kept for the Statistics screen
   saveKey: 'voyager_save_v15',
 };
 
@@ -472,6 +473,8 @@ DATA.tutorial = [
     text: 'You need an <b>Orbital Shipyard</b> in orbit around one of your planets. Then choose a hull: <b>Small</b>, <b>Medium</b> or <b>Large</b>, all available from the start. The exact type, stats and weapons are rolled, from Normal up to a one-in-a-thousand <b>Omega</b>, and every new ship is unveiled on screen as it leaves the slipway.<br><br>Small beats Large, Large beats Medium, and Medium beats Small.' },
   { screen: 'fleets', target: '#main .panel', title: 'Hangar and fleets',
     text: 'Ships fight in fleets of up to five, and every ship costs maintenance each Cycle (Metals and a quarter as much Chemicals), the more the rarer and better-rolled it is; drag a ship onto a fleet slot to set its lane, or into the hangar. The hangar holds the ships in no fleet: {hangar} per Orbital Shipyard, +2 per shipyard level, and you can sort it. <b>Auto scrap</b> breaks up the ships you don\'t want, by rarity, hull and roll quality. From the Star Map you send a fleet to clear a guarded system or to strike a xeno world. Keep a fleet at home: when <b style="color:#ff5a4a">! RAID</b> appears on the map, something is coming for one of your colonies.<br><br>Each fleet can be led by an <b>officer</b> (the ＋ Officer slot after the fleet\'s ships). Officers give the fleet\'s ships passive bonuses in battle and have one ★ ability.' },
+  { screen: 'stats', target: '#main .panel', title: 'Statistics',
+    text: 'Every Cycle you end is recorded here. <b>Per Cycle</b> shows what each resource gains or loses after upkeep; <b>Stockpile</b> shows what you hold. Pick a resource with the chips, and how far back to look.<br><br>A line that keeps falling is a shortage in the making: find the building or fleet that drains it before the stores run dry.' },
   { screen: 'overview', demo: 'raid', pos: 'left', target: '#main .panel.threats', title: 'Raids',
     text: 'Sooner or later the xenos come for your worlds. {raids}<br><br>A raid is spotted a few Cycles before it arrives: it shows here with its size and arrival time, and as <b style="color:#ff5a4a">! RAID</b> on the Star Map. Raids hit your <b>outlying colonies</b> first; the capital only when nothing else is in reach.<br><br>This raid is staged for practice. Let\'s play it out.' },
   { screen: 'battle', demo: 'setup', pos: 'side', target: '#main .panel', title: 'A raid arrives',

@@ -29,6 +29,7 @@ const State = {
         remnant: { ore: 40, homeId: null, alive: true, aggro: 0.8 },
       },
       log: [],
+      history: [],        // per-Cycle economy snapshots for the Statistics screen (Economy.record)
       pendingEvents: [],
       reports: [],
       lastSeen: Date.now(),
@@ -95,6 +96,7 @@ const State = {
         if (first) first.officer = 'kroll';
       }
       for (const f of data.fleets || []) if (f.officer && !DATA.officers[f.officer]) f.officer = null;
+      if (!data.history) data.history = [];
       let dropped = 0;
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) { delete data.techs[id]; dropped++; }
       if (data.techs) for (const id in data.techs) data.techs[id] = Math.min(DATA.techMax, data.techs[id] | 0);

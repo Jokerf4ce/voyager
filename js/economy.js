@@ -425,6 +425,19 @@ const Economy = {
       electronics: i.electronics, chemicals: i.chemicals - up * DATA.upkeep.chemShare, research: i.research, crypto: i.crypto, caps: i.caps, upkeep: up };
   },
 
+  // One Statistics snapshot per Cycle: the net change per Cycle and the stockpiles at the end of it.
+  record() {
+    const n = this.net();
+    const snap = { c: G.cycle, net: {}, res: {} };
+    for (const k of Object.keys(DATA.resources)) {
+      snap.net[k] = Math.round((n[k] || 0) * 100) / 100;
+      snap.res[k] = Math.round((G.res[k] || 0) * 100) / 100;
+    }
+    G.history = G.history || [];
+    G.history.push(snap);
+    if (G.history.length > DATA.config.historyMax) G.history.splice(0, G.history.length - DATA.config.historyMax);
+  },
+
   tick() {
     Colonies.tickBuild();
     const inc = this.income();

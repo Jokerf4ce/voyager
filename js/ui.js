@@ -21,6 +21,7 @@ const UI = {
     ['research', '☍', 'Research'],
     ['shipyard', '⚒', 'Shipyard'],
     ['fleets', '➤', 'Hangar'],
+    ['stats', '∿', 'Statistics'],
     ['log', '☰', 'Chronicle'],
     ['settings', '⚙', 'Settings'],
   ],
@@ -589,6 +590,75 @@ const UI = {
     return this.panel('Current Project', curHtml)
       + this.panel('Archives of the Covenant · Economy', `<p class="muted small">Research is made by Research Labs. Each project gives a small bonus and can be researched up to ${DATA.techMax} times; every level costs more than the last.</p>${group('economy')}`)
       + this.panel('Archives of the Covenant · War', group('military'));
+  },
+
+  screen_stats() {
+    const keys = Object.keys(DATA.resources);
+    const metric = keys.includes(UI.statsMetric) ? UI.statsMetric : 'metal';
+    const view = UI.statsView === 'res' ? 'res' : 'net';
+    const range = UI.statsRange ?? 25;
+    const all = G.history || [];
+    const pts = range ? all.slice(-range) : all;
+    const r = DATA.resources[metric];
+    const chips = keys.map((k) => this.btn(`${DATA.resources[k].icon} ${DATA.resources[k].name}`, 'statsmetric', k, false, 'small' + (k === metric ? ' on' : ''))).join('');
+    const views = [['net', 'Per Cycle'], ['res', 'Stockpile']].map(([v, l]) => this.btn(l, 'statsview', v, false, 'small' + (view === v ? ' on' : ''))).join('');
+    const ranges = [[25, 'Last 25'], [100, 'Last 100'], [0, 'All']].map(([v, l]) => this.btn(l, 'statsrange', String(v), false, 'small' + (range === v ? ' on' : ''))).join('');
+    const what = view === 'net' ? `${r.name} gained per Cycle, after upkeep` : `${r.name} in stock`;
+    let body;
+    if (pts.length < 2) {
+      body = `<p class="muted">No history yet. Every Cycle you end is recorded here, so the chart appears after the second Cycle.</p>`;
+    } else {
+      const vals = pts.map((p) => p[view][metric]);
+      const hi0 = Math.max(...vals), lo0 = Math.min(...vals);
+      const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const last = vals[vals.length - 1], first = vals[0];
+      const sign = (v) => (v > 0 ? '+' : '') + U.amount(metric, v);
+      body = this.statsChart(pts, metric, view, r.color)
+        + `<div class="statsum small">
+            <div><small class="muted">Latest</small><b class="res-${metric}">${U.amount(metric, last)}</b></div>
+            <div><small class="muted">Average</small><b>${U.amount(metric, avg)}</b></div>
+            <div><small class="muted">Highest</small><b>${U.amount(metric, hi0)}</b></div>
+            <div><small class="muted">Lowest</small><b>${U.amount(metric, lo0)}</b></div>
+            <div><small class="muted">Change over range</small><b class="${last - first >= 0 ? 'good' : 'bad'}">${sign(last - first)}</b></div>
+          </div>`;
+    }
+    return this.panel('Statistics', `
+      <p class="small muted">The economy, cycle by cycle: ${what}. Up to ${DATA.config.historyMax} Cycles are kept.</p>
+      <div class="btnrow sortrow"><small class="muted">Metric</small>${chips}</div>
+      <div class="btnrow sortrow"><small class="muted">Show</small>${views}</div>
+      <div class="btnrow sortrow"><small class="muted">Range</small>${ranges}</div>
+      ${body}`);
+  },
+
+  // An inline SVG line chart of one metric over the given Cycles (no libraries).
+  statsChart(pts, key, view, color) {
+    const W = 640, H = 260, L = 58, R = 16, T = 14, B = 30;
+    const vals = pts.map((p) => p[view][key]);
+    let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals);
+    if (hi === lo) hi = lo + 1;
+    const pad = (hi - lo) * 0.06;
+    hi += pad; if (lo < 0) lo -= pad;
+    const x = (i) => L + (pts.length === 1 ? 0 : (i / (pts.length - 1)) * (W - L - R));
+    const y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const base = y(Math.max(lo, Math.min(hi, 0)));
+    let grid = '';
+    for (let t = 0; t <= 4; t++) {
+      const v = lo + ((hi - lo) * t) / 4;
+      grid += `<line x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="sgrid"/>`
+        + `<text x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" class="saxis">${U.esc(U.amount(key, v))}</text>`;
+    }
+    const line = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+    const area = `${line} L${x(vals.length - 1).toFixed(1)} ${base.toFixed(1)} L${x(0).toFixed(1)} ${base.toFixed(1)} Z`;
+    const dots = pts.length <= 60 ? vals.map((v, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.6" fill="${color}"><title>C${pts[i].c}: ${U.esc(U.amount(key, v))}</title></circle>`).join('') : '';
+    return `<div class="statchart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${U.esc(DATA.resources[key].name)} per Cycle">
+      ${grid}
+      <line x1="${L}" x2="${W - R}" y1="${base.toFixed(1)}" y2="${base.toFixed(1)}" class="szero"/>
+      <path d="${area}" fill="${color}" fill-opacity="0.14"/>
+      <path d="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round"/>
+      ${dots}
+      <text x="${L}" y="${H - 8}" class="saxis">C${pts[0].c}</text>
+      <text x="${W - R}" y="${H - 8}" text-anchor="end" class="saxis">C${pts[pts.length - 1].c}</text>
+    </svg></div>`;
   },
 
   screen_log() {

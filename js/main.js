@@ -11,6 +11,7 @@ const Game = {
     Sfx.play('cycle');
     Missions.tick();
     Economy.tick();
+    Economy.record();
     Ships.repair();
     Research.tick();
     AI.tick();
@@ -69,7 +70,7 @@ const Game = {
 
   // While the tutorial runs the game is locked: you can look around, change audio settings and use the tutorial,
   // and on its practice steps fight the practice battle. Anything else nudges the tutorial panel instead.
-  tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort',
+  tourSafe: new Set(['screen', 'close', 'selship', 'gofleets', 'gobattle', 'gocolony', 'colsys', 'colopen', 'goyard', 'hangarsort', 'statsmetric', 'statsview', 'statsrange',
     'bopen', 'bshow', 'selplanet', 'mapsys', 'opensys', 'mapzoom', 'maphome', 'mapcenter', 'splashclose',
     'rules', 'officerinfo', 'tutorial', 'tutnext', 'tutback', 'tutskip', 'tutmin', 'music', 'musicplay', 'musicskip', 'musicmode', 'voice', 'voicetest', 'sfx', 'subtitles']),
   // Actions that make their own sound (or one that follows right away), so they don't also click.
@@ -119,6 +120,9 @@ const Game = {
     bswapnav: (a) => { UI.swapNav(+a); },
     brestore: () => { Battle.restoreTurn(); },
     hangarsort: (a) => { UI.hangarSort = a; },
+    statsmetric: (a) => { UI.statsMetric = a; },
+    statsview: (a) => { UI.statsView = a; },
+    statsrange: (a) => { UI.statsRange = +a; },
     scrapf: (a) => {
       const f = Ships.scrapFilter(), [k, v] = a.split(':');
       if (k === 'rarity') f.rarity = v;

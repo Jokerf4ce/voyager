@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.70.0 — 2026-11-28
+- **Statistics screen** (nav, between Hangar and Chronicle). Every Cycle you end is recorded (the net change per Cycle after upkeep, and the stockpiles), up to 400 Cycles. The screen draws one resource as a line chart: pick the metric (Metals, Rare Minerals, Organics, Electronics, Chemicals, Crypto Shards, Research), show it **Per Cycle** or as the **Stockpile**, and look back over the last 25, last 100 or all Cycles. Below the chart: latest, average, highest, lowest and the change over the range.
+- **Tutorial:** a new step after the Hangar explains the Statistics screen.
+- Cycles that pass while the game is closed are not recorded (the Chronicle still logs them).
+
 ## 0.69.4 — 2026-11-28
 - **Removed the "While You Were Gone" popup.** Away progress still applies (the same gains, and the Chronicle still records them); it just no longer opens a window on return.
 
