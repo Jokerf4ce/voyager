@@ -112,6 +112,7 @@ const State = {
       if (data.ships) for (const sh of Object.values(data.ships)) if (sh.upkeepRoll == null && DATA.shipTypes[sh.type]) sh.upkeep = Ships.rollUpkeep(sh); // v0.53 upkeep
       if (data.researching && !DATA.techs[data.researching]) { data.researching = 'scanning'; data.researchProgress = 0; }
       G = data;
+      for (const s of G.systems || []) if (s.guard && s.guard.owner === 'monster') s.guard = Galaxy.pirates(Galaxy.danger(s.x, s.y)); // v0.77: Lurkers → pirates
       return true;
     } catch (e) { return false; }
   },

@@ -95,18 +95,26 @@ const Galaxy = {
     return made;
   },
 
-  // Monster lairs, more and nastier the farther out. (Charting a system no longer triggers events: v0.48.)
+  // Pirate dens, more and better armed the farther from home. (Charting a system no longer triggers events: v0.48.)
   populate(s) {
     const d = this.danger(s.x, s.y), g = DATA.galaxy;
     if (G.homeId == null || d < g.lairFrom) return;
     if (Math.random() > Math.min(g.lairMax, g.lairChance * (d - g.lairFrom + 0.3))) return;
-    const n = Math.min(DATA.fleetMax, U.randInt(2, 3) + Math.floor(d * 1.5));
+    s.guard = this.pirates(d);
+  },
+  // A pirate band for danger d (DATA.pirates): regular ships, scaled by the distance from home.
+  pirates(d) {
+    const P = DATA.pirates;
+    const n = Math.min(DATA.fleetMax, U.randInt(P.count[0], P.count[1]) + Math.floor(d * P.perDanger));
+    const sizes = ['S', ...(d >= P.medium ? ['M', 'M'] : []), ...(d >= P.large ? ['L'] : [])];
     const ships = [];
     for (let k = 0; k < n; k++) {
-      const r = Math.random() * (0.8 + d * 0.6);
-      ships.push(Ships.make(r > 1.4 ? 'leviathan' : r > 0.8 ? 'maw' : 'lurker', { owner: 'monster', rarity: Ships.rollRarity(d * 0.8) }));
+      const size = U.pick(sizes);
+      const types = Object.keys(DATA.shipTypes).filter((t) => DATA.shipTypes[t].size === size && !DATA.shipTypes[t].monster && !DATA.shipTypes[t].structure);
+      ships.push(Ships.make(U.pick(types), { owner: 'pirate', rarity: Ships.rollRarity(d * P.rarity), name: U.pick(P.ships) }));
     }
-    s.guard = { owner: 'monster', name: d > 1.2 ? 'Lurker Brood' : 'Lurkers', ships };
+    const name = P.names.filter(([, from]) => d >= from).pop()[0];
+    return { owner: 'pirate', name, ships };
   },
 
   // Make sure the space around every charted (or Covenant) system exists, so its neighbours can be found.

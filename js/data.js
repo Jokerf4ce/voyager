@@ -349,6 +349,7 @@ DATA.shipPalettes = {
   chorus: { hull: '#a8b89c', metal: '#3e4a36', accent: '#6ca832', glass: '#c0a830', glow: '#a0ff60', halo: '#90e050' },
   remnant: { hull: '#a0a0a4', metal: '#3a3a42', accent: '#d05030', glass: '#d03020', glow: '#ff6030', halo: '#ff5020' },
   monster: { hull: '#b84850', metal: '#b4a688', accent: '#7a4070', glass: '#f0e040', glow: '#f0e040', halo: '#d0c030' },
+  pirate: { hull: '#5a5048', metal: '#2e2a28', accent: '#b03a30', glass: '#d0b040', glow: '#ff8040', halo: '#e04020' },
 };
 
 // Grim names for new ships.
@@ -380,11 +381,13 @@ DATA.techs = {
 };
 
 
-// Factions. 'player' is you; others are AI. 'monster' are neutral horrors guarding systems.
+// Factions. 'player' is you; chorus and remnant are AI empires. 'pirate' are the neutral bands guarding systems
+// (v0.77, replacing the Lurkers; 'monster' is kept only so very old data still reads).
 DATA.factions = {
   player: { name: 'The Last Covenant', color: '#d8c8a0', short: 'You' },
   chorus: { name: 'The Chorus', color: '#7fbf3f', short: 'Chorus', desc: 'A hive that sings across the void. It wants you to join the song.' },
   remnant: { name: 'Iron Remnant', color: '#d06030', short: 'Remnant', desc: 'Ancient war-machines still following orders from a dead empire.' },
+  pirate: { name: 'Pirates', color: '#c04848', short: 'Pirates', desc: 'Deserters, corsairs and scavengers. The farther from home, the better armed.' },
   monster: { name: 'Lurkers', color: '#8a2a3a', short: 'Lurkers' },
 };
 
@@ -464,7 +467,7 @@ DATA.galaxy = {
   extraLane: 95,           // extra hyperlanes only between systems closer than this
   growRadius: 1,           // chunks generated around every charted system (1 = the 3x3 around it)
   alienDistance: [520, 680], // how far out the two alien empires lie from home
-  lairFrom: 0.3,           // monster lairs start at this danger (distance from home / alienDistance[0])
+  lairFrom: 0.3,           // pirate dens start at this danger (distance from home / alienDistance[0])
   lairChance: 0.22, lairMax: 0.4,
 };
 
@@ -598,4 +601,15 @@ DATA.trade = {
   value: { metal: 1, organics: 1, rare: 2, chemicals: 2, electronics: 2.5 }, // what one unit is worth, for the rates
   lot: 50,          // units given per trade
   rateCount: 3,
+};
+
+// Pirates (v0.77): regular ships guarding dens. Strength grows with the distance from your home system (danger d):
+// more ships, bigger hulls and better rarities the farther out.
+DATA.pirates = {
+  count: [2, 3], perDanger: 1.5,   // ships: 2–3, plus this × d (max a full fleet)
+  medium: 0.6, large: 1.25,        // from this danger on, medium / large hulls join
+  rarity: 0.9,                     // rarity bias × d
+  names: [['Pirate Raiders', 0], ['Corsair Band', 0.7], ['Reaver Fleet', 1.2], ['Pirate Warlord', 1.7]], // [name, from danger]
+  ships: ['Red Jack', 'Rust Widow', 'Gallows Bell', 'Knife Saint', 'Cutpurse', 'Black Tithe', 'Bonegrin', 'Salt Rat', 'Scuttler', 'Mutineer', 'Grim Fortune',
+    'Cold Hook', 'Lucky Wretch', 'Debt Collector', 'Scrap Prince', 'Howling Ann', 'Blind Wager', 'Marrow Thief', 'Smiling Dog', 'Last Laugh'],
 };

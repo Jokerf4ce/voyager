@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.77.0 — 2026-11-28
+- **Pirates replace the Lurkers.** The dens guarding unclaimed systems are now pirate bands of regular ships (any hull type, with salvageable weapons and their own rust-and-red livery), not monsters.
+- **They scale with the distance from your home system:** 2–3 ships nearby, up to a full fleet of five far out; medium hulls join from 0.6 of the way to the alien empires, large hulls from 1.25; rarities improve the farther out. The band's name shows it: Pirate Raiders, Corsair Band, Reaver Fleet, Pirate Warlord. Average power runs from about 75 close to home to about 450 at twice the alien distance (`DATA.pirates`).
+- Existing saves: every Lurker den becomes a pirate band of the same distance when the game loads.
+
 ## 0.76.0 — 2026-11-28
 - **Trading posts.** Charting a new system has an 18 % chance to reveal a trading post on one of its planets (never in the home system or one held by the xenos): a **Black Market**, an **Exchange Hub** or an **Independent Station**, each with its own name (e.g. "Black Market – Rustgate"). Each post offers 1–3 services, always including its kind's speciality:
   - **Ships for Crypto Shards** (2–3 hulls of any type; price by rarity and size). Black Markets stock better rarities at higher prices.

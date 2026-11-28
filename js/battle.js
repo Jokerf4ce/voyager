@@ -505,7 +505,7 @@ const Battle = {
         outcome = `Defeat. ☠ ${s.name} has fallen to ${DATA.factions[att].name}. Its people will not be seen again.`;
       } else outcome = result === 'retreat' ? 'Your ships withdraw.' : result === 'draw' ? 'Neither side breaks. Your ships withdraw.' : 'Defeat. Your ships are gone, and so are their crews.';
     }
-    const enemyName = b.kind === 'attack' ? (s.guard && s.guard.name) || (DATA.factions[s.owner] || {}).name || 'Lurkers' : b.threat.name;
+    const enemyName = b.kind === 'attack' ? (s.guard && s.guard.name) || (DATA.factions[s.owner] || {}).name || 'Pirates' : b.threat.name;
     this.say(outcome);
     const rep = { c: G.cycle, sys: s.name, enemy: enemyName, myLost, theirLost, outcome, won, lost: !won };
     G.reports.unshift(rep);
