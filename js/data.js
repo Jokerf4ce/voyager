@@ -593,14 +593,20 @@ DATA.trade = {
   names: ['Rustgate', 'The Hollow Coin', 'Saint Ferro\'s Rest', 'Lanternfall', 'Grieving Wheel', 'Ninefold', 'The Gilded Maw', 'Ashmarket', 'Low Choir',
     'Tallow Dock', 'Vesper Ring', 'The Drowned Ledger', 'Brass Reliquary', 'Cinderhold', 'Mercy\'s Toll', 'The Pale Bazaar', 'Salt Anchor', 'Kettle Station',
     'Last Lantern', 'Ironbough', 'The Weeping Scale', 'Gallows Quay', 'Copperhook', 'Sable Exchange', 'Widow\'s Purse', 'Oubliette Nine', 'Thorn Market', 'Grey Tithe'],
-  shipCount: [2, 3],
-  shipPrice: { normal: 1, strong: 2.5, epic: 6, legendary: 15, omega: 40 }, // Crypto Shards, × size below, ±10 %
-  sizePrice: { S: 1, M: 1.6, L: 2.4 },
-  officerPrice: [4, 8],
-  materials: ['metal', 'rare', 'organics', 'electronics', 'chemicals'],
+  // Ships are offered as contracts, e.g. "Epic medium hull, 1 in stock": the ship is built (random type of that
+  // size, rolled stats) when you buy it. Prices in Crypto Shards (a Finance District mines 0.05 per Cycle).
+  shipOffers: [2, 3],          // contracts per post
+  shipStock: [1, 3],           // ships per contract (fewer for better rarities, see stockMult)
+  shipPrice: { normal: 0.2, strong: 0.5, epic: 1.2, legendary: 3, omega: 8 }, // × size below, ±10 %
+  sizePrice: { S: 1, M: 1.5, L: 2.2 },
+  officerPrice: [0.8, 2],
+  // the exchange: every gathered material for every other gathered one, every crafted for every other crafted,
+  // and every material for Crypto Shards; always at a loss
+  gathered: ['metal', 'rare', 'organics'],
+  crafted: ['electronics', 'chemicals'],
   value: { metal: 1, organics: 1, rare: 2, chemicals: 2, electronics: 2.5 }, // what one unit is worth, for the rates
+  shardValue: 400,  // value units per Crypto Shard (fair: 400 Metals = 1 shard)
   lot: 50,          // units given per trade
-  rateCount: 3,
 };
 
 // Pirates (v0.77): regular ships guarding dens. Strength grows with the distance from your home system (danger d):

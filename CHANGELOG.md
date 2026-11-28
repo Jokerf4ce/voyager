@@ -2,6 +2,12 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.78.0 — 2026-11-28
+- **Lower Crypto Shard prices**, in line with a Finance District's 0.05 per Cycle: ship contracts from about 0.2 (Normal, small) to 1.2 × size (Epic) and 3 × size (Legendary); officers 0.8–2 shards.
+- **Ship contracts instead of ships on display:** a post offers 2–3 contracts such as "Epic · Medium hull, 1 in stock". The ship is built when you buy it (random type of that size, rolled stats and weapons). Stock is limited, smaller for better rarities, and renews with the post.
+- **Full material exchange:** a post with the exchange trades every gathered material for every other gathered one (Metals, Rare Minerals, Organics), every crafted one for the other (Electronics, Chemicals), and **buys all five for Crypto Shards** (fair value: 400 Metals per shard). Every deal still takes a cut.
+- Posts from 0.76 get the new stock when the game loads.
+
 ## 0.77.0 — 2026-11-28
 - **Pirates replace the Lurkers.** The dens guarding unclaimed systems are now pirate bands of regular ships (any hull type, with salvageable weapons and their own rust-and-red livery), not monsters.
 - **They scale with the distance from your home system:** 2–3 ships nearby, up to a full fleet of five far out; medium hulls join from 0.6 of the way to the alien empires, large hulls from 1.25; rarities improve the farther out. The band's name shows it: Pirate Raiders, Corsair Band, Reaver Fleet, Pirate Warlord. Average power runs from about 75 close to home to about 450 at twice the alien distance (`DATA.pirates`).

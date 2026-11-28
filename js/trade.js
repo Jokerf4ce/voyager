@@ -1,5 +1,6 @@
 // Voyager — trading posts (v0.76). Some newly charted systems hold one on a planet: a Black Market, an Exchange Hub or an
-// Independent Station. Each offers 1–3 services: ships for Crypto Shards, material exchange (always at a loss) and
+// Independent Station. Each offers 1–3 services: ship contracts for Crypto Shards (built on purchase, limited stock),
+// exchange (gathered↔gathered, crafted↔crafted, anything → Crypto Shards; always at a loss) and
 // officers for Crypto Shards. Trade is remote (no fleet needed) while the system is not held by the xenos.
 // Posts live in G.trade; their stock is restocked every DATA.trade.restock Cycles.
 
@@ -36,23 +37,25 @@ const Trade = {
     const T = DATA.trade, K = T.kinds[post.kind];
     post.next = G.cycle + T.restock;
     if (post.services.includes('ships')) {
-      const types = Object.keys(DATA.shipTypes).filter((k) => !DATA.shipTypes[k].monster && !DATA.shipTypes[k].structure);
-      post.ships = Array.from({ length: U.randInt(T.shipCount[0], T.shipCount[1]) }, () => {
-        const sh = Ships.make(U.pick(types), { bias: K.shipBias });
-        sh.price = this.shipPrice(sh, K.priceMult);
-        return sh;
+      // contracts: rarity and hull size, built on purchase; better rarities come in smaller numbers
+      post.ships = Array.from({ length: U.randInt(T.shipOffers[0], T.shipOffers[1]) }, () => {
+        const rarity = Ships.rollRarity(K.shipBias), size = U.pick(['S', 'S', 'M', 'M', 'L']);
+        const stock = Math.max(1, U.randInt(T.shipStock[0], T.shipStock[1]) - (rarity === 'normal' ? 0 : rarity === 'strong' ? 1 : 2));
+        return { rarity, size, stock, price: this.shipPrice(rarity, size, K.priceMult) };
       });
     } else post.ships = [];
     if (post.services.includes('exchange')) {
-      const mats = T.materials;
-      post.rates = Array.from({ length: T.rateCount }, () => {
-        const [from, to] = U.shuffle([...mats]).slice(0, 2);
-        const loss = K.loss[0] + Math.random() * (K.loss[1] - K.loss[0]);
-        const give = T.lot;
-        const get = Math.max(1, Math.floor(give * T.value[from] / T.value[to] * (1 - loss)));
-        return { from, to, give, get, loss: Math.round(loss * 100) };
-      });
-    } else post.rates = [];
+      const loss = () => K.loss[0] + Math.random() * (K.loss[1] - K.loss[0]);
+      const offer = (from, to) => {
+        const l = loss(), give = T.lot;
+        const fair = to === 'crypto' ? give * T.value[from] / T.shardValue : give * T.value[from] / T.value[to];
+        const get = to === 'crypto' ? Math.max(0.01, Math.floor(fair * (1 - l) * 100) / 100) : Math.max(1, Math.floor(fair * (1 - l)));
+        return { from, to, give, get, loss: Math.round(l * 100) };
+      };
+      const pairs = (list) => list.flatMap((a) => list.filter((b) => b !== a).map((b) => offer(a, b)));
+      post.rates = [...pairs(T.gathered), ...pairs(T.crafted)];
+      post.sell = [...T.gathered, ...T.crafted].map((k) => offer(k, 'crypto'));
+    } else { post.rates = []; post.sell = []; }
     if (post.services.includes('officers')) {
       const o = Officers.generate(1).o1;
       const names = new Set(Object.values(DATA.officers).map((x) => x.name));
@@ -61,17 +64,19 @@ const Trade = {
     } else post.officer = null;
   },
 
-  shipPrice(sh, mult = 1) {
+  shipPrice(rarity, size, mult = 1) {
     const T = DATA.trade;
-    return Math.round(T.shipPrice[sh.rarity] * T.sizePrice[sh.size] * mult * (0.9 + Math.random() * 0.2) * 100) / 100;
+    return Math.round(T.shipPrice[rarity] * T.sizePrice[size] * mult * (0.9 + Math.random() * 0.2) * 100) / 100;
   },
+  // Posts saved before v0.76.1 (ship cards for sale, three exchange offers) get the new kind of stock.
+  migrate() { for (const p of G.trade || []) if (!p.sell || (p.ships || []).some((x) => x.type)) this.restock(p); },
 
   // Once per Cycle: posts whose time has come restock.
   tick() { for (const p of G.trade || []) if (G.cycle >= p.next) this.restock(p); },
 
   buyShipBlocker(post, i) {
     const sh = post.ships[i];
-    if (!sh) return 'Sold';
+    if (!sh || sh.stock <= 0) return 'Sold out';
     if (!this.open(post)) return 'Closed';
     if (G.res.crypto < sh.price - 1e-9) return 'Not enough Crypto Shards';
     if (Ships.hangarFree() <= 0 && !Ships.roomyFleet()) return 'Hangar full';
@@ -80,30 +85,33 @@ const Trade = {
   buyShip(postId, i) {
     const post = (G.trade || []).find((t) => t.id === postId);
     if (!post || this.buyShipBlocker(post, i)) return null;
-    const sh = post.ships.splice(i, 1)[0];
-    G.res.crypto -= sh.price;
-    delete sh.price;
-    G.ships[sh.id] = sh; // its id was drawn when the post stocked it
+    const offer = post.ships[i];
+    G.res.crypto = Math.round((G.res.crypto - offer.price) * 100) / 100;
+    offer.stock--;
+    const types = Object.keys(DATA.shipTypes).filter((k) => DATA.shipTypes[k].size === offer.size && !DATA.shipTypes[k].monster && !DATA.shipTypes[k].structure);
+    const sh = Ships.make(U.pick(types), { rarity: offer.rarity });
+    G.ships[sh.id] = sh;
     const f = Ships.roomyFleet();
     if (f) f.ships.push(sh.id);
-    Log.add(`⚖ Bought ${DATA.shipRarities[sh.rarity].name} ${DATA.shipTypes[sh.type].name} "${sh.name}" at ${this.title(post)}${f ? `; it joins ${f.name}` : ''}.`, sh.rarity === 'normal' ? '' : 'good');
+    Log.add(`⚖ Bought a ${DATA.shipRarities[sh.rarity].name} ${DATA.shipTypes[sh.type].name}, "${sh.name}", at ${this.title(post)}${f ? `; it joins ${f.name}` : ''}.`, sh.rarity === 'normal' ? '' : 'good');
     return sh;
   },
 
-  exchangeBlocker(post, i, times = 1) {
-    const r = post.rates[i];
+  offerList(post, list) { return list === 'sell' ? post.sell || [] : post.rates || []; },
+  exchangeBlocker(post, i, times = 1, list = 'rates') {
+    const r = this.offerList(post, list)[i];
     if (!r) return 'No offer';
     if (!this.open(post)) return 'Closed';
     if ((G.res[r.from] || 0) < r.give * times) return `Not enough ${DATA.resources[r.from].name}`;
     return null;
   },
-  exchange(postId, i, times = 1) {
+  exchange(postId, i, times = 1, list = 'rates') {
     const post = (G.trade || []).find((t) => t.id === postId);
-    if (!post || this.exchangeBlocker(post, i, times)) return false;
-    const r = post.rates[i];
+    if (!post || this.exchangeBlocker(post, i, times, list)) return false;
+    const r = this.offerList(post, list)[i];
     G.res[r.from] -= r.give * times;
-    G.res[r.to] += r.get * times;
-    Log.add(`⚖ Traded ${r.give * times} ${DATA.resources[r.from].name} for ${r.get * times} ${DATA.resources[r.to].name} at ${this.title(post)}.`);
+    G.res[r.to] = Math.round((G.res[r.to] + r.get * times) * 100) / 100;
+    Log.add(`⚖ Traded ${r.give * times} ${DATA.resources[r.from].name} for ${U.amount(r.to, r.get * times)} ${DATA.resources[r.to].name} at ${this.title(post)}.`);
     return true;
   },
 
@@ -117,7 +125,7 @@ const Trade = {
     const post = (G.trade || []).find((t) => t.id === postId);
     if (!post || this.officerBlocker(post)) return null;
     const { def, price } = post.officer;
-    G.res.crypto -= price;
+    G.res.crypto = Math.round((G.res.crypto - price) * 100) / 100;
     if (!G.officerDefs) G.officerDefs = JSON.parse(JSON.stringify(DATA.officerPresets)); // old saves: make the roster editable
     let n = Object.keys(G.officerDefs).length + 1, key;
     do key = 'o' + n++; while (G.officerDefs[key]);

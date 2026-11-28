@@ -706,7 +706,7 @@ const UI = {
     const cry = (v) => `<b class="res-crypto">${DATA.resources.crypto.icon} ${U.amount('crypto', v)}</b>`;
     if (!posts.length) {
       return this.panel('Trade', `<p class="muted">No trading posts known yet. Chart new systems with survey probes: about one in ${Math.round(1 / T.chance)} hides a <b>Black Market</b>, an <b>Exchange Hub</b> or an <b>Independent Station</b>.</p>
-        <p class="small muted">They sell ships and hire out officers for Crypto Shards (mined by Finance Districts), and swap materials, always at a loss. You can trade with any post whose system the xenos don't hold.</p>`);
+        <p class="small muted">They sell ship contracts and hire out officers for Crypto Shards (mined by Finance Districts), swap materials and buy them for shards, always at a loss. You can trade with any post whose system the xenos don't hold.</p>`);
     }
     if (this.tradeSel != null) posts.sort((a, b) => (b.id === this.tradeSel) - (a.id === this.tradeSel));
     const out = posts.map((post) => {
@@ -716,17 +716,24 @@ const UI = {
         <div class="right"><small class="${open ? 'muted' : 'bad'}">${open ? `new stock in ${Math.max(1, post.next - G.cycle)} Cycle${post.next - G.cycle > 1 ? 's' : ''}` : `Closed: ${U.esc(DATA.factions[s.owner].name)} hold the system`}</small><br>${this.btn('Star Map', 'mapsys', s.id, false, 'small')}</div></div>`;
       const sec = [];
       if (post.services.includes('ships')) {
-        const cards = post.ships.map((sh, i) => {
-          const why = Trade.buyShipBlocker(post, i);
-          return this.shipCard(sh, { extra: `<div class="tprice">${cry(sh.price)} ${this.btn('Buy', 'tradeship', `${post.id}:${i}`, !!why, 'small gold')}${why && why !== 'Not enough Crypto Shards' ? `<small class="bad">${why}</small>` : ''}</div>` });
+        const S = DATA.sizes;
+        const tiles = post.ships.map((o, i) => {
+          const why = Trade.buyShipBlocker(post, i), rar = DATA.shipRarities[o.rarity];
+          return `<div class="toffer ${o.stock ? '' : 'soldout'}" style="--rc:${rar.color}"><div class="toffer-top"><span class="sc-size">${o.size}</span><b style="color:${rar.color}">${rar.name}</b></div>
+            <div>${S[o.size].name} hull</div><small class="muted">type rolled when built · ${o.stock ? `${o.stock} in stock` : 'sold out'}</small>
+            <div class="tprice">${cry(o.price)} ${this.btn('Buy', 'tradeship', `${post.id}:${i}`, !!why, 'small gold')}</div>${why && why !== 'Not enough Crypto Shards' && why !== 'Sold out' ? `<small class="bad">${why}</small>` : ''}</div>`;
         }).join('');
-        sec.push(`<h4>${T.services.ships.icon} Ships</h4>${cards ? `<div class="cardrow wrap">${cards}</div>` : '<p class="small muted">Sold out until the next stock.</p>'}`);
+        sec.push(`<h4>${T.services.ships.icon} Ship contracts</h4><div class="toffers">${tiles}</div>`);
       }
       if (post.services.includes('exchange')) {
         const R = DATA.resources;
-        const rows = post.rates.map((r, i) => `<div class="trate"><span><b class="res-${r.from}">${R[r.from].icon} ${r.give} ${R[r.from].name}</b> → <b class="res-${r.to}">${R[r.to].icon} ${r.get} ${R[r.to].name}</b> <small class="bad">−${r.loss} %</small></span>
-          <span class="btnrow">${[1, 5].map((n) => this.btn(`×${n}`, 'tradex', `${post.id}:${i}:${n}`, !!Trade.exchangeBlocker(post, i, n), 'small')).join('')}</span></div>`).join('');
-        sec.push(`<h4>${T.services.exchange.icon} Material exchange</h4>${rows}<p class="small muted">The cut is the loss against a fair swap. Rates change with the stock.</p>`);
+        const row = (r, i, list) => `<div class="trate"><span><b class="res-${r.from}">${R[r.from].icon} ${r.give} ${R[r.from].name}</b> → <b class="res-${r.to}">${R[r.to].icon} ${U.amount(r.to, r.get)}${r.to === 'crypto' ? '' : ' ' + R[r.to].name}</b> <small class="bad">−${r.loss} %</small></span>
+          <span class="btnrow">${[1, 5].map((n) => this.btn(`×${n}`, 'tradex', `${post.id}:${i}:${n}:${list}`, !!Trade.exchangeBlocker(post, i, n, list), 'small')).join('')}</span></div>`;
+        const group = (title, filter) => { const rows = post.rates.map((r, i) => [r, i]).filter(([r]) => filter(r.from)).map(([r, i]) => row(r, i, 'rates')).join(''); return rows ? `<h5>${title}</h5>${rows}` : ''; };
+        sec.push(`<h4>${T.services.exchange.icon} Material exchange</h4>
+          ${group('Gathered ↔ gathered', (k) => T.gathered.includes(k))}${group('Crafted ↔ crafted', (k) => T.crafted.includes(k))}
+          <h5>Sell for Crypto Shards</h5>${(post.sell || []).map((r, i) => row(r, i, 'sell')).join('')}
+          <p class="small muted">Every deal takes a cut: the loss against a fair swap. Rates change with the stock.</p>`);
       }
       if (post.services.includes('officers')) {
         const o = post.officer;
@@ -735,7 +742,7 @@ const UI = {
       }
       return `<div class="tpost ${open ? '' : 'closed'} ${post.id === this.tradeSel ? 'sel' : ''}">${head}${sec.join('')}</div>`;
     }).join('');
-    return this.panel(`Trade (${posts.length} post${posts.length > 1 ? 's' : ''})`, `<p class="small muted">You hold ${cry(G.res.crypto)}. Ships and officers cost Crypto Shards; the exchange swaps materials at a loss. New stock every ${T.restock} Cycles.</p>${out}`);
+    return this.panel(`Trade (${posts.length} post${posts.length > 1 ? 's' : ''})`, `<p class="small muted">You hold ${cry(G.res.crypto)} (a Finance District mines ${DATA.resources.crypto.icon} 0.05 per Cycle). Ship contracts and officers cost Crypto Shards; the exchange swaps materials and buys them for shards, always at a loss. New stock every ${T.restock} Cycles.</p>${out}`);
   },
 
   screen_settings() {

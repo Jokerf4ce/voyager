@@ -893,3 +893,8 @@ body.touring [data-dragship] { cursor: not-allowed; }
 .trate { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 4px 6px; border-bottom: 1px solid #2a2420; flex-wrap: wrap; }
 .tnote { margin: 6px 0; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .tnote b { font-size: 15px; }
+.toffers { display: flex; flex-wrap: wrap; gap: 8px; }
+.toffer { width: 170px; border: 2px solid var(--rc); background: #141210; padding: 6px 8px; display: flex; flex-direction: column; gap: 3px; }
+.toffer.soldout { opacity: .45; }
+.toffer-top { display: flex; gap: 6px; align-items: center; }
+.tpost h5 { margin: 8px 0 2px; font-size: 13px; color: var(--ash); letter-spacing: .08em; text-transform: uppercase; font-weight: normal; }
