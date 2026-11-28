@@ -149,7 +149,7 @@ Raids go for outlying colonies first; the capital system is only targeted when i
 
 Every game starts with all three; the Home Guard starts under Kroll.
 
-**Starting fleet** (v0.71.0, random since v0.73.0): the Home Guard is two small, one medium and one large ship of random types, one of them (at random) an Epic card. **Officers** are rolled per game since v0.73.0 (G.officerDefs: name, rank, title, story, portrait, two rolled passives, one ability each); the three hand-made officers remain as presets for old saves. Its maintenance is carried by larger starting stores (300 Metals, 150 Organics, 200 Chemicals; v0.71.2). For the first 25 Cycles the starting ships don't count toward the strength raids are built to (v0.71.1), and the capital starts with a level 2 mining rig and a level 3 Power Plant (v0.71.2).
+**Starting fleet** (v0.71.0, random since v0.73.0): the Home Guard is two small, one medium and one large ship of random types, one of them (at random) an Epic card. **Officers** are rolled per game since v0.73.0 (G.officerDefs: name, rank, title, story, portrait, two rolled passives, one ability each); since v0.73.1 a game starts with one; the three hand-made officers remain as presets for old saves. Its maintenance is carried by larger starting stores (300 Metals, 150 Organics, 200 Chemicals; v0.71.2). For the first 25 Cycles the starting ships don't count toward the strength raids are built to (v0.71.1), and the capital starts with a level 2 mining rig and a level 3 Power Plant (v0.71.2).
 
 **Capacities never block building** (v0.71.2): you can always build; usage over a cap rations all production (cap / used) until capacity is added. A full cap used to block every build, a soft-lock.
 

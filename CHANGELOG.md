@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.73.1 — 2026-11-28
+- **One officer at the start:** a new game rolls a single officer (random name, portrait, passives and ability), who leads the Home Guard. Saves from before keep their officers.
+
 ## 0.73.0 — 2026-11-28
 - **Random starting fleet:** every new game rolls the Home Guard's ships: two small, one medium and one large of random types (Scout, Fighter or Heavy Fighter; Corvette, Frigate or Gunboat; Destroyer, Battleship or Carrier). One of the four, at random, is an Epic card.
 - **Random officers:** every new game rolls three new officers (js/officers.js): name, rank, title, story and a portrait from the face generator, two passives with rolled values, and one ability each (Hold the Line, Smoke and Mirrors, Prophecy of Ruin, one per officer). The first leads the Home Guard. Names, ranks and titles never repeat within a game.

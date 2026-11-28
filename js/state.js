@@ -7,7 +7,7 @@ const State = {
     G = {
       version: 15,
       cycle: 1,
-      officerDefs: Officers.generate(3), // this game's officers, rolled (js/officers.js); DATA.officers reads them
+      officerDefs: Officers.generate(1), // this game's officers (one at the start), rolled (js/officers.js); DATA.officers reads them
       officers: null,     // officers you command, by key (set below)
       difficulty: null,   // chosen right after the galaxy is made (State.setDifficulty); null = not picked yet
       res: { metal: 300, rare: 20, organics: 150, electronics: 30, chemicals: 200, research: 0, crypto: 0 },

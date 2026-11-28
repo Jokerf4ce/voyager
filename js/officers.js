@@ -67,7 +67,7 @@ const Officers = {
     };
   },
 
-  // n officers with different names and one ability each (the first leads the Home Guard).
+  // n officers with different names and one ability each (the first leads the Home Guard). A new game rolls one (State.newGame).
   generate(n = 3) {
     const out = {}, abil = U.shuffle(Object.keys(this.abilities));
     // no two officers of a game share a first name, surname, rank, title word or story
