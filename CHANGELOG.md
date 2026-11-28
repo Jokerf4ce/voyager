@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.74.3 — 2026-11-28
+- **Longer maintenance:** a fleet is now in maintenance for **4 to 7 Cycles** after a battle (was 1 to 4): 4, plus 1 for every 25 % of its total hull lost, up to 7. Learning takes one Cycle off and Commander adds one, but never below 4 or above 7 (Learning 4–6, Commander 5–7).
+
 ## 0.74.2 — 2026-11-28
 - **Battle screen:** the officer's card now stands **beside** your lanes, outside them, under an "Officer" label, still exactly the size of a ship card. The lanes no longer have a sixth column for it.
 - **Fleet power is shown inside the power bar** at the top: yours on the left, the enemy's on the right (the "fleet power" lines under the fleet names are gone).

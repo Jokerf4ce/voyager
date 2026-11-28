@@ -323,7 +323,7 @@ const Ships = {
   maintCycles(lostFrac) {
     const M = DATA.maintenance;
     const n = M.base + Math.floor(Math.max(0, lostFrac) / M.per + 1e-9);
-    return Math.max(1, Math.min(M.max, n) + (M.diff[G.difficulty] || 0));
+    return Math.max(M.base, Math.min(M.max, Math.min(M.max, n) + (M.diff[G.difficulty] || 0)));
   },
   // Once per Cycle, before new battles: every fleet in maintenance gets one Cycle closer to ready.
   tickMaint() { for (const f of G.fleets) if (f.maint > 0) f.maint--; },

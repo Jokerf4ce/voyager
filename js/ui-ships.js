@@ -162,7 +162,7 @@ Object.assign(UI, {
           </ol>
           <p class="small muted">Blue bar: shields. Orange bar: hull. <b>Restore</b> shows what it would give back.</p>
           <p><b>Officers:</b> the officer leading your fleet (next to its name) gives its ships passive bonuses for the whole battle. Its <b>★ ability</b> can be used once per battle on your turn and doesn't use the ship's turn.</p>
-          <p><b>⚙ In maintenance:</b> after a battle the fleet is in maintenance for ${DATA.maintenance.base} Cycle plus 1 for every ${Math.round(DATA.maintenance.per * 100)} % of its total hull it lost (up to ${DATA.maintenance.max}; one less on Learning, one more on Commander). It can still fight, but fatigued: −${Math.round((1 - DATA.maintenance.dmg) * 100)} % damage, shields start at ${Math.round(DATA.maintenance.shields * 100)} %, and no officer ability.</p></section>
+          <p><b>⚙ In maintenance:</b> after a battle the fleet is in maintenance for ${DATA.maintenance.base} Cycles plus 1 for every ${Math.round(DATA.maintenance.per * 100)} % of its total hull it lost (up to ${DATA.maintenance.max}; one less on Learning and one more on Commander, never below ${DATA.maintenance.base}). It can still fight, but fatigued: −${Math.round((1 - DATA.maintenance.dmg) * 100)} % damage, shields start at ${Math.round(DATA.maintenance.shields * 100)} %, and no officer ability.</p></section>
       </div>
       <div class="btnrow">${this.btn('Close', 'close', '', false, 'gold')}</div></div>`);
     this.$('modal').querySelector('.modal-box').classList.add('wide');
