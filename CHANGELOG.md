@@ -2,6 +2,11 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.69.1 — 2026-11-28
+- **Portrait fixes.** Bigger heads (about 10 % wider and taller; the nose and mouth move with the head's size), a wider neck with wider collars and gorget to match, and smaller eyes (normal, wide and narrow, with smaller irises).
+- **The cap sits on the head:** its crown now follows the skull down to a band across the forehead, with the peak and its shadow below.
+- **New cyberjaw:** a shaded metal plate along the right jaw, from the chin up to a glowing hinge under the ear, with a seam where it meets the skin, vents and rivets (was a box over the lower right of the face).
+
 ## 0.69.0 — 2026-11-28
 - **Portraits at 80×72** (were 32×32). `js/faces.js` was redrawn at the new size with four tones per material (deep shadow, shadow, base, light) and lighting from the upper left, dithered between tones so faces and cloth shade smoothly. Faces now have almond eyes with irises, pupils and catch-lights, lids and creases, shaped brows, a lit nose bridge with nostrils, two-tone lips, ears, eye sockets and cheekbones, textured hair (combed, stubble, strands), rounded shoulders and more detailed outfits (epaulettes with fringe, medal ribbons, lapels, embroidered robes, plate armour). Background details get no outline. Same parts, same spec format: the three officers keep their looks.
 - Portraits show at 80×72 (1:1) in the Hangar officer slot and on officer cards, 40×36 in battle, smaller on phones (scaled smoothly below 1:1).

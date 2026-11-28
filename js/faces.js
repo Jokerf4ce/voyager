@@ -152,7 +152,7 @@ const Faces = {
     outfit: {
       uniform(c) {
         Faces.shoulders(c, 'cloth');
-        Faces.collar(c, 'cloth', 7, 50, 56);
+        Faces.collar(c, 'cloth', 10, 51, 56);
         c.mirror((sd, mx) => { for (let y = 60; y < c.H; y++) c.shift(mx(37), y, -1, ['cloth']); });        // the jacket's front edge
         for (const y of [60, 64, 68]) { c.ellipse(41.5, y, 1.1, 1.1, 'trim'); c.px(42, y + 1, 'trim', 0); }
         c.mirror((sd, mx) => c.line(mx(14), 61, mx(25), 58, 'cloth', 1));                                  // shoulder seams
@@ -169,33 +169,33 @@ const Faces = {
         const ribbons = ['blood', 'trim', 'glow', 'iris'];
         ribbons.forEach((m, i) => { c.rect(49 + i * 3, 61, 50 + i * 3, 63, m, { flat: 2 }); c.px(49 + i * 3, 61, m, 3); });
         c.ellipse(52.5, 67, 2.2, 2.2, 'trim'); c.px(52, 66, 'glow', 3);                                     // the star
-        Faces.collar(c, 'cloth', 7, 50, 56); c.line(33, 55, 46, 55, 'trim', 2); c.line(33, 56, 46, 56, 'trim', 1);
+        Faces.collar(c, 'cloth', 10, 51, 56); c.line(30, 55, 49, 55, 'trim', 2); c.line(30, 56, 49, 56, 'trim', 1);
       },
       coat(c) {
         Faces.shoulders(c, 'cloth', { wide: 1 });
-        c.profile(39.5, 52, 71, (y) => 4 + (y - 52) * 0.25, 'cloth2', { light: (nx) => 0.7 - Math.abs(nx) * 0.2 });   // shirt
+        c.profile(39.5, 52, 71, (y) => 7 + (y - 52) * 0.25, 'cloth2', { light: (nx) => 0.7 - Math.abs(nx) * 0.2 });   // shirt
         c.mirror((sd, mx) => {                                                                              // lapels
           for (let y = 52; y < c.H; y++) {
-            const a = 36 - (y - 52) * 0.55, b = a + 5 + Math.min(4, (y - 52) * 0.4);
+            const a = 33 - (y - 52) * 0.55, b = a + 5 + Math.min(4, (y - 52) * 0.4);
             for (let x = Math.round(a - (b - a)); x <= Math.round(a); x++) c.pl(mx(x), y, 'cloth', 0.35 + (x - a) * 0.05);
             c.px(mx(Math.round(a)), y, 'cloth', 3);
           }
         });
-        c.profile(39.5, 53, 56, () => 6, 'cloth', { flat: 0 });                                             // turned-up collar shadow
+        c.profile(39.5, 53, 55, () => 9, 'cloth', { flat: 0 });                                             // turned-up collar shadow
         c.mirror((sd, mx) => c.px(mx(26), 66, 'trim', 3));
       },
       robe(c) {
         Faces.shoulders(c, 'cloth', { drape: true });
-        c.profile(39.5, 50, 71, (y) => Math.max(1, 9 - (y - 50) * 0.42), 'cloth', { flat: 0 });              // the opening, in shadow
+        c.profile(39.5, 52, 71, (y) => Math.max(1, 11 - (y - 52) * 0.5), 'cloth', { flat: 0 });              // the opening, in shadow
         c.mirror((sd, mx) => {                                                                              // embroidered edges
-          for (let y = 50; y < c.H; y++) {
-            const x = 39.5 - Math.max(1, 9 - (y - 50) * 0.42);
+          for (let y = 52; y < c.H; y++) {
+            const x = 39.5 - Math.max(1, 11 - (y - 52) * 0.5);
             c.px(mx(Math.floor(x) - 1), y, 'trim', (y % 3) ? 2 : 3); c.px(mx(Math.floor(x) - 2), y, 'trim', 1);
           }
         });
         c.mirror((sd, mx) => { for (let y = 58; y < c.H; y += 5) c.line(mx(8), y, mx(20), y + 2, 'cloth', 1); });   // folds
         c.ellipse(39.5, 65, 3, 3.5, 'trim'); c.ellipse(39.5, 65, 1.5, 2, 'glow', { flat: 3 });                // pendant
-        c.line(39, 52, 39, 61, 'trim', 1);
+        c.line(39, 53, 39, 61, 'trim', 1);
       },
       armor(c) {
         Faces.shoulders(c, 'cloth');
@@ -203,23 +203,23 @@ const Faces = {
         c.line(39, 56, 39, 71, 'metal', 0); c.line(40, 56, 40, 71, 'metal', 3);
         for (const y of [62, 67]) c.line(27, y, 52, y, 'metal', 0);
         c.mirror((sd, mx) => { c.ellipse(mx(15.5), 60, 10, 6.5, 'metal'); c.line(mx(7), 63, mx(24), 63, 'trim', 1); c.line(mx(8), 64, mx(23), 64, 'metal', 0); });  // pauldrons
-        Faces.collar(c, 'metal', 8, 50, 56);                                                                // gorget
+        Faces.collar(c, 'metal', 11, 51, 56);                                                                // gorget
         c.ellipse(39.5, 59, 2.2, 2.2, 'glow', { flat: 3 }); c.mirror((sd, mx) => c.px(mx(37), 59, 'glow', 1));
       },
     },
 
     // the head: neck, ears, face. Sets Faces.F.
     head: {
-      oval(c) { Faces.headShape(c, { rx: 15.4, ry: 19.4, jaw: 0.72 }); },
-      square(c) { Faces.headShape(c, { rx: 16.2, ry: 19, jaw: 0.9, chinW: 1 }); },
-      long(c) { Faces.headShape(c, { rx: 14.4, ry: 20.6, jaw: 0.68 }); },
-      gaunt(c) { Faces.headShape(c, { rx: 14.2, ry: 20, jaw: 0.6, hollow: true }); },
+      oval(c) { Faces.headShape(c, { rx: 17, ry: 21.5, jaw: 0.72 }); },
+      square(c) { Faces.headShape(c, { rx: 17.8, ry: 21, jaw: 0.9, chinW: 1 }); },
+      long(c) { Faces.headShape(c, { rx: 16, ry: 22.4, jaw: 0.68 }); },
+      gaunt(c) { Faces.headShape(c, { rx: 15.8, ry: 22, jaw: 0.6, hollow: true }); },
     },
 
     eyes: {
-      normal(c) { Faces.eyePair(c, { h: 2.6 }); },
-      narrow(c) { Faces.eyePair(c, { h: 1.7, lid: 2 }); },
-      wide(c) { Faces.eyePair(c, { h: 3.4, lower: true }); },
+      normal(c) { Faces.eyePair(c, { h: 2 }); },
+      narrow(c) { Faces.eyePair(c, { h: 1.4, lid: 2 }); },
+      wide(c) { Faces.eyePair(c, { h: 2.6, lower: true }); },
       closed(c) {
         Faces.eachEye(c, (x, y, sd) => {
           for (let dx = -3; dx <= 3; dx++) c.px(x + dx, y + Math.round((dx * dx) / 9) - 0, 'ink', 1);           // the closed lid's line
@@ -229,7 +229,7 @@ const Faces = {
         });
       },
       cyber(c) {
-        Faces.eyePair(c, { h: 2.6 });
+        Faces.eyePair(c, { h: 2 });
         const { cx, eyeY, eyeDX } = Faces.F, x = Math.round(cx + eyeDX);
         c.ellipse(x, eyeY, 5, 4.2, 'metal');
         c.ellipse(x, eyeY, 2.6, 2.6, 'ink', { flat: 1 });
@@ -330,14 +330,21 @@ const Faces = {
         }
       },
       cap(c) {
-        const { cx, top } = Faces.F;
-        c.profile(cx, top - 9, top + 1, (y) => 12 + (y - top + 9) * 0.35, 'cloth', { light: (nx, t) => c.lit(nx, -0.6 + t) });   // crown
-        c.profile(cx, top + 1, top + 3, () => 15.5, 'cloth', { flat: 1 });                                  // band
-        c.line(cx - 15, top + 2, cx + 15, top + 2, 'trim', 2);
-        c.profile(cx, top + 4, top + 6, (y) => 13 - (y - top - 4) * 2, 'ink', { flat: 2 });                  // the peak
-        c.line(cx - 12, top + 4, cx + 12, top + 4, 'ink', 1);
-        c.ellipse(cx, top - 3, 3, 3, 'trim'); c.px(cx - 1, top - 4, 'glow', 3);                              // badge
-        for (let x = Math.round(cx - 12); x <= cx + 12; x++) c.shift(x, top + 7, -2, ['skin', 'hair']);
+        const { cx, cy, rx, ry, top } = Faces.F, band = top + Math.round(ry * 0.36);
+        // the crown covers the top of the skull and rises a little at the front
+        for (let y = top - 6; y <= band; y++) for (let x = 0; x < c.W; x++) {
+          const nx = (x + 0.5 - cx) / (rx + 1.6), ny = (y + 0.5 - (cy - 1)) / (ry + 1.8);
+          const rise = (x + 0.5 - cx) / (rx + 2.5 - (band - y) * 0.12);
+          if (nx * nx + ny * ny > 1 && !(y > top - 6 && Math.abs(rise) <= 1 && y < top + 2)) continue;
+          c.pl(x, y, 'cloth', c.lit(nx * 0.9, Math.max(-0.8, ny * 1.4)) + Math.sin(x * 0.7) * 0.03);
+        }
+        c.profile(cx, band - 2, band, (y) => rx + 1.8, 'cloth', { light: (nx) => c.lit(nx, 0) - 0.12 });   // the band
+        c.line(cx - rx - 1, band - 1, cx + rx + 1, band - 1, 'trim', 2);
+        c.profile(cx, band + 1, band + 3, (y) => rx - 1 - (y - band - 1) * 2.5, 'ink', { light: (nx, t) => 0.55 - t * 0.4 });  // the peak
+        c.line(cx - rx + 1, band + 1, cx + rx - 1, band + 1, 'ink', 3);
+        c.ellipse(cx, top + 1, 3, 3.2, 'trim'); c.px(cx - 1, top, 'glow', 3);                                     // badge
+        c.mirror((sd, mx) => c.line(mx(Math.round(cx - 5)), top + 1, mx(Math.round(cx - 9)), top - 1, 'trim', 1));
+        for (let x = Math.round(cx - rx); x <= cx + rx; x++) for (let k = 4; k <= 5; k++) c.shift(x, band + k, -1, ['skin', 'hair']);  // shade under the peak
       },
       helmet(c) {
         const { cx, cy, rx, top, eyeY } = Faces.F;
@@ -417,11 +424,26 @@ const Faces = {
         for (const y of [top + 6, top + 8]) for (let x = Math.round(cx - 5); x <= cx + 5; x++) if ((x + y) % 5) c.shift(x, y, -1, ['skin']);
       },
       cyberjaw(c) {
-        const { cx, chin, rx, mouthY } = Faces.F;
-        for (let y = mouthY - 2; y <= chin; y++) for (let x = Math.round(cx + 2); x <= Math.round(cx + rx); x++) if (c.is(x, y, ['skin', 'hair', 'lips'])) c.pl(x, y, 'metal', c.lit((x - cx) / rx, (y - mouthY) / 8));
-        c.line(cx + 2, mouthY - 2, cx + 2, chin, 'ink', 1);
-        for (const y of [mouthY, mouthY + 3]) c.line(cx + 3, y, cx + rx - 1, y, 'metal', 0);
-        c.px(cx + 6, mouthY + 1, 'glow', 3); c.px(cx + 9, mouthY + 1, 'glow', 2);
+        // a metal plate along the right jawline, from the hinge under the ear to the chin
+        const { cx, cy, rx, ry, chin, eyeY } = Faces.F, FACE = ['skin', 'lips', 'hair', 'ink', 'eye', 'iris'];
+        const face = (x, y) => c.is(x, y, FACE) && y <= chin + 1;
+        const plate = new Set(), cells = [];
+        for (let y = eyeY + 5; y <= chin + 1; y++) for (let x = Math.round(cx + 1); x < c.W; x++) {
+          if (!face(x, y)) continue;
+          const u = (x + 0.5 - cx) / rx, v = (y - eyeY - 5) / (chin - eyeY - 5);
+          if (u * 0.9 + v * 0.55 < 0.52) continue;                                                            // the seam: from the mouth corner up to the ear
+          plate.add(x + ',' + y); cells.push([x, y]);
+        }
+        for (const [x, y] of cells) c.pl(x, y, 'metal', c.lit(((x + 0.5 - cx) / rx) * 0.75, ((y + 0.5 - cy) / ry) * 0.6) + 0.28);
+        for (const [x, y] of cells) if (!face(x + 1, y) || !face(x, y + 1)) c.px(x, y, 'metal', 1);                                     // the outer rim
+        for (const [x, y] of cells) {                                                                         // the seam where metal meets skin
+          if ([[-1, 0], [0, -1], [-1, -1]].some(([dx, dy]) => !plate.has((x + dx) + ',' + (y + dy)) && c.is(x + dx, y + dy, ['skin', 'lips']))) c.px(x, y, 'ink', 1);
+        }
+        const hx = Math.round(cx + rx - 3), hy = eyeY + 8;                                                    // the hinge
+        c.ellipse(hx, hy, 2.6, 2.6, 'metal', { light: (nx, ny) => c.lit(nx, ny) + 0.1 });
+        c.px(hx, hy, 'glow', 3); c.px(hx - 1, hy, 'glow', 2); c.px(hx + 1, hy, 'ink', 1);
+        for (let i = 0; i < 4; i++) { const x = Math.round(cx + 2 + i * 2), y = chin - 2 - Math.round(i * 0.7); if (plate.has(x + ',' + y)) c.line(x, y, x, y + 1, 'ink', 1); }   // vents
+        for (const [x, y] of cells) if ((x * 7 + y * 3) % 23 === 0 && plate.has((x - 1) + ',' + y) && plate.has((x + 1) + ',' + y)) c.px(x, y, 'metal', 3);                // rivets
       },
       monocle(c) {
         const { cx, eyeY, eyeDX } = Faces.F, x = Math.round(cx + eyeDX);
@@ -459,11 +481,11 @@ const Faces = {
   },
   headShape(c, o) {
     const F = this.F;
-    F.rx = o.rx; F.ry = o.ry; F.cx = 39.5; F.cy = 30.5;
+    F.rx = o.rx; F.ry = o.ry; F.cx = 39.5; F.cy = 29.5;
     F.top = Math.round(F.cy - F.ry); F.chin = Math.round(F.cy + F.ry); F.eyeY = Math.round(F.cy - 1);
     F.mouthY = F.eyeY + Math.round(o.ry * 0.68); F.eyeDX = Math.round(o.rx * 0.48 * 2) / 2;
     // the neck, shadowed under the jaw
-    c.profile(F.cx, F.chin - 8, 57, (y) => 6.2 + Math.max(0, y - 52) * 0.5, 'skin', { light: (nx, t, x, y) => c.lit(nx * 0.9, 0) - (y < F.chin + 4 ? 0.35 : 0.1) });
+    c.profile(F.cx, F.chin - 10, 58, (y) => 9 + Math.max(0, y - 52) * 0.6, 'skin', { light: (nx, t, x, y) => c.lit(nx * 0.9, 0) - (y < F.chin + 4 ? 0.35 : 0.1) });
     // ears
     c.mirror((sd, mx) => {
       const ex = mx(Math.round(F.cx - F.rx)) + (sd < 0 ? 0.6 : 0.4);
@@ -496,7 +518,7 @@ const Faces = {
     const h = o.h;
     this.eachEye(c, (x, y, sd) => {
       for (let dx = -4; dx <= 4; dx++) {
-        const t = dx / 4.2, half = h * Math.sqrt(Math.max(0, 1 - t * t)) * (1 - t * sd * 0.12);
+        const t = dx / 4.4, half = h * Math.sqrt(Math.max(0, 1 - t * t)) * (1 - t * sd * 0.12);
         const yt = Math.round(y - half * 0.8), yb = Math.round(y + half * 0.6);
         for (let yy = yt; yy <= yb; yy++) c.px(x + dx, yy, 'eye', yy === yt ? 1 : (dx * sd > 2 ? 1 : 2));
         if (half > 0.3) { c.px(x + dx, yt - 1, 'ink', 1); if (o.lid) c.px(x + dx, yt, 'ink', 2); }
@@ -504,7 +526,7 @@ const Faces = {
         c.shift(x + dx, yt - 2, -1, ['skin']);                                                               // the crease
       }
       c.px(x - sd * 5, y - 1, 'ink', 1);                                                                     // lashes at the outer corner
-      const ix = x + (o.gaze || 0), ir = Math.min(2.2, h * 0.85 + 0.4);
+      const ix = x + (o.gaze || 0), ir = Math.min(2, h * 0.75 + 0.3);
       for (let yy = Math.floor(y - ir); yy <= Math.ceil(y + ir); yy++) for (let xx = Math.floor(ix - ir); xx <= Math.ceil(ix + ir); xx++) {
         if (!c.is(xx, yy, 'eye')) continue;
         const d = Math.hypot(xx - ix, yy - y);
@@ -527,7 +549,7 @@ const Faces = {
     });
   },
   nose(c, o) {
-    const { cx, eyeY } = this.F, x = Math.round(cx), top = eyeY + 1, tip = eyeY + 8, w = o.w;
+    const { cx, eyeY, ry } = this.F, x = Math.round(cx), top = eyeY + 1, tip = eyeY + Math.round(ry * 0.42), w = o.w;
     for (let y = top; y <= tip; y++) {
       const t = (y - top) / (tip - top), hook = o.hook ? Math.sin(t * Math.PI) * o.hook : 0;
       c.shift(x + 1 + Math.round(hook), y, -1, ['skin']);                                                     // the shadow side of the bridge
