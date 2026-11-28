@@ -45,6 +45,7 @@ const VoiceLines = {
   coffee:         { text: 'Reminder: the coffee in the officers lounge is not a fuel substitute.', triggers: ['random'], glitch: 0.35 },
   airlock:        { text: 'Airlock three cycling. Whoever is in there, please knock twice.', triggers: ['random'], glitch: 0.4 },
   blink:          { text: 'Commander, remember to blink. Your crew finds it unsettling.', triggers: ['random'], glitch: 0.35 },
+  warranty:        { text: 'Commander: Incoming transmission about our ships extended warranty. Should I put them through?', triggers: ['random'], glitch: 0.35 },
   slipspace:      { text: 'Warning! Slipspace rupture detected!', triggers: ['combat'], glitch: 0.35 },
   forces:         { text: 'Warning! Hostile forces inbound!', triggers: ['combat'], glitch: 0.35 },
   signatures:     { text: 'Warning! Unknown signatures detected!', triggers: ['combat'], glitch: 0.35 },
