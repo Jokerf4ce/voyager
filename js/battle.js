@@ -110,15 +110,14 @@ const Battle = {
     const b = G.battle, s = G.systems[b.sys];
     const units = [];
     const f = b.fleetId != null ? Ships.fleet(b.fleetId) : null;
-    const tired = Ships.inMaint(f), M = DATA.maintenance;
-    b.fatigued = tired;
+    const M = DATA.maintenance;
     if (f) for (const ship of Ships.fleetShips(f)) {
       const u = this.officerPassives(this.unitFrom(ship, 'player', ship.id), f.officer);
-      if (tired) { u.dmgMult *= M.dmg; u.shield = Math.round(u.shield * M.shields * 10) / 10; } // fatigued: in maintenance
+      if (Ships.inMaint(ship)) { u.maint = ship.maint; u.dmgMult *= M.dmg; u.shield = Math.round(u.shield * M.shields * 10) / 10; } // fatigued: in maintenance
       u.hull0 = u.hull;
       units.push(u);
     }
-    b.officer = f && f.officer && DATA.officers[f.officer] ? { key: f.officer, used: tired, fatigued: tired } : null;
+    b.officer = f && f.officer && DATA.officers[f.officer] ? { key: f.officer, used: false } : null;
     if (b.kind === 'attack') {
       const g = Missions.guard(s);
       if (g) g.ships.slice(0, DATA.fleetMax).forEach((ship, i) => units.push(this.unitFrom(ship, 'enemy', i)));
@@ -446,14 +445,17 @@ const Battle = {
     if (typeof Sfx !== 'undefined') Sfx.play(result === 'win' ? 'victory' : 'defeat', { delay: 0.5 }); // after the last shot lands
     const m = State.mods();
     const myLost = [], theirLost = [];
-    // the fleet goes into maintenance, longer the more hull it lost (DATA.maintenance)
+    // every surviving ship goes into maintenance, longer the more of its hull it lost (DATA.maintenance)
     const mine = b.units.filter((x) => x.side === 'player' && x.ref !== 'defense');
     const fl = b.fleetId != null ? Ships.fleet(b.fleetId) : null;
-    if (fl && mine.length) {
-      const max = mine.reduce((a, u) => a + u.hullMax, 0), lost = mine.reduce((a, u) => a + Math.max(0, (u.hull0 ?? u.hullMax) - (u.dead ? 0 : u.hull)), 0);
-      fl.maint = Math.max(fl.maint || 0, Ships.maintCycles(max ? lost / max : 0));
-      b.maint = fl.maint;
+    const maintNote = [];
+    for (const u of mine.filter((x) => !x.dead)) {
+      const ship = G.ships[u.ref];
+      if (!ship) continue;
+      ship.maint = Math.max(ship.maint || 0, Ships.maintCycles(u.hullMax ? Math.max(0, (u.hull0 ?? u.hullMax) - u.hull) / u.hullMax : 0));
+      maintNote.push(`${ship.name} ${ship.maint}`);
     }
+    b.maint = maintNote.length ? `In maintenance (Cycles): ${maintNote.join(', ')}.` : '';
     // your ships: losses are permanent, damage carries over
     for (const u of mine) {
       const ship = G.ships[u.ref];
@@ -508,8 +510,8 @@ const Battle = {
     const rep = { c: G.cycle, sys: s.name, enemy: enemyName, myLost, theirLost, outcome, won, lost: !won };
     G.reports.unshift(rep);
     if (G.reports.length > 30) G.reports.length = 30;
-    if (b.maint && fl && fl.ships.length) this.say(`${fl.name} is in maintenance for ${b.maint} Cycle${b.maint > 1 ? 's' : ''}.`);
-    Log.add(`⚔ Battle at ${s.name}. Lost: ${myLost.join(', ') || 'none'}. Destroyed: ${theirLost.join(', ') || 'none'}. ${outcome}${b.maint && fl && fl.ships.length ? ` ${fl.name} is in maintenance for ${b.maint} Cycle${b.maint > 1 ? 's' : ''}.` : ''}`, won ? 'good' : 'bad');
+    if (b.maint) this.say(b.maint);
+    Log.add(`⚔ Battle at ${s.name}. Lost: ${myLost.join(', ') || 'none'}. Destroyed: ${theirLost.join(', ') || 'none'}. ${outcome}${b.maint ? ' ' + b.maint : ''}`, won ? 'good' : 'bad');
 
     // the fleet heads home (or is gone)
     Ships.cleanup();

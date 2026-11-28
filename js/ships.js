@@ -317,18 +317,20 @@ const Ships = {
   },
 
   // Fleets at home repair their hulls each Cycle.
-  // ---- in maintenance (DATA.maintenance): fleet.maint = Cycles left ----
-  inMaint(f) { return !!f && (f.maint || 0) > 0; },
-  // Cycles of maintenance for a battle in which the fleet lost `lostFrac` of its total hull.
+  // ---- in maintenance (DATA.maintenance), per ship since v0.75.1: ship.maint = Cycles left ----
+  inMaint(sh) { return !!sh && (sh.maint || 0) > 0; },
+  // Ships of a fleet in maintenance (optionally: still in maintenance after `after` more Cycles).
+  maintCount(f, after = 0) { return f ? this.fleetShips(f).filter((sh) => (sh.maint || 0) > after).length : 0; },
+  // Cycles of maintenance for a ship that lost `lostFrac` of its hull in a battle.
   maintCycles(lostFrac) {
     const M = DATA.maintenance;
     const n = M.base + Math.floor(Math.max(0, lostFrac) / M.per + 1e-9);
     return Math.max(M.base, Math.min(M.max, Math.min(M.max, n) + (M.diff[G.difficulty] || 0)));
   },
-  // Once per Cycle, before new battles: every fleet in maintenance gets one Cycle closer to ready.
-  tickMaint() { for (const f of G.fleets) if (f.maint > 0) f.maint--; },
-  // Rested fleets first, then the strongest.
-  byReadiness(fleets) { return [...fleets].sort((a, b) => (this.inMaint(a) - this.inMaint(b)) || this.groupPower(this.fleetShips(b)) - this.groupPower(this.fleetShips(a))); },
+  // Once per Cycle, before new battles: every ship in maintenance gets one Cycle closer to ready.
+  tickMaint() { for (const sh of this.all()) if (sh.maint > 0) sh.maint--; },
+  // Fleets with fewer ships in maintenance first, then the strongest.
+  byReadiness(fleets) { return [...fleets].sort((a, b) => (this.maintCount(a) - this.maintCount(b)) || this.groupPower(this.fleetShips(b)) - this.groupPower(this.fleetShips(a))); },
 
   repair() {
     if (G.unpaid) return; // no upkeep, no repairs

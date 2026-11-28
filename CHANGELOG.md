@@ -2,6 +2,13 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.75.1 — 2026-11-28
+- **Maintenance is per ship now, not per fleet.** After a battle each surviving ship is in maintenance for 4 Cycles plus 1 for every 25 % of its *own* hull it lost (up to 7; Learning −1, Commander +1, always 4–7). A ship in maintenance can fight, fatigued (−25 % damage, shields start at 50 %). Swap in rested ships from the hangar to field a fresh fleet.
+- **"⚙ MAINTENANCE · n" stamp** across every ship card in maintenance (Hangar, fleets, battle), like the "DESTROYED" stamp on wrecks; hover it for the details.
+- The officer's ability is no longer blocked by maintenance.
+- Hangar fleet rows say "⚙ 2 of 4 in maintenance"; Defend buttons count the fatigued ships and list the most rested fleets first; Attack buttons count ships that would still be in maintenance on arrival; the battle log and Chronicle list each ship's Cycles.
+- Saves with a fleet in maintenance pass it on to that fleet's ships.
+
 ## 0.75.0 — 2026-11-28
 - **Settings screen reworked** into a grid of tiles of one size: Music, Assistant, Sound effects, Fleet colours, Difficulty, Save, Tutorial, Tester mode and New galaxy.
 - **Music tracks are a collapsible list:** "Tracks (6) ▾" in the Music tile opens them as a full-width drawer under that row. The tile shows what is playing and Next.

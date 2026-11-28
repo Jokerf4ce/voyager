@@ -100,6 +100,7 @@ const State = {
       }
       for (const f of data.fleets || []) if (f.officer && !defs[f.officer]) f.officer = null;
       if (!data.history) data.history = [];
+      for (const f of data.fleets || []) if (f.maint != null) { for (const id of f.ships || []) if (data.ships && data.ships[id]) data.ships[id].maint = f.maint; delete f.maint; } // v0.75.1: maintenance per ship
       let dropped = 0;
       if (data.techs) for (const id in data.techs) if (!DATA.techs[id]) { delete data.techs[id]; dropped++; }
       if (data.techs) for (const id in data.techs) data.techs[id] = Math.min(DATA.techMax, data.techs[id] | 0);
@@ -141,7 +142,7 @@ const State = {
       crypto: inc.crypto * cycles * eff,
     };
     for (const k in gained) G.res[k] += gained[k];
-    for (const f of G.fleets) if (f.maint > 0) f.maint = Math.max(0, f.maint - cycles); // maintenance finishes while you are away
+    for (const sh of Object.values(G.ships)) if (sh.maint > 0) sh.maint = Math.max(0, sh.maint - cycles); // maintenance finishes while you are away
     const completed = Research.tick();
     for (let i = 0; i < Math.min(cycles, DATA.construction.cycles); i++) Colonies.tickBuild(true); // construction finishes while you are away (quietly)
     const mins = Math.floor(secs / 60);

@@ -272,9 +272,9 @@ DATA.restore = { shield: 0.25, hull: 0.1 }; // battle action Restore: part of ma
 // `perLevel` for every level above 1; all shipyards add up.
 DATA.hangar = { base: 10, perLevel: 2 };
 DATA.fleetMax = 5;           // ships per fleet (and per side in battle)
-// In maintenance (v0.74): after a battle, a fleet is in maintenance for base + 1 Cycle per `per` of its total hull lost
-// (dead ships count fully), up to max, adjusted by difficulty but never outside base..max (v0.74.3: 4–7, was 1–4). It can still fight, but fatigued: damage × dmg,
-// shields start at × shields, and its officer's ability is unavailable.
+// In maintenance (v0.74, per ship since v0.75.1): after a battle, each surviving ship is in maintenance for base + 1 Cycle per `per` of its own hull lost
+// in that battle, up to max, adjusted by difficulty but never outside base..max (v0.74.3: 4–7, was 1–4). It can still fight, but fatigued: damage × dmg,
+// shields start at × shields.
 DATA.maintenance = { base: 4, per: 0.25, max: 7, dmg: 0.75, shields: 0.5, diff: { learning: -1, commander: 1 } };
 DATA.repairPerCycle = 0.2;   // fraction of max hull repaired per Cycle for fleets at home
 // System projects (v0.62): megastructures built for a whole star system, not on a planet. Each system you hold has
@@ -548,7 +548,7 @@ DATA.tutorial = [
   },
   {
     screen: 'battle', demo: 'fight', pos: 'side', target: '#board .bhead2 .btnrow', title: 'Auto, and after the fight',
-    text: '<b>Auto</b> fights for you, <b>Resolve instantly</b> skips to the end, <b>Retreat</b> pulls out (in a defense, that loses the system). <b>End Cycle</b> is locked while a fight is on.<br><br>Afterwards, damage stays: fleets at home repair {repair} % of their hull per Cycle, and destroyed ships are gone for good. After every fight the fleet is <b>in maintenance</b> for 4 to 7 Cycles, the longer the more hull it lost: it can still fight, but <b>fatigued</b> (less damage, half shields, no officer ability), so keep a second fleet ready. Victories can salvage weapons for the armory.<br><br><b>⚖ Rules of engagement</b>, under the battle log, sums all of this up with diagrams.'
+    text: '<b>Auto</b> fights for you, <b>Resolve instantly</b> skips to the end, <b>Retreat</b> pulls out (in a defense, that loses the system). <b>End Cycle</b> is locked while a fight is on.<br><br>Afterwards, damage stays: fleets at home repair {repair} % of their hull per Cycle, and destroyed ships are gone for good. After every fight each surviving ship is <b>in maintenance</b> for 4 to 7 Cycles, the longer the more hull it lost: it can still fight, but <b>fatigued</b> (less damage, half shields), so keep spare ships and a second fleet ready. Victories can salvage weapons for the armory.<br><br><b>⚖ Rules of engagement</b>, under the battle log, sums all of this up with diagrams.'
   },
   {
     target: '.nav-btn[data-a="settings"]', nav: true, title: 'The void is listening',
