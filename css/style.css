@@ -155,7 +155,8 @@ small, .small { font-size: 16px; }
 .bhead { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .grow { flex: 1 1 auto; min-width: 0; }
 .bsub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.1; }
-.bauto { flex-shrink: 0; white-space: nowrap; }
+.bauto { flex-shrink: 0; white-space: nowrap; width: 128px; min-height: 40px; box-sizing: border-box; text-align: center; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; padding-left: 4px; padding-right: 4px; }
+.bauto small { display: block; white-space: nowrap; }
 .bicon { flex-shrink: 0; display: inline-block; vertical-align: middle; background: #3a3229; border: 1px solid #4a4036; }
 .bsum-item { display: flex; align-items: center; gap: 6px; }
 .chips { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }

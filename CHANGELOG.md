@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.69.3 — 2026-11-28
+- **Buildings menu: all Auto buttons the same size** (128 × 40). They varied with the number of costs on the button and with "no room" text.
+
 ## 0.69.2 — 2026-11-28
 - **Faces: features moved up, a real chin.** Eyes sit a little above the middle of the head, the nose ends a third of the way to the chin and the mouth about 60 % of the way, so there is a chin below the mouth (the mouth used to sit on the chin line). `Faces.F.noseY` is new.
 - **Better faces:** softer, more frontal light with less dither on skin (no hard split down the middle); cheekbones, the hollow below them, temples and a lit chin; the jaw casts a shadow on the neck; a clearer nose (lit bridge, shadow side, the shadow it casts, wings, nostrils); smile folds from the nose to the mouth corners; ears with a lit rim, a hollow and a lobe, set a little further out.
