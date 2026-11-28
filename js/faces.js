@@ -24,8 +24,8 @@ const Faces = {
   // 4×4 ordered dither, 0…1
   bayer: [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((v) => (v + 0.5) / 16),
   // light value (0…1) → tone (0…3), dithered between tones
-  tone(L, x, y) {
-    const v = Math.max(0, Math.min(1, L)) * 3.4 - 0.2 + (this.bayer[(y & 3) * 4 + (x & 3)] - 0.5) * 0.3;
+  tone(L, x, y, dither = 0.3) {
+    const v = Math.max(0, Math.min(1, L)) * 3.4 - 0.2 + (this.bayer[(y & 3) * 4 + (x & 3)] - 0.5) * dither;
     return Math.max(0, Math.min(3, Math.round(v)));
   },
   // Lambert light from the upper left for a surface normal (nx, ny pointing right/down, nz toward the viewer).
@@ -42,7 +42,7 @@ const Faces = {
     this.grid[y][x] = { m, s, bgLayer: this.inBg };
   },
   // paint with a light value instead of a tone
-  pl(x, y, m, L) { x = Math.round(x); y = Math.round(y); this.px(x, y, m, this.tone(L, x, y)); },
+  pl(x, y, m, L) { x = Math.round(x); y = Math.round(y); this.px(x, y, m, this.tone(L, x, y, m === 'skin' ? 0.16 : 0.3)); },   // skin: less dither, cleaner faces
   get(x, y) { x = Math.round(x); y = Math.round(y); return x < 0 || y < 0 || x >= this.W || y >= this.H ? null : this.grid[y][x]; },
   is(x, y, m) { const g = this.get(x, y); return !!g && (Array.isArray(m) ? m.includes(g.m) : g.m === m); },
   // darken / lighten what is already there by a number of tones (only on the given materials, if any)
@@ -100,7 +100,8 @@ const Faces = {
   hash(x, y, k = 0) { const s = Math.sin(x * 127.1 + y * 311.7 + k * 74.7) * 43758.5453; return s - Math.floor(s); },
 
   // The face's frame (set by the head): centre, half sizes, top of the head, chin, eye line, mouth line.
-  F: { cx: 39.5, cy: 31, rx: 13.5, ry: 17, top: 14, chin: 48, eyeY: 30, mouthY: 42, eyeDX: 6.5 },
+  F: { cx: 39.5, cy: 29.5, rx: 17, ry: 21.5, top: 8, chin: 51, eyeY: 27, noseY: 35, mouthY: 39, eyeDX: 8 },
+  faceMask: null,
 
   // ---- the parts ----
   parts: {
@@ -297,9 +298,10 @@ const Faces = {
         c.line(cx - 4, mouthY, cx + 4, mouthY, 'ink', 1);
       },
       goatee(c) {
-        const { cx, mouthY, chin } = Faces.F;
-        c.profile(cx, mouthY + 2, chin + 1, (y) => 3.4 - (y - mouthY - 2) * 0.12, 'hair', { light: (nx, t, x, y) => c.lit(nx, 0.3) + Math.sin(x * 2) * 0.1 });
-        c.mirror((sd, mx) => c.line(mx(Math.round(cx - 6)), mouthY - 2, mx(Math.round(cx - 3)), mouthY - 2, 'hair', 1));
+        const { cx, mouthY, chin } = Faces.F, y0 = mouthY + 2, y1 = Math.min(chin, mouthY + 2 + Math.round((chin - mouthY) * 0.8));
+        c.profile(cx, y0, y1, (y) => { const t = (y - y0) / Math.max(1, y1 - y0); return 3.8 - t * t * 2.2; }, 'hair',
+          { light: (nx, t, x, y) => c.lit(nx * 0.8, 0.2 + t * 0.4) + Math.sin(x * 1.9 + y * 0.6) * 0.08 });
+        c.mirror((sd, mx) => { c.line(mx(Math.round(cx - 6)), mouthY - 2, mx(Math.round(cx - 3)), mouthY - 2, 'hair', 1); c.px(mx(Math.round(cx - 6)), mouthY - 1, 'hair', 0); });
       },
       moustache(c) {
         const { cx, mouthY } = Faces.F;
@@ -482,33 +484,56 @@ const Faces = {
   headShape(c, o) {
     const F = this.F;
     F.rx = o.rx; F.ry = o.ry; F.cx = 39.5; F.cy = 29.5;
-    F.top = Math.round(F.cy - F.ry); F.chin = Math.round(F.cy + F.ry); F.eyeY = Math.round(F.cy - 1);
-    F.mouthY = F.eyeY + Math.round(o.ry * 0.68); F.eyeDX = Math.round(o.rx * 0.48 * 2) / 2;
-    // the neck, shadowed under the jaw
-    c.profile(F.cx, F.chin - 10, 58, (y) => 9 + Math.max(0, y - 52) * 0.6, 'skin', { light: (nx, t, x, y) => c.lit(nx * 0.9, 0) - (y < F.chin + 4 ? 0.35 : 0.1) });
-    // ears
+    F.top = Math.round(F.cy - F.ry); F.chin = Math.round(F.cy + F.ry);
+    // proportions: eyes a little above the middle of the head, nose and mouth in the upper part of the lower half,
+    // so there is a real chin below the mouth
+    F.eyeY = Math.round(F.cy - 2.6);
+    F.noseY = F.eyeY + Math.round(o.ry * 0.33);                                                         // the tip of the nose
+    F.mouthY = F.eyeY + Math.round(o.ry * 0.61);
+    F.eyeDX = Math.round(o.rx * 0.48 * 2) / 2;
+    // the neck, in the shadow of the head
+    c.profile(F.cx, F.chin - 10, 58, (y) => 9 + Math.max(0, y - 52) * 0.6, 'skin', { light: (nx, t, x, y) => c.lit(nx * 0.9, 0) - 0.2 });
+    // ears: a lit outer rim, the hollow inside, a lobe
     c.mirror((sd, mx) => {
-      const ex = mx(Math.round(F.cx - F.rx)) + (sd < 0 ? 0.6 : 0.4);
-      c.ellipse(ex, F.eyeY + 3, 2.4, 4.6, 'skin', { light: (nx, ny) => c.lit(nx * 0.8 + sd * 0.3, ny) });
-      c.line(ex - sd * 0.3, F.eyeY + 1, ex - sd * 0.3, F.eyeY + 5, 'skin', 0);
+      const ex = mx(Math.round(F.cx - F.rx - 0.8)) + (sd < 0 ? 0.7 : 0.3), ey = F.eyeY + 4;
+      c.ellipse(ex, ey, 2.7, 5, 'skin', { light: (nx, ny) => c.lit(nx * 0.7 + sd * 0.35, ny * 0.8) });
+      c.ellipse(ex + sd * 0.4, ey - 0.2, 1.2, 2.9, 'skin', { light: () => 0.2 });                          // the hollow
+      c.line(ex - sd * 1.3, ey - 3, ex - sd * 1.3, ey + 2, 'skin', 3);                                     // the rim catches the light
+      c.ellipse(ex, ey + 4, 1.5, 1.4, 'skin', { light: (nx, ny) => c.lit(nx, ny) + 0.05 });               // the lobe
     });
     // the face: an ellipse whose lower half narrows toward the jaw
+    const mask = this.faceMask = new Set();
     for (let y = Math.floor(F.cy - F.ry); y <= Math.ceil(F.cy + F.ry); y++) for (let x = 0; x < c.W; x++) {
       const ny = (y + 0.5 - F.cy) / F.ry, k = ny > 0.05 ? (ny - 0.05) / 0.95 : 0;
       const w = F.rx * (1 - (1 - o.jaw) * Math.pow(k, o.chinW ? 2.2 : 1.4));
       const nx = (x + 0.5 - F.cx) / w;
       if (nx * nx + ny * ny > 1) continue;
-      let L = c.lit(nx * 0.92, ny * 0.75);
-      // eye sockets under the brow ridge, a lit forehead and cheekbones, the shadow under the nose and lip
+      let L = c.lit(nx * 0.62, ny * 0.55) + 0.04 - Math.max(0, Math.abs(nx) - 0.8) * 0.6;   // soft, mostly frontal light; the sides turn away
       for (const sx of [-1, 1]) {
-        const ex = (x + 0.5 - (F.cx + sx * F.eyeDX)) / 4.6, ey = (y + 0.5 - (F.eyeY - 0.6)) / 3.2;
-        if (ex * ex + ey * ey < 1) L -= 0.16 * (1 - ex * ex - ey * ey);
-        const kx = (x + 0.5 - (F.cx + sx * (F.eyeDX + 2))) / 3.5, ky = (y + 0.5 - (F.eyeY + 5)) / 2;
-        if (kx * kx + ky * ky < 1) L += 0.1 * (sx < 0 ? 1 : 0.4);
+        // eye sockets under the brow ridge
+        const ex = (x + 0.5 - (F.cx + sx * F.eyeDX)) / 4.8, ey = (y + 0.5 - (F.eyeY - 0.4)) / 3.3;
+        if (ex * ex + ey * ey < 1) L -= 0.17 * (1 - ex * ex - ey * ey);
+        // cheekbones catch the light
+        const kx = (x + 0.5 - (F.cx + sx * (F.eyeDX + 2.5))) / 3.8, ky = (y + 0.5 - (F.eyeY + 5.5)) / 2.2;
+        if (kx * kx + ky * ky < 1) L += 0.12 * (sx < 0 ? 1 : 0.45) * (1 - kx * kx - ky * ky);
+        // the hollow under the cheekbone, toward the jaw
+        const hx = (x + 0.5 - (F.cx + sx * (F.rx * 0.62))) / 3, hy = (y + 0.5 - (F.mouthY - 1)) / 4;
+        if (hx * hx + hy * hy < 1) L -= (o.hollow ? 0.28 : 0.09) * (1 - hx * hx - hy * hy);
       }
-      if (o.hollow && Math.abs(nx) > 0.42 && ny > 0.12 && ny < 0.55) L -= 0.24;                            // hollow cheeks
-      if (y > F.mouthY + 2 && y < F.mouthY + 4 && Math.abs(x + 0.5 - F.cx) < 3) L -= 0.15;                 // under the lower lip
+      if (Math.abs(nx) > 0.72 && ny < -0.1 && ny > -0.65) L -= 0.08;                                     // temples
+      const cxn = (x + 0.5 - (F.cx - 0.8)) / 3.6, cyn = (y + 0.5 - (F.chin - 3.5)) / 2.2;                 // the chin: a lit ball
+      if (cxn * cxn + cyn * cyn < 1) L += 0.16 * (1 - cxn * cxn - cyn * cyn);
+      if (y >= F.mouthY + 2 && y <= F.mouthY + 3 && Math.abs(x + 0.5 - F.cx) < 3) L -= 0.16;              // the dip under the lower lip
       c.pl(x, y, 'skin', L);
+      mask.add(x + ',' + y);
+    }
+    // the jaw throws a shadow down onto the neck, so the chin reads against it
+    for (let x = 0; x < c.W; x++) for (let y = F.eyeY; y <= F.chin + 1; y++) {
+      if (!mask.has(x + ',' + y) || mask.has(x + ',' + (y + 1))) continue;
+      for (let k = 1; k <= 4; k++) {
+        if (!c.is(x, y + k, 'skin') || mask.has(x + ',' + (y + k))) break;
+        if (k <= 2) c.px(x, y + k, 'skin', 0); else if (this.bayer[((y + k) & 3) * 4 + (x & 3)] < (k === 3 ? 0.6 : 0.3)) c.px(x, y + k, 'skin', 0);
+      }
     }
   },
   // where the eyes are: f(x, y, side) for each
@@ -549,17 +574,20 @@ const Faces = {
     });
   },
   nose(c, o) {
-    const { cx, eyeY, ry } = this.F, x = Math.round(cx), top = eyeY + 1, tip = eyeY + Math.round(ry * 0.42), w = o.w;
+    const { cx, eyeY, noseY } = this.F, x = Math.round(cx), top = eyeY, tip = noseY, w = o.w;
     for (let y = top; y <= tip; y++) {
-      const t = (y - top) / (tip - top), hook = o.hook ? Math.sin(t * Math.PI) * o.hook : 0;
-      c.shift(x + 1 + Math.round(hook), y, -1, ['skin']);                                                     // the shadow side of the bridge
-      if (t > 0.3) c.shift(x + 2 + Math.round(hook), y, -1, ['skin']);
-      if (t > 0.15 && t < 0.85) c.shift(x - 1, y, 1, ['skin']);                                              // light down the bridge
+      const t = (y - top) / (tip - top), hook = o.hook ? Math.round(Math.sin(t * Math.PI) * o.hook) : 0;
+      if (t > 0.1 && t < 0.9) c.shift(x - 1 + hook, y, 1, ['skin']);                                     // light down the bridge
+      c.shift(x + 1 + hook, y, -1, ['skin']);                                                               // its shadow side
+      if (t > 0.35) c.shift(x + 2 + hook, y, -1, ['skin']);
+      if (t > 0.55) for (let k = 3; k <= 4; k++) if (this.bayer[(y & 3) * 4 + ((x + k) & 3)] < 0.55) c.shift(x + k + hook, y, -1, ['skin']);   // the shadow it casts on the cheek
     }
-    c.ellipse(cx - 0.3, tip, w * 0.55, 1.5, 'skin', { light: (nx, ny) => c.lit(nx, ny) + 0.12 });           // the tip
-    c.mirror((sd, mx) => { c.ellipse(mx(Math.round(cx - w + 0.4)), tip + 0.5, 1.2, 1.2, 'skin', { light: (nx, ny) => c.lit(nx, ny) - 0.1 }); });  // wings
-    c.mirror((sd, mx) => c.px(mx(Math.round(cx - 1.5)), tip + 1, 'skin', 0));                                // nostrils
-    for (let dx = -Math.round(w); dx <= Math.round(w); dx++) c.shift(x + dx, tip + 2, -1, ['skin']);         // shadow below
+    const hk = o.hook ? Math.round(o.hook * 0.3) : 0;
+    c.ellipse(cx - 0.2 + hk, tip - 0.3, w * 0.62, 1.7, 'skin', { light: (nx, ny) => c.lit(nx, ny) + 0.1 });    // the tip
+    c.px(x - 1 + hk, tip - 1, 'skin', 3);
+    c.mirror((sd, mx) => c.ellipse(mx(Math.round(cx - w)) + (sd < 0 ? 0.3 : -0.3), tip + 0.3, 1.3, 1.4, 'skin', { light: (nx, ny) => c.lit(nx, ny) - (sd > 0 ? 0.22 : 0.08) }));   // wings
+    c.mirror((sd, mx) => { c.px(mx(Math.round(cx - 1.6)), tip + 1, 'skin', 0); c.px(mx(Math.round(cx - 2.4)), tip + 1, 'skin', 0); });   // nostrils
+    for (let dx = -Math.round(w) + 1; dx <= Math.round(w) + 1; dx++) c.shift(x + dx, tip + 2, -1, ['skin']);   // shadow under the nose
   },
   mouth(c, o) {
     const { cx, mouthY } = this.F, x0 = Math.round(cx);
@@ -571,7 +599,14 @@ const Faces = {
       if (o.teeth && Math.abs(t) < 0.7) c.px(x0 + dx, y, 'eye', 2);
       if (Math.abs(t) < 0.85) for (let k = 1; k <= Math.round(o.lower * (1 - t * t) + 0.2); k++) c.px(x0 + dx, y + k, 'lips', k === 1 && Math.abs(t) < 0.4 ? 3 : 2);
     }
-    c.shift(x0, mouthY - 3, -1, ['skin']); c.shift(x0 + 1, mouthY - 3, -1, ['skin']);                       // the groove above the lip
+    c.shift(x0, mouthY - 2, -1, ['skin']); c.shift(x0 + 1, mouthY - 2, -1, ['skin']);                       // the groove above the lip
+    const { noseY } = this.F;                                                                                 // smile folds: nose wing to mouth corner
+    this.mirror((sd, mx) => {
+      for (let y = noseY + 1; y <= mouthY + 1; y++) {
+        const t = (y - noseY - 1) / Math.max(1, mouthY - noseY), xx = Math.round(this.F.cx - 4.5 - t * 1.6);
+        if (sd > 0 || (y & 1)) c.shift(mx(xx), y, -1, ['skin']);
+      }
+    });
   },
   // the hair over the top of the head; o.depth: how far down the forehead, o.stubble / o.comb / o.part: texture
   hairCap(c, o) {
