@@ -322,6 +322,8 @@ The capital starts with the whole chain running: Mine, Bio-Harvester, Electronic
 
 Recorded audio files can be added as tracks alongside the generated ones.
 
+**Away progress** (v0.69.4): while the game is closed the empire produces at reduced efficiency; the gains go straight into the stores and the Chronicle records them. There is no "While You Were Gone" popup.
+
 **Sound effects** (decided v0.54): synthesised with Web Audio in `js/sfx.js`, rendered once per effect into a buffer and then replayed. End Cycle plays one heavy industrial lever thrown home, a single "ka-CHUNK" (v0.54.1); picking a star on the Star Map plays a short digital chirp. Recorded files can replace any effect (decided v0.68): they are listed in `Sfx.files` with a synthesised fallback; End Cycle uses `assets/sfx/cycle.mp3`; hull and shield hits and misses use `hull.mp3`, `shield.mp3` and `evade.mp3` (v0.68.1). On/Off and volume are in Settings. A new ship plays a fabricator reveal (whine, clamp, confirm tones), plus a dark chord for Epic and better.
 
 **New-ship splash** (decided v0.55): every ship built is revealed on a full-screen splash (sprite printed in with a scan line, rarity name, rolls, weapons, where it went), with Show in Hangar, Build another and Close.

@@ -2,6 +2,9 @@
 
 Versions: MINOR for new features, PATCH for fixes and tweaks. The version shown in the game's bottom-right corner comes from `js/version.js`.
 
+## 0.69.4 — 2026-11-28
+- **Removed the "While You Were Gone" popup.** Away progress still applies (the same gains, and the Chronicle still records them); it just no longer opens a window on return.
+
 ## 0.69.3 — 2026-11-28
 - **Buildings menu: all Auto buttons the same size** (128 × 40). They varied with the number of costs on the button and with "no room" text.
 

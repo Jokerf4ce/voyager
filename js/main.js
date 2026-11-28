@@ -369,15 +369,9 @@ window.addEventListener('DOMContentLoaded', () => {
     if (location.hash === '#admin') history.replaceState(null, '', '#tester');
   }
   if (State.load()) {
-    const off = State.applyOffline();
+    State.applyOffline(); // the empire keeps producing while the game was closed; the result is in the Chronicle, no popup
     UI.selSys = G.homeId;
     UI.render();
-    if (off) {
-      UI.modal(`<h2>While You Were Gone</h2><p class="flavor">You were away for ${off.mins} minutes. The Covenant endured without you.</p>
-        ${Object.entries(off.gained).map(([k, v]) => `<div class="kv"><span>${DATA.resources[k].name}</span><b class="res-${k}">+${U.fmt(v)}</b></div>`).join('')}
-        ${off.completed.length ? `<p class="small">Completed: ${off.completed.map(U.esc).join(', ')}</p>` : ''}
-        <div class="btnrow">${UI.btn('Continue', 'close', '', false, 'gold')}</div>`);
-    }
     if (G.over) Game.overShown = true;
     if (G.over === 'lose') { UI.screen = 'gameover'; UI.render(); }
     if (G.difficulty === null && State.slot === 'main') Game.welcome(); // closed before the game was set up: tour, then difficulty
